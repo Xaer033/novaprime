@@ -9,8 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a765cd52069d35849970373ea73ee4b4, type: 3}
-  m_Name: GameConfig
+  m_Script: {fileID: 11500000, guid: 34568cf48c03f3b439027da6533f80a7, type: 3}
+  m_Name: GameplayResources
   m_EditorClassIdentifier: 
-  initalState: singleplayer_gameplay
-  guiManager: {fileID: 11400000, guid: 87e9a852f907aea46a72bae89f8f8cc6, type: 2}
+  gameplayCamera: {fileID: 0}
+  playerAvatar: {fileID: 5789754299105121112, guid: 4d9e1bc12d1bcd24b8367c65543d09b6,
+    type: 3}

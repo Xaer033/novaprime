@@ -4,7 +4,7 @@ using UnityEngine;
 using GhostGen;
 
 
-[CreateAssetMenu(menuName = "Mr.Tuck/Game Config")]
+[CreateAssetMenu(menuName = "Nova/Game Config")]
 public class GameConfig : ScriptableObject, IPostInit
 {
     public string initalState;

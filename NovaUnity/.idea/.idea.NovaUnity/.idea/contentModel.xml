@@ -11,10 +11,24 @@
             <e p="GameFoundations" t="Include">
               <e p="BaseController.cs" t="Include" />
               <e p="GameConfig.cs" t="Include" />
+              <e p="GameplayResources.cs" t="Include" />
               <e p="GuiManager.cs" t="Include" />
               <e p="NetworkOpCodes.cs" t="Include" />
               <e p="SessionFlags.cs" t="Include" />
               <e p="Singleton.cs" t="Include" />
+            </e>
+            <e p="GamePlay" t="Include">
+              <e p="GameContext.cs" t="Include" />
+              <e p="GameEventType.cs" t="Include" />
+              <e p="GameModes" t="Include">
+                <e p="IGameModeController.cs" t="Include" />
+                <e p="SinglePlayerCampaignMode.cs" t="Include" />
+              </e>
+              <e p="Player" t="Include">
+                <e p="PlayerAvatarView.cs" t="Include" />
+                <e p="PlayerController.cs" t="Include" />
+              </e>
+              <e p="PlayFieldController.cs" t="Include" />
             </e>
             <e p="GUI" t="Include">
               <e p="MainMenuController.cs" t="Include" />
@@ -26,6 +40,7 @@
               <e p="IntroState.cs" t="Include" />
               <e p="MainMenuState.cs" t="Include" />
               <e p="NovaStateFactory.cs" t="Include" />
+              <e p="SingleplayerGameplayState.cs" t="Include" />
             </e>
           </e>
           <e p="GhostGen" t="Include">

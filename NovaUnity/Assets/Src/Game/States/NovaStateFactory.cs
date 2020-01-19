@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using GhostGen;
+﻿using GhostGen;
+using UnityEngine;
 
 public class NovaGameState
 {
@@ -20,7 +20,7 @@ public class NovaStateFactory : IStateFactory
         {
             case NovaGameState.INTRO:                       return new IntroState();
             case NovaGameState.MAIN_MENU:                   return new MainMenuState();
-//            case TuckState.SINGLEPLAYER_GAMEPLAY:       return new GameplayState();
+            case NovaGameState.SINGLEPLAYER_GAMEPLAY:       return new SingleplayerGameplayState();
             case NovaGameState.CREDITS:                     break;
         }
 

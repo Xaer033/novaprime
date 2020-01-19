@@ -58,3 +58,11 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+
+NovaUnity/Library/
+
+NovaUnity/Temp/
+
+NovaUnity/Logs/
+
+NovaUnity/obj/

@@ -12,14 +12,17 @@ public class IntroState : IGameState
 
     public void Init( GameStateMachine stateMachine, object changeStateData )
 	{
-		Debug.Log ("Entering In Intro State");
         DOTween.Init(true, true, LogBehaviour.ErrorsOnly);
 
         _stateMachine = stateMachine;
         _gotoSplash = true;
         
     }
-    
+
+    public void FixedStep(float fixedDeltaTime)
+    {
+	    
+    }
     public void Step( float p_deltaTime )
 	{
 		if (_gotoSplash) 
@@ -39,7 +42,6 @@ public class IntroState : IGameState
     public void Exit( )
 	{
 	//	_controller.getUI().rem
-		Debug.Log ("Exiting In Intro State");
 		//_backButton.onClick.RemoveAllListeners ();
 	}
 }

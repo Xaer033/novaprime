@@ -8,6 +8,6 @@ using UnityEngine.U2D;
 public class GameplayResources : ScriptableObject
 {
     public GameObject gameplayCamera;
-    public GameObject playerAvatar;
+    public PlayerAvatarView playerAvatar;
 
 }

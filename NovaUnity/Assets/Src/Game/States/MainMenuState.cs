@@ -9,11 +9,15 @@ public class MainMenuState : IGameState
 
 	public void Init( GameStateMachine stateMachine, object changeStateData )
 	{
-		Debug.Log ("Entering In MainMenu State");
         _mainMenuController = new MainMenuController();
         _mainMenuController.Start();
 	}
-    
+	
+	public void FixedStep(float fixedDeltaTime)
+	{
+	    
+	}
+	
     public void Step( float p_deltaTime )
 	{
 		
@@ -22,7 +26,6 @@ public class MainMenuState : IGameState
     public void Exit( )
 	{
 	//	_controller.getUI().rem
-		Debug.Log ("Exiting In MainMenu State");
 
 	}
     

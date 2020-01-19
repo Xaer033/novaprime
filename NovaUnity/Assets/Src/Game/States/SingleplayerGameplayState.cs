@@ -26,6 +26,11 @@ public class SingleplayerGameplayState : IGameState
     }
 
     
+    public void FixedStep(float fixedDeltaTime)
+    {
+	    _gameModeController.FixedStep(fixedDeltaTime);    
+    }
+    
     public void Step( float p_deltaTime )
 	{
         _gameModeController.Step(p_deltaTime);

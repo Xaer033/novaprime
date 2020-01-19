@@ -1,4 +1,5 @@
-﻿using GhostGen;
+﻿using System;
+using GhostGen;
 using UnityEngine;
 
 public class Singleton : MonoBehaviour
@@ -11,7 +12,7 @@ public class Singleton : MonoBehaviour
     public SessionFlags sessionFlags { get; private set; }
 
     public GuiManager gui { get { return gameConfig.guiManager; } }
-    //public GameplayResources gameplayResources { get { return gameConfig.gameplayResources; } }
+    public GameplayResources gameplayResources { get { return gameConfig.gameplayResources; } }
     public NetworkManager networkManager { get; private set; }
 
     public NotificationDispatcher notificationDispatcher { get; private set; }
@@ -50,6 +51,11 @@ public class Singleton : MonoBehaviour
     {
         gameStateMachine.Step(Time.deltaTime);
         gui.Step(Time.deltaTime);
+    }
+
+    public void FixedUpdate()
+    {
+        gameStateMachine.FixedStep(Time.fixedDeltaTime);
     }
 
     public static Singleton instance

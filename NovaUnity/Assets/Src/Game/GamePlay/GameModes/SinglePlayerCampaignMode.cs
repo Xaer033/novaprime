@@ -12,22 +12,31 @@ public class SinglePlayerCampaignMode : NotificationDispatcher, IGameModeControl
 //    private PlayFieldController _playFieldController = new PlayFieldController();
 //    private List<PlayerState> _playerList = new List<PlayerState>(PlayerGroup.kMaxPlayerCount);
 
-
+    private PlayerController _pController;
+    
     public void Start(object context)
     {
         _addCallbacks();
-        
 
+        PlayerAvatarView playerView = GameObject.Instantiate<PlayerAvatarView>(Singleton.instance.gameplayResources.playerAvatar);
+        _pController = new PlayerController();
+        _pController.Start(playerView);
     }
 
     public void FixedStep(float fixedDeltaTime)
     {
-        
+        if (_pController != null)
+        {
+            _pController.FixedStep(fixedDeltaTime);
+        }
     }
     
     public void Step(float deltaTime)
     {
-
+        if (_pController != null)
+        {
+            _pController.Step(deltaTime);
+        }
     }
 
     public void CleanUp()

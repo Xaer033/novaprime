@@ -1,4 +1,6 @@
-﻿namespace GhostGen
+﻿using UnityEngine;
+
+namespace GhostGen
 {
     public class GameStateMachine
 	{
@@ -20,14 +22,27 @@
 				_currentState.Step( p_deltaTime );
 		}
 
+		public void FixedStep(float p_fixedDeltaTime)
+		{
+			if (_currentState != null)
+			{
+				_currentState.FixedStep(p_fixedDeltaTime);
+			}
+		}
+
 		public void ChangeState( string stateId, object changeStateInfo = null )
 		{
 			if (_currentId == stateId)
 				return;
 
-			if( _currentState != null )
+			if (_currentState != null)
+			{
+				Debug.Log ("Leaving State: " + _currentId);
 				_currentState.Exit( );
+			}
 
+			
+			Debug.Log ("Entering State: " + stateId);
 			_currentState = _stateFactory.CreateState( stateId );
 			_currentState.Init(this, changeStateInfo);
 		}

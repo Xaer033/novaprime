@@ -11,7 +11,7 @@ public class GameConfig : ScriptableObject, IPostInit
 
     public GuiManager guiManager;
 //    public CardResourceBank cardResourceBank;
-    //public GameplayResources gameplayResources;
+    public GameplayResources gameplayResources;
 
     public void PostInit()
     {

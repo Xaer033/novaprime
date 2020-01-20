@@ -42,7 +42,6 @@ GameObject:
   - component: {fileID: 1975189271847259609}
   - component: {fileID: 5727036435548383886}
   - component: {fileID: 6191800851597614576}
-  - component: {fileID: 4369692902738450763}
   m_Layer: 10
   m_Name: Cube
   m_TagString: Untagged
@@ -109,19 +108,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!65 &4369692902738450763
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5489997287738067753}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &5789754299105121112
 GameObject:
   m_ObjectHideFlags: 0
@@ -132,6 +118,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5789754299105121113}
   - component: {fileID: 1315047983}
+  - component: {fileID: 5829704941812201185}
   m_Layer: 10
   m_Name: PlayerAvatar
   m_TagString: Untagged
@@ -183,7 +170,20 @@ MonoBehaviour:
   maxClimbAngle: 80
   maxDecendAngle: 75
   wallSlideSpeedMax: 3
-  collider: {fileID: 4369692902738450763}
+  collider: {fileID: 5829704941812201185}
+--- !u!65 &5829704941812201185
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5789754299105121112}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!1 &5789754300994217977
 GameObject:
   m_ObjectHideFlags: 0

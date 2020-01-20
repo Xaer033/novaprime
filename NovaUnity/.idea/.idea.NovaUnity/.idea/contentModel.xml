@@ -28,12 +28,17 @@
                 <e p="IGameModeController.cs" t="Include" />
                 <e p="SinglePlayerCampaignMode.cs" t="Include" />
               </e>
+              <e p="Platforms" t="Include">
+                <e p="PlatformView.cs" t="Include" />
+              </e>
               <e p="Player" t="Include">
+                <e p="IPlatformPassenger.cs" t="Include" />
                 <e p="PlayerAvatarView.cs" t="Include" />
                 <e p="PlayerController.cs" t="Include" />
                 <e p="PlayerInput.cs" t="Include" />
               </e>
               <e p="PlayFieldController.cs" t="Include" />
+              <e p="RaycastController.cs" t="Include" />
             </e>
             <e p="GUI" t="Include">
               <e p="MainMenuController.cs" t="Include" />

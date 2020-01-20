@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerAvatarView : MonoBehaviour
+public class PlayerAvatarView : MonoBehaviour, IPlatformPassenger
 {
     public LayerMask collisionMask;
     public int horizontalRayCount = 4;
@@ -15,7 +15,9 @@ public class PlayerAvatarView : MonoBehaviour
     public float accelerationTimeAir = 0.2f;
     public float accelerationTimeGround = 0.1f;
     public float maxClimbAngle = 80.0f;
+    public float maxDecendAngle = 75.0f;
     
     public Collider collider;
 
+    public Vector3 requestVelocity { get; set; }
 }

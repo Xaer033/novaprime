@@ -25,6 +25,7 @@ public class PlayerController
         public float slopeAngle;
         public float slopeAngleOld;
         public Vector3 velocityOld;
+        public int faceDir;
         
 
         public void Reset(Vector3 oldVelocity)
@@ -40,6 +41,7 @@ public class PlayerController
     private PlayerAvatarView _view; 
     
     private Vector3 _velocity;
+    private float _timeToWallUnstick;
     private Vector3 _fixedPosition;
     private float _velocityXSmoothing;
 
@@ -61,6 +63,8 @@ public class PlayerController
             _view.verticalRayCount,
             _view.collider, 
             _view.collisionMask);
+
+        _collisionInfo.faceDir = 1;
     }
 
     public Vector3 position
@@ -84,6 +88,44 @@ public class PlayerController
     {
         if (_view)
         {
+            float targetVelocityX  = input.horizontalMovement * _view.speed;
+            
+            float accelerationTime = _collisionInfo.below ? _view.accelerationTimeGround : _view.accelerationTimeAir;
+            _velocity.x = Mathf.SmoothDamp(_velocity.x, targetVelocityX, ref _velocityXSmoothing, accelerationTime);
+            
+            int wallDirX = _collisionInfo.left ? -1 : 1;
+            int inputDirX = input.horizontalMovement == 0 ?  0 : input.horizontalMovement < 0 ? -1 : 1;
+            
+            bool wallSliding = false;
+            bool wallOnSide = (_collisionInfo.left || _collisionInfo.right);
+            if ( wallOnSide && !_collisionInfo.below && _velocity.y < 0 )
+            {
+                wallSliding = true;
+                if (_velocity.y < -_view.wallSlideSpeedMax)
+                {
+                    _velocity.y = -_view.wallSlideSpeedMax;
+                }
+
+                if (_timeToWallUnstick > 0)
+                {
+                    _velocityXSmoothing = 0;
+                    _velocity.x = 0;
+                    
+                    if (inputDirX != wallDirX && inputDirX != 0)
+                    {
+                        _timeToWallUnstick -= deltaTime;
+                    }
+                    else
+                    {
+                        _timeToWallUnstick = _view.wallStickTime;
+                    }
+                }
+                else
+                {
+                    _timeToWallUnstick = _view.wallStickTime;
+                }
+            }
+            
             if (_collisionInfo.above || _collisionInfo.below)
             {
                 _velocity.y = 0;
@@ -93,15 +135,33 @@ public class PlayerController
             float gravity = -(2 * _view.jumpHeight) / (timeToJumpApex * timeToJumpApex);
             float jumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
             
-            if (input.jump && _collisionInfo.below)
+            if (input.jump)
             {
-                _velocity.y = jumpVelocity;
+                if (wallSliding)
+                {
+                    if (wallDirX == inputDirX)
+                    {
+                        _velocity.x = -wallDirX * _view.wallJumpClimb.x;
+                        _velocity.y =  _view.wallJumpClimb.y;
+                    }
+                    else if (inputDirX == 0)
+                    {
+                        _velocity.x = -wallDirX * _view.wallJumpOff.x;
+                        _velocity.y = _view.wallJumpOff.y;
+                    }
+                    else
+                    {
+                        _velocity.x = -wallDirX * _view.wallJumpLeap.x;
+                        _velocity.y = _view.wallJumpLeap.y;
+                    }
+                }
+                else if (_collisionInfo.below)
+                {
+                    _velocity.y = jumpVelocity;
+                }
             }
-            float targetVelocityX  = input.horizontalMovement * _view.speed;
-
-            float accelerationTime = _collisionInfo.below ? _view.accelerationTimeGround : _view.accelerationTimeAir;
             
-            _velocity.x = Mathf.SmoothDamp(_velocity.x, targetVelocityX, ref _velocityXSmoothing, accelerationTime);
+
             _velocity.y += gravity * deltaTime;
             
             
@@ -184,8 +244,14 @@ public class PlayerController
     private Vector3 _horizontalCollisions(Vector3 currentVelocity)
     {
         Vector3 newVelocity = currentVelocity;
-        float directionX = Mathf.Sign(currentVelocity.x);
+        float directionX = _collisionInfo.faceDir;
         float rayLength = Mathf.Abs(currentVelocity.x) + _raycastController.skinWidth;
+
+        if (Mathf.Abs(currentVelocity.x) < _raycastController.skinWidth)
+        {
+            rayLength = 2 * _raycastController.skinWidth;
+        }
+        
         RaycastHit hit;
         
         for (int i = 0; i < _view.horizontalRayCount; ++i)
@@ -305,14 +371,18 @@ public class PlayerController
         _raycastController.Step();
         _collisionInfo.Reset(velocity);
 
+        if (velocity.x != 0)
+        {
+            _collisionInfo.faceDir = (int)Mathf.Sign(velocity.x);
+        }
+        
         if (velocity.y < 0)
         {
             velocity = _decendSlope(velocity);
         }
-        if (Mathf.Abs(velocity.x) > 0.0001f)
-        {
+        
             velocity = _horizontalCollisions(velocity);
-        }
+        
 
         if (Mathf.Abs(velocity.y) > 0.0001f)
         {

@@ -147,12 +147,13 @@ public class PlatformView : MonoBehaviour
                         
                         float pushX = (directionY == 1) ? velocity.x : 0;
                         float pushY = velocity.y - (hit.distance - _raycastController.skinWidth) * directionY;
-                            _passengerMovementList.Add( 
-                                new PassengerMovement(
-                                    hit.transform, 
-                                    new Vector3(pushX, pushY), 
-                                    directionY == 1, 
-                                    true));
+                        
+                        _passengerMovementList.Add( 
+                            new PassengerMovement(
+                                hit.transform, 
+                                new Vector3(pushX, pushY), 
+                                directionY == 1, 
+                                true));
                     }
                 }
             }
@@ -173,13 +174,13 @@ public class PlatformView : MonoBehaviour
                         _movedPassengersSet.Add(hit.transform);
                         float pushX = velocity.x - (hit.distance - _raycastController.skinWidth) * directionX;
                         float pushY = -_raycastController.skinWidth;
-//                            passenger.requestVelocity = new Vector3(pushX, pushY);
-                            _passengerMovementList.Add( 
-                                new PassengerMovement(
-                                    hit.transform, 
-                                    new Vector3(pushX, pushY), 
-                                    false, 
-                                    true));
+                        
+                        _passengerMovementList.Add( 
+                            new PassengerMovement(
+                                hit.transform, 
+                                new Vector3(pushX, pushY), 
+                                false, 
+                                true));
                     }
                 }
             }
@@ -199,8 +200,7 @@ public class PlatformView : MonoBehaviour
                         _movedPassengersSet.Add(hit.transform);
                         float pushX = velocity.x;
                         float pushY = velocity.y;
-                       
-//                            passenger.requestVelocity = new Vector3(pushX, pushY);
+                        
                         _passengerMovementList.Add( 
                             new PassengerMovement(
                                 hit.transform, 

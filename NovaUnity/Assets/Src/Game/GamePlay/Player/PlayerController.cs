@@ -54,6 +54,7 @@ public class PlayerController
     public void Start(PlayerAvatarView view)
     {
         _view = view;
+        _view.controller = this;
         
         _raycastController = new RaycastController(
             _view.horizontalRayCount, 
@@ -110,7 +111,7 @@ public class PlayerController
 //                _view.requestVelocity = Vector3.zero;
 //            }
 //            
-            _move(deltaTime, _velocity * deltaTime);
+            _move(_velocity * deltaTime, false);
 
         }
 //        if (_view)
@@ -193,6 +194,11 @@ public class PlayerController
             rayOrigin += Vector3.up * (_raycastController.horizontalRaySpacing * i);
             if (Physics.Raycast(rayOrigin, Vector3.right * directionX, out hit, rayLength, _view.collisionMask))
             {
+                if (hit.distance == 0)
+                {
+                    continue;
+                }
+                
                 float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
                 if (i == 0 && slopeAngle <= _view.maxClimbAngle)
                 {
@@ -288,7 +294,13 @@ public class PlayerController
 
         return newVelocity;
     }
-    private void _move(float deltaTime, Vector3 velocity)
+
+    public void Move(Vector3 velocity, bool isOnPlatform)
+    {
+        _move(velocity, isOnPlatform);
+    }
+    
+    private void _move( Vector3 velocity, bool isOnPlatform)
     {
         _raycastController.Step();
         _collisionInfo.Reset(velocity);
@@ -308,6 +320,11 @@ public class PlayerController
         }
         
         _view.transform.Translate(velocity);
+
+        if (isOnPlatform)
+        {
+            _collisionInfo.below = true;
+        }
         
     }
 //    private void _updateRaycastOrigins()

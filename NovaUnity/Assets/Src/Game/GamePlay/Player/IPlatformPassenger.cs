@@ -2,5 +2,6 @@
 
 public interface IPlatformPassenger 
 {
-    Vector3 requestVelocity { get; set; }
+    void RequestMovement(PassengerMovement movement);
+
 }

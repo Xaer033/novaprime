@@ -19,5 +19,13 @@ public class PlayerAvatarView : MonoBehaviour, IPlatformPassenger
     
     public Collider collider;
 
-    public Vector3 requestVelocity { get; set; }
+    public void RequestMovement(PassengerMovement movement)
+    {
+        if (controller != null)
+        {
+            controller.Move(movement.velocity, movement.isOnPlatform);
+        }
+    }
+    
+    public PlayerController controller { get; set; }
 }

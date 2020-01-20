@@ -6980,8 +6980,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2012725221}
-  m_LocalRotation: {x: -0, y: 0.008727774, z: -0, w: 0.9999619}
-  m_LocalPosition: {x: 2.73, y: 0.44, z: -0.74}
+  m_LocalRotation: {x: 0, y: 0.008726558, z: 0, w: 0.999962}
+  m_LocalPosition: {x: 2.75, y: 0.63, z: -0.74}
   m_LocalScale: {x: 1.3450536, y: 0.27489573, z: 2.3591}
   m_Children: []
   m_Father: {fileID: 139781504}
@@ -6999,12 +6999,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ae6d8aca2908ba438106f686444e525, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  localWaypoints:
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 2.15, z: 0}
   passengerMask:
     serializedVersion: 2
     m_Bits: 1024
   horizontalRayCount: 4
   verticalRayCount: 12
-  move: {x: 0, y: 0, z: 0}
+  speed: 3
   collider: {fileID: 2012725224}
 --- !u!65 &2012725224
 BoxCollider:

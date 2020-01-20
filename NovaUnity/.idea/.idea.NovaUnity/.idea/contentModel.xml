@@ -18,6 +18,10 @@
               <e p="Singleton.cs" t="Include" />
             </e>
             <e p="GamePlay" t="Include">
+              <e p="Camera" t="Include">
+                <e p="GameplayCamera.cs" t="Include" />
+              </e>
+              <e p="FrameInput.cs" t="Include" />
               <e p="GameContext.cs" t="Include" />
               <e p="GameEventType.cs" t="Include" />
               <e p="GameModes" t="Include">
@@ -27,6 +31,7 @@
               <e p="Player" t="Include">
                 <e p="PlayerAvatarView.cs" t="Include" />
                 <e p="PlayerController.cs" t="Include" />
+                <e p="PlayerInput.cs" t="Include" />
               </e>
               <e p="PlayFieldController.cs" t="Include" />
             </e>

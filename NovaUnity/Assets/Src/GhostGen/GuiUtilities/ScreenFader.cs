@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(CanvasGroup))]
 public class ScreenFader : MonoBehaviour
 {
     public const float kDefaultFadeDuration = 0.25f;
@@ -45,6 +46,12 @@ public class ScreenFader : MonoBehaviour
     {
         get { return _fadeBG.color; }
         set { _fadeBG.color = value; }
+    }
+
+    public float alpha
+    {
+        set { _canvasGroup.alpha = value; }
+        get { return _canvasGroup.alpha; }
     }
 
     private Tween _fade(float startAlpha, float endAlpha, float duration, Action callback)

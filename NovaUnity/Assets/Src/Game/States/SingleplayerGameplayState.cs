@@ -16,8 +16,8 @@ public class SingleplayerGameplayState : IGameState
 
 		_stateMachine = stateMachine;
 
-        Tween introTween = Singleton.instance.gui.screenFader.FadeIn(1.0f);
-        introTween.SetDelay(0.25f);
+        // *TEMP*
+        Singleton.instance.gui.screenFader.alpha = 0.0f;
 
 
         _gameModeController = new SinglePlayerCampaignMode();

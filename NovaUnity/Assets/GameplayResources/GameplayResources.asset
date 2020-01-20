@@ -12,5 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34568cf48c03f3b439027da6533f80a7, type: 3}
   m_Name: GameplayResources
   m_EditorClassIdentifier: 
-  gameplayCamera: {fileID: 0}
+  gameplayCamera: {fileID: 750901081596856283, guid: 57845569f40ecc84f89fd329f71426f5,
+    type: 3}
   playerAvatar: {fileID: 1315047983, guid: 4d9e1bc12d1bcd24b8367c65543d09b6, type: 3}

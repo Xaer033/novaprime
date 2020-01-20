@@ -11,71 +11,38 @@ public class SinglePlayerCampaignMode : NotificationDispatcher, IGameModeControl
 //    private TuckMatchCore _tuckMatchCore;
 //    private PlayFieldController _playFieldController = new PlayFieldController();
 //    private List<PlayerState> _playerList = new List<PlayerState>(PlayerGroup.kMaxPlayerCount);
-
-    private PlayerController _pController;
+    private PlayFieldController _playFieldController;
     
     public void Start(object context)
     {
-        _addCallbacks();
+       _playFieldController = new PlayFieldController();
+       _playFieldController.Start();
+       
 
-        PlayerAvatarView playerView = GameObject.Instantiate<PlayerAvatarView>(Singleton.instance.gameplayResources.playerAvatar);
-        _pController = new PlayerController();
-        _pController.Start(playerView);
     }
 
     public void FixedStep(float fixedDeltaTime)
     {
-        if (_pController != null)
+        if (_playFieldController != null)
         {
-            _pController.FixedStep(fixedDeltaTime);
+            _playFieldController.FixedStep(fixedDeltaTime);
         }
     }
     
     public void Step(float deltaTime)
     {
-        if (_pController != null)
+        if (_playFieldController != null)
         {
-            _pController.Step(deltaTime);
+            _playFieldController.Step(deltaTime);
         }
     }
 
     public void CleanUp()
     {
-        _removeCallbacks();
-
-        RemoveAllListeners();
     }
 
    
 
-    private void onGameOver(bool gameOverPopup = true)
-    {
-        if (!gameOverPopup)
-        {
-            Singleton.instance.gui.screenFader.FadeOut(0.5f, () =>
-            {
-                DispatchEvent(GameEventType.GAME_OVER);
-            });
-        }
-        else
-        {
-            //MatchOverEvent matchOver = MatchOverEvent.Create(_playerList);
-            //_gameOverPopupController.Start(matchOver.playerRanking, () =>
-            //{
-                DispatchEvent(GameEventType.GAME_OVER);
-            //});
-        }
-    }
-    
-    private void _addCallbacks()
-    {
-  
-    }
-
-    private void _removeCallbacks()
-    {
-
-    }
-
+   
 
 }

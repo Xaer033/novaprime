@@ -7,7 +7,7 @@ using UnityEngine.U2D;
 [CreateAssetMenu(menuName ="Nova/Gameplay Resources")]
 public class GameplayResources : ScriptableObject
 {
-    public GameObject gameplayCamera;
+    public GameplayCamera gameplayCamera;
     public PlayerAvatarView playerAvatar;
 
 }

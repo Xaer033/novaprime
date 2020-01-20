@@ -2647,8 +2647,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 185625632}
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: -6.51, y: 11.51, z: -0.57000005}
-  m_LocalScale: {x: 8.056155, y: 0.3247997, z: 2.3591}
+  m_LocalPosition: {x: -6.51, y: 21.71, z: -0.57000005}
+  m_LocalScale: {x: 27.513891, y: 0.3247997, z: 2.3591}
   m_Children: []
   m_Father: {fileID: 139781504}
   m_RootOrder: 17
@@ -2829,8 +2829,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 233198336}
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: -2.23, y: 8.94, z: -0.57000005}
-  m_LocalScale: {x: 11.077213, y: 0.3247997, z: 2.3591}
+  m_LocalPosition: {x: -2.23, y: 18.56, z: -0.57000005}
+  m_LocalScale: {x: 30.566048, y: 0.3247997, z: 2.3591}
   m_Children: []
   m_Father: {fileID: 139781504}
   m_RootOrder: 16
@@ -6019,7 +6019,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 999515774}
   m_LocalRotation: {x: -0, y: -0, z: -0.49590015, w: 0.8683796}
-  m_LocalPosition: {x: 13.21, y: 3.98, z: -0.57000005}
+  m_LocalPosition: {x: 13.48, y: 4.14, z: -0.57000005}
   m_LocalScale: {x: 5.4106274, y: 0.3247997, z: 2.3591}
   m_Children: []
   m_Father: {fileID: 139781504}
@@ -6982,7 +6982,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1796611799}
   m_LocalRotation: {x: -0, y: 0.008727774, z: -0, w: 0.9999619}
-  m_LocalPosition: {x: 11.66, y: 4.65, z: -0.907}
+  m_LocalPosition: {x: 11.76, y: 4.627, z: -0.63}
   m_LocalScale: {x: 2.7595372, y: 0.431209, z: 2.3591}
   m_Children: []
   m_Father: {fileID: 139781504}
@@ -7165,7 +7165,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2012725221}
   m_LocalRotation: {x: 0, y: 0.008726558, z: 0, w: 0.999962}
-  m_LocalPosition: {x: 2.75, y: 0.63, z: -0.74}
+  m_LocalPosition: {x: 1.41, y: 2.44, z: -0.72}
   m_LocalScale: {x: 1.3450536, y: 0.27489573, z: 2.3591}
   m_Children: []
   m_Father: {fileID: 139781504}
@@ -7183,18 +7183,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ae6d8aca2908ba438106f686444e525, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cycleMode: 1
+  waitTime: 1
+  easeAmount: 0.36
+  speed: 2.5
+  localWaypoints:
+  - {x: 0, y: 0, z: 0}
+  - {x: -1.67, y: 4.35, z: 0}
+  - {x: 5.64, y: 6.24, z: 0}
   passengerMask:
     serializedVersion: 2
     m_Bits: 1024
-  localWaypoints:
-  - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 2.15, z: 0}
-  - {x: 3.77, y: 2.72, z: 0}
+  horizontalRayCount: 4
+  verticalRayCount: 4
   collider: {fileID: 2012725224}
-  speed: 3
-  cyclic: 0
-  waitTime: 1
-  easeAmount: 0.5
 --- !u!65 &2012725224
 BoxCollider:
   m_ObjectHideFlags: 0

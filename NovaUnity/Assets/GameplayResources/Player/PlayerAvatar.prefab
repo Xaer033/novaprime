@@ -161,15 +161,15 @@ MonoBehaviour:
   jumpHeight: 3.5
   timeToJumpApex: 0.5
   wallStickTime: 0.25
-  wallJumpClimb: {x: 7.5, y: 16}
-  wallJumpOff: {x: 8.5, y: 7}
-  wallJumpLeap: {x: 18, y: 17}
-  speed: 5
-  accelerationTimeAir: 0.3
-  accelerationTimeGround: 0.02
-  maxClimbAngle: 80
-  maxDecendAngle: 75
-  wallSlideSpeedMax: 3
+  wallJumpClimb: {x: 4, y: 16}
+  wallJumpOff: {x: 6, y: 7}
+  wallJumpLeap: {x: 12, y: 17}
+  speed: 6
+  accelerationTimeAir: 0.2
+  accelerationTimeGround: 0.05
+  maxClimbAngle: 75
+  maxDecendAngle: 60
+  wallSlideSpeedMax: 2.5
   collider: {fileID: 5829704941812201185}
 --- !u!65 &5829704941812201185
 BoxCollider:

@@ -43,7 +43,9 @@ public class PlayerController
     private Vector3 _velocity;
     private float _timeToWallUnstick;
     private Vector3 _fixedPosition;
+    private Vector3 _fixedPositionOld;
     private float _velocityXSmoothing;
+    private FrameInput _lastInput;
 
 //    private float _horizontalRaySpacing;
 //    private float _verticalRaySpacing;
@@ -86,15 +88,26 @@ public class PlayerController
     // Update is called once per frame
     public void Step(float deltaTime, FrameInput input)
     {
+        _lastInput = input;
+        
+//        if (_view && _view.transform != null)
+//        {
+//            Vector3 thing = Vector3.zero;
+//            _view.transform.localPosition = Vector3.Lerp(_fixedPositionOld, _fixedPosition, deltaTime);
+//        }
+    }
+    
+    public void FixedStep(float deltaTime)
+    {
         if (_view)
         {
-            float targetVelocityX  = input.horizontalMovement * _view.speed;
+            float targetVelocityX  = _lastInput.horizontalMovement * _view.speed;
             
             float accelerationTime = _collisionInfo.below ? _view.accelerationTimeGround : _view.accelerationTimeAir;
             _velocity.x = Mathf.SmoothDamp(_velocity.x, targetVelocityX, ref _velocityXSmoothing, accelerationTime);
             
             int wallDirX = _collisionInfo.left ? -1 : 1;
-            int inputDirX = input.horizontalMovement == 0 ?  0 : input.horizontalMovement < 0 ? -1 : 1;
+            int inputDirX = _lastInput.horizontalMovement == 0 ?  0 : _lastInput.horizontalMovement < 0 ? -1 : 1;
             
             bool wallSliding = false;
             bool wallOnSide = (_collisionInfo.left || _collisionInfo.right);
@@ -135,7 +148,7 @@ public class PlayerController
             float gravity = -(2 * _view.jumpHeight) / (timeToJumpApex * timeToJumpApex);
             float jumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
             
-            if (input.jump)
+            if (_lastInput.jump)
             {
                 if (wallSliding)
                 {
@@ -164,35 +177,9 @@ public class PlayerController
 
             _velocity.y += gravity * deltaTime;
             
-            
-//            if (_view.requestVelocity != Vector3.zero)
-//            {
-//                _move(deltaTime, _view.requestVelocity);
-//                _view.requestVelocity = Vector3.zero;
-//            }
-//            
             _move(_velocity * deltaTime, false);
 
         }
-//        if (_view)
-//        {
-//            _acceleration.x = input.horizontalMovement;
-//            if(_view.transform != null)
-//            {
-//                _view.transform.localPosition = Vector3.Lerp(_view.transform.localPosition, _fixedPosition, deltaTime);
-//            }
-//        }
-    }
-    
-    public void FixedStep(float fixedDeltaTime)
-    {
-//        if (_view)
-//        {
-//            _velocity.y += _view.gravity * fixedDeltaTime;
-//            Vector3 deltaVel = _velocity * fixedDeltaTime;
-//            
-//            _move(fixedDeltaTime, deltaVel);
-//        }
     }
 
     private Vector3 _verticalCollisions(Vector3 currentVelocity)
@@ -366,7 +353,7 @@ public class PlayerController
         _move(velocity, isOnPlatform);
     }
     
-    private void _move( Vector3 velocity, bool isOnPlatform)
+    private void _move(Vector3 velocity, bool isOnPlatform)
     {
         _raycastController.Step();
         _collisionInfo.Reset(velocity);
@@ -390,33 +377,11 @@ public class PlayerController
         }
         
         _view.transform.Translate(velocity);
-
+        
         if (isOnPlatform)
         {
             _collisionInfo.below = true;
         }
         
     }
-//    private void _updateRaycastOrigins()
-//    {
-//        Bounds bounds = _view.collider.bounds;
-//        bounds.Expand(skinWidth * -2);
-//        
-//        _raycastOrigins.bottomLeft = new Vector3(bounds.min.x, bounds.min.y);
-//        _raycastOrigins.bottomRight = new Vector3(bounds.max.x, bounds.min.y);
-//        _raycastOrigins.topLeft = new Vector3(bounds.min.x, bounds.max.y);
-//        _raycastOrigins.topRight = new Vector3(bounds.max.x, bounds.max.y);
-//
-//    }
-//    private void _calculateRaySpacing()
-//    {
-//        Bounds bounds = _view.collider.bounds;
-//        bounds.Expand(skinWidth * -2);
-//
-//        int horizontalRayCount = Mathf.Clamp(_view.horizontalRayCount, 2, int.MaxValue);
-//        int verticalRayCount = Mathf.Clamp(_view.verticalRayCount, 2, int.MaxValue);
-//        
-//        _horizontalRaySpacing = bounds.size.y / (horizontalRayCount - 1);
-//        _verticalRaySpacing = bounds.size.x / (verticalRayCount - 1);
-//    }
 }

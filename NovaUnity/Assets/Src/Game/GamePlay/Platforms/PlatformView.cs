@@ -6,13 +6,24 @@ using UnityEngine.Serialization;
 
 public class PlatformView : MonoBehaviour
 {
+    public enum CycleMode
+    {
+        YOYO,
+        CYCLIC
+    }
+
+    public CycleMode cycleMode;
+    public float waitTime;
+    [Range(0,2)]
+    public float easeAmount = 1;
+    
+    public float speed;
     public Vector3[] localWaypoints;
     
     public LayerMask passengerMask;
     public int horizontalRayCount = 4;
     public int verticalRayCount = 4;
 
-    public float speed;
 
     public Collider collider;
 
@@ -23,6 +34,7 @@ public class PlatformView : MonoBehaviour
 
     private int _fromWaypointIndex;
     private float _percentBetweenWaypoints;
+    private float _nextMoveTime;
     
     private Vector3[] _globalWayPoints;
     // Start is called before the first frame update
@@ -40,7 +52,7 @@ public class PlatformView : MonoBehaviour
     void Update()
     {
         _raycastController.Step();
-        Vector3 velocity = _calculatePlatformMovement(Time.deltaTime);
+        Vector3 velocity = _calculatePlatformMovement(Time.deltaTime, Time.time);
         
         _calculatePassengerMovement(velocity);
 
@@ -50,26 +62,44 @@ public class PlatformView : MonoBehaviour
 
     }
 
-    private Vector3 _calculatePlatformMovement(float deltaTime)
+    private Vector3 _calculatePlatformMovement(float deltaTime, float time)
     {
-        int toWaypointIndex = _fromWaypointIndex + 1;
+        if (time < _nextMoveTime)
+        {
+            return Vector3.zero;
+        }
+        
+        _fromWaypointIndex %= _globalWayPoints.Length;
+        
+        int toWaypointIndex = (_fromWaypointIndex + 1) % _globalWayPoints.Length;
         Vector3 fromWaypoint = _globalWayPoints[_fromWaypointIndex];
         Vector3 toWaypoint = _globalWayPoints[toWaypointIndex];
         float distanceBetweenWaypoint = Vector3.Distance(fromWaypoint, toWaypoint) + 0.0001f;
         _percentBetweenWaypoints += deltaTime * speed / distanceBetweenWaypoint;
+        _percentBetweenWaypoints = Mathf.Clamp01(_percentBetweenWaypoints);
 
-        Vector3 newPos = Vector3.Lerp(fromWaypoint, toWaypoint, _percentBetweenWaypoints);
+        float lerpValue = _ease(_percentBetweenWaypoints);
+
+        Vector3 newPos = Vector3.Lerp(fromWaypoint, toWaypoint, lerpValue);
         if (_percentBetweenWaypoints >= 1)
         {
             _percentBetweenWaypoints = 0;
             _fromWaypointIndex++;
-            if (_fromWaypointIndex >= _globalWayPoints.Length - 1)
+
+            _nextMoveTime = time + waitTime;
+            if ( cycleMode == CycleMode.YOYO && _fromWaypointIndex >= _globalWayPoints.Length - 1)
             {
                 _fromWaypointIndex = 0;
                 System.Array.Reverse(_globalWayPoints);
             }
         }
         return newPos - transform.position;
+    }
+
+    private float _ease(float x)
+    {
+        float a = easeAmount + 1;
+        return Mathf.Pow(x, a) / (Mathf.Pow(x, a) + Mathf.Pow(1 - x, a));
     }
     private void _movePassengers(bool beforeMovePlatform)
     {

@@ -6,8 +6,7 @@ using UnityEngine;
 public class PlayerAvatarView : MonoBehaviour, IPlatformPassenger
 {
     public LayerMask collisionMask;
-    public int horizontalRayCount = 4;
-    public int verticalRayCount = 4;
+    public float distanceBetweenRays = 0.2f;
 
     public float maxJumpHeight = 4;
     public float minJumpHeight = 1.0f;

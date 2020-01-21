@@ -21,8 +21,7 @@ public class PlatformView : MonoBehaviour
     public Vector3[] localWaypoints;
     
     public LayerMask passengerMask;
-    public int horizontalRayCount = 4;
-    public int verticalRayCount = 4;
+    public float distanceBetweenRays = 0.2f;
 
 
     public Collider collider;
@@ -40,7 +39,7 @@ public class PlatformView : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        _raycastController = new RaycastController(horizontalRayCount, verticalRayCount, collider, passengerMask);
+        _raycastController = new RaycastController(distanceBetweenRays, collider, passengerMask);
         _globalWayPoints = new Vector3[localWaypoints.Length];
         for (int i = 0; i < localWaypoints.Length; ++i)
         {
@@ -51,8 +50,11 @@ public class PlatformView : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        float deltaTime = Time.fixedDeltaTime;
+        float time = Time.fixedTime;
+        
         _raycastController.UpdateRaycastOrigins();
-        Vector3 velocity = _calculatePlatformMovement(Time.fixedDeltaTime, Time.fixedTime);
+        Vector3 velocity = _calculatePlatformMovement(deltaTime, time);
         
         _calculatePassengerMovement(velocity);
 
@@ -74,7 +76,7 @@ public class PlatformView : MonoBehaviour
         int toWaypointIndex = (_fromWaypointIndex + 1) % _globalWayPoints.Length;
         Vector3 fromWaypoint = _globalWayPoints[_fromWaypointIndex];
         Vector3 toWaypoint = _globalWayPoints[toWaypointIndex];
-        float distanceBetweenWaypoint = Vector3.Distance(fromWaypoint, toWaypoint) + 0.0001f;
+        float distanceBetweenWaypoint = Vector3.Distance(fromWaypoint, toWaypoint);
         _percentBetweenWaypoints += deltaTime * speed / distanceBetweenWaypoint;
         _percentBetweenWaypoints = Mathf.Clamp01(_percentBetweenWaypoints);
 
@@ -118,6 +120,7 @@ public class PlatformView : MonoBehaviour
             { 
                 platformPat.RequestMovement(passenger);
                 
+//                passenger.transform.Translate(passenger.velocity);
             }
         }
     }
@@ -135,7 +138,7 @@ public class PlatformView : MonoBehaviour
         {
             float rayLength = Mathf.Abs(velocity.y) + _raycastController.skinWidth;
             
-            for (int i = 0; i < verticalRayCount; ++i)
+            for (int i = 0; i < _raycastController.verticalRayCount; ++i)
             {
                 Vector3 rayOrigin = (directionY == -1) ? _raycastController.origins.bottomLeft : _raycastController.origins.topLeft;
                 rayOrigin += Vector3.right * (_raycastController.verticalRaySpacing * i);
@@ -151,7 +154,7 @@ public class PlatformView : MonoBehaviour
                         
                         float pushX = (directionY == 1) ? velocity.x : 0;
                         float pushY = velocity.y - (hit.distance - _raycastController.skinWidth) * directionY;
-                        
+                    
                         _passengerMovementList.Add( 
                             new PassengerMovement(
                                 hit.transform, 
@@ -167,12 +170,12 @@ public class PlatformView : MonoBehaviour
         if (velocity.x != 0)
         {
             float rayLength = Mathf.Abs(velocity.x) + _raycastController.skinWidth;
-            for (int i = 0; i < horizontalRayCount; ++i)
+            for (int i = 0; i < _raycastController.horizontalRayCount; ++i)
             {
                 Vector3 rayOrigin = (directionX == -1) ? _raycastController.origins.bottomLeft : _raycastController.origins.bottomRight;
                 rayOrigin += Vector3.up * (_raycastController.horizontalRaySpacing * i);
                 
-                Debug.DrawRay(rayOrigin, Vector3.right * directionX * rayLength, Color.blue);
+                Debug.DrawRay(rayOrigin, Vector3.right * directionX * rayLength, Color.yellow);
 
                 bool isHit = Physics.Raycast(rayOrigin, Vector3.right * directionX, out hit, rayLength, passengerMask);
                 if (isHit && hit.distance != 0)
@@ -194,15 +197,16 @@ public class PlatformView : MonoBehaviour
             }
         }
         
-        if(directionY == -1 || (velocity.y == 0 && velocity.x !=0))
+        // The passenger is on top of a horizontal platform or a downward moving platform
+        if(directionY == -1 || velocity.y == 0 && velocity.x !=0)
         {
-            float rayLength = _raycastController.skinWidth;
+            float rayLength =  _raycastController.skinWidth * 2.0f;
             
-            for (int i = 0; i < verticalRayCount; ++i)
+            for (int i = 0; i < _raycastController.verticalRayCount; ++i)
             {
                 Vector3 rayOrigin = _raycastController.origins.topLeft + Vector3.right * (_raycastController.verticalRaySpacing * i);
                
-                Debug.DrawRay(rayOrigin, Vector3.up * rayLength, Color.blue);
+                Debug.DrawRay(rayOrigin, Vector3.up * rayLength, Color.green);
                 
                 bool isHit = Physics.Raycast(rayOrigin, Vector3.up, out hit, rayLength, passengerMask);
                 if(isHit && hit.distance != 0)
@@ -212,7 +216,7 @@ public class PlatformView : MonoBehaviour
                         _movedPassengersSet.Add(hit.transform);
                         float pushX = velocity.x;
                         float pushY = velocity.y;
-                        
+
                         _passengerMovementList.Add( 
                             new PassengerMovement(
                                 hit.transform, 

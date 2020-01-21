@@ -10,6 +10,9 @@ public class RaycastController
     public int horizontalRayCount { get; set; }
     public int verticalRayCount  { get; set; }
 
+    public float distanceBetweenRays { get; set; }
+    
+
     public Collider collider { get; set; }
    public float horizontalRaySpacing { get; private set;}
    public float verticalRaySpacing { get; private set;}
@@ -30,13 +33,14 @@ public class RaycastController
         public Vector3 bottomRight;
     }
     
-    public RaycastController(int hRayCount, int vRayCount, Collider boundsCollider, LayerMask collisionLayerMask, float collisionSkinWidth = 0.015f)
+    public RaycastController(float distBetweenRays, Collider boundsCollider, LayerMask collisionLayerMask, float collisionSkinWidth = 0.015f)
     {
+        distanceBetweenRays = distBetweenRays;
         horizontalRaySpacing = 0;
         verticalRaySpacing = 0;
         skinWidth = collisionSkinWidth;
-        horizontalRayCount = hRayCount;
-        verticalRayCount = vRayCount;
+        horizontalRayCount = 1;
+        verticalRayCount = 1;
 
         collider = boundsCollider;
         collisionMask = collisionLayerMask;
@@ -71,8 +75,16 @@ public class RaycastController
     
     private void _calculateRaySpacing()
     {
+        distanceBetweenRays = Mathf.Clamp(distanceBetweenRays, 0.0001f, 20);
+        
         Bounds bounds = collider.bounds;
         bounds.Expand(skinWidth * -2);
+
+        float boundsWidth = bounds.size.x;
+        float boundsHeight = bounds.size.y;
+        
+        horizontalRayCount = Mathf.RoundToInt(boundsHeight / distanceBetweenRays);
+        verticalRayCount = Mathf.RoundToInt(boundsWidth / distanceBetweenRays);
 
         int clampedHRayCount = Mathf.Clamp(horizontalRayCount, 2, int.MaxValue);
         int clampedVRayCount = Mathf.Clamp(verticalRayCount, 2, int.MaxValue);

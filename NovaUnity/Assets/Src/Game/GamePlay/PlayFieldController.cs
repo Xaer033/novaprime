@@ -13,9 +13,10 @@ public class PlayFieldController : NotificationDispatcher
         _addCallbacks();
 
         PlayerAvatarView playerView = GameObject.Instantiate<PlayerAvatarView>(Singleton.instance.gameplayResources.playerAvatar);
+        PlayerInput input = new PlayerInput(0);
         
-        _pController = new PlayerController();
-        _pController.Start(playerView);
+        _pController = new PlayerController(playerView, input);
+        _pController.Start();
 
         _gameplayCamera = GameObject.FindObjectOfType<GameplayCamera>();
         if (_gameplayCamera == null)
@@ -28,8 +29,7 @@ public class PlayFieldController : NotificationDispatcher
     {
         if (_pController != null)
         {
-            FrameInput p1Input = PlayerInput.GetInput(0);
-            _pController.Step(deltaTime, p1Input);
+            _pController.Step(deltaTime);
 
             if (_gameplayCamera != null)
             {

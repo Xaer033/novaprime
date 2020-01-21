@@ -9,7 +9,8 @@ public class PlayerAvatarView : MonoBehaviour, IPlatformPassenger
     public int horizontalRayCount = 4;
     public int verticalRayCount = 4;
 
-    public float jumpHeight = 4;
+    public float maxJumpHeight = 4;
+    public float minJumpHeight = 1.0f;
     public float timeToJumpApex = 0.4f;
 
     public float wallStickTime = .25f;

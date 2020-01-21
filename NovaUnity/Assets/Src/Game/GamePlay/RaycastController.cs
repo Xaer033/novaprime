@@ -30,7 +30,7 @@ public class RaycastController
         public Vector3 bottomRight;
     }
     
-    public RaycastController(int hRayCount, int vRayCount, Collider boundsCollider, LayerMask collisionLayerMask, float collisionSkinWidth = 0.05f)
+    public RaycastController(int hRayCount, int vRayCount, Collider boundsCollider, LayerMask collisionLayerMask, float collisionSkinWidth = 0.015f)
     {
         horizontalRaySpacing = 0;
         verticalRaySpacing = 0;

@@ -49,10 +49,10 @@ public class PlatformView : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         _raycastController.Step();
-        Vector3 velocity = _calculatePlatformMovement(Time.deltaTime, Time.time);
+        Vector3 velocity = _calculatePlatformMovement(Time.fixedDeltaTime, Time.time);
         
         _calculatePassengerMovement(velocity);
 
@@ -188,11 +188,13 @@ public class PlatformView : MonoBehaviour
         
         if(directionY == -1 || (velocity.y == 0 && velocity.x !=0))
         {
-            float rayLength = _raycastController.skinWidth * 2.0f;
+            float rayLength = _raycastController.skinWidth * 8.0f;
             
             for (int i = 0; i < verticalRayCount; ++i)
             {
-                Vector3 rayOrigin = _raycastController.origins.topLeft + (_raycastController.verticalRaySpacing * i * Vector3.right);
+                Vector3 rayOrigin = _raycastController.origins.topLeft + Vector3.right * (_raycastController.verticalRaySpacing * i);
+               
+                Debug.DrawRay(rayOrigin, Vector3.up * rayLength, Color.blue);
                 if (Physics.Raycast(rayOrigin, Vector3.up, out hit, rayLength, passengerMask))
                 {
                     if (!_movedPassengersSet.Contains(hit.transform))
@@ -206,7 +208,7 @@ public class PlatformView : MonoBehaviour
                                 hit.transform, 
                                 new Vector3(pushX, pushY), 
                                 true, 
-                                false));
+                                true));
                     }
                 }
             }

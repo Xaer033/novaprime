@@ -47,18 +47,19 @@ public class PlayerController
     private float _velocityXSmoothing;
     private FrameInput _lastInput;
 
-//    private float _horizontalRaySpacing;
-//    private float _verticalRaySpacing;
+    private PlayerInput _input;
+    
 
     private RaycastController _raycastController;
 //    private RaycastOrigins _raycastOrigins;
     public CollisionInfo _collisionInfo;
-    
-    // Start is called before the first frame update
-    public void Start(PlayerAvatarView view)
+
+    public PlayerController(PlayerAvatarView view, PlayerInput input)
     {
         _view = view;
         _view.controller = this;
+
+        _input = input;
         
         _raycastController = new RaycastController(
             _view.horizontalRayCount, 
@@ -67,6 +68,12 @@ public class PlayerController
             _view.collisionMask);
 
         _collisionInfo.faceDir = 1;
+    }
+    
+    // Start is called before the first frame update
+    public void Start()
+    {
+        
     }
 
     public Vector3 position
@@ -86,9 +93,9 @@ public class PlayerController
     }
     
     // Update is called once per frame
-    public void Step(float deltaTime, FrameInput input)
+    public void Step(float deltaTime)
     {
-        _lastInput = input;
+        _lastInput = _input.GetInput();
         
 //        if (_view && _view.transform != null)
 //        {
@@ -145,10 +152,11 @@ public class PlayerController
             }
 
             float timeToJumpApex = _view.timeToJumpApex;
-            float gravity = -(2 * _view.jumpHeight) / (timeToJumpApex * timeToJumpApex);
-            float jumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
+            float gravity = -(2 * _view.maxJumpHeight) / (timeToJumpApex * timeToJumpApex);
+            float maxJumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
+            float minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs((gravity) * _view.minJumpHeight));
             
-            if (_lastInput.jump)
+            if (_lastInput.jumpPressed)
             {
                 if (wallSliding)
                 {
@@ -170,7 +178,14 @@ public class PlayerController
                 }
                 else if (_collisionInfo.below)
                 {
-                    _velocity.y = jumpVelocity;
+                    _velocity.y = maxJumpVelocity;
+                }
+            }
+            else if (_lastInput.jumpReleased)
+            {
+                if (_velocity.y > minJumpVelocity)
+                {
+                    _velocity.y = minJumpVelocity;
                 }
             }
             
@@ -180,21 +195,32 @@ public class PlayerController
             _move(_velocity * deltaTime, false);
 
         }
+        _input.Clear();
     }
 
     private Vector3 _verticalCollisions(Vector3 currentVelocity)
     {
         Vector3 newVelocity = currentVelocity;
         float directionY = Mathf.Sign(currentVelocity.y);
-        float rayLength = Mathf.Abs(currentVelocity.y) + _raycastController.skinWidth;
+        float rayLength = Mathf.Abs(currentVelocity.y) + _raycastController.skinWidth * 2;
+        
         RaycastHit hit;
         
         for (int i = 0; i < _view.verticalRayCount; ++i)
         {
             Vector3 rayOrigin = (directionY == -1) ? _raycastOrigins.bottomLeft : _raycastOrigins.topLeft;
             rayOrigin += Vector3.right * (_raycastController.verticalRaySpacing * i + currentVelocity.x);
+            
+            Debug.DrawRay(rayOrigin, Vector3.up * directionY, Color.red);
             if (Physics.Raycast(rayOrigin, Vector3.up * directionY, out hit, rayLength, _view.collisionMask))
             {
+                if (hit.collider.tag == "Through")
+                {
+                    if (directionY == 1)
+                    {
+                        continue;
+                    }
+                }
                 newVelocity.y = (hit.distance - _raycastController.skinWidth) * directionY;
                 rayLength = hit.distance;
 
@@ -206,7 +232,6 @@ public class PlayerController
                 _collisionInfo.above = directionY == 1;
             }
             
-            Debug.DrawRay(rayOrigin, Vector3.up * directionY * rayLength, Color.red);
         }
 
         if (_collisionInfo.climbingSlope)
@@ -245,12 +270,15 @@ public class PlayerController
         {
             Vector3 rayOrigin = (directionX == -1) ? _raycastOrigins.bottomLeft : _raycastOrigins.bottomRight;
             rayOrigin += Vector3.up * (_raycastController.horizontalRaySpacing * i);
+            
+            Debug.DrawRay(rayOrigin, Vector3.right * directionX, Color.red);
             if (Physics.Raycast(rayOrigin, Vector3.right * directionX, out hit, rayLength, _view.collisionMask))
             {
                 if (hit.distance == 0)
                 {
                     continue;
                 }
+                
                 
                 float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
                 if (i == 0 && slopeAngle <= _view.maxClimbAngle)
@@ -284,7 +312,6 @@ public class PlayerController
                     _collisionInfo.right = directionX == 1;
                 }
             }
-            Debug.DrawRay(rayOrigin, Vector3.right * directionX * rayLength, Color.red);
 
         }
 

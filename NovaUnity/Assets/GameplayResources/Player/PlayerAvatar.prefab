@@ -135,7 +135,7 @@ Transform:
   m_GameObject: {fileID: 5789754299105121112}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
   m_Children:
   - {fileID: 449116805717182556}
   m_Father: {fileID: 0}
@@ -156,16 +156,17 @@ MonoBehaviour:
   collisionMask:
     serializedVersion: 2
     m_Bits: 512
-  horizontalRayCount: 20
+  horizontalRayCount: 10
   verticalRayCount: 5
-  jumpHeight: 3.5
+  maxJumpHeight: 3
+  minJumpHeight: 0.4
   timeToJumpApex: 0.5
-  wallStickTime: 0.25
+  wallStickTime: 0.15
   wallJumpClimb: {x: 4, y: 16}
   wallJumpOff: {x: 6, y: 7}
   wallJumpLeap: {x: 12, y: 17}
-  speed: 6
-  accelerationTimeAir: 0.2
+  speed: 4.5
+  accelerationTimeAir: 0.15
   accelerationTimeGround: 0.05
   maxClimbAngle: 75
   maxDecendAngle: 60
@@ -179,10 +180,10 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5789754299105121112}
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
+  m_Size: {x: 1.33, y: 1.06, z: 1}
   m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!1 &5789754300994217977
 GameObject:

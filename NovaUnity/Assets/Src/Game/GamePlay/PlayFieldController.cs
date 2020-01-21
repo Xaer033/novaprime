@@ -23,6 +23,7 @@ public class PlayFieldController : NotificationDispatcher
         {
             _gameplayCamera = GameObject.Instantiate<GameplayCamera>(Singleton.instance.gameplayResources.gameplayCamera);
         }
+        _gameplayCamera.target = playerView;
     }
 
     public void Step(float deltaTime)
@@ -30,11 +31,6 @@ public class PlayFieldController : NotificationDispatcher
         if (_pController != null)
         {
             _pController.Step(deltaTime);
-
-            if (_gameplayCamera != null)
-            {
-                _gameplayCamera.target = _pController.position;
-            }
         }
     }
 

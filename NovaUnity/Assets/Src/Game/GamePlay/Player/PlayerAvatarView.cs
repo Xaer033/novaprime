@@ -13,7 +13,7 @@ public class PlayerAvatarView : MonoBehaviour, IPlatformPassenger
     public float minJumpHeight = 1.0f;
     public float timeToJumpApex = 0.4f;
 
-    public float wallStickTime = .25f;
+    public float wallStickTime = .15f;
     
     public Vector2 wallJumpClimb;
     public Vector2 wallJumpOff;

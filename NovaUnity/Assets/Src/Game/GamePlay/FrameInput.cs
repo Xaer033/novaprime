@@ -6,6 +6,7 @@ public struct FrameInput
 {
     // Range of -1 to 1
     public float horizontalMovement;
+    public float verticalMovement;
     public bool jumpPressed;
     public bool jumpReleased;
     public bool primaryFire;

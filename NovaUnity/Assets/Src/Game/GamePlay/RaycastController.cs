@@ -52,7 +52,7 @@ public class RaycastController
         }
     }
 
-    public void Step()
+    public void UpdateRaycastOrigins()
     {
         _calculateRaySpacing(); // *TEMP*
         _updateRaycastOrigins();

@@ -9,10 +9,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 750901081596856261}
+  - component: {fileID: 750901081596856283}
   - component: {fileID: 750901081596856262}
   - component: {fileID: 750901081596856260}
   - component: {fileID: 750901081596856263}
-  - component: {fileID: 750901081596856283}
   m_Layer: 8
   m_Name: GameplayCamera
   m_TagString: MainCamera
@@ -34,6 +34,23 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &750901081596856283
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 750901081596856256}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d18def174457dcc409fee946b556f725, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  focusAreaSize: {x: 1, y: 1}
+  targetOffset: {x: 0, y: 0.5, z: -11.5}
+  lookAheadDistanceX: 1
+  lookSmoothTimeX: 0.5
+  lookSmoothTimeY: 0.02
 --- !u!20 &750901081596856262
 Camera:
   m_ObjectHideFlags: 0
@@ -59,7 +76,7 @@ Camera:
     height: 1
   near clip plane: 1
   far clip plane: 200
-  field of view: 29
+  field of view: 30
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -154,17 +171,3 @@ MonoBehaviour:
   blendDistance: 0
   weight: 1
   priority: 0
---- !u!114 &750901081596856283
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 750901081596856256}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d18def174457dcc409fee946b556f725, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  targetOffset: {x: 0, y: 1, z: -11.5}
-  smoothTime: 0.1

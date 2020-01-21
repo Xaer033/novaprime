@@ -21,6 +21,7 @@ public class PlayerInput
         
         FrameInput input = new FrameInput();
         input.horizontalMovement = Input.GetAxis("playerHorizontal");
+        input.verticalMovement = Input.GetAxis("playerVertical");
         input.jumpPressed = _jumpPressed;
         input.jumpReleased = _jumpRelease;
         input.primaryFire = Input.GetMouseButton(0);

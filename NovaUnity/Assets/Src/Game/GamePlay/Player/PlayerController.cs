@@ -20,7 +20,8 @@ public class PlayerController
     private float _wallSlideVelocity;
     private bool _isWallSliding;
 
-    private float _jumpTimer;
+    private float _midairJumpTimer;
+    private float _coyoteJumpTimer;
     
     private Vector3 _fixedPosition;
     private Vector3 _fixedPositionOld;
@@ -145,14 +146,15 @@ public class PlayerController
         float maxJumpVelocity = Mathf.Abs(_gravity) * timeToJumpApex;
         float minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(_gravity) * _view.minJumpHeight);
         
-        _jumpTimer -= deltaTime;
-
+        _midairJumpTimer -= deltaTime;
+        _coyoteJumpTimer -= deltaTime;
+        
         if (_lastInput.jumpPressed)
         {
-            _jumpTimer = _view.jumpRememberDelay;
+            _midairJumpTimer = _view.jumpRememberDelay;
         }
         // This is so if the player jumps while in the air for a bit, we still jump when on floor
-        if (_jumpTimer > 0)
+        if (_midairJumpTimer > 0)
         {
             Debug.Log("JumpPressed");
             if (isWallSliding)
@@ -173,11 +175,12 @@ public class PlayerController
                     velocity.y = _view.wallJumpLeap.y;
                 }
                 
-                _jumpTimer = 0;
+                _midairJumpTimer = 0;
             }
             
-            if (_collisionInfo.below)
+            if (_coyoteJumpTimer > 0)
             {
+                _coyoteJumpTimer = 0;
                 if (_collisionInfo.slidingDownMaxSlope)
                 {
 //                    if (inputDirX != -(int) Mathf.Sign(_collisionInfo.slopeNormal.x))
@@ -192,7 +195,7 @@ public class PlayerController
                     velocity.y = maxJumpVelocity;
                 }
                 
-                _jumpTimer = 0;
+                _midairJumpTimer = 0;
             }
         }
 
@@ -354,6 +357,11 @@ public class PlayerController
                 }
                 _collisionInfo.below = directionY == -1;
                 _collisionInfo.above = directionY == 1;
+
+                if (_collisionInfo.below)
+                {
+                    _coyoteJumpTimer = _view.coyoteTime;
+                }
             }
         }
 

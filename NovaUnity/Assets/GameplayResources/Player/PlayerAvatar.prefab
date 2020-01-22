@@ -157,18 +157,22 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   distanceBetweenRays: 0.08
-  maxJumpHeight: 3
-  minJumpHeight: 0.4
-  timeToJumpApex: 0.5
-  wallStickTime: 0.15
-  wallJumpClimb: {x: 4, y: 16}
-  wallJumpOff: {x: 6, y: 7}
-  wallJumpLeap: {x: 12, y: 17}
+  maxJumpHeight: 2.5
+  minJumpHeight: 0.28
+  timeToJumpApex: 0.4
+  coyoteTime: 0.15
+  jumpRememberDelay: 0.2
+  wallStickTime: 0.2
+  wallSlideSpeedMax: 0
+  wallSlideSpeedDampTime: 0.1
+  wallJumpClimb: {x: 4, y: 10}
+  wallJumpOff: {x: 6, y: 6}
+  wallJumpLeap: {x: 10, y: 8}
   speed: 4.5
+  terminalVelocity: 9.8
   accelerationTimeAir: 0.15
   accelerationTimeGround: 0.05
   maxSlopeAngle: 50
-  wallSlideSpeedMax: 2.5
   collider: {fileID: 5829704941812201185}
 --- !u!65 &5829704941812201185
 BoxCollider:

@@ -15,14 +15,21 @@ public class PlayerController
 
     private float _gravity;
     private Vector3 _velocity;
+    
     private float _timeToWallUnstick;
+    private float _wallSlideVelocity;
     private bool _isWallSliding;
+
+    private float _jumpTimer;
+    
     private Vector3 _fixedPosition;
     private Vector3 _fixedPositionOld;
+    
     private float _velocityXSmoothing;
+    
     private FrameInput _lastInput;
-
     private PlayerInput _input;
+    
     private float _resetPlatformTime;
 
     private RaycastController _raycastController;
@@ -67,14 +74,13 @@ public class PlayerController
     }
 
     // Update is called once per frame
-    public void FixedStep(float deltaTime)
-    {
-//        _lastInput = _input.GetInput();
-    }
-
     public void Step(float deltaTime)
     {
         _lastInput = _input.GetInput();
+    }
+
+    public void FixedStep(float deltaTime)
+    {
         if (_view)
         {
             int wallDirX = _collisionInfo.left ? -1 : 1;
@@ -84,7 +90,7 @@ public class PlayerController
             _handleDirectionMovement(ref _velocity, deltaTime);
 
             bool isWallSliding = _handleWallSliding(ref _velocity, deltaTime, wallDirX, inputDirX);
-            _handleJumping(ref _velocity, isWallSliding, wallDirX, inputDirX);
+            _handleJumping(ref _velocity, deltaTime, isWallSliding, wallDirX, inputDirX);
 
             // Apply constraints to velocity and move avatar, no modifications to _velocity here
             _move(_velocity * deltaTime, false);
@@ -125,19 +131,29 @@ public class PlayerController
         float targetVelocityX = _lastInput.horizontalMovement * _view.speed;
         float accelerationTime = _collisionInfo.below ? _view.accelerationTimeGround : _view.accelerationTimeAir;
         velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref _velocityXSmoothing, accelerationTime);
-        velocity.y += _gravity * deltaTime;
+        if (velocity.y > -Mathf.Abs(_view.terminalVelocity))
+        {
+            velocity.y += _gravity * deltaTime;
+        }
     }
     
-    private void _handleJumping(ref Vector3 velocity, bool isWallSliding, int wallDirX, int inputDirX)
+    private void _handleJumping(ref Vector3 velocity, float deltaTime, bool isWallSliding, int wallDirX, int inputDirX)
     {
+        
         float timeToJumpApex = _view.timeToJumpApex;
         _gravity = -(2 * _view.maxJumpHeight) / (timeToJumpApex * timeToJumpApex);
         float maxJumpVelocity = Mathf.Abs(_gravity) * timeToJumpApex;
         float minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(_gravity) * _view.minJumpHeight);
+        
+        _jumpTimer -= deltaTime;
 
         if (_lastInput.jumpPressed)
         {
-            
+            _jumpTimer = _view.jumpRememberDelay;
+        }
+        // This is so if the player jumps while in the air for a bit, we still jump when on floor
+        if (_jumpTimer > 0)
+        {
             Debug.Log("JumpPressed");
             if (isWallSliding)
             {
@@ -156,22 +172,27 @@ public class PlayerController
                     velocity.x = -wallDirX * _view.wallJumpLeap.x;
                     velocity.y = _view.wallJumpLeap.y;
                 }
+                
+                _jumpTimer = 0;
             }
             
             if (_collisionInfo.below)
             {
                 if (_collisionInfo.slidingDownMaxSlope)
                 {
-                    if (inputDirX != -(int) Mathf.Sign(_collisionInfo.slopeNormal.x))
+//                    if (inputDirX != -(int) Mathf.Sign(_collisionInfo.slopeNormal.x))
                     {
-                        _velocity.x = maxJumpVelocity * _collisionInfo.slopeNormal.x * 0.5f;
-                        _velocity.y = maxJumpVelocity * _collisionInfo.slopeNormal.y;
+                        Vector3 jumpDirection = (Vector3.up + _collisionInfo.slopeNormal).normalized * maxJumpVelocity;
+                        velocity.x = jumpDirection.x;
+                        velocity.y = jumpDirection.y;
                     }
                 }
                 else 
                 {
                     velocity.y = maxJumpVelocity;
                 }
+                
+                _jumpTimer = 0;
             }
         }
 
@@ -190,13 +211,18 @@ public class PlayerController
     private bool _handleWallSliding(ref Vector3 velocity, float deltaTime, int wallDirX, int inputDirX)
     {
         bool isWallSliding = false;
-        bool wallOnSide = (_collisionInfo.left || _collisionInfo.right);
+        
+        bool pushingLeftWall = (_collisionInfo.left && inputDirX == -1);
+        bool pushingRightWall = ( _collisionInfo.right && inputDirX == 1);
+
+        bool wallOnSide = _collisionInfo.left || _collisionInfo.right;// pushingLeftWall || pushingRightWall;
         if (wallOnSide && !_collisionInfo.below && velocity.y < 0)
         {
             isWallSliding = true;
             if (velocity.y < -_view.wallSlideSpeedMax)
             {
-                velocity.y = -_view.wallSlideSpeedMax;
+                float targetYSpeed = -_view.wallSlideSpeedMax;
+                velocity.y = Mathf.SmoothDamp(velocity.y,targetYSpeed, ref _wallSlideVelocity, _view.wallSlideSpeedDampTime);
             }
 
             if (_timeToWallUnstick > 0)
@@ -446,6 +472,7 @@ public class PlayerController
     {
         _raycastController.distanceBetweenRays = _view.distanceBetweenRays;
         _raycastController.UpdateRaycastOrigins();
+        
         _collisionInfo.Reset();
         _collisionInfo.oldMoveDelta = moveDelta;
 

@@ -48,10 +48,10 @@ public class PlatformView : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        float deltaTime = Time.deltaTime;
-        float time = Time.time;
+        float deltaTime = Time.fixedDeltaTime;
+        float time = Time.fixedTime;
         
         _raycastController.UpdateRaycastOrigins();
         Vector3 velocity = _calculatePlatformMovement(deltaTime, time);

@@ -11,18 +11,22 @@ public class PlayerAvatarView : MonoBehaviour, IPlatformPassenger
     public float maxJumpHeight = 4;
     public float minJumpHeight = 1.0f;
     public float timeToJumpApex = 0.4f;
+    public float coyoteTime = 0.15f;
+    public float jumpRememberDelay = .2f;
 
     public float wallStickTime = .15f;
+    public float wallSlideSpeedMax = 3.0f;
+    public float wallSlideSpeedDampTime = 0.1f;
     
     public Vector2 wallJumpClimb;
     public Vector2 wallJumpOff;
     public Vector2 wallJumpLeap;
     
     public float speed;
+    public float terminalVelocity = 20.0f;
     public float accelerationTimeAir = 0.2f;
     public float accelerationTimeGround = 0.1f;
     public float maxSlopeAngle = 80.0f;
-    public float wallSlideSpeedMax = 3.0f;
     
     public Collider collider;
 

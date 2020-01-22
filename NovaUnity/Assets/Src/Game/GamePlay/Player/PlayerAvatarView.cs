@@ -21,8 +21,7 @@ public class PlayerAvatarView : MonoBehaviour, IPlatformPassenger
     public float speed;
     public float accelerationTimeAir = 0.2f;
     public float accelerationTimeGround = 0.1f;
-    public float maxClimbAngle = 80.0f;
-    public float maxDecendAngle = 75.0f;
+    public float maxSlopeAngle = 80.0f;
     public float wallSlideSpeedMax = 3.0f;
     
     public Collider collider;

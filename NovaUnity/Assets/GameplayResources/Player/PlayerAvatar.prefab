@@ -167,8 +167,7 @@ MonoBehaviour:
   speed: 4.5
   accelerationTimeAir: 0.15
   accelerationTimeGround: 0.05
-  maxClimbAngle: 75
-  maxDecendAngle: 60
+  maxSlopeAngle: 50
   wallSlideSpeedMax: 2.5
   collider: {fileID: 5829704941812201185}
 --- !u!65 &5829704941812201185

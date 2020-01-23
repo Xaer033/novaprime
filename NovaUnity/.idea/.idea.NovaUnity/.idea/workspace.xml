@@ -2,16 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b6a73f64-2447-4d4c-814f-a9d0ed8da726" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.NovaUnity/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.NovaUnity/.idea/contentModel.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.NovaUnity/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.NovaUnity/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/GameplayResources/Platforms/PlatformView.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/GameplayResources/Platforms/PlatformView.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/GameplayResources/Player/PlayerAvatar.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/GameplayResources/Player/PlayerAvatar.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/GameplayScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/GameplayScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Main.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Main.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Src/Game/GamePlay/Camera/GameplayCamera.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Src/Game/GamePlay/Camera/GameplayCamera.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Src/Game/GamePlay/Platforms/PlatformView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Src/Game/GamePlay/Platforms/PlatformView.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Src/Game/GamePlay/Player/PlayerAvatarView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Src/Game/GamePlay/Player/PlayerAvatarView.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Src/Game/GamePlay/Player/PlayerController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Src/Game/GamePlay/Player/PlayerController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Src/Game/States/SingleplayerGameplayState.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Src/Game/States/SingleplayerGameplayState.cs" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -60,15 +51,6 @@
             </entry>
           </file>
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/B14383EC-3968-4F70-B50D-581371CC3DB6/16/07e82580/EditorApplication.cs">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="139">
-                  <caret line="532" column="53" selection-start-line="532" selection-start-column="53" selection-end-line="532" selection-end-column="53" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
             <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/B14383EC-3968-4F70-B50D-581371CC3DB6/d9/8f3e275d/PauseState.cs">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="153">
@@ -77,11 +59,11 @@
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/Assets/Src/Game/GamePlay/Platforms/PlatformView.cs">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="268">
-                  <caret line="67" column="8" selection-start-line="67" selection-start-column="8" selection-end-line="67" selection-end-column="8" />
+                <state relative-caret-position="64">
+                  <caret line="55" column="32" lean-forward="true" selection-start-line="55" selection-start-column="32" selection-end-line="55" selection-end-column="32" />
                   <folding>
                     <marker date="1579777591811" expanded="false" signature="6:125" ph="..." />
                     <marker date="1579777591811" expanded="true" signature="185:9720" ph="{...}" />
@@ -123,6 +105,37 @@
               </provider>
             </entry>
           </file>
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/Assets/Src/Game/States/SingleplayerGameplayState.cs">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="46">
+                  <caret line="42" column="47" lean-forward="true" selection-start-line="42" selection-start-column="47" selection-end-line="42" selection-end-column="47" />
+                  <folding>
+                    <marker date="1579779709985" expanded="false" signature="6:114" ph="..." />
+                    <marker date="1579779709985" expanded="true" signature="167:1854" ph="{...}" />
+                    <marker date="1579779709985" expanded="true" signature="405:707" ph="{...}" />
+                    <marker date="1579779709985" expanded="true" signature="765:920" ph="{...}" />
+                    <marker date="1579779709985" expanded="true" signature="976:1177" ph="{...}" />
+                    <marker date="1579779709985" expanded="true" signature="1230:1359" ph="{...}" />
+                    <marker date="1579779709985" expanded="true" signature="1277:1353" ph="{...}" />
+                    <marker date="1579779709985" expanded="true" signature="1406:1527" ph="{...}" />
+                    <marker date="1579779709985" expanded="true" signature="1450:1521" ph="{...}" />
+                    <marker date="1579779709985" expanded="true" signature="1551:1727" ph="{...}" />
+                    <marker date="1579779709985" expanded="true" signature="1777:1851" ph="{...}" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/3BD64DD8-08F0-46B3-8BA2-FB6667D0ADC4/cb/f0551ab5/AsyncOperation.cs">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="165">
+                  <caret line="66" column="40" selection-start-line="66" selection-start-column="40" selection-end-line="66" selection-end-column="40" />
+                </state>
+              </provider>
+            </entry>
+          </file>
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/Assets/Src/Game/GamePlay/Player/PlayerAvatarView.cs">
               <provider selected="true" editor-type-id="text-editor">
@@ -150,22 +163,6 @@
                   <folding>
                     <marker date="1579770938951" expanded="false" signature="6:78" ph="..." />
                     <marker date="1579770938951" expanded="true" signature="104:358" ph="{...}" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/Assets/Src/Game/GamePlay/Player/PlayerInput.cs">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="170">
-                  <caret line="18" column="23" selection-start-line="18" selection-start-column="23" selection-end-line="18" selection-end-column="23" />
-                  <folding>
-                    <marker date="1579653228364" expanded="false" signature="6:108" ph="..." />
-                    <marker date="1579653228364" expanded="true" signature="134:1056" ph="{...}" />
-                    <marker date="1579653228364" expanded="true" signature="282:326" ph="{...}" />
-                    <marker date="1579653228364" expanded="true" signature="359:957" ph="{...}" />
-                    <marker date="1579653228364" expanded="true" signature="982:1054" ph="{...}" />
                   </folding>
                 </state>
               </provider>
@@ -280,7 +277,7 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/Assets/Src/Game/GamePlay/PlayFieldController.cs">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="561">
+                <state relative-caret-position="493">
                   <caret line="40" column="29" selection-start-line="40" selection-start-column="29" selection-end-line="40" selection-end-column="29" />
                   <folding>
                     <marker date="1579653228326" expanded="false" signature="6:94" ph="..." />
@@ -415,7 +412,7 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/Assets/Src/Game/GamePlay/RaycastController.cs">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="714">
+                <state relative-caret-position="510">
                   <caret line="56" column="5" selection-start-line="56" selection-start-column="5" selection-end-line="56" selection-end-column="5" />
                   <folding>
                     <marker date="1579654822176" expanded="false" signature="6:78" ph="..." />
@@ -465,10 +462,10 @@
       <find>_view</find>
       <find>collisionCollider</find>
       <find>FrameInput</find>
-      <find>below</find>
       <find>_move</find>
       <find>_timeScale</find>
       <find>wallStickTime</find>
+      <find>below</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -501,6 +498,7 @@
     <setting file="file://$PROJECT_DIR$/Assets/Src/Game/GameFoundations/GuiManager.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Src/Game/GameFoundations/GameConfig.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Src/Game/GamePlay/Player/AvatarConstrainer.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/3BD64DD8-08F0-46B3-8BA2-FB6667D0ADC4/cb/f0551ab5/AsyncOperation.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Src/Game/GameFoundations/SessionFlags.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/3BD64DD8-08F0-46B3-8BA2-FB6667D0ADC4/9d/95429fda/Input.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Src/Game/GameFoundations/BaseController.cs" root0="FORCE_HIGHLIGHTING" />
@@ -553,7 +551,6 @@
         <option value="$PROJECT_DIR$/Assets/Src/Game/States/IntroState.cs" />
         <option value="$PROJECT_DIR$/Assets/Src/Game/States/MainMenuState.cs" />
         <option value="$PROJECT_DIR$/Assets/Src/GhostGen/GuiUtilities/ScreenFader.cs" />
-        <option value="$PROJECT_DIR$/Assets/Src/Game/States/SingleplayerGameplayState.cs" />
         <option value="$PROJECT_DIR$/Assets/Src/Game/GamePlay/GameModes/SinglePlayerCampaignMode.cs" />
         <option value="$PROJECT_DIR$/Assets/Src/Game/GameFoundations/GameplayResources.cs" />
         <option value="$PROJECT_DIR$/Assets/Src/Game/GamePlay/Player/IPlatformPassenger.cs" />
@@ -570,6 +567,7 @@
         <option value="$PROJECT_DIR$/Assets/Src/Game/GamePlay/Player/PlayerController.cs" />
         <option value="$PROJECT_DIR$/Assets/Src/Game/GamePlay/TimeWarpers/TimeWarpFieldController.cs" />
         <option value="$PROJECT_DIR$/Assets/Src/Game/GamePlay/Platforms/PlatformView.cs" />
+        <option value="$PROJECT_DIR$/Assets/Src/Game/States/SingleplayerGameplayState.cs" />
       </list>
     </option>
   </component>
@@ -648,12 +646,12 @@
       <workItem from="1579574112600" duration="6168000" />
       <workItem from="1579585007039" duration="27657000" />
       <workItem from="1579661769777" duration="8123000" />
-      <workItem from="1579674211710" duration="26277000" />
+      <workItem from="1579674211710" duration="26919000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="133682000" />
+    <option name="totallyTimeSpent" value="134324000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -725,11 +723,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/../../YellowSign/YellowSignUnity/Assets/Src/Game/GamePlay/GameTimer.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-887" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../../YellowSign/YellowSignUnity/Assets/Src/Game/GamePlay/GameSystems/GameTimerManager.cs">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="442">
@@ -1032,22 +1025,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Assets/Src/Game/States/SingleplayerGameplayState.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="258">
-          <caret line="28" column="20" lean-forward="true" selection-start-line="28" selection-start-column="20" selection-end-line="28" selection-end-column="20" />
-          <folding>
-            <marker date="1579472418359" expanded="false" signature="6:79" ph="..." />
-            <marker date="1579472418359" expanded="true" signature="132:1280" ph="{...}" />
-            <marker date="1579472418359" expanded="true" signature="370:728" ph="{...}" />
-            <marker date="1579472418359" expanded="true" signature="782:850" ph="{...}" />
-            <marker date="1579472418359" expanded="true" signature="897:953" ph="{...}" />
-            <marker date="1579472418359" expanded="true" signature="977:1153" ph="{...}" />
-            <marker date="1579472418359" expanded="true" signature="1203:1277" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Assets/Src/Game/GamePlay/Player/IPlatformPassenger.cs">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="34">
@@ -1060,7 +1037,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Assets/Src/Game/GamePlay/Player/PlayerInput.cs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
+        <state relative-caret-position="102">
           <caret line="18" column="23" selection-start-line="18" selection-start-column="23" selection-end-line="18" selection-end-column="23" />
           <folding>
             <marker date="1579653228364" expanded="false" signature="6:108" ph="..." />
@@ -1074,7 +1051,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Assets/Src/Game/GamePlay/PlayFieldController.cs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="561">
+        <state relative-caret-position="493">
           <caret line="40" column="29" selection-start-line="40" selection-start-column="29" selection-end-line="40" selection-end-column="29" />
           <folding>
             <marker date="1579653228326" expanded="false" signature="6:94" ph="..." />
@@ -1099,7 +1076,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Assets/Src/Game/GamePlay/RaycastController.cs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="714">
+        <state relative-caret-position="510">
           <caret line="56" column="5" selection-start-line="56" selection-start-column="5" selection-end-line="56" selection-end-column="5" />
           <folding>
             <marker date="1579654822176" expanded="false" signature="6:78" ph="..." />
@@ -1390,8 +1367,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Assets/Src/Game/GamePlay/Platforms/PlatformView.cs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="268">
-          <caret line="67" column="8" selection-start-line="67" selection-start-column="8" selection-end-line="67" selection-end-column="8" />
+        <state relative-caret-position="64">
+          <caret line="55" column="32" lean-forward="true" selection-start-line="55" selection-start-column="32" selection-end-line="55" selection-end-column="32" />
           <folding>
             <marker date="1579777591811" expanded="false" signature="6:125" ph="..." />
             <marker date="1579777591811" expanded="true" signature="185:9720" ph="{...}" />
@@ -1428,6 +1405,33 @@
             <marker date="1579777591811" expanded="true" signature="9358:9702" ph="{...}" />
             <marker date="1579777591811" expanded="true" signature="9753:10145" ph="{...}" />
             <marker date="1579777591811" expanded="true" signature="9990:10143" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/3BD64DD8-08F0-46B3-8BA2-FB6667D0ADC4/cb/f0551ab5/AsyncOperation.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="66" column="40" selection-start-line="66" selection-start-column="40" selection-end-line="66" selection-end-column="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Assets/Src/Game/States/SingleplayerGameplayState.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="46">
+          <caret line="42" column="47" lean-forward="true" selection-start-line="42" selection-start-column="47" selection-end-line="42" selection-end-column="47" />
+          <folding>
+            <marker date="1579779709985" expanded="false" signature="6:114" ph="..." />
+            <marker date="1579779709985" expanded="true" signature="167:1854" ph="{...}" />
+            <marker date="1579779709985" expanded="true" signature="405:707" ph="{...}" />
+            <marker date="1579779709985" expanded="true" signature="765:920" ph="{...}" />
+            <marker date="1579779709985" expanded="true" signature="976:1177" ph="{...}" />
+            <marker date="1579779709985" expanded="true" signature="1230:1359" ph="{...}" />
+            <marker date="1579779709985" expanded="true" signature="1277:1353" ph="{...}" />
+            <marker date="1579779709985" expanded="true" signature="1406:1527" ph="{...}" />
+            <marker date="1579779709985" expanded="true" signature="1450:1521" ph="{...}" />
+            <marker date="1579779709985" expanded="true" signature="1551:1727" ph="{...}" />
+            <marker date="1579779709985" expanded="true" signature="1777:1851" ph="{...}" />
           </folding>
         </state>
       </provider>

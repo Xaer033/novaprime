@@ -2,6 +2,7 @@
 using GhostGen;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class SingleplayerGameplayState : IGameState
 {
@@ -19,21 +20,44 @@ public class SingleplayerGameplayState : IGameState
         // *TEMP*
         Singleton.instance.gui.screenFader.alpha = 0.0f;
 
+        if (Application.isEditor)
+        {
+            onSceneLoaded(null);
+        }
+        else
+        {
+            AsyncOperation async = SceneManager.UnloadSceneAsync("GameplayScene");
+            async.completed += onSceneUnloaded;
+        }
+    }
 
+    private void onSceneUnloaded(AsyncOperation asyncOp)
+    {
+        AsyncOperation async = SceneManager.LoadSceneAsync("GameplayScene", LoadSceneMode.Additive);
+        async.completed += onSceneLoaded;
+    }
+
+    private void onSceneLoaded(AsyncOperation asyncOp)
+    {        
         _gameModeController = new SinglePlayerCampaignMode();
         _gameModeController.AddListener(GameEventType.GAME_OVER, onGameOver);
         _gameModeController.Start(null);
     }
-
     
     public void FixedStep(float fixedDeltaTime)
     {
-	    _gameModeController.FixedStep(fixedDeltaTime);    
+        if (_gameModeController != null)
+        {
+	        _gameModeController.FixedStep(fixedDeltaTime);
+        }
     }
     
     public void Step( float p_deltaTime )
 	{
-        _gameModeController.Step(p_deltaTime);
+        if (_gameModeController != null)
+        {
+            _gameModeController.Step(p_deltaTime);
+        }
     }
 
     public void Exit()

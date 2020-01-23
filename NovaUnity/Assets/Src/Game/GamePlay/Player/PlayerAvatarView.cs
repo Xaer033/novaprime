@@ -1,13 +1,11 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerAvatarView : MonoBehaviour, IPlatformPassenger
+public class PlayerAvatarView : MonoBehaviour, IPlatformPassenger, ITimeWarpTarget
 {
-    public LayerMask collisionMask;
-    public float distanceBetweenRays = 0.2f;
-
+   
     public float maxJumpHeight = 4;
     public float minJumpHeight = 1.0f;
     public float timeToJumpApex = 0.4f;
@@ -26,17 +24,31 @@ public class PlayerAvatarView : MonoBehaviour, IPlatformPassenger
     public float terminalVelocity = 20.0f;
     public float accelerationTimeAir = 0.2f;
     public float accelerationTimeGround = 0.1f;
-    public float maxSlopeAngle = 80.0f;
-    
-    public Collider collider;
 
+    public AvatarConstrainer constrainer;
+    
     public void RequestMovement(PassengerMovement movement)
+    {
+        if (constrainer != null)
+        {
+            constrainer.Move(movement.velocity, movement.isOnPlatform);
+        }
+    }
+
+    public void OnTimeWarpEnter(float timeScale)
     {
         if (controller != null)
         {
-            controller.Move(movement.velocity, movement.isOnPlatform);
+            controller.OnTimeWarpEnter(timeScale);
         }
     }
-    
+
+    public void OnTimeWarpExit()
+    {
+        if (controller != null)
+        {
+            controller.OnTimeWarpExit();
+        }
+    }
     public PlayerController controller { get; set; }
 }

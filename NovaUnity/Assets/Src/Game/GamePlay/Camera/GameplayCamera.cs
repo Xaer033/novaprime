@@ -28,9 +28,9 @@ public class GameplayCamera : MonoBehaviour
         set
         {
             _target = value;
-            if (_target != null && _target.collider != null)
+            if (_target != null && _target.constrainer.collisionCollider != null)
             {
-                _focusArea = new FocusArea(target.collider.bounds, focusAreaSize);
+                _focusArea = new FocusArea(target.constrainer.collisionCollider.bounds, focusAreaSize);
             }
             else
             {
@@ -46,7 +46,7 @@ public class GameplayCamera : MonoBehaviour
     {
         if (target != null)
         {
-            _focusArea.Update(target.collider.bounds, focusAreaSize);
+            _focusArea.Update(target.constrainer.collisionCollider.bounds, focusAreaSize);
             Vector3 focusPosition = _focusArea.center + targetOffset;
 
             if (_focusArea.velocity.x != 0)

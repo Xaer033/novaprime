@@ -118,6 +118,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5789754299105121113}
   - component: {fileID: 1315047983}
+  - component: {fileID: 9125514036299057097}
   - component: {fileID: 5829704941812201185}
   m_Layer: 10
   m_Name: PlayerAvatar
@@ -160,8 +161,8 @@ MonoBehaviour:
   maxJumpHeight: 2.5
   minJumpHeight: 0.28
   timeToJumpApex: 0.4
-  coyoteTime: 0.15
-  jumpRememberDelay: 0.2
+  coyoteTime: 0.1
+  jumpRememberDelay: 0.0895
   wallStickTime: 0.2
   wallSlideSpeedMax: 0
   wallSlideSpeedDampTime: 0.1
@@ -174,6 +175,25 @@ MonoBehaviour:
   accelerationTimeGround: 0.05
   maxSlopeAngle: 50
   collider: {fileID: 5829704941812201185}
+  constrainer: {fileID: 9125514036299057097}
+--- !u!114 &9125514036299057097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5789754299105121112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1eb6ba04f269ca14c9dc2cba40c3e83a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  collisionCollider: {fileID: 5829704941812201185}
+  collisionMask:
+    serializedVersion: 2
+    m_Bits: 512
+  distanceBetweenRays: 0.08
+  maxSlopeAngle: 50
 --- !u!65 &5829704941812201185
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -185,7 +205,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.33, y: 1.06, z: 1}
+  m_Size: {x: 1.01, y: 1.06, z: 1}
   m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!1 &5789754300994217977
 GameObject:

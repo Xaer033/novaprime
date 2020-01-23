@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class PlatformView : MonoBehaviour
+public class PlatformView : MonoBehaviour, ITimeWarpTarget
 {
     public enum CycleMode
     {
@@ -24,7 +24,7 @@ public class PlatformView : MonoBehaviour
     public float distanceBetweenRays = 0.2f;
 
 
-    public Collider collider;
+    public Collider collisionCollider;
 
     private RaycastController _raycastController;
     private HashSet<Transform> _movedPassengersSet = new HashSet<Transform>();
@@ -34,23 +34,33 @@ public class PlatformView : MonoBehaviour
     private int _fromWaypointIndex;
     private float _percentBetweenWaypoints;
     private float _nextMoveTime;
+    private float _timeScale = 1.0f;
     
     private Vector3[] _globalWayPoints;
     // Start is called before the first frame update
     void Awake()
     {
-        _raycastController = new RaycastController(distanceBetweenRays, collider, passengerMask);
+        _raycastController = new RaycastController(distanceBetweenRays, collisionCollider, passengerMask);
         _globalWayPoints = new Vector3[localWaypoints.Length];
         for (int i = 0; i < localWaypoints.Length; ++i)
         {
             _globalWayPoints[i] = localWaypoints[i] + transform.position;
         }
     }
-
+    
+    public void OnTimeWarpEnter(float timeScale)
+    {
+        _timeScale = timeScale;
+    }
+    
+    public void OnTimeWarpExit()
+    {
+        _timeScale = 1.0f;
+    }
     // Update is called once per frame
     void FixedUpdate()
     {
-        float deltaTime = Time.fixedDeltaTime;
+        float deltaTime = Time.fixedDeltaTime * _timeScale;
         float time = Time.fixedTime;
         
         _raycastController.UpdateRaycastOrigins();

@@ -29,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 1516962157636426271}
   m_LocalRotation: {x: 0, y: 0.008726558, z: 0, w: 0.999962}
   m_LocalPosition: {x: 2.22, y: 2.01, z: -0.73}
-  m_LocalScale: {x: 1.3450536, y: 0.27489573, z: 2.3591}
+  m_LocalScale: {x: 1.3450536, y: 3.0838144, z: 2.3591}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -105,14 +105,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cycleMode: 0
-  waitTime: 1
-  easeAmount: 1.11
-  speed: 3
+  waitTime: 0
+  easeAmount: 0
+  speed: 4
   localWaypoints:
   - {x: 0, y: 0, z: 0}
-  - {x: -1.67, y: 6.94, z: 0}
+  - {x: 0, y: 4.25, z: 0}
   passengerMask:
     serializedVersion: 2
     m_Bits: 1024
   distanceBetweenRays: 0.05
-  collider: {fileID: 1516962157636426258}
+  collisionCollider: {fileID: 1516962157636426258}

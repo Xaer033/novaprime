@@ -31,6 +31,10 @@ public class PlayFieldController : NotificationDispatcher
         if (_pController != null)
         {
             _pController.Step(deltaTime);
+            if (Input.GetKeyDown(KeyCode.F1))
+            {
+                _pController.position = Vector3.zero;
+            }
         }
     }
 

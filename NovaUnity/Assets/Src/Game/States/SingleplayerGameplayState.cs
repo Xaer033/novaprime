@@ -34,8 +34,17 @@ public class SingleplayerGameplayState : IGameState
 
     private void onSceneUnloaded(AsyncOperation asyncOp)
     {
-        AsyncOperation async = SceneManager.LoadSceneAsync("GameplayScene", LoadSceneMode.Additive);
-        async.completed += onSceneLoaded;
+        string name = SceneManager.GetActiveScene().name;
+        if (Application.isEditor && name == "GameplayScene")
+        {
+            onSceneLoaded(null);
+        }
+        else
+        {
+            AsyncOperation async = SceneManager.LoadSceneAsync("GameplayScene", LoadSceneMode.Additive);
+            async.completed += onSceneLoaded;
+        }
+
     }
 
     private void onSceneLoaded(AsyncOperation asyncOp)

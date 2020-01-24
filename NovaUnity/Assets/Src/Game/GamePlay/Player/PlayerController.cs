@@ -50,6 +50,7 @@ public class PlayerController
     public Vector3 position
     {
         get { return _view.transform.position; }
+        set { _view.transform.position = value; }
     }
 
     public Quaternion rotation

@@ -53,17 +53,6 @@ public class Singleton : MonoBehaviour
         gameStateMachine.Step(Time.deltaTime);
         gui.Step(Time.deltaTime);
         
-        
-        //Debug stuff
-        if (Input.GetKeyUp(KeyCode.F11))
-        {
-            EditorApplication.isPaused = !EditorApplication.isPaused;
-        }
-        
-        if (Input.GetKeyUp(KeyCode.F12))
-        {
-            EditorApplication.Step();
-        }
     }
 
     public void FixedUpdate()

@@ -243,13 +243,18 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
     {
         if (localWaypoints != null)
         {
-            Gizmos.color = Color.red;
             float size = 0.3f;
             for (int i = 0; i < localWaypoints.Length; ++i)
             {
+                Gizmos.color = Color.red;
                 Vector3 globalPos = Application.isPlaying ? _globalWayPoints[i] : localWaypoints[i] + transform.position;
                 Gizmos.DrawLine(globalPos - Vector3.up * size, globalPos + Vector3.up * size);
                 Gizmos.DrawLine(globalPos - Vector3.left * size, globalPos + Vector3.left * size);
+
+                
+                Gizmos.color = i == 0 ? new Color(0.42f, 0.75f, 0.4f, 0.8f) : new Color(0.2f, 0.2f, 1.0f, 0.8f);
+                Vector3 platformSize = collisionCollider.bounds.size;
+                Gizmos.DrawCube(globalPos, platformSize);
             }
         }
     }

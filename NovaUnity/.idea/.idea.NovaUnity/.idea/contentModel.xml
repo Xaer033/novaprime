@@ -60,9 +60,6 @@
             </e>
           </e>
           <e p="GhostGen" t="Include">
-            <e p="Editor" t="Include">
-              <e p="EventForwarderEditor.cs" t="Include" />
-            </e>
             <e p="Extentions" t="Include">
               <e p="EnumExtentions.cs" t="Include" />
             </e>

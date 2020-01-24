@@ -52,7 +52,11 @@ public class Singleton : MonoBehaviour
     {
         gameStateMachine.Step(Time.deltaTime);
         gui.Step(Time.deltaTime);
-        
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
     }
 
     public void FixedUpdate()

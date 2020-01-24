@@ -20,9 +20,10 @@ public class SingleplayerGameplayState : IGameState
         // *TEMP*
         Singleton.instance.gui.screenFader.alpha = 0.0f;
 
-        if (Application.isEditor)
+        string name = SceneManager.GetActiveScene().name;
+        if (Application.isEditor || name != "GameplayScene")
         {
-            onSceneLoaded(null);
+            onSceneUnloaded(null);
         }
         else
         {

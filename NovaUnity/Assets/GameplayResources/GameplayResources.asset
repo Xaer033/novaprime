@@ -15,3 +15,5 @@ MonoBehaviour:
   gameplayCamera: {fileID: 750901081596856283, guid: 57845569f40ecc84f89fd329f71426f5,
     type: 3}
   playerAvatar: {fileID: 1315047983, guid: 4d9e1bc12d1bcd24b8367c65543d09b6, type: 3}
+  machineGunView: {fileID: -2973457739781033346, guid: 76b7b00ebdb9a7f4397284dc79fbe64c,
+    type: 3}

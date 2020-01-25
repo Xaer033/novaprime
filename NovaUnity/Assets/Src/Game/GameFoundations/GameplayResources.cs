@@ -9,5 +9,6 @@ public class GameplayResources : ScriptableObject
 {
     public GameplayCamera gameplayCamera;
     public PlayerAvatarView playerAvatar;
+    public MachineGunView machineGunView;
 
 }

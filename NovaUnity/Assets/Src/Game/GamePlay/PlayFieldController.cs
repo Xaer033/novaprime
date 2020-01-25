@@ -11,19 +11,21 @@ public class PlayFieldController : NotificationDispatcher
     public void Start()
     {
         _addCallbacks();
-
-        PlayerAvatarView playerView = GameObject.Instantiate<PlayerAvatarView>(Singleton.instance.gameplayResources.playerAvatar);
-        PlayerInput input = new PlayerInput(0);
         
-        _pController = new PlayerController(playerView, input);
-        _pController.Start();
-
+        PlayerAvatarView playerView = GameObject.Instantiate<PlayerAvatarView>(Singleton.instance.gameplayResources.playerAvatar);
+        
         _gameplayCamera = GameObject.FindObjectOfType<GameplayCamera>();
         if (_gameplayCamera == null)
         {
             _gameplayCamera = GameObject.Instantiate<GameplayCamera>(Singleton.instance.gameplayResources.gameplayCamera);
         }
         _gameplayCamera.target = playerView;
+        
+        PlayerInput input = new PlayerInput(0, _gameplayCamera);
+        
+        _pController = new PlayerController(playerView, input);
+        _pController.Start();
+
     }
 
     public void Step(float deltaTime)

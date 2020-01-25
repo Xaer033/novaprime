@@ -1,11 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 using UnityEngine;
+using Quaternion = UnityEngine.Quaternion;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
 
 public class PlayerAvatarView : MonoBehaviour, IPlatformPassenger, ITimeWarpTarget
 {
-   
+    
     public float maxJumpHeight = 4;
     public float minJumpHeight = 1.0f;
     public float timeToJumpApex = 0.4f;
@@ -26,12 +30,36 @@ public class PlayerAvatarView : MonoBehaviour, IPlatformPassenger, ITimeWarpTarg
     public float accelerationTimeGround = 0.1f;
 
     public AvatarConstrainer constrainer;
+
+     
+    public Transform armHook;
+    
+
+    public void Aim(Vector3 cursorPosition)
+    {
+        if (armHook)
+        {
+            Vector3 delta = (cursorPosition - armHook.position).normalized;
+            armHook.rotation = Quaternion.LookRotation(delta, Vector3.up);
+        }
+    }
+
+    public void SetWeapon(Transform weaponTransform)
+    {
+        if (weaponTransform && armHook)
+        {
+            weaponTransform.SetParent(armHook);
+            weaponTransform.localPosition = Vector3.zero;
+            weaponTransform.localRotation = Quaternion.identity;
+            weaponTransform.localScale = Vector3.one;
+        }
+    }
     
     public void RequestMovement(PassengerMovement movement)
     {
-        if (constrainer != null)
+        if (controller != null)
         {
-            constrainer.Move(movement.velocity, movement.isOnPlatform);
+            controller.Move(movement.velocity, movement.isOnPlatform);
         }
     }
 

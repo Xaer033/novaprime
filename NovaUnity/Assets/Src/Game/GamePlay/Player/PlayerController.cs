@@ -1,10 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Numerics;
 using UnityEngine;
-using UnityEngine.ProBuilder;
-using Quaternion = UnityEngine.Quaternion;
-using Vector3 = UnityEngine.Vector3;
 
 public class PlayerController
 {
@@ -21,8 +15,8 @@ public class PlayerController
     private float _midairJumpTimer;
     private float _coyoteJumpTimer;
     
-    private Vector3 _fixedPosition;
-    private Vector3 _fixedPositionOld;
+    private Vector3 _currentPosition;
+    private Vector3 _previousPosition;
     
     private float _velocityXSmoothing;
     
@@ -31,6 +25,7 @@ public class PlayerController
     
     private float _resetPlatformTime;
 
+    private MachineGun _machineGun;
 
     public PlayerController(PlayerAvatarView view, PlayerInput input)
     {
@@ -38,6 +33,7 @@ public class PlayerController
         _view.controller = this;
 
         _input = input;
+        
     }
 
     // Start is called before the first frame update
@@ -45,8 +41,24 @@ public class PlayerController
     {
         float timeToJumpApex = _view.timeToJumpApex;
         _gravity = -(2 * _view.maxJumpHeight) / (timeToJumpApex * timeToJumpApex);
+        
+        _machineGun = new MachineGun();
+        _view.SetWeapon(_machineGun.view.transform);
+        
     }
 
+    public void Move(Vector3 moveDelta, bool isOnPlatform)
+    {
+        if (_view && _view.constrainer != null)
+        {
+            Vector3 constrainedMoveDelta = _view.constrainer.Move(moveDelta, isOnPlatform, _lastInput);
+
+            _previousPosition = _currentPosition;
+            _currentPosition = _view.transform.localPosition + constrainedMoveDelta;
+            _view.transform.localPosition = _currentPosition;
+        }
+    }
+    
     public Vector3 position
     {
         get { return _view.transform.position; }
@@ -67,12 +79,16 @@ public class PlayerController
     public void Step(float deltaTime)
     {
         _lastInput = _input.GetInput();
+        
+        float alpha = (Time.time - deltaTime) / Time.fixedDeltaTime;
+//        _view.transform.localPosition = Vector3.Lerp(_previousPosition, _currentPosition, alpha);
     }
 
     public void FixedStep(float deltaTime)
     {
-        deltaTime = _lastInput.primaryFire ? deltaTime * 0.5f : deltaTime;
+        deltaTime = _lastInput.secondaryFire ? deltaTime * 0.5f : deltaTime;
         deltaTime = deltaTime * _timeScale;
+        
         if (_view)
         {
             int wallDirX = _view.constrainer.collisionInfo.left ? -1 : 1;
@@ -83,7 +99,7 @@ public class PlayerController
             bool isWallSliding = _handleWallSliding(ref _velocity, deltaTime, wallDirX, inputDirX);
             _handleJumping(ref _velocity, deltaTime, isWallSliding, wallDirX, inputDirX);
             
-            _view.constrainer.Move(_velocity * deltaTime, false, _lastInput);
+            Move(_velocity * deltaTime, false);
             
             if (collisionInfo.below)
             {
@@ -99,14 +115,28 @@ public class PlayerController
                 }
                 else
                 {
-
                     _velocity.y = 0;
                 }
             }
+            
+            // Aim
+            _view.Aim(_lastInput.cursorPosition);
         }
         
+        // Weapon Handling
+        if (_machineGun != null)
+        {
+            _machineGun.FixedStep(deltaTime);
+
+            if (_lastInput.primaryFire)
+            {
+                _machineGun.Fire(_lastInput.cursorPosition);
+            }
+        }
+
         // Clear buffered input as we handled it above (for transient button up/down events that may get missed in a fixedUpdate
         _input.Clear();
+
     }
 
     public void OnTimeWarpEnter(float timeScale)
@@ -129,7 +159,9 @@ public class PlayerController
     {
         float targetVelocityX = _lastInput.horizontalMovement * _view.speed;
         float accelerationTime = collisionInfo.below ? _view.accelerationTimeGround : _view.accelerationTimeAir;
-        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref _velocityXSmoothing, accelerationTime);
+        float inputVelocityX = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref _velocityXSmoothing, accelerationTime);
+
+        velocity.x = inputVelocityX;
         if (velocity.y > -Mathf.Abs(_view.terminalVelocity))
         {
             velocity.y += _gravity * deltaTime;
@@ -146,9 +178,6 @@ public class PlayerController
        
         _gravity = (_lastInput.verticalMovement < 0) ? _gravity * 2 : _gravity;
 
-        _midairJumpTimer -= deltaTime;
-        _coyoteJumpTimer -= deltaTime;
-        
         if (_lastInput.jumpPressed)
         {
             _midairJumpTimer = _view.jumpRememberDelay;
@@ -156,7 +185,6 @@ public class PlayerController
         // This is so if the player jumps while in the air for a bit, we still jump when on floor
         if (_midairJumpTimer > 0)
         {
-            Debug.Log("JumpPressed");
             if (isWallSliding)
             {
                 if (wallDirX == inputDirX)
@@ -192,7 +220,7 @@ public class PlayerController
                 }
                 else 
                 {
-                    velocity.y = maxJumpVelocity;
+                    velocity.y = _lastInput.verticalMovement < 0 ? maxJumpVelocity * 0.75f : maxJumpVelocity;
                 }
                 
                 _midairJumpTimer = 0;
@@ -201,13 +229,15 @@ public class PlayerController
 
         if (_lastInput.jumpReleased)
         {
-            
-            Debug.Log("JumpReleased");
             if (velocity.y > minJumpVelocity)
             {
                 velocity.y = minJumpVelocity;
             }
         }
+        
+        _midairJumpTimer -= deltaTime;
+        _coyoteJumpTimer -= deltaTime;
+
     }
 
 

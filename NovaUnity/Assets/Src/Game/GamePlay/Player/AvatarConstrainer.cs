@@ -17,6 +17,7 @@ public class AvatarConstrainer : MonoBehaviour
     private CollisionInfo _collisionInfo;
     private FrameInput _input;
 
+    
     private float _resetPlatformTime;
 
     public CollisionInfo collisionInfo
@@ -35,12 +36,12 @@ public class AvatarConstrainer : MonoBehaviour
         _collisionInfo.faceDir = 1;
     }
     
-    public void Move(Vector3 moveDelta, bool isOnPlatform, FrameInput input = default(FrameInput))
+    public Vector3 Move(Vector3 moveDelta, bool isOnPlatform, FrameInput input = default(FrameInput))
     {
-        _move(moveDelta, isOnPlatform, input);
+        return _move(moveDelta, isOnPlatform, input);
     }
     
-    private void _move(Vector3 moveDelta, bool isOnPlatform, FrameInput input)
+    private Vector3 _move(Vector3 moveDelta, bool isOnPlatform, FrameInput input)
     {
         _input = input;
         
@@ -69,7 +70,7 @@ public class AvatarConstrainer : MonoBehaviour
         }
         
 //        _view.transform.localPosition = _view.transform.localPosition + moveDelta;
-        transform.Translate(moveDelta);
+        return moveDelta;
     }
 
     protected void _horizontalCollisions(ref Vector3 moveDelta)

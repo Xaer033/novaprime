@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+﻿using System.Runtime.CompilerServices;
+using UnityEngine;
 
+[RequireComponent(typeof(Camera))]
 public class GameplayCamera : MonoBehaviour
 {
     public Vector2 focusAreaSize;
@@ -18,6 +20,12 @@ public class GameplayCamera : MonoBehaviour
     private Vector3 _velocity;
     private PlayerAvatarView _target;
     private bool _lookAheadStopped;
+    private Camera _camera;
+    
+    public Camera camera
+    {
+        get { return _camera; }
+    }
 
     public PlayerAvatarView target
     {
@@ -36,6 +44,10 @@ public class GameplayCamera : MonoBehaviour
         get { return _target; }
     }
 
+    public void Awake()
+    {
+        _camera = GetComponent<Camera>();
+    }
     
     // Update is called once per frame
     void LateUpdate()

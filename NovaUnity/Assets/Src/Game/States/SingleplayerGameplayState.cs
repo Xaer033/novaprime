@@ -41,7 +41,7 @@ public class SingleplayerGameplayState : IGameState
         }
         else
         {
-            AsyncOperation async = SceneManager.LoadSceneAsync("GameplayScene", LoadSceneMode.Additive);
+            AsyncOperation async = SceneManager.LoadSceneAsync("GameplayScene", LoadSceneMode.Single);
             async.completed += onSceneLoaded;
         }
 

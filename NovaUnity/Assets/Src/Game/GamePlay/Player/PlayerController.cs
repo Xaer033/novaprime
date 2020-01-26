@@ -252,10 +252,13 @@ public class PlayerController
         if (wallOnSide && !collisionInfo.below && velocity.y < 0)
         {
             isWallSliding = true;
+
+            float wallSpeedDampTime = _lastInput.verticalMovement < 0 ? 0.1f : _view.wallSlideSpeedDampTime;
+            
             if (velocity.y < -_view.wallSlideSpeedMax)
             {
                 float targetYSpeed = -_view.wallSlideSpeedMax;
-                velocity.y = Mathf.SmoothDamp(velocity.y,targetYSpeed, ref _wallSlideVelocity, _view.wallSlideSpeedDampTime);
+                velocity.y = Mathf.SmoothDamp(velocity.y,targetYSpeed, ref _wallSlideVelocity, wallSpeedDampTime);
             }
 
             if (_timeToWallUnstick > 0)

@@ -192,7 +192,7 @@ MonoBehaviour:
   jumpRememberDelay: 0.0895
   wallStickTime: 0.2
   wallSlideSpeedMax: 0
-  wallSlideSpeedDampTime: 0.1
+  wallSlideSpeedDampTime: 0
   wallJumpClimb: {x: 4, y: 10}
   wallJumpOff: {x: 6, y: 6}
   wallJumpLeap: {x: 10, y: 8}
@@ -202,7 +202,6 @@ MonoBehaviour:
   accelerationTimeGround: 0.05
   constrainer: {fileID: 9125514036299057097}
   armHook: {fileID: 7402611272870614619}
-  weaponHook: {fileID: 0}
 --- !u!114 &9125514036299057097
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -219,8 +218,9 @@ MonoBehaviour:
   collisionMask:
     serializedVersion: 2
     m_Bits: 512
-  distanceBetweenRays: 0.08
+  distanceBetweenRays: 0.04
   maxSlopeAngle: 50
+  walkStepRayPercentage: 0.75
 --- !u!65 &5829704941812201185
 BoxCollider:
   m_ObjectHideFlags: 0

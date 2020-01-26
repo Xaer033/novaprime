@@ -47,10 +47,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   focusAreaSize: {x: 1, y: 1}
-  targetOffset: {x: 0, y: 2.5, z: -30}
+  targetOffset: {x: 0, y: 1, z: -30}
   lookAheadDistanceX: 1
   lookSmoothTimeX: 0.5
-  lookSmoothTimeY: 0.02
+  lookSmoothTimeY: 0.2
 --- !u!20 &750901081596856262
 Camera:
   m_ObjectHideFlags: 0
@@ -74,8 +74,8 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 1
-  far clip plane: 200
+  near clip plane: 16
+  far clip plane: 112
   field of view: 16
   orthographic: 0
   orthographic size: 5
@@ -125,7 +125,7 @@ MonoBehaviour:
     keepAlpha: 0
   fog:
     enabled: 1
-    excludeSkybox: 1
+    excludeSkybox: 0
   debugLayer:
     lightMeter:
       width: 512

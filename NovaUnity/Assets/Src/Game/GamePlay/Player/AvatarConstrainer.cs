@@ -12,8 +12,11 @@ public class AvatarConstrainer : MonoBehaviour
     public LayerMask collisionMask;
     public float distanceBetweenRays = 0.08f;
     public float maxSlopeAngle = 50;
-    public float walkStepHeight = 0.25f;
+    [Range(0, 1)] 
+    public float walkStepRayPercentage = 0.25f;
     
+    private float _walkStepHeight = 0.25f;
+    private int _walkStepIndex;
     private RaycastController _raycastController;
     private CollisionInfo _collisionInfo;
     private FrameInput _input;
@@ -48,6 +51,7 @@ public class AvatarConstrainer : MonoBehaviour
         
         _raycastController.distanceBetweenRays = distanceBetweenRays;
         _raycastController.UpdateRaycastOrigins();
+        _walkStepIndex = Mathf.RoundToInt(_raycastController.verticalRayCount * walkStepRayPercentage);
         
         _collisionInfo.Reset();
         _collisionInfo.oldMoveDelta = moveDelta;
@@ -85,6 +89,8 @@ public class AvatarConstrainer : MonoBehaviour
             rayLength = 2 * _raycastController.skinWidth;
         }
 
+        _walkStepHeight =  (_raycastController.horizontalRaySpacing * _walkStepIndex);
+        
         RaycastHit hit;
         for (int i = 0; i < _raycastController.horizontalRayCount; ++i)
         {
@@ -125,7 +131,7 @@ public class AvatarConstrainer : MonoBehaviour
                     moveDelta.x += distanceToSlopeStart * directionX;
                 }
 
-                if (_collisionInfo.belowOld && hit.point.y < _raycastController.origins.bottomLeft.y + walkStepHeight)
+                if (_collisionInfo.belowOld && i <= _walkStepIndex)// hit.point.y < _raycastController.origins.bottomLeft.y + walkStepHeight + _raycastController.skinHeight)
                 {
                     _collisionInfo.stepUp = true;
                 }
@@ -143,7 +149,6 @@ public class AvatarConstrainer : MonoBehaviour
                             moveDelta.y = Mathf.Tan(_collisionInfo.slopeAngle * Mathf.Deg2Rad) * Mathf.Abs(moveDelta.x);
                         }
 
-                        _collisionInfo.stepUp = _collisionInfo.belowOld && hit.point.y < _raycastController.origins.bottomLeft.y + walkStepHeight;
                         _collisionInfo.left = directionX == -1;
                         _collisionInfo.right = directionX == 1;
                     }
@@ -155,14 +160,14 @@ public class AvatarConstrainer : MonoBehaviour
     protected void _verticalCollisions(ref Vector3 moveDelta)
     {
         float directionY = Mathf.Sign(moveDelta.y);
-        float rayLength = Mathf.Abs(moveDelta.y) + _raycastController.skinHeight + walkStepHeight;
+        float rayLength = Mathf.Abs(moveDelta.y) + _raycastController.skinHeight + _walkStepHeight;
         
         int inputDirY =  _input.verticalMovement == 0 ?  0 : _input.verticalMovement < 0 ? -1 : 1;
 
         for (int i = 0; i < _raycastController.verticalRayCount; ++i)
         {
             Vector3 rayOrigin = (directionY == -1) ? _raycastOrigins.bottomLeft : _raycastOrigins.topLeft;
-            rayOrigin.y = rayOrigin.y + walkStepHeight;
+            rayOrigin.y = rayOrigin.y + _walkStepHeight;
             rayOrigin += Vector3.right * (_raycastController.verticalRaySpacing * i + moveDelta.x);
             
             Debug.DrawRay(rayOrigin, Vector3.up * directionY * rayLength, Color.red);
@@ -190,7 +195,7 @@ public class AvatarConstrainer : MonoBehaviour
                     }
                 }
                 
-                moveDelta.y = (hit.distance - _raycastController.skinHeight - walkStepHeight) * directionY;
+                moveDelta.y = (hit.distance - _raycastController.skinHeight - _walkStepHeight) * directionY;
                 rayLength = hit.distance;
 
                 if (_collisionInfo.climbingSlope)

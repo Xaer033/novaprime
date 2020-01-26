@@ -9,7 +9,6 @@ using Vector3 = UnityEngine.Vector3;
 
 public class PlayerAvatarView : MonoBehaviour, IPlatformPassenger, ITimeWarpTarget
 {
-    
     public float maxJumpHeight = 4;
     public float minJumpHeight = 1.0f;
     public float timeToJumpApex = 0.4f;

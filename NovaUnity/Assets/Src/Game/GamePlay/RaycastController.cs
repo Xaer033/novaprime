@@ -5,6 +5,7 @@ using UnityEngine;
 public class RaycastController
 {
     public float skinWidth { get; set; }
+    public float skinHeight { get; set; }
     
     public LayerMask collisionMask { get; set; }
     public int horizontalRayCount { get; set; }
@@ -33,12 +34,13 @@ public class RaycastController
         public Vector3 bottomRight;
     }
     
-    public RaycastController(float distBetweenRays, Collider boundsCollider, LayerMask collisionLayerMask, float collisionSkinWidth = 0.015f)
+    public RaycastController(float distBetweenRays, Collider boundsCollider, LayerMask collisionLayerMask, float collisionSkinWidth = 0.015f, float collisionSkinHeight = 0.015f)
     {
         distanceBetweenRays = distBetweenRays;
         horizontalRaySpacing = 0;
         verticalRaySpacing = 0;
         skinWidth = collisionSkinWidth;
+        skinHeight = collisionSkinHeight;
         horizontalRayCount = 1;
         verticalRayCount = 1;
 
@@ -65,7 +67,7 @@ public class RaycastController
     private void _updateRaycastOrigins()
     {
         Bounds bounds = collider.bounds;
-        bounds.Expand(skinWidth * -2);
+        bounds.Expand(new Vector3(skinWidth * -2, skinHeight * -2, 0));
         
        _origins.bottomLeft = new Vector3(bounds.min.x, bounds.min.y);
        _origins.bottomRight = new Vector3(bounds.max.x, bounds.min.y);
@@ -78,7 +80,7 @@ public class RaycastController
         distanceBetweenRays = Mathf.Clamp(distanceBetweenRays, 0.0001f, 20);
         
         Bounds bounds = collider.bounds;
-        bounds.Expand(skinWidth * -2);
+        bounds.Expand(new Vector3(skinWidth * -2, skinHeight * -2, 0));
 
         float boundsWidth = bounds.size.x;
         float boundsHeight = bounds.size.y;

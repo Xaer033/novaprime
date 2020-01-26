@@ -12,6 +12,7 @@ public class AvatarConstrainer : MonoBehaviour
     public LayerMask collisionMask;
     public float distanceBetweenRays = 0.08f;
     public float maxSlopeAngle = 50;
+    public float walkStepHeight = 0.25f;
     
     private RaycastController _raycastController;
     private CollisionInfo _collisionInfo;
@@ -78,22 +79,29 @@ public class AvatarConstrainer : MonoBehaviour
         float directionX = _collisionInfo.faceDir;
         float rayLength = Mathf.Abs(moveDelta.x) + _raycastController.skinWidth;
 
+       Vector3 rayOrigin = (directionX == -1) ? _raycastOrigins.bottomLeft : _raycastOrigins.bottomRight;
         if (Mathf.Abs(moveDelta.x) < _raycastController.skinWidth)
         {
             rayLength = 2 * _raycastController.skinWidth;
         }
-        
+
         RaycastHit hit;
-        
         for (int i = 0; i < _raycastController.horizontalRayCount; ++i)
         {
-            Vector3 rayOrigin = (directionX == -1) ? _raycastOrigins.bottomLeft : _raycastOrigins.bottomRight;
-            rayOrigin += Vector3.up * (_raycastController.horizontalRaySpacing * i);
+            Vector3 firstRayOrigin = rayOrigin;
+            firstRayOrigin += Vector3.up * (_raycastController.horizontalRaySpacing * i);
             
-            Debug.DrawRay(rayOrigin, Vector3.right * directionX, Color.red);
-            if (Physics.Raycast(rayOrigin, Vector3.right * directionX, out hit, rayLength, collisionMask))
+            Debug.DrawRay(firstRayOrigin, Vector3.right * directionX, Color.red);
+            
+            bool isHit = Physics.Raycast(firstRayOrigin, Vector3.right * directionX, out hit, rayLength, collisionMask);
+            if (isHit)
             {
                 if (Mathf.Abs(hit.distance) < 0.00001f)
+                {
+                    continue;
+                }
+
+                if (hit.collider.CompareTag("Platform"))
                 {
                     continue;
                 }
@@ -117,17 +125,28 @@ public class AvatarConstrainer : MonoBehaviour
                     moveDelta.x += distanceToSlopeStart * directionX;
                 }
 
-                if (!_collisionInfo.climbingSlope || slopeAngle > maxSlopeAngle)
+                if (_collisionInfo.belowOld && hit.point.y < _raycastController.origins.bottomLeft.y + walkStepHeight)
                 {
-                    moveDelta.x = (hit.distance - _raycastController.skinWidth) * directionX;
-                    rayLength = hit.distance;
+                    _collisionInfo.stepUp = true;
+                }
+                else
+                {
+                    _collisionInfo.stepUp = false;
+                    
+                    if (!_collisionInfo.climbingSlope || slopeAngle > maxSlopeAngle)
+                    {    
+                        moveDelta.x = (hit.distance - _raycastController.skinWidth) * directionX;
+                        rayLength = hit.distance;
 
-                    if (_collisionInfo.climbingSlope)
-                    {
-                        moveDelta.y = Mathf.Tan(_collisionInfo.slopeAngle * Mathf.Deg2Rad) * Mathf.Abs(moveDelta.x);
+                        if (_collisionInfo.climbingSlope)
+                        {
+                            moveDelta.y = Mathf.Tan(_collisionInfo.slopeAngle * Mathf.Deg2Rad) * Mathf.Abs(moveDelta.x);
+                        }
+
+                        _collisionInfo.stepUp = _collisionInfo.belowOld && hit.point.y < _raycastController.origins.bottomLeft.y + walkStepHeight;
+                        _collisionInfo.left = directionX == -1;
+                        _collisionInfo.right = directionX == 1;
                     }
-                    _collisionInfo.left = directionX == -1;
-                    _collisionInfo.right = directionX == 1;
                 }
             }
         }
@@ -136,22 +155,23 @@ public class AvatarConstrainer : MonoBehaviour
     protected void _verticalCollisions(ref Vector3 moveDelta)
     {
         float directionY = Mathf.Sign(moveDelta.y);
-        float rayLength = Mathf.Abs(moveDelta.y) + _raycastController.skinWidth;
+        float rayLength = Mathf.Abs(moveDelta.y) + _raycastController.skinHeight + walkStepHeight;
         
         int inputDirY =  _input.verticalMovement == 0 ?  0 : _input.verticalMovement < 0 ? -1 : 1;
 
         for (int i = 0; i < _raycastController.verticalRayCount; ++i)
         {
             Vector3 rayOrigin = (directionY == -1) ? _raycastOrigins.bottomLeft : _raycastOrigins.topLeft;
+            rayOrigin.y = rayOrigin.y + walkStepHeight;
             rayOrigin += Vector3.right * (_raycastController.verticalRaySpacing * i + moveDelta.x);
             
-            Debug.DrawRay(rayOrigin, Vector3.up * directionY, Color.red);
+            Debug.DrawRay(rayOrigin, Vector3.up * directionY * rayLength, Color.red);
             
             RaycastHit hit;
             bool isHit = Physics.Raycast(rayOrigin, Vector3.up * directionY, out hit, rayLength, collisionMask);
             if (isHit)
             {
-                if (hit.collider.CompareTag( "Through"))
+                if (hit.collider.CompareTag( "Platform") || hit.collider.CompareTag("Elevator"))
                 {
                     if (directionY == 1 || Mathf.Abs(hit.distance) < 0.0001f)
                     {
@@ -170,7 +190,7 @@ public class AvatarConstrainer : MonoBehaviour
                     }
                 }
                 
-                moveDelta.y = (hit.distance - _raycastController.skinWidth) * directionY;
+                moveDelta.y = (hit.distance - _raycastController.skinHeight - walkStepHeight) * directionY;
                 rayLength = hit.distance;
 
                 if (_collisionInfo.climbingSlope)
@@ -230,8 +250,8 @@ public class AvatarConstrainer : MonoBehaviour
     {
         RaycastHit maxSlopeHitLeft;
         RaycastHit maxSlopeHitRight;
-        bool isLeftHit     = Physics.Raycast(_raycastOrigins.bottomLeft, Vector3.down, out maxSlopeHitLeft, Mathf.Abs(moveDelta.y) + _raycastController.skinWidth, collisionMask);
-        bool isRightHit    = Physics.Raycast(_raycastOrigins.bottomRight, Vector3.down, out maxSlopeHitRight, Mathf.Abs(moveDelta.y) + _raycastController.skinWidth, collisionMask);
+        bool isLeftHit     = Physics.Raycast(_raycastOrigins.bottomLeft, Vector3.down, out maxSlopeHitLeft, Mathf.Abs(moveDelta.y) + _raycastController.skinHeight, collisionMask);
+        bool isRightHit    = Physics.Raycast(_raycastOrigins.bottomRight, Vector3.down, out maxSlopeHitRight, Mathf.Abs(moveDelta.y) + _raycastController.skinHeight, collisionMask);
 
         if(isLeftHit ^ isRightHit)
         {
@@ -259,7 +279,7 @@ public class AvatarConstrainer : MonoBehaviour
                 {
                     if (Mathf.Sign(hit.normal.x) == directionX)
                     {
-                        if (hit.distance - _raycastController.skinWidth <= Mathf.Tan(slopeAngle * Mathf.Deg2Rad) * Mathf.Abs(moveDelta.x))
+                        if (hit.distance - _raycastController.skinHeight <= Mathf.Tan(slopeAngle * Mathf.Deg2Rad) * Mathf.Abs(moveDelta.x))
                         {
                             float moveDistance = Mathf.Abs(moveDelta.x);
                             float decendVelocityY = Mathf.Sin(slopeAngle * Mathf.Deg2Rad) * moveDistance;

@@ -146,7 +146,7 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
         // Moving vertically
         if (Mathf.Abs(velocity.y)> 0)
         {
-            float rayLength = Mathf.Abs(velocity.y) + _raycastController.skinWidth;
+            float rayLength = Mathf.Abs(velocity.y) + _raycastController.skinHeight;
             
             for (int i = 0; i < _raycastController.verticalRayCount; ++i)
             {
@@ -163,7 +163,7 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
                         _movedPassengersSet.Add(hit.transform);
                         
                         float pushX = (directionY == 1) ? velocity.x : 0;
-                        float pushY = velocity.y - (hit.distance - _raycastController.skinWidth) * directionY;
+                        float pushY = velocity.y - (hit.distance - _raycastController.skinHeight) * directionY;
                     
                         _passengerMovementList.Add( 
                             new PassengerMovement(
@@ -210,7 +210,8 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
         // The passenger is on top of a horizontal platform or a downward moving platform
         if(directionY == -1 || Mathf.Abs(velocity.y ) <= 0.00001f && Mathf.Abs(velocity.x) > 0)
         {
-            float rayLength =  _raycastController.skinWidth * 2.0f;
+            float skin = Mathf.Abs(directionY) > 0 ? _raycastController.skinHeight : _raycastController.skinWidth;
+            float rayLength =  skin * 2.0f;
             
             for (int i = 0; i < _raycastController.verticalRayCount; ++i)
             {

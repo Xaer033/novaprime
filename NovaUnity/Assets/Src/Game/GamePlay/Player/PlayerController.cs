@@ -211,7 +211,7 @@ public class PlayerController
                 _coyoteJumpTimer = 0;
                 if (collisionInfo.slidingDownMaxSlope)
                 {
-//                    if (inputDirX != -(int) Mathf.Sign(_collisionInfo.slopeNormal.x))
+                    if (inputDirX == 0 || inputDirX != -(int) Mathf.Sign(collisionInfo.slopeNormal.x))
                     {
                         Vector3 jumpDirection = (Vector3.up + collisionInfo.slopeNormal).normalized * maxJumpVelocity;
                         velocity.x = jumpDirection.x;

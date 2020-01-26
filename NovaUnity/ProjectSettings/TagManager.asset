@@ -5,7 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - GuiObject
-  - Through
+  - Elevator
+  - Platform
   layers:
   - Default
   - TransparentFX

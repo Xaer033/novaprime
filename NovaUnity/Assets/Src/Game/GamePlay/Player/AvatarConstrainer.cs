@@ -176,7 +176,7 @@ public class AvatarConstrainer : MonoBehaviour
             bool isHit = Physics.Raycast(rayOrigin, Vector3.up * directionY, out hit, rayLength, collisionMask);
             if (isHit)
             {
-                if (hit.collider.CompareTag( "Platform") || hit.collider.CompareTag("Elevator"))
+                if (hit.collider.CompareTag( "Platform"))
                 {
                     if (directionY == 1 || Mathf.Abs(hit.distance) < 0.0001f)
                     {

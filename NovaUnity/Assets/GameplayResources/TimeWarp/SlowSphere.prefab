@@ -4807,6 +4807,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   affectedLayers:
     serializedVersion: 2
-    m_Bits: 1536
+    m_Bits: 3584
   timeScale: 0.2
   radius: 0.77

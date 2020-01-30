@@ -39,6 +39,8 @@
                 <e p="IGameModeController.cs" t="Include" />
                 <e p="SinglePlayerCampaignMode.cs" t="Include" />
               </e>
+              <e p="GameState.cs" t="Include" />
+              <e p="GameSystems.cs" t="Include" />
               <e p="Platforms" t="Include">
                 <e p="PlatformView.cs" t="Include" />
               </e>
@@ -48,6 +50,7 @@
                 <e p="PlayerAvatarView.cs" t="Include" />
                 <e p="PlayerController.cs" t="Include" />
                 <e p="PlayerInput.cs" t="Include" />
+                <e p="PlayerState.cs" t="Include" />
               </e>
               <e p="PlayFieldController.cs" t="Include" />
               <e p="RaycastController.cs" t="Include" />
@@ -56,8 +59,13 @@
                 <e p="TimeWarpFieldController.cs" t="Include" />
               </e>
               <e p="Weapons" t="Include">
-                <e p="MachineGun.cs" t="Include" />
+                <e p="BulletView.cs" t="Include" />
+                <e p="MachineGunController.cs" t="Include" />
+                <e p="MachineGunState.cs" t="Include" />
                 <e p="MachineGunView.cs" t="Include" />
+                <e p="ProjectileData.cs" t="Include" />
+                <e p="ProjectileState.cs" t="Include" />
+                <e p="ProjectileSystem.cs" t="Include" />
               </e>
             </e>
             <e p="GUI" t="Include">

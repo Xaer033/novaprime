@@ -17,3 +17,6 @@ MonoBehaviour:
   playerAvatar: {fileID: 1315047983, guid: 4d9e1bc12d1bcd24b8367c65543d09b6, type: 3}
   machineGunView: {fileID: -2973457739781033346, guid: 76b7b00ebdb9a7f4397284dc79fbe64c,
     type: 3}
+  bulletView: {fileID: -1901877338219026376, guid: a67d08bde992529428ee0d38b34637eb,
+    type: 3}
+  bulletData: {fileID: 11400000, guid: f85596d5b7b0430459790eb8fb481afc, type: 2}

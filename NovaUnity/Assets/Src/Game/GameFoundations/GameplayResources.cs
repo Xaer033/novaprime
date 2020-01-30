@@ -10,5 +10,8 @@ public class GameplayResources : ScriptableObject
     public GameplayCamera gameplayCamera;
     public PlayerAvatarView playerAvatar;
     public MachineGunView machineGunView;
+    public BulletView bulletView;
+
+    public ProjectileData bulletData;
 
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class AvatarConstrainer : MonoBehaviour
 {
-    private const float kFallThroughPlatformWaitDuration = 0.4f;
+    private const float kFallThroughPlatformWaitDuration = 0.15f;
     
     public Collider collisionCollider;
     
@@ -74,7 +74,6 @@ public class AvatarConstrainer : MonoBehaviour
             _collisionInfo.below = true;
         }
         
-//        _view.transform.localPosition = _view.transform.localPosition + moveDelta;
         return moveDelta;
     }
 

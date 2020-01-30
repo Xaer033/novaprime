@@ -7,6 +7,7 @@ TagManager:
   - GuiObject
   - Elevator
   - Platform
+  - Through
   layers:
   - Default
   - TransparentFX
@@ -19,7 +20,7 @@ TagManager:
   - PostProcessing
   - obsticals
   - player
-  - 
+  - projectiles
   - 
   - 
   - 

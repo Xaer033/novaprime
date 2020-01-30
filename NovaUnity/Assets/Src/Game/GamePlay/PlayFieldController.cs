@@ -7,25 +7,37 @@ public class PlayFieldController : NotificationDispatcher
 {
     private PlayerController _pController;
     private GameplayCamera _gameplayCamera;
+    private GameState _gameState;
+    private GameSystems _gameSystems;
     
     public void Start()
     {
         _addCallbacks();
         
-        PlayerAvatarView playerView = GameObject.Instantiate<PlayerAvatarView>(Singleton.instance.gameplayResources.playerAvatar);
+        UnityEngine.Random.InitState(666);
+
+        _gameState = new GameState();
+        _gameSystems = new GameSystems(_gameState);
+        
+        _gameSystems.Start();
+        
+        PlayerState p1State = PlayerState.Create(Vector3.up * 2.0f);
+        _gameState.playerStateList.Add(p1State);
+        
+        PlayerAvatarView p1View = GameObject.Instantiate<PlayerAvatarView>(Singleton.instance.gameplayResources.playerAvatar);
         
         _gameplayCamera = GameObject.FindObjectOfType<GameplayCamera>();
         if (_gameplayCamera == null)
         {
             _gameplayCamera = GameObject.Instantiate<GameplayCamera>(Singleton.instance.gameplayResources.gameplayCamera);
         }
-        _gameplayCamera.target = playerView;
+        _gameplayCamera.target = p1View;
         
-        PlayerInput input = new PlayerInput(0, _gameplayCamera);
+        PlayerInput p1Input = new PlayerInput(0, _gameplayCamera);
         
-        _pController = new PlayerController(playerView, input);
-        _pController.Start();
-
+        _pController = new PlayerController(p1State, p1View, p1Input);
+        _pController.Start(_gameSystems);
+        
     }
 
     public void Step(float deltaTime)
@@ -35,8 +47,13 @@ public class PlayFieldController : NotificationDispatcher
             _pController.Step(deltaTime);
             if (Input.GetKeyDown(KeyCode.F1))
             {
-                _pController.position = Vector3.zero;
+                _gameState.playerStateList[0].position = Vector3.zero;
             }
+        }
+
+        if (_gameSystems != null)
+        {
+            _gameSystems.Step(deltaTime);
         }
     }
 
@@ -45,7 +62,12 @@ public class PlayFieldController : NotificationDispatcher
         if (_pController != null)
         {
             _pController.FixedStep(fixedDeltaTime);
-        } 
+        }
+
+        if (_gameSystems != null)
+        {
+            _gameSystems.FixedStep(fixedDeltaTime);
+        }
     }
 
     public void CleanUp()

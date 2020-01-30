@@ -1,13 +1,12 @@
+using GhostGen;
 using UnityEngine;
 
-public class PlayerController
+public class PlayerController : NotificationDispatcher
 {
     private PlayerAvatarView _view;
 
     private float _gravity;
-    private Vector3 _velocity;
 
-    private float _timeScale = 1.0f;
     private float _timeToWallUnstick;
     private float _wallSlideVelocity;
     private bool _isWallSliding;
@@ -15,7 +14,6 @@ public class PlayerController
     private float _midairJumpTimer;
     private float _coyoteJumpTimer;
     
-    private Vector3 _currentPosition;
     private Vector3 _previousPosition;
     
     private float _velocityXSmoothing;
@@ -25,39 +23,32 @@ public class PlayerController
     
     private float _resetPlatformTime;
 
-    private MachineGun _machineGun;
-
-    public PlayerController(PlayerAvatarView view, PlayerInput input)
+    private MachineGunController _machineGunController;
+    private PlayerState _state;
+    private GameSystems _gameSystems;
+    
+    public PlayerController(PlayerState state, PlayerAvatarView view, PlayerInput input)
     {
+        _state = state;
+        
         _view = view;
         _view.controller = this;
 
         _input = input;
-        
     }
 
     // Start is called before the first frame update
-    public void Start()
+    public void Start(GameSystems gameSystems)
     {
+        _gameSystems = gameSystems;
+        
         float timeToJumpApex = _view.timeToJumpApex;
         _gravity = -(2 * _view.maxJumpHeight) / (timeToJumpApex * timeToJumpApex);
         
-        _machineGun = new MachineGun();
-        _view.SetWeapon(_machineGun.view.transform);
-        
+        _machineGunController = new MachineGunController(_gameSystems, _state.machineGunState);
+        _view.SetWeapon(_machineGunController.view.transform);
     }
 
-    public void Move(Vector3 moveDelta, bool isOnPlatform)
-    {
-        if (_view && _view.constrainer != null)
-        {
-            Vector3 constrainedMoveDelta = _view.constrainer.Move(moveDelta, isOnPlatform, _lastInput);
-
-            _previousPosition = _currentPosition;
-            _currentPosition = _view.transform.localPosition + constrainedMoveDelta;
-            _view.transform.localPosition = _currentPosition;
-        }
-    }
     
     public Vector3 position
     {
@@ -75,31 +66,45 @@ public class PlayerController
         get { return _lastInput; }
     }
 
+    
+    public void Move(Vector3 moveDelta, bool isOnPlatform)
+    {
+        if (_view && _view.constrainer != null)
+        {
+            Vector3 constrainedMoveDelta = _view.constrainer.Move(moveDelta, isOnPlatform, _lastInput);
+
+            _previousPosition = _state.position;
+            _state.position = _state.position + constrainedMoveDelta;
+            _view.transform.localPosition = _state.position;
+        }
+    }
+    
     // Update is called once per frame
     public void Step(float deltaTime)
     {
         _lastInput = _input.GetInput();
         
-        float alpha = (Time.time - deltaTime) / Time.fixedDeltaTime;
-//        _view.transform.localPosition = Vector3.Lerp(_previousPosition, _currentPosition, alpha);
+        float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
+//        _view.transform.localPosition = Vector3.Lerp(_previousPosition, _state.position, alpha);
+//        _view.transform.localPosition = _state.position;
     }
 
     public void FixedStep(float deltaTime)
     {
         deltaTime = _lastInput.secondaryFire ? deltaTime * 0.5f : deltaTime;
-        deltaTime = deltaTime * _timeScale;
+        deltaTime = deltaTime * _state.timeScale;
         
         if (_view)
         {
             int wallDirX = _view.constrainer.collisionInfo.left ? -1 : 1;
             int inputDirX = _lastInput.horizontalMovement == 0 ? 0 : _lastInput.horizontalMovement < 0 ? -1 : 1;
             
-            _handleDirectionMovement(ref _velocity, deltaTime);
+            _handleDirectionMovement(ref _state.velocity, deltaTime);
 
-            bool isWallSliding = _handleWallSliding(ref _velocity, deltaTime, wallDirX, inputDirX);
-            _handleJumping(ref _velocity, deltaTime, isWallSliding, wallDirX, inputDirX);
+            bool isWallSliding = _handleWallSliding(ref _state.velocity, deltaTime, wallDirX, inputDirX);
+            _handleJumping(ref _state.velocity, deltaTime, isWallSliding, wallDirX, inputDirX);
             
-            Move(_velocity * deltaTime, false);
+            Move(_state.velocity * deltaTime, false);
             
             if (collisionInfo.below)
             {
@@ -111,11 +116,11 @@ public class PlayerController
             {
                 if (collisionInfo.slidingDownMaxSlope)
                 {
-                    _velocity.y += collisionInfo.slopeNormal.y * -_gravity * deltaTime;
+                    _state.velocity.y += collisionInfo.slopeNormal.y * -_gravity * deltaTime;
                 }
                 else
                 {
-                    _velocity.y = 0;
+                    _state.velocity.y = 0;
                 }
             }
             
@@ -124,13 +129,13 @@ public class PlayerController
         }
         
         // Weapon Handling
-        if (_machineGun != null)
+        if (_machineGunController != null)
         {
-            _machineGun.FixedStep(deltaTime);
+            _machineGunController.FixedStep(deltaTime);
 
             if (_lastInput.primaryFire)
             {
-                _machineGun.Fire(_lastInput.cursorPosition);
+                _machineGunController.Fire(_lastInput.cursorPosition);
             }
         }
 
@@ -141,12 +146,12 @@ public class PlayerController
 
     public void OnTimeWarpEnter(float timeScale)
     {
-        _timeScale = timeScale;
+        _state.timeScale = timeScale;
     }
     
     public void OnTimeWarpExit()
     {
-        _timeScale = 1.0f;
+        _state.timeScale = 1.0f;
     }
     
     private CollisionInfo collisionInfo
@@ -176,7 +181,7 @@ public class PlayerController
         float maxJumpVelocity = Mathf.Abs(_gravity) * timeToJumpApex;
         float minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(_gravity) * _view.minJumpHeight);
        
-        _gravity = (_lastInput.verticalMovement < 0) ? _gravity * 2 : _gravity;
+        _gravity = (_lastInput.verticalMovement < 0) ? _gravity * 1.5f : _gravity;
 
         if (_lastInput.jumpPressed)
         {
@@ -237,7 +242,6 @@ public class PlayerController
         
         _midairJumpTimer -= deltaTime;
         _coyoteJumpTimer -= deltaTime;
-
     }
 
 

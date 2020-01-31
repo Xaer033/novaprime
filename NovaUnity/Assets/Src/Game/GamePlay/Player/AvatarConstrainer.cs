@@ -96,7 +96,7 @@ public class AvatarConstrainer : MonoBehaviour
             Vector3 firstRayOrigin = rayOrigin;
             firstRayOrigin += Vector3.up * (_raycastController.horizontalRaySpacing * i);
             
-            Debug.DrawRay(firstRayOrigin, Vector3.right * directionX, Color.red);
+            Debug.DrawRay(firstRayOrigin, Vector3.right * directionX * rayLength, Color.red);
             
             bool isHit = Physics.Raycast(firstRayOrigin, Vector3.right * directionX, out hit, rayLength, collisionMask);
             if (isHit)
@@ -159,14 +159,16 @@ public class AvatarConstrainer : MonoBehaviour
     protected void _verticalCollisions(ref Vector3 moveDelta)
     {
         float directionY = Mathf.Sign(moveDelta.y);
-        float rayLength = Mathf.Abs(moveDelta.y) + _raycastController.skinHeight + _walkStepHeight;
+        
+        float walkStepHeight = directionY == 1 ? 0 : _walkStepHeight;
+        float rayLength = Mathf.Abs(moveDelta.y) + _raycastController.skinHeight + walkStepHeight;
         
         int inputDirY =  _input.verticalMovement == 0 ?  0 : _input.verticalMovement < 0 ? -1 : 1;
 
         for (int i = 0; i < _raycastController.verticalRayCount; ++i)
         {
             Vector3 rayOrigin = (directionY == -1) ? _raycastOrigins.bottomLeft : _raycastOrigins.topLeft;
-            rayOrigin.y = rayOrigin.y + _walkStepHeight;
+            rayOrigin.y = rayOrigin.y + walkStepHeight;
             rayOrigin += Vector3.right * (_raycastController.verticalRaySpacing * i + moveDelta.x);
             
             Debug.DrawRay(rayOrigin, Vector3.up * directionY * rayLength, Color.red);
@@ -193,8 +195,8 @@ public class AvatarConstrainer : MonoBehaviour
                         continue;
                     }
                 }
-                
-                moveDelta.y = (hit.distance - _raycastController.skinHeight - _walkStepHeight) * directionY;
+
+                moveDelta.y = (hit.distance - _raycastController.skinHeight - walkStepHeight) * directionY;
                 rayLength = hit.distance;
 
                 if (_collisionInfo.climbingSlope)

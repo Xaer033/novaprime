@@ -52,10 +52,10 @@ public class PlayerController : NotificationDispatcher
     
     public Vector3 position
     {
-        get { return _view.transform.position; }
-        set { _view.transform.position = value; }
+        get { return _state.position; }
+        set { _state.position = value; }
     }
-
+    
     public Quaternion rotation
     {
         get { return _view.transform.rotation; }

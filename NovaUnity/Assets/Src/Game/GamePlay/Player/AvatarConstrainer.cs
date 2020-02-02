@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using Photon.Realtime;
 using UnityEngine;
@@ -130,7 +130,7 @@ public class AvatarConstrainer : MonoBehaviour
                     moveDelta.x += distanceToSlopeStart * directionX;
                 }
 
-                if (_collisionInfo.belowOld && i <= _walkStepIndex)// hit.point.y < _raycastController.origins.bottomLeft.y + walkStepHeight + _raycastController.skinHeight)
+                if (_collisionInfo.belowOld && i <= _walkStepIndex)
                 {
                     _collisionInfo.stepUp = true;
                 }

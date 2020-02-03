@@ -93,11 +93,20 @@ public class PlayerController : NotificationDispatcher
     {
         deltaTime = _lastInput.secondaryFire ? deltaTime * 0.5f : deltaTime;
         deltaTime = deltaTime * _state.timeScale;
-        
+
+
+        Vector3 aimDirection = _lastInput.cursorDirection.normalized;
+        Vector3 aimPosition = _lastInput.useCusorPosition ? _lastInput.cursorPosition : _state.position + (aimDirection * 4.0f);
+        Debug.DrawRay(_state.position, aimDirection, Color.cyan, 0.2f);
+
+        const float kDebugLineSize = 0.2f;
+        Debug.DrawLine(aimPosition + Vector3.down * kDebugLineSize, aimPosition + Vector3.up     * kDebugLineSize, Color.cyan, 0.2f);
+        Debug.DrawLine(aimPosition + Vector3.left * kDebugLineSize, aimPosition + Vector3.right  * kDebugLineSize, Color.cyan, 0.2f);
+    
         if (_view)
         {
             int wallDirX = _view.constrainer.collisionInfo.left ? -1 : 1;
-            int inputDirX = _lastInput.horizontalMovement == 0 ? 0 : _lastInput.horizontalMovement < 0 ? -1 : 1;
+            int inputDirX = Mathf.Abs(_lastInput.horizontalMovement) < 0.5f ? 0 : _lastInput.horizontalMovement < 0 ? -1 : 1;
             
             _handleDirectionMovement(ref _state.velocity, deltaTime);
 
@@ -125,7 +134,7 @@ public class PlayerController : NotificationDispatcher
             }
             
             // Aim
-            _view.Aim(_lastInput.cursorPosition);
+            _view.Aim(aimPosition);
         }
         
         // Weapon Handling
@@ -135,7 +144,7 @@ public class PlayerController : NotificationDispatcher
 
             if (_lastInput.primaryFire)
             {
-                _machineGunController.Fire(_lastInput.cursorPosition);
+                _machineGunController.Fire(aimPosition);
             }
         }
 

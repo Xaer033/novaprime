@@ -20,3 +20,4 @@ MonoBehaviour:
   bulletView: {fileID: -1901877338219026376, guid: a67d08bde992529428ee0d38b34637eb,
     type: 3}
   bulletData: {fileID: 11400000, guid: f85596d5b7b0430459790eb8fb481afc, type: 2}
+  p1Input: {fileID: -944628639613478452, guid: a654f08727a8dac48b3b2688a62cfc5f, type: 3}

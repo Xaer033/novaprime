@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.U2D;
 
 
@@ -13,5 +14,5 @@ public class GameplayResources : ScriptableObject
     public BulletView bulletView;
 
     public ProjectileData bulletData;
-
+    public InputActionAsset p1Input;
 }

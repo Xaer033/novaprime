@@ -13,8 +13,6 @@ public class SingleplayerGameplayState : IGameState
 
     public void Init( GameStateMachine stateMachine, object changeStateData )
 	{       
-        Debug.Log ("Entering In GamePlay State");
-
 		_stateMachine = stateMachine;
 
         // *TEMP*

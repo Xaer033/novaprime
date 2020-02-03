@@ -15,6 +15,9 @@
               </e>
             </e>
           </e>
+          <e p="TimeWarp" t="Include">
+            <e p="TimeWarpShader.shader" t="Include" />
+          </e>
         </e>
         <e p="Src" t="Include">
           <e p="Game" t="Include">
@@ -57,6 +60,7 @@
               <e p="TimeWarpers" t="Include">
                 <e p="ITimeWarpTarget.cs" t="Include" />
                 <e p="TimeWarpFieldController.cs" t="Include" />
+                <e p="TimeWarpShaderHelper.cs" t="Include" />
               </e>
               <e p="Weapons" t="Include">
                 <e p="BulletView.cs" t="Include" />

@@ -19,19 +19,6 @@
             <e p="TimeWarpShader.shader" t="Include" />
           </e>
         </e>
-        <e p="Samples" t="Include">
-          <e p="Input System" t="Include">
-            <e p="1.0.0-preview.4" t="Include">
-              <e p="Simple Demo" t="Include">
-                <e p="SimpleController_UsingActionAsset.cs" t="Include" />
-                <e p="SimpleController_UsingActions.cs" t="Include" />
-                <e p="SimpleController_UsingPlayerInput.cs" t="Include" />
-                <e p="SimpleController_UsingState.cs" t="Include" />
-                <e p="SimpleControls.cs" t="Include" />
-              </e>
-            </e>
-          </e>
-        </e>
         <e p="Src" t="Include">
           <e p="Game" t="Include">
             <e p="GameFoundations" t="Include">

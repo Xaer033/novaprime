@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: BulletData
   m_EditorClassIdentifier: 
   type: 1
-  speed: 40
+  speed: 65
   damage: 5
   deathTimer: 20

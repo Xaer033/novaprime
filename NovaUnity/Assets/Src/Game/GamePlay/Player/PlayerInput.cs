@@ -20,6 +20,8 @@ public class PlayerInput
     {
         playerNumber = pNumber;
         _camera = playerCamera;
+        
+        
         _pAction = new PlayerActions();
         _pAction.Gameplay.Enable();
     }

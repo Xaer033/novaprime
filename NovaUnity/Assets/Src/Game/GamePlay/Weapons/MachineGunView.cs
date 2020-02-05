@@ -9,14 +9,12 @@ public class MachineGunView : MonoBehaviour
     
     public LayerMask targetLayerMask;
     
-    public float bulletSpeed;
     public float fireCooldown;
 
 
     // (This should all be in a weapon class)
     public GameObject _bulletFXPrefab;
     private TrailRenderer[] _fxPool;
-    private Tween[] _fxTweens;
     private int _fxIndex;
     
     public Transform barrelHook;
@@ -91,7 +89,6 @@ public class MachineGunView : MonoBehaviour
         _fxIndex = 0;
 
         _fxPool = new TrailRenderer[kFXPoolSize];
-        _fxTweens = new Tween[kFXPoolSize];
 
         for(int i = 0; i < kFXPoolSize; ++i)
         {

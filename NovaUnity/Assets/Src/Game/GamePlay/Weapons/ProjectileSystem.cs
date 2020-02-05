@@ -7,12 +7,14 @@ public class ProjectileSystem : NotificationDispatcher
     private BulletView[] _projectileViewPool;
     
     private int _poolSize;
+    private RaycastHit[] _raycastHitList;
     
     public ProjectileSystem(int poolSize)
     {
         _poolSize = poolSize;
         _projectilePool = new ProjectileState[poolSize];
         _projectileViewPool = new BulletView[poolSize];
+        _raycastHitList = new RaycastHit[3];
     }
     
     public void Start()
@@ -54,12 +56,13 @@ public class ProjectileSystem : NotificationDispatcher
                 float lookAhead = state.velocity.magnitude * scaledDeltaTime;
                 Vector3 bulletDir = state.velocity.normalized;
                 Vector3 rayStart = state.position;
+                
                 Debug.DrawRay(rayStart, bulletDir * lookAhead, Color.green);
-                bool isHit = Physics.Raycast(rayStart, bulletDir, out hit, lookAhead, view.collisionMask);
-                if (isHit)
+                
+                int hitCount = Physics.RaycastNonAlloc(rayStart, bulletDir, _raycastHitList, lookAhead, view.collisionMask);
+                if(hitCount > 0)
                 {
                     
-                    Debug.DrawRay(hit.point, hit.normal, Color.red, 1.0f);
                     //Do damage
                     state.isActive = false;
                 }

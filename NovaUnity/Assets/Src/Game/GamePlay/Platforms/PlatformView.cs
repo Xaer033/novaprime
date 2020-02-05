@@ -35,13 +35,16 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
     private float _percentBetweenWaypoints;
     private float _nextMoveTime;
     private float _timeScale = 1.0f;
-    
+    private RaycastHit[] _raycastHits;
     private Vector3[] _globalWayPoints;
     // Start is called before the first frame update
     void Awake()
     {
+        _raycastHits = new RaycastHit[10];
+        
         _raycastController = new RaycastController(distanceBetweenRays, collisionCollider, passengerMask);
         _globalWayPoints = new Vector3[localWaypoints.Length];
+        
         for (int i = 0; i < localWaypoints.Length; ++i)
         {
             _globalWayPoints[i] = localWaypoints[i] + transform.position;
@@ -130,7 +133,6 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
             { 
                 platformPat.RequestMovement(passenger);
                 
-//                passenger.transform.Translate(passenger.velocity);
             }
         }
     }
@@ -141,10 +143,9 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
         
         float directionX = Mathf.Sign(velocity.x);
         float directionY = Mathf.Sign(velocity.y);
-        RaycastHit hit;
 
         // Moving vertically
-        if (Mathf.Abs(velocity.y)> 0)
+        if (Mathf.Abs(velocity.y) > 0)
         {
             float rayLength = Mathf.Abs(velocity.y) + _raycastController.skinHeight;
             
@@ -155,22 +156,26 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
                
                 Debug.DrawRay(rayOrigin, Vector3.up * directionY * rayLength, Color.blue);
 
-                bool isHit = Physics.Raycast(rayOrigin, Vector3.up * directionY, out hit, rayLength, passengerMask);
-                if (isHit &&  Mathf.Abs(hit.distance) > 0)
+                int hitCount = Physics.RaycastNonAlloc(rayOrigin, Vector3.up * directionY, _raycastHits, rayLength, passengerMask);
+                for (int x = 0; x < hitCount; ++x)
                 {
-                    if (!_movedPassengersSet.Contains(hit.transform))
+                    RaycastHit hit = _raycastHits[x];
+                    if (Mathf.Abs(hit.distance) > 0)
                     {
-                        _movedPassengersSet.Add(hit.transform);
+                        if (!_movedPassengersSet.Contains(hit.transform))
+                        {
+                            _movedPassengersSet.Add(hit.transform);
+                            
+                            float pushX = (directionY == 1) ? velocity.x : 0;
+                            float pushY = velocity.y - (hit.distance - _raycastController.skinHeight) * directionY;
                         
-                        float pushX = (directionY == 1) ? velocity.x : 0;
-                        float pushY = velocity.y - (hit.distance - _raycastController.skinHeight) * directionY;
-                    
-                        _passengerMovementList.Add( 
-                            new PassengerMovement(
-                                hit.transform, 
-                                new Vector3(pushX, pushY), 
-                                directionY == 1, 
-                                true));
+                            _passengerMovementList.Add( 
+                                new PassengerMovement(
+                                    hit.transform, 
+                                    new Vector3(pushX, pushY), 
+                                    directionY == 1, 
+                                    true));
+                        }
                     }
                 }
             }
@@ -187,21 +192,26 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
                 
                 Debug.DrawRay(rayOrigin, Vector3.right * directionX * rayLength, Color.yellow);
 
-                bool isHit = Physics.Raycast(rayOrigin, Vector3.right * directionX, out hit, rayLength, passengerMask);
-                if (isHit && Mathf.Abs(hit.distance) > 0)
+                int hitCount = Physics.RaycastNonAlloc(rayOrigin, Vector3.right * directionX, _raycastHits, rayLength, passengerMask);
+
+                for (int x = 0; x < hitCount; ++x)
                 {
-                    if (!_movedPassengersSet.Contains(hit.transform))
+                    RaycastHit hit = _raycastHits[x];
+                    if (Mathf.Abs(hit.distance) > 0)
                     {
-                        _movedPassengersSet.Add(hit.transform);
-                        float pushX = velocity.x - (hit.distance - _raycastController.skinWidth) * directionX;
-                        float pushY = -_raycastController.skinWidth;
-                        
-                        _passengerMovementList.Add( 
-                            new PassengerMovement(
-                                hit.transform, 
-                                new Vector3(pushX, pushY), 
-                                false, 
-                                true));
+                        if (!_movedPassengersSet.Contains(hit.transform))
+                        {
+                            _movedPassengersSet.Add(hit.transform);
+                            float pushX = velocity.x - (hit.distance - _raycastController.skinWidth) * directionX;
+                            float pushY = -_raycastController.skinWidth;
+                            
+                            _passengerMovementList.Add( 
+                                new PassengerMovement(
+                                    hit.transform, 
+                                    new Vector3(pushX, pushY), 
+                                    false, 
+                                    true));
+                        }
                     }
                 }
             }
@@ -219,21 +229,26 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
                
                 Debug.DrawRay(rayOrigin, Vector3.up * rayLength, Color.green);
                 
-                bool isHit = Physics.Raycast(rayOrigin, Vector3.up, out hit, rayLength, passengerMask);
-                if(isHit && Mathf.Abs(hit.distance) > 0)
+                int hitCount = Physics.RaycastNonAlloc(rayOrigin, Vector3.up, _raycastHits, rayLength, passengerMask);
+                
+                for (int x = 0; x < hitCount; ++x)
                 {
-                    if (!_movedPassengersSet.Contains(hit.transform))
+                    RaycastHit hit = _raycastHits[x];
+                    if(Mathf.Abs(hit.distance) > 0)
                     {
-                        _movedPassengersSet.Add(hit.transform);
-                        float pushX = velocity.x;
-                        float pushY = velocity.y;
+                        if (!_movedPassengersSet.Contains(hit.transform))
+                        {
+                            _movedPassengersSet.Add(hit.transform);
+                            float pushX = velocity.x;
+                            float pushY = velocity.y;
 
-                        _passengerMovementList.Add( 
-                            new PassengerMovement(
-                                hit.transform, 
-                                new Vector3(pushX, pushY), 
-                                true, 
-                                false));
+                            _passengerMovementList.Add( 
+                                new PassengerMovement(
+                                    hit.transform, 
+                                    new Vector3(pushX, pushY), 
+                                    true, 
+                                    false));
+                        }
                     }
                 }
             }

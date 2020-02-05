@@ -50,7 +50,7 @@ public class MachineGunController
             return;
         
         Vector3 visualWeaponPos = _view.barrelHook.position;
-        Vector3 viewDir = getFireDirection(_view.barrelHook.forward, 0.02f);//(targetPos - visualWeaponPos).normalized;
+        Vector3 viewDir = getFireDirection(_view.barrelHook.forward, 0.05f);//(targetPos - visualWeaponPos).normalized;
         viewDir.z = 0;
 
         Vector3 adjustedPos = visualWeaponPos + (viewDir * 20.0f);

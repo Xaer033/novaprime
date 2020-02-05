@@ -18,6 +18,8 @@ public class TimeWarpFieldController : MonoBehaviour
 
     private Vector3 _initialRendererScale;
     private Collider _collider;
+    private Collider[] _colliderList;
+    
     private Dictionary<Collider, ITimeWarpTarget> _timeWarpMap = new Dictionary<Collider, ITimeWarpTarget>();
     
     private HashSet<ITimeWarpTarget> _insideSet = new HashSet<ITimeWarpTarget>();
@@ -26,6 +28,7 @@ public class TimeWarpFieldController : MonoBehaviour
 
     void Awake()
     {
+        _colliderList = new Collider[50];
         _radiusShaderId = Shader.PropertyToID("_radius");
         if (_renderer)
         {
@@ -45,8 +48,8 @@ public class TimeWarpFieldController : MonoBehaviour
         
         _currentSphereTargets.Clear();
         
-        Collider[] colliderList = Physics.OverlapSphere(transform.position, radius, affectedLayers);
-        _generateCurrentTargetList(ref _currentSphereTargets, colliderList);
+        int colliderCount = Physics.OverlapSphereNonAlloc(transform.position, radius, _colliderList, affectedLayers);
+        _generateCurrentTargetList(ref _currentSphereTargets, _colliderList, colliderCount);
         
         for (int i = 0; i < _currentSphereTargets.Count; ++i)
         {
@@ -76,9 +79,9 @@ public class TimeWarpFieldController : MonoBehaviour
         }
     }
     
-    private void _generateCurrentTargetList(ref List<ITimeWarpTarget> targetList, Collider[] colliderList)
+    private void _generateCurrentTargetList(ref List<ITimeWarpTarget> targetList, Collider[] colliderList, int colliderCount)
     {
-        for (int i = 0; i < colliderList.Length; ++i)
+        for (int i = 0; i < colliderCount; ++i)
         {
             Collider collider = colliderList[i];
             ITimeWarpTarget target;
@@ -95,7 +98,6 @@ public class TimeWarpFieldController : MonoBehaviour
             {
                 continue;
             }
-
 
             targetList.Add(target);
         }

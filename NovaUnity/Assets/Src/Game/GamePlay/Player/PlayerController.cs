@@ -20,7 +20,7 @@ public class PlayerController : NotificationDispatcher
     
     private FrameInput _lastInput;
     private PlayerInput _input;
-    
+    private int _jumpCount;
     private float _resetPlatformTime;
 
     private MachineGunController _machineGunController;
@@ -91,6 +91,9 @@ public class PlayerController : NotificationDispatcher
 
     public void FixedStep(float deltaTime)
     {
+        _lastInput = _input.GetInput();
+        
+        
         deltaTime = _lastInput.secondaryFire ? deltaTime * 0.5f : deltaTime;
         deltaTime = deltaTime * _state.timeScale;
 
@@ -118,6 +121,14 @@ public class PlayerController : NotificationDispatcher
             if (collisionInfo.below)
             {
                 _coyoteJumpTimer = _view.coyoteTime;
+                _jumpCount = 0;
+            }
+            else
+            {
+                if (_coyoteJumpTimer <= 0 && _jumpCount == 0 && !isWallSliding)
+                {
+                    _jumpCount++;
+                }
             }
             
             // *Bop*
@@ -172,7 +183,7 @@ public class PlayerController : NotificationDispatcher
     private void _handleDirectionMovement(ref Vector3 velocity, float deltaTime)
     {
         float targetVelocityX = _lastInput.horizontalMovement * _view.speed;
-        float accelerationTime = collisionInfo.below ? _view.accelerationTimeGround : _view.accelerationTimeAir;
+        float accelerationTime = collisionInfo.below ? _view.accelerationTimeGround : _jumpCount > 1 ? _view.accelerationTimeAir * 2.5f : _view.accelerationTimeAir; 
         float inputVelocityX = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref _velocityXSmoothing, accelerationTime);
 
         velocity.x = inputVelocityX;
@@ -196,6 +207,10 @@ public class PlayerController : NotificationDispatcher
         {
             _midairJumpTimer = _view.jumpRememberDelay;
         }
+
+        bool didDoubleJump = (_jumpCount == 1 && _lastInput.jumpPressed);
+        Debug.Log("Did JUmp: " + didDoubleJump + ", " + _jumpCount);
+        
         // This is so if the player jumps while in the air for a bit, we still jump when on floor
         if (_midairJumpTimer > 0)
         {
@@ -216,11 +231,11 @@ public class PlayerController : NotificationDispatcher
                     velocity.x = -wallDirX * _view.wallJumpLeap.x;
                     velocity.y = _view.wallJumpLeap.y;
                 }
-                
+
                 _midairJumpTimer = 0;
             }
             
-            if (_coyoteJumpTimer > 0)
+            if ( _coyoteJumpTimer > 0 || didDoubleJump)
             {
                 _coyoteJumpTimer = 0;
                 if (collisionInfo.slidingDownMaxSlope)
@@ -230,19 +245,28 @@ public class PlayerController : NotificationDispatcher
                         Vector3 jumpDirection = (Vector3.up + collisionInfo.slopeNormal).normalized * maxJumpVelocity;
                         velocity.x = jumpDirection.x;
                         velocity.y = jumpDirection.y;
+                        
+                        _jumpCount++;
                     }
                 }
                 else 
                 {
                     velocity.y = _lastInput.verticalMovement < 0 ? maxJumpVelocity * 0.75f : maxJumpVelocity;
+                    if (_jumpCount > 0)
+                    {
+                        velocity.x = inputDirX * _view.wallJumpOff.x;
+                    }
+                    
+                    _jumpCount++;
                 }
-                
+
                 _midairJumpTimer = 0;
             }
         }
 
         if (_lastInput.jumpReleased)
         {
+            
             if (velocity.y > minJumpVelocity)
             {
                 velocity.y = minJumpVelocity;
@@ -265,7 +289,8 @@ public class PlayerController : NotificationDispatcher
         if (wallOnSide && !collisionInfo.below && velocity.y < 0)
         {
             isWallSliding = true;
-
+            _jumpCount = 0;
+            
             float wallSpeedDampTime = _lastInput.verticalMovement < 0 ? 0.1f : _view.wallSlideSpeedDampTime;
             
             if (velocity.y < -_view.wallSlideSpeedMax)

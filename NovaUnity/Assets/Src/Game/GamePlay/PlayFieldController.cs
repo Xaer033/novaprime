@@ -51,16 +51,7 @@ public class PlayFieldController : NotificationDispatcher
         {
             _pController.Step(deltaTime);
             
-            //Debug STUFF
-            if (_pAction.Gameplay.reset.triggered)
-            {
-                _gameState.playerStateList[0].position = Vector3.zero;
-            }
-
-            if (_pAction.Gameplay.exit.triggered)
-            {
-                Application.Quit();
-            }
+           
         }
 
         if (_gameSystems != null)
@@ -79,6 +70,17 @@ public class PlayFieldController : NotificationDispatcher
         if (_gameSystems != null)
         {
             _gameSystems.FixedStep(fixedDeltaTime);
+        }
+        
+        //Debug STUFF
+        if (_pAction.Gameplay.reset.triggered)
+        {
+            _gameState.playerStateList[0].position = Vector3.zero;
+        }
+
+        if (_pAction.Gameplay.exit.triggered)
+        {
+            Application.Quit();
         }
     }
 

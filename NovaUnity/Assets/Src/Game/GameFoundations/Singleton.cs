@@ -2,6 +2,7 @@
 using GhostGen;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Singleton : MonoBehaviour
 {
@@ -53,10 +54,6 @@ public class Singleton : MonoBehaviour
         gameStateMachine.Step(Time.deltaTime);
         gui.Step(Time.deltaTime);
 
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Application.Quit();
-        }
     }
 
     public void FixedUpdate()

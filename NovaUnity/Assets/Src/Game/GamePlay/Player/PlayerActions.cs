@@ -73,6 +73,22 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""exit"",
+                    ""type"": ""Button"",
+                    ""id"": ""80c9640c-df71-402a-9234-283b434bef95"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""reset"",
+                    ""type"": ""Button"",
+                    ""id"": ""753534df-cdb7-4c91-9f8e-1fb16a6e8d14"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -262,6 +278,50 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                     ""action"": ""aimAbsolute"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1b788965-a9a0-41ba-aa2e-d6bf85ce52b1"",
+                    ""path"": ""<Gamepad>/select"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""exit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""fcae5523-f663-4cd3-b8cc-2896aecf1acb"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""exit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""68c7fd17-3efe-4380-903c-dc4f6bbb1a7e"",
+                    ""path"": ""<Keyboard>/f1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""reset"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""137474e8-a7ac-4a2b-8dcf-024ac8cb17bd"",
+                    ""path"": ""<Gamepad>/start"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""reset"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -300,6 +360,8 @@ public class @PlayerActions : IInputActionCollection, IDisposable
         m_Gameplay_verticalMovement = m_Gameplay.FindAction("verticalMovement", throwIfNotFound: true);
         m_Gameplay_forcePad = m_Gameplay.FindAction("forcePad", throwIfNotFound: true);
         m_Gameplay_aimAbsolute = m_Gameplay.FindAction("aimAbsolute", throwIfNotFound: true);
+        m_Gameplay_exit = m_Gameplay.FindAction("exit", throwIfNotFound: true);
+        m_Gameplay_reset = m_Gameplay.FindAction("reset", throwIfNotFound: true);
         // Menu
         m_Menu = asset.FindActionMap("Menu", throwIfNotFound: true);
     }
@@ -358,6 +420,8 @@ public class @PlayerActions : IInputActionCollection, IDisposable
     private readonly InputAction m_Gameplay_verticalMovement;
     private readonly InputAction m_Gameplay_forcePad;
     private readonly InputAction m_Gameplay_aimAbsolute;
+    private readonly InputAction m_Gameplay_exit;
+    private readonly InputAction m_Gameplay_reset;
     public struct GameplayActions
     {
         private @PlayerActions m_Wrapper;
@@ -369,6 +433,8 @@ public class @PlayerActions : IInputActionCollection, IDisposable
         public InputAction @verticalMovement => m_Wrapper.m_Gameplay_verticalMovement;
         public InputAction @forcePad => m_Wrapper.m_Gameplay_forcePad;
         public InputAction @aimAbsolute => m_Wrapper.m_Gameplay_aimAbsolute;
+        public InputAction @exit => m_Wrapper.m_Gameplay_exit;
+        public InputAction @reset => m_Wrapper.m_Gameplay_reset;
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -399,6 +465,12 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                 @aimAbsolute.started -= m_Wrapper.m_GameplayActionsCallbackInterface.OnAimAbsolute;
                 @aimAbsolute.performed -= m_Wrapper.m_GameplayActionsCallbackInterface.OnAimAbsolute;
                 @aimAbsolute.canceled -= m_Wrapper.m_GameplayActionsCallbackInterface.OnAimAbsolute;
+                @exit.started -= m_Wrapper.m_GameplayActionsCallbackInterface.OnExit;
+                @exit.performed -= m_Wrapper.m_GameplayActionsCallbackInterface.OnExit;
+                @exit.canceled -= m_Wrapper.m_GameplayActionsCallbackInterface.OnExit;
+                @reset.started -= m_Wrapper.m_GameplayActionsCallbackInterface.OnReset;
+                @reset.performed -= m_Wrapper.m_GameplayActionsCallbackInterface.OnReset;
+                @reset.canceled -= m_Wrapper.m_GameplayActionsCallbackInterface.OnReset;
             }
             m_Wrapper.m_GameplayActionsCallbackInterface = instance;
             if (instance != null)
@@ -424,6 +496,12 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                 @aimAbsolute.started += instance.OnAimAbsolute;
                 @aimAbsolute.performed += instance.OnAimAbsolute;
                 @aimAbsolute.canceled += instance.OnAimAbsolute;
+                @exit.started += instance.OnExit;
+                @exit.performed += instance.OnExit;
+                @exit.canceled += instance.OnExit;
+                @reset.started += instance.OnReset;
+                @reset.performed += instance.OnReset;
+                @reset.canceled += instance.OnReset;
             }
         }
     }
@@ -480,6 +558,8 @@ public class @PlayerActions : IInputActionCollection, IDisposable
         void OnVerticalMovement(InputAction.CallbackContext context);
         void OnForcePad(InputAction.CallbackContext context);
         void OnAimAbsolute(InputAction.CallbackContext context);
+        void OnExit(InputAction.CallbackContext context);
+        void OnReset(InputAction.CallbackContext context);
     }
     public interface IMenuActions
     {

@@ -12,7 +12,6 @@ public class PlayerInput
     private Vector3 _lastAimDirection;
     private bool _lastJumpAxis;
     
-    private InputActionAsset pAction;
     private PlayerActions _pAction;
     private bool _useGamePad;
     
@@ -28,8 +27,6 @@ public class PlayerInput
     
     public FrameInput GetInput()
     {
-       // var gamepad = Gamepad.current;
-
 //       pAction.FindAction("movement").ReadValue<>().movement;
         float horizontalMovement = _pAction.Gameplay.horizontalMovement.ReadValue<float>();// gamepad.leftStick.ReadValue();
         float verticalMovement = _pAction.Gameplay.verticalMovement.ReadValue<float>();// gamepad.leftStick.ReadValue();

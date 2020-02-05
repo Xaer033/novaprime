@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using GhostGen;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayFieldController : NotificationDispatcher
 {
@@ -9,6 +10,7 @@ public class PlayFieldController : NotificationDispatcher
     private GameplayCamera _gameplayCamera;
     private GameState _gameState;
     private GameSystems _gameSystems;
+    private PlayerActions _pAction;
     
     public void Start()
     {
@@ -33,6 +35,9 @@ public class PlayFieldController : NotificationDispatcher
         }
         _gameplayCamera.target = p1View;
         
+        _pAction = new PlayerActions();
+        _pAction.Gameplay.Enable();
+        
         PlayerInput p1Input = new PlayerInput(0, _gameplayCamera);
         
         _pController = new PlayerController(p1State, p1View, p1Input);
@@ -45,9 +50,16 @@ public class PlayFieldController : NotificationDispatcher
         if (_pController != null)
         {
             _pController.Step(deltaTime);
-            if (Input.GetKeyDown(KeyCode.F1))
+            
+            //Debug STUFF
+            if (_pAction.Gameplay.reset.triggered)
             {
                 _gameState.playerStateList[0].position = Vector3.zero;
+            }
+
+            if (_pAction.Gameplay.exit.triggered)
+            {
+                Application.Quit();
             }
         }
 

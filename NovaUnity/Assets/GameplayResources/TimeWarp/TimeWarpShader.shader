@@ -72,10 +72,10 @@ Shader "Unlit/TimeWarpShader"
                 
                 float range = _radius * _warpFactor /  (diffLength * 50);
                 
-                float4 warp = float4(cos(_Time.y + diffLength ) * 0.5, sin(_Time.x + diffLength) * 0.5, 0, 0);
+                float4 warp = float4(cos(_Time.y + diffLength * diff.x - diff.y ) * 0.5, sin(_Time.x + diff.x + diffLength * diff.y) * 0.5, 0, 0);
                 warp = (warp) * 0.4;
                 
-                float4 offset = diff * range * 1;
+                float4 offset = diff * range;
 
                 float4 uv = i.grabPos - (offset + warp);
                 half4 bgcolor = tex2Dproj(_BackgroundTexture, uv);

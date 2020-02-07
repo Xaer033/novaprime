@@ -209,7 +209,6 @@ public class PlayerController : NotificationDispatcher
         }
 
         bool didDoubleJump = (_jumpCount == 1 && _lastInput.jumpPressed);
-        Debug.Log("Did JUmp: " + didDoubleJump + ", " + _jumpCount);
         
         // This is so if the player jumps while in the air for a bit, we still jump when on floor
         if (_midairJumpTimer > 0)

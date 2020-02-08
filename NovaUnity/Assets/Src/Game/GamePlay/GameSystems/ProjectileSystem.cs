@@ -1,7 +1,7 @@
 ﻿using GhostGen;
 using UnityEngine;
 
-public class ProjectileSystem : NotificationDispatcher
+public class ProjectileSystem : NotificationDispatcher, IGameSystem
 {
     private ProjectileState[] _projectilePool;
     private BulletView[] _projectileViewPool;
@@ -17,7 +17,7 @@ public class ProjectileSystem : NotificationDispatcher
         _raycastHitList = new RaycastHit[3];
     }
     
-    public void Start()
+    public void Start(GameSystems gameSystems, GameState gameState)
     {
         BulletView projectileTemplate = Singleton.instance.gameplayResources.bulletView;
         for (int i = 0; i < _poolSize; ++i)
@@ -41,7 +41,6 @@ public class ProjectileSystem : NotificationDispatcher
             return;
         }
 
-        RaycastHit hit;
         for (int i = 0; i < _poolSize; ++i)
         {
             ProjectileState state = _projectilePool[i];

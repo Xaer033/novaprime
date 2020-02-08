@@ -1,7 +1,7 @@
-using GhostGen;
+﻿using GhostGen;
 using UnityEngine;
 
-public class PlayerController : NotificationDispatcher, IAvatarController
+public class GruntController : NotificationDispatcher, IAvatarController
 {
     private PlayerAvatarView _view;
 
@@ -13,28 +13,22 @@ public class PlayerController : NotificationDispatcher, IAvatarController
 
     private float _midairJumpTimer;
     private float _coyoteJumpTimer;
-    
-    private Vector3 _previousPosition;
-    
     private float _velocityXSmoothing;
     
     private FrameInput _lastInput;
-    private PlayerInput _input;
     private int _jumpCount;
     private float _resetPlatformTime;
 
     private MachineGunController _machineGunController;
-    private PlayerState _state;
+    private GruntState _state;
     private GameSystems _gameSystems;
     
-    public PlayerController(PlayerState state, PlayerAvatarView view, PlayerInput input)
+    public GruntController(GruntState state, PlayerAvatarView view)
     {
         _state = state;
         
         _view = view;
         _view.controller = this;
-
-        _input = input;
     }
 
     // Start is called before the first frame update
@@ -45,7 +39,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         float timeToJumpApex = _view.timeToJumpApex;
         _gravity = -(2 * _view.maxJumpHeight) / (timeToJumpApex * timeToJumpApex);
         
-        _machineGunController = new MachineGunController(_gameSystems, _state.machineGunState);
+        _machineGunController = new MachineGunController(_gameSystems, null);
         _view.SetWeapon(_machineGunController.view.transform);
     }
 
@@ -73,27 +67,13 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         {
             Vector3 constrainedMoveDelta = _view.constrainer.Move(moveDelta, isOnPlatform, _lastInput);
 
-            _previousPosition = _state.position;
             _state.position = _state.position + constrainedMoveDelta;
             _view.transform.localPosition = _state.position;
         }
     }
-    
-    // Update is called once per frame
-    public void Step(float deltaTime)
-    {
-        _lastInput = _input.GetInput();
-        
-        float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
-//        _view.transform.localPosition = Vector3.Lerp(_previousPosition, _state.position, alpha);
-//        _view.transform.localPosition = _state.position;
-    }
 
     public void FixedStep(float deltaTime)
     {
-        _lastInput = _input.GetInput();
-        
-        
         deltaTime = _lastInput.secondaryFire ? deltaTime * 0.5f : deltaTime;
         deltaTime = deltaTime * _state.timeScale;
 
@@ -158,10 +138,6 @@ public class PlayerController : NotificationDispatcher, IAvatarController
                 _machineGunController.Fire(aimPosition);
             }
         }
-
-        // Clear buffered input as we handled it above (for transient button up/down events that may get missed in a fixedUpdate
-        _input.Clear();
-
     }
 
     public void OnTimeWarpEnter(float timeScale)

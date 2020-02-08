@@ -77,5 +77,5 @@ public class PlayerAvatarView : MonoBehaviour, IPlatformPassenger, ITimeWarpTarg
             controller.OnTimeWarpExit();
         }
     }
-    public PlayerController controller { get; set; }
+    public IAvatarController controller { get; set; }
 }

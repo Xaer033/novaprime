@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Utilities;
 
 public class PlayerInput
 {
     public int playerNumber { get; set; }
 
-    private GameplayCamera _camera;
+    private Camera _camera;
     private bool _jumpPressed;
     private bool _jumpRelease;
     
@@ -15,13 +16,15 @@ public class PlayerInput
     private PlayerActions _pAction;
     private bool _useGamePad;
     
-    public PlayerInput(int pNumber, GameplayCamera playerCamera)
+    public PlayerInput(int pNumber, Camera playerCamera)
     {
         playerNumber = pNumber;
         _camera = playerCamera;
-        
+
         
         _pAction = new PlayerActions();
+        int count = InputSystem.devices.Count;
+//        _pAction.devices = new ReadOnlyArray<InputDevice>(InputSystem.devices.ToArray(), 4, 1);
         _pAction.Gameplay.Enable();
     }
     
@@ -54,7 +57,7 @@ public class PlayerInput
         input.primaryFire = _pAction.Gameplay.primaryFire.ReadValue<float>() > 0.01f;
         input.secondaryFire = Input.GetMouseButton(1);
         
-        input.cursorPosition = _camera.camera.ScreenToWorldPoint(new Vector3(aimPosition.x, aimPosition.y, Mathf.Abs(_camera.transform.position.z)));
+        input.cursorPosition = _camera != null ? _camera.ScreenToWorldPoint(new Vector3(aimPosition.x, aimPosition.y, Mathf.Abs(_camera.transform.position.z))) : Vector3.zero;
         input.cursorPosition.z = 0;
 
         if (_pAction.Gameplay.forcePad.triggered)

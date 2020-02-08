@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class AvatarConstrainer : MonoBehaviour
 {
+    private const int kRaycastHitCount = 20;
     private const float kFallThroughPlatformWaitDuration = 0.15f;
     
     public Collider collisionCollider;
@@ -20,7 +21,7 @@ public class AvatarConstrainer : MonoBehaviour
     private RaycastController _raycastController;
     private CollisionInfo _collisionInfo;
     private FrameInput _input;
-
+    private RaycastHit[] _raycastHits;
     
     private float _resetPlatformTime;
 
@@ -31,6 +32,8 @@ public class AvatarConstrainer : MonoBehaviour
     
     void Awake()
     {
+        _raycastHits = new RaycastHit[kRaycastHitCount];
+        
         _raycastController = new RaycastController(
             distanceBetweenRays,
             collisionCollider,
@@ -90,7 +93,7 @@ public class AvatarConstrainer : MonoBehaviour
 
         _walkStepHeight =  (_raycastController.horizontalRaySpacing * _walkStepIndex);
         
-        RaycastHit hit;
+//        RaycastHit hit;
         for (int i = 0; i < _raycastController.horizontalRayCount; ++i)
         {
             Vector3 firstRayOrigin = rayOrigin;
@@ -98,9 +101,11 @@ public class AvatarConstrainer : MonoBehaviour
             
             Debug.DrawRay(firstRayOrigin, Vector3.right * directionX * rayLength, Color.red);
             
-            bool isHit = Physics.Raycast(firstRayOrigin, Vector3.right * directionX, out hit, rayLength, collisionMask);
-            if (isHit)
+            int hitCount = Physics.RaycastNonAlloc(firstRayOrigin, Vector3.right * directionX, _raycastHits, rayLength, collisionMask);
+            // Potential future bug for not looping through all hitCount
+            if (hitCount > 0)
             {
+                RaycastHit hit = _raycastHits[0];
                 if (Mathf.Abs(hit.distance) < 0.00001f)
                 {
                     continue;
@@ -173,10 +178,11 @@ public class AvatarConstrainer : MonoBehaviour
             
             Debug.DrawRay(rayOrigin, Vector3.up * directionY * rayLength, Color.red);
             
-            RaycastHit hit;
-            bool isHit = Physics.Raycast(rayOrigin, Vector3.up * directionY, out hit, rayLength, collisionMask);
-            if (isHit)
+            int hitCount = Physics.RaycastNonAlloc(rayOrigin, Vector3.up * directionY, _raycastHits, rayLength, collisionMask);
+            for(int x = 0; x < hitCount; ++x)
             {
+                RaycastHit hit = _raycastHits[x];
+            
                 if (hit.collider.CompareTag( "Platform"))
                 {
                     if (directionY == 1 || Mathf.Abs(hit.distance) < 0.0001f)
@@ -215,10 +221,10 @@ public class AvatarConstrainer : MonoBehaviour
             rayLength = Mathf.Abs(moveDelta.x) + _raycastController.skinWidth;
             Vector3 rayOrigin = ((directionX == -1) ? _raycastOrigins.bottomLeft : _raycastOrigins.bottomRight) + Vector3.up * moveDelta.y;
             
-            RaycastHit hit;
-            bool isHit = Physics.Raycast(rayOrigin, Vector3.right * directionX, out hit, rayLength, collisionMask);
-            if(isHit)
+            int hitCount = Physics.RaycastNonAlloc(rayOrigin, Vector3.right * directionX, _raycastHits, rayLength, collisionMask);
+            if (hitCount > 0)
             {
+                RaycastHit hit = _raycastHits[0];
                 float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
                 if (slopeAngle != _collisionInfo.slopeAngle)
                 {

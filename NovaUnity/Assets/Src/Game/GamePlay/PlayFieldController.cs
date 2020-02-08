@@ -6,7 +6,6 @@ using UnityEngine.InputSystem;
 
 public class PlayFieldController : NotificationDispatcher
 {
-    private PlayerController _pController;
     private GameplayCamera _gameplayCamera;
     private GameState _gameState;
     private GameSystems _gameSystems;
@@ -22,38 +21,15 @@ public class PlayFieldController : NotificationDispatcher
         _gameSystems = new GameSystems(_gameState);
         
         _gameSystems.Start();
-        
-        PlayerState p1State = PlayerState.Create(Vector3.up * 2.0f);
-        _gameState.playerStateList.Add(p1State);
-        
-        PlayerAvatarView p1View = GameObject.Instantiate<PlayerAvatarView>(Singleton.instance.gameplayResources.playerAvatar);
-        
-        _gameplayCamera = GameObject.FindObjectOfType<GameplayCamera>();
-        if (_gameplayCamera == null)
-        {
-            _gameplayCamera = GameObject.Instantiate<GameplayCamera>(Singleton.instance.gameplayResources.gameplayCamera);
-        }
-        _gameplayCamera.target = p1View;
-        
+        _gameSystems.GetSystem<PlayerSystem>().Spawn(0, Vector3.up * 2.0f);
+
         _pAction = new PlayerActions();
         _pAction.Gameplay.Enable();
-        
-        PlayerInput p1Input = new PlayerInput(0, _gameplayCamera);
-        
-        _pController = new PlayerController(p1State, p1View, p1Input);
-        _pController.Start(_gameSystems);
-        
+
     }
 
     public void Step(float deltaTime)
     {
-        if (_pController != null)
-        {
-            _pController.Step(deltaTime);
-            
-           
-        }
-
         if (_gameSystems != null)
         {
             _gameSystems.Step(deltaTime);
@@ -62,11 +38,6 @@ public class PlayFieldController : NotificationDispatcher
 
     public void FixedStep(float fixedDeltaTime)
     {
-        if (_pController != null)
-        {
-            _pController.FixedStep(fixedDeltaTime);
-        }
-
         if (_gameSystems != null)
         {
             _gameSystems.FixedStep(fixedDeltaTime);
@@ -111,7 +82,7 @@ public class PlayFieldController : NotificationDispatcher
         }
     }
     
-    private void _addCallbacks()
+    private void   _addCallbacks()
     {
   
     }

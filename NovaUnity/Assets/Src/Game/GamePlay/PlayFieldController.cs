@@ -19,13 +19,19 @@ public class PlayFieldController : NotificationDispatcher
 
         _gameState = new GameState();
         _gameSystems = new GameSystems(_gameState);
-        
         _gameSystems.Start();
-        _gameSystems.GetSystem<PlayerSystem>().Spawn(0, Vector3.up * 2.0f);
+        
+        AvatarSystem aSystem = _gameSystems.GetSystem<AvatarSystem>();
+        PlayerController pController = aSystem.Spawn<PlayerController>( "player", Vector3.up * 2.0f);
+        pController.playerNumber = 0;
 
+        
+        
+        IAvatarController gruntController = aSystem.Spawn<IAvatarController>( "grunt", Vector3.right * 2 + Vector3.up * 2.0f);
+
+        
         _pAction = new PlayerActions();
         _pAction.Gameplay.Enable();
-
     }
 
     public void Step(float deltaTime)

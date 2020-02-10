@@ -14,10 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameplayCamera: {fileID: 750901081596856283, guid: 57845569f40ecc84f89fd329f71426f5,
     type: 3}
-  playerAvatar: {fileID: 1315047983, guid: 4d9e1bc12d1bcd24b8367c65543d09b6, type: 3}
+  avatar: {fileID: 1315047983, guid: 4d9e1bc12d1bcd24b8367c65543d09b6, type: 3}
   machineGunView: {fileID: -2973457739781033346, guid: 76b7b00ebdb9a7f4397284dc79fbe64c,
     type: 3}
   bulletView: {fileID: -1901877338219026376, guid: a67d08bde992529428ee0d38b34637eb,
     type: 3}
   bulletData: {fileID: 11400000, guid: f85596d5b7b0430459790eb8fb481afc, type: 2}
   p1Input: {fileID: -944628639613478452, guid: a654f08727a8dac48b3b2688a62cfc5f, type: 3}
+  unitMap: {fileID: 11400000, guid: cd32ba94df0d4e44f8d1c06bdc747cc8, type: 2}

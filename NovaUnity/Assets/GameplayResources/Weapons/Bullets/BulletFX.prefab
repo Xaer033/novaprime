@@ -242,5 +242,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   collisionMask:
     serializedVersion: 2
-    m_Bits: 2560
+    m_Bits: 6656
   _trailRenderer: {fileID: 1753894756286364932}

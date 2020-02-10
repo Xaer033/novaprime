@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 292990dcc9a5ac94580fa1d10df86866, type: 3}
+  m_Name: StandardUnitMap
+  m_EditorClassIdentifier: 
+  _unitList:
+  - id: player
+    type: 1
+    view: {fileID: 1315047983, guid: 4d9e1bc12d1bcd24b8367c65543d09b6, type: 3}
+    data: {fileID: 11400000, guid: 4b92978451178234e91395adbbb8c0da, type: 2}
+  - id: grunt
+    type: 2
+    view: {fileID: 1315047983, guid: c6762e55a4237b041bdf95090ff6808b, type: 3}
+    data: {fileID: 11400000, guid: aaaf3723aa622294e87ae4babf1469f9, type: 2}

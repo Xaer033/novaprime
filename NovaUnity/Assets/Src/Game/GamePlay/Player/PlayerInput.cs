@@ -2,7 +2,7 @@
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Utilities;
 
-public class PlayerInput
+public class PlayerInput : IInputGenerator
 {
     public int playerNumber { get; set; }
 

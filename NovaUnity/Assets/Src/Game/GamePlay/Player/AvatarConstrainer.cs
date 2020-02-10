@@ -13,6 +13,7 @@ public class AvatarConstrainer : MonoBehaviour
     public LayerMask collisionMask;
     public float distanceBetweenRays = 0.08f;
     public float maxSlopeAngle = 50;
+    
     [Range(0, 1)] 
     public float walkStepRayPercentage = 0.25f;
     
@@ -179,13 +180,27 @@ public class AvatarConstrainer : MonoBehaviour
             Debug.DrawRay(rayOrigin, Vector3.up * directionY * rayLength, Color.red);
             
             int hitCount = Physics.RaycastNonAlloc(rayOrigin, Vector3.up * directionY, _raycastHits, rayLength, collisionMask);
+
+            float smallestDist = rayLength;
+            RaycastHit activeHit = default;
+            int activeIndex = -1;
             for(int x = 0; x < hitCount; ++x)
             {
                 RaycastHit hit = _raycastHits[x];
-            
-                if (hit.collider.CompareTag( "Platform"))
+
+                if (hit.distance < smallestDist)
                 {
-                    if (directionY == 1 || Mathf.Abs(hit.distance) < 0.0001f)
+                    smallestDist = hit.distance;
+                    activeHit = hit;
+                    activeIndex = x;
+                }
+            }
+
+            if (activeIndex >= 0)
+            {
+                if (activeHit.collider.CompareTag( "Platform"))
+                {
+                    if (directionY == 1 || Mathf.Abs(activeHit.distance) < 0.0001f)
                     {
                         continue;
                     }
@@ -197,13 +212,13 @@ public class AvatarConstrainer : MonoBehaviour
                     
                     if (inputDirY == -1)
                     {
-                        StartCoroutine(_startFallThroughPlatformTimer());//Gross...
+                        Singleton.instance.StartCoroutine(_startFallThroughPlatformTimer());//Gross...
                         continue;
                     }
                 }
 
-                moveDelta.y = (hit.distance - _raycastController.skinHeight - walkStepHeight) * directionY;
-                rayLength = hit.distance;
+                moveDelta.y = (activeHit.distance - _raycastController.skinHeight - walkStepHeight) * directionY;
+                rayLength = activeHit.distance;
 
                 if (_collisionInfo.climbingSlope)
                 {

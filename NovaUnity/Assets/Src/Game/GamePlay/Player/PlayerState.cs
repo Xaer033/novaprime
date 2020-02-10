@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using System.Text;
+using UnityEngine;
 
 public class PlayerState
 {
-    public static PlayerState Create(int playerNumber, Vector3 position)
+    public static PlayerState Create(string uuid,  int playerNumber, Vector3 position)
     {
         PlayerState state = new PlayerState();
         state.playerNumber = playerNumber;
@@ -12,9 +13,10 @@ public class PlayerState
         state.timeScale = 1.0f;
         state.machineGunState = new MachineGunState();
         state.stateType = PlayerActivityType.NONE;
-
+        state.uuid = uuid;//StringUtil.CreateMD5(data.name + "_" + playerNumber);
         return state;
     }
+
 
     public int playerNumber;
     public Vector3 position;
@@ -25,6 +27,10 @@ public class PlayerState
     public PlayerActivityType stateType;
 
     public MachineGunState machineGunState;
+
+    public string uuid;
+    
+   
 }
 
 public enum PlayerActivityType

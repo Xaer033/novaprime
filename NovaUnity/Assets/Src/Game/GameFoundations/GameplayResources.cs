@@ -9,10 +9,12 @@ using UnityEngine.U2D;
 public class GameplayResources : ScriptableObject
 {
     public GameplayCamera gameplayCamera;
-    public PlayerAvatarView playerAvatar;
+    public AvatarView avatar;
     public MachineGunView machineGunView;
     public BulletView bulletView;
 
     public ProjectileData bulletData;
     public InputActionAsset p1Input;
+
+    public UnitMap unitMap;
 }

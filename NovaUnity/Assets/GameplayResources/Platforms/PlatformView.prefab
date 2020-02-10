@@ -113,6 +113,6 @@ MonoBehaviour:
   - {x: 0, y: 4.25, z: 0}
   passengerMask:
     serializedVersion: 2
-    m_Bits: 1024
+    m_Bits: 5120
   distanceBetweenRays: 0.08
   collisionCollider: {fileID: 1516962157636426258}

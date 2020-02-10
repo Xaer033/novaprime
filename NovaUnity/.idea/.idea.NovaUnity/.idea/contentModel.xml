@@ -29,6 +29,7 @@
               <e p="NetworkOpCodes.cs" t="Include" />
               <e p="SessionFlags.cs" t="Include" />
               <e p="Singleton.cs" t="Include" />
+              <e p="StringUtil.cs" t="Include" />
             </e>
             <e p="GamePlay" t="Include">
               <e p="Camera" t="Include">
@@ -36,9 +37,10 @@
               </e>
               <e p="CollisionInfo.cs" t="Include" />
               <e p="Enemies" t="Include">
+                <e p="EnemyState.cs" t="Include" />
                 <e p="Grunt" t="Include">
+                  <e p="GruntBrain.cs" t="Include" />
                   <e p="GruntController.cs" t="Include" />
-                  <e p="GruntState.cs" t="Include" />
                 </e>
               </e>
               <e p="FrameInput.cs" t="Include" />
@@ -50,20 +52,22 @@
               </e>
               <e p="GameState.cs" t="Include" />
               <e p="GameSystems" t="Include">
+                <e p="AvatarSystem.cs" t="Include" />
                 <e p="GameSystems.cs" t="Include" />
                 <e p="IGameSystem.cs" t="Include" />
-                <e p="PlayerSystem.cs" t="Include" />
                 <e p="ProjectileSystem.cs" t="Include" />
               </e>
               <e p="IAvatarController.cs" t="Include" />
+              <e p="IInputGenerator.cs" t="Include" />
+              <e p="NewBehaviourScript.cs" t="Include" />
               <e p="Platforms" t="Include">
                 <e p="PlatformView.cs" t="Include" />
               </e>
               <e p="Player" t="Include">
                 <e p="AvatarConstrainer.cs" t="Include" />
+                <e p="AvatarView.cs" t="Include" />
                 <e p="IPlatformPassenger.cs" t="Include" />
                 <e p="PlayerActions.cs" t="Include" />
-                <e p="PlayerAvatarView.cs" t="Include" />
                 <e p="PlayerController.cs" t="Include" />
                 <e p="PlayerInput.cs" t="Include" />
                 <e p="PlayerState.cs" t="Include" />
@@ -75,6 +79,9 @@
                 <e p="TimeWarpFieldController.cs" t="Include" />
                 <e p="TimeWarpShaderHelper.cs" t="Include" />
               </e>
+              <e p="UnitData.cs" t="Include" />
+              <e p="UnitMap.cs" t="Include" />
+              <e p="UnitType.cs" t="Include" />
               <e p="Weapons" t="Include">
                 <e p="BulletView.cs" t="Include" />
                 <e p="MachineGunController.cs" t="Include" />

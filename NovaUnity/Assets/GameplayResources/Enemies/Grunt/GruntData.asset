@@ -23,7 +23,7 @@ MonoBehaviour:
   wallJumpClimb: {x: 4, y: 10}
   wallJumpOff: {x: 6, y: 3}
   wallJumpLeap: {x: 8, y: 8}
-  speed: 2
+  speed: 3
   terminalVelocity: 15
   accelerationTimeAir: 0.15
   accelerationTimeDoubleJumpAir: 0.375
@@ -31,3 +31,4 @@ MonoBehaviour:
   targetLayerMask:
     serializedVersion: 2
     m_Bits: 1024
+  machineGunData: {fileID: 11400000, guid: d3d2225bbbf5d0e439f02d629a0e8c9d, type: 2}

@@ -10,6 +10,7 @@ public class MachineGunController
 
     private MachineGunView _view;
     private MachineGunState _state;
+    private MachineGunData _machineGunData;
 
     public MachineGunView view
     {
@@ -17,13 +18,14 @@ public class MachineGunController
     }
     
 
-    public MachineGunController(GameSystems gameSystems, MachineGunState state)
+    public MachineGunController(GameSystems gameSystems, MachineGunState state, MachineGunData data)
     {
         _gameSystems = gameSystems;
         _state = state;
+        _machineGunData = data;
         
         // Move this later
-        _view = GameObject.Instantiate<MachineGunView>(Singleton.instance.gameplayResources.machineGunView);
+        _view = GameObject.Instantiate<MachineGunView>(_machineGunData.view);
     }
     
     public void OnTimeWarpEnter(float timeScale)
@@ -56,7 +58,7 @@ public class MachineGunController
         Vector3 adjustedPos = visualWeaponPos + (viewDir * 20.0f);
         
         RaycastHit hit;
-        bool isHit = Physics.Raycast(visualWeaponPos, (adjustedPos - visualWeaponPos).normalized, out hit, 20.0f, _view.targetLayerMask);
+        bool isHit = Physics.Raycast(visualWeaponPos, (adjustedPos - visualWeaponPos).normalized, out hit, 20.0f, _machineGunData.targetLayerMask);
         if (isHit)
         {
             adjustedPos = hit.point;
@@ -65,10 +67,9 @@ public class MachineGunController
 //        Debug.DrawRay(adjustedPos, Vector3.up, Color.red, 1.0f);
         _view.Fire(adjustedPos, 10.0f);
 
-        ProjectileData projectileData = Singleton.instance.gameplayResources.bulletData;
-        _gameSystems.projectileSystem.Spawn(projectileData, visualWeaponPos, viewDir);
+        _gameSystems.projectileSystem.Spawn(_machineGunData.projectileData, visualWeaponPos, viewDir);
         
-        _state.fireTimer = _view.fireCooldown;
+        _state.fireTimer = _machineGunData.fireCooldownSeconds;
     }
   
     private Vector3 getFireDirection(Vector3 forward, float range)

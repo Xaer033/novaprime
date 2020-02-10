@@ -18,7 +18,6 @@ public class GruntController : NotificationDispatcher, IAvatarController
     
     private FrameInput _lastInput;
     private IInputGenerator _input;
-    private int _jumpCount;
     private float _resetPlatformTime;
 
     private MachineGunController _machineGunController;
@@ -29,7 +28,7 @@ public class GruntController : NotificationDispatcher, IAvatarController
     
     public GruntController(UnitMap.Unit unit, EnemyState state, AvatarView view, IInputGenerator input)
     {
-        _unit = _unit;
+        _unit = unit;
         _unitData = unit.data;
         _state = state;
         
@@ -73,8 +72,8 @@ public class GruntController : NotificationDispatcher, IAvatarController
         float timeToJumpApex = _unitData.timeToJumpApex;
         _gravity = -(2 * _unitData.maxJumpHeight) / (timeToJumpApex * timeToJumpApex);
         
-//        _machineGunController = new MachineGunController(_gameSystems, _state.machineGunState);
-//        _view.SetWeapon(_machineGunController.view.transform);
+        _machineGunController = new MachineGunController(_gameSystems, _state.machineGunState, _unitData.machineGunData);
+        _view.SetWeapon(_machineGunController.view.transform);
     }
 
     public FrameInput lastInput
@@ -99,9 +98,9 @@ public class GruntController : NotificationDispatcher, IAvatarController
         
     }
 
-    public void FixedStep(float deltaTime)
+    public void FixedStep(float deltaTime, FrameInput input)
     {
-        _lastInput = _input.GetInput();
+        _lastInput = input;
         
         deltaTime = _lastInput.secondaryFire ? deltaTime * 0.5f : deltaTime;
         deltaTime = deltaTime * _state.timeScale;
@@ -129,14 +128,6 @@ public class GruntController : NotificationDispatcher, IAvatarController
         if (collisionInfo.below)
         {
             _coyoteJumpTimer = _unitData.coyoteTime;
-            _jumpCount = 0;
-        }
-        else
-        {
-            if (_coyoteJumpTimer <= 0 && _jumpCount == 0 && !isWallSliding)
-            {
-                _jumpCount++;
-            }
         }
         
         // *Bop*
@@ -149,6 +140,24 @@ public class GruntController : NotificationDispatcher, IAvatarController
             else
             {
                 _state.velocity.y = 0;
+            }
+        }
+        
+        
+        if (_view)
+        {
+            // Aim
+            _view.Aim(aimPosition);
+        }
+
+        // Weapon Handling
+        if (_machineGunController != null)
+        {
+            _machineGunController.FixedStep(deltaTime);
+
+            if (_lastInput.primaryFire)
+            {
+                _machineGunController.Fire(aimPosition);
             }
         }
     }
@@ -173,8 +182,7 @@ public class GruntController : NotificationDispatcher, IAvatarController
     {
         float targetVelocityX = _lastInput.horizontalMovement * _unitData.speed;
         
-        float airFriction =  _jumpCount == 2 ? _unitData.accelerationTimeDoubleJumpAir : _unitData.accelerationTimeAir;
-        float accelerationTime = collisionInfo.below ? _unitData.accelerationTimeGround : airFriction; 
+        float accelerationTime = collisionInfo.below ? _unitData.accelerationTimeGround : _unitData.accelerationTimeAir; 
         float inputVelocityX = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref _velocityXSmoothing, accelerationTime);
 
         velocity.x = inputVelocityX;
@@ -199,8 +207,6 @@ public class GruntController : NotificationDispatcher, IAvatarController
             _midairJumpTimer = _unitData.jumpRememberDelay;
         }
 
-        bool didDoubleJump = (_jumpCount == 1 && _lastInput.jumpPressed);
-        
         // This is so if the player jumps while in the air for a bit, we still jump when on floor
         if (_midairJumpTimer > 0)
         {
@@ -222,12 +228,11 @@ public class GruntController : NotificationDispatcher, IAvatarController
                     velocity.y = _unitData.wallJumpLeap.y;
                 }
 
-                _jumpCount = 3;
                 _midairJumpTimer = 0;
             }
             else
             {
-                if ( _coyoteJumpTimer > 0 || didDoubleJump)
+                if ( _coyoteJumpTimer > 0)
                 {
                     _coyoteJumpTimer = 0;
                     if (collisionInfo.slidingDownMaxSlope)
@@ -237,19 +242,11 @@ public class GruntController : NotificationDispatcher, IAvatarController
                             Vector3 jumpDirection = (Vector3.up + collisionInfo.slopeNormal).normalized * maxJumpVelocity;
                             velocity.x = jumpDirection.x;
                             velocity.y = jumpDirection.y;
-                        
-                            _jumpCount++;
                         }
                     }
                     else 
                     {
                         velocity.y = _lastInput.verticalMovement < 0 ? maxJumpVelocity * 0.75f : maxJumpVelocity;
-                        if (_jumpCount > 0)
-                        {
-                            velocity.x = inputDirX * _unitData.wallJumpOff.x;
-                        }
-                    
-                        _jumpCount++;
                     }
 
                     _midairJumpTimer = 0;
@@ -279,7 +276,6 @@ public class GruntController : NotificationDispatcher, IAvatarController
         if (wallOnSide && !collisionInfo.below && velocity.y < 0)
         {
             isWallSliding = true;
-            _jumpCount = 1;
             
             float wallSpeedDampTime = _lastInput.verticalMovement < 0 ? 0.1f : _unitData.wallSlideSpeedDampTime;
             

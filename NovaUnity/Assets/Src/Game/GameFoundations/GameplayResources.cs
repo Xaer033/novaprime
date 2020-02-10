@@ -12,9 +12,7 @@ public class GameplayResources : ScriptableObject
     public AvatarView avatar;
     public MachineGunView machineGunView;
     public BulletView bulletView;
-
-    public ProjectileData bulletData;
-    public InputActionAsset p1Input;
+    public TextAsset inputList;
 
     public UnitMap unitMap;
 }

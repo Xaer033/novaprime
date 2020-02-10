@@ -31,3 +31,4 @@ MonoBehaviour:
   targetLayerMask:
     serializedVersion: 2
     m_Bits: 0
+  machineGunData: {fileID: 11400000, guid: 4b17b859321cf394b98dacaa960d30ae, type: 2}

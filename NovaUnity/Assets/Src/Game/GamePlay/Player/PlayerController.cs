@@ -79,9 +79,10 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         
         float timeToJumpApex = _unitData.timeToJumpApex;
         _gravity = -(2 * _unitData.maxJumpHeight) / (timeToJumpApex * timeToJumpApex);
-        
-        _machineGunController = new MachineGunController(_gameSystems, _state.machineGunState);
+
+        _machineGunController = new MachineGunController(_gameSystems, _state.machineGunState, _unitData.machineGunData);
         _view.SetWeapon(_machineGunController.view.transform);
+        
         _state.stateType = PlayerActivityType.ACTIVE;
     }
 
@@ -117,11 +118,10 @@ public class PlayerController : NotificationDispatcher, IAvatarController
 //        _view.transform.localPosition = _state.position;
     }
 
-    public void FixedStep(float deltaTime)
+    public void FixedStep(float deltaTime, FrameInput input)
     {
-        _lastInput = _input.GetInput();
-        
-        
+        _lastInput = input;
+
         deltaTime = _lastInput.secondaryFire ? deltaTime * 0.5f : deltaTime;
         deltaTime = deltaTime * _state.timeScale;
 
@@ -190,7 +190,6 @@ public class PlayerController : NotificationDispatcher, IAvatarController
 
         // Clear buffered input as we handled it above (for transient button up/down events that may get missed in a fixedUpdate
         _input.Clear();
-
     }
 
     public void OnTimeWarpEnter(float timeScale)

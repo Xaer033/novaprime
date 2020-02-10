@@ -28,7 +28,7 @@ public class GameSystems : GhostGen.NotificationDispatcher
     {
         _gameState = gameState;
         
-        projectileSystem = new ProjectileSystem(500);
+        projectileSystem = new ProjectileSystem(125);
         AvatarSystem = new AvatarSystem();
         
         

@@ -19,6 +19,9 @@
             <e p="TimeWarpShader.shader" t="Include" />
           </e>
         </e>
+        <e p="Resources" t="Include">
+          <e p="inputList.txt" t="Include" />
+        </e>
         <e p="Src" t="Include">
           <e p="Game" t="Include">
             <e p="GameFoundations" t="Include">
@@ -85,6 +88,7 @@
               <e p="Weapons" t="Include">
                 <e p="BulletView.cs" t="Include" />
                 <e p="MachineGunController.cs" t="Include" />
+                <e p="MachineGunData.cs" t="Include" />
                 <e p="MachineGunState.cs" t="Include" />
                 <e p="MachineGunView.cs" t="Include" />
                 <e p="ProjectileData.cs" t="Include" />

@@ -7,25 +7,13 @@ public class MachineGunView : MonoBehaviour
 {
     private const int kFXPoolSize = 50;
     
-    public LayerMask targetLayerMask;
-    
-    public float fireCooldown;
-
-
     // (This should all be in a weapon class)
     public GameObject _bulletFXPrefab;
-    private TrailRenderer[] _fxPool;
-    private int _fxIndex;
     
     public Transform barrelHook;
     
     public MachineGunController controller { get; set; }
     
-    void Awake ()
-    {
-        setupFXPool();
-    }
-
     public void OnTimeWarpEnter(float timeScale)
     {
         if (controller != null)
@@ -75,27 +63,5 @@ public class MachineGunView : MonoBehaviour
 //            fx.gameObject.SetActive(false);
 //            t = null;
 //        });
-    }
-
-    private TrailRenderer getNextFX()
-    {
-        TrailRenderer fx = _fxPool[_fxIndex];
-        _fxIndex = (_fxIndex + 1) % _fxPool.Length;
-        return fx;
-    }
-
-    private void setupFXPool()
-    {
-        _fxIndex = 0;
-
-        _fxPool = new TrailRenderer[kFXPoolSize];
-
-        for(int i = 0; i < kFXPoolSize; ++i)
-        {
-            GameObject fxObj = GameObject.Instantiate<GameObject>(_bulletFXPrefab, transform.position, transform.rotation);
-            _fxPool[i] = fxObj.GetComponent<TrailRenderer>();
-            _fxPool[i].gameObject.SetActive(false);
-            //_fxPool[i].emitting = (false);
-        }
     }
 }

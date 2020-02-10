@@ -27,7 +27,8 @@ public class PlayFieldController : NotificationDispatcher
 
         
         
-        IAvatarController gruntController = aSystem.Spawn<IAvatarController>( "grunt", Vector3.right * 2 + Vector3.up * 2.0f);
+        aSystem.Spawn<IAvatarController>( "grunt", Vector3.right * 2 + Vector3.up * 2.0f);
+        aSystem.Spawn<IAvatarController>( "grunt", Vector3.left * 4.0f + Vector3.up * 2.0f);
 
         
         _pAction = new PlayerActions();

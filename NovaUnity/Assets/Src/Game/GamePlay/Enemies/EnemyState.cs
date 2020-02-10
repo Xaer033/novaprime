@@ -10,6 +10,7 @@ public class EnemyState
         state.velocity = Vector3.zero;
         state.timeScale = 1.0f;
         state.uuid = uuid;
+        state.machineGunState = new MachineGunState();
         return state;
     }
     
@@ -18,10 +19,11 @@ public class EnemyState
     public Vector3 position;
     public Vector3 velocity;
 
+    public MachineGunState machineGunState;
     public LocomotionState locomotionState;
     public AiState aiState;
     public string targetUUID;
-    
+
     public string uuid;
 }
 

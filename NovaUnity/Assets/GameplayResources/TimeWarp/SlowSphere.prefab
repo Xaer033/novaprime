@@ -4997,7 +4997,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   affectedLayers:
     serializedVersion: 2
-    m_Bits: 1024
+    m_Bits: 5120
   _renderer: {fileID: 0}
   timeScale: 0.3
   radius: 1.95

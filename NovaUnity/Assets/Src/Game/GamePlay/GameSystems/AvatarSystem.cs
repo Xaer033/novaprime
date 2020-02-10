@@ -1,7 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
 using GhostGen;
+using Newtonsoft.Json;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class AvatarSystem : NotificationDispatcher, IGameSystem
 {
@@ -14,14 +19,18 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     private List<IAvatarController>      _avatarControllerList;
     private Dictionary<string, IAvatarController> _avatarLookUpMap;
 
+    private List<FrameInput> _frameInputList;
+    
     private GameplayCamera _camera;
     private static int _spawnCount = 0;
+    private int _fixedStepCount;
     
     public AvatarSystem()
     {
         _unitMap = Singleton.instance.gameplayResources.unitMap;
         _avatarControllerList       = new List<IAvatarController>(200);
         _avatarLookUpMap            = new Dictionary<string, IAvatarController>();
+        _frameInputList             = new List<FrameInput>();
 
 //        _playerActionList         = new List<PlayerActions>(kMaxPlayerCount);
     }
@@ -30,14 +39,26 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     {
         _gameSystems = gameSystems;
         _gameState = gameState;
+        _fixedStepCount = 0;
     }
 
     public void FixedStep(float deltaTime)
     {
         for (int i = 0; i < _avatarControllerList.Count; ++i)
         {
-            _avatarControllerList[i].FixedStep(deltaTime);
+            IInputGenerator inputGenerator = _avatarControllerList[i].GetInput();
+            FrameInput input = inputGenerator.GetInput();
+            _frameInputList.Add(input);            
+            // This is kinda cool, cuz now we can swap input generators or save/store them for replays
+            _avatarControllerList[i].FixedStep(deltaTime, input);
         }
+
+        if (Keyboard.current.f10Key.wasPressedThisFrame)
+        {
+            SaveToFile();
+        }
+
+        _fixedStepCount++;
     }
 
     public void Step(float deltaTime)
@@ -137,4 +158,26 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         }
         return _camera;
     }
+
+    private void SaveToFile()
+    {
+        StreamWriter writer = new StreamWriter("Assets/Resources/inputList.txt", false, Encoding.UTF8);
+       
+        JsonWriter jsonWriter = new JsonTextWriter(writer);
+        jsonWriter.WriteStartArray();
+        foreach (var input in _frameInputList)
+        {
+            string jsonInput = JsonUtility.ToJson(input);
+            jsonWriter.WriteRaw(jsonInput);
+        }
+        jsonWriter.WriteEndArray();
+        jsonWriter.Flush();
+        jsonWriter.Close();
+        
+    }
+//    private static byte[] ToByteArray(PlayerState command)
+//    {
+//        string jsonCommand = JsonUtility.ToJson(command);
+//        return System.Text.Encoding.UTF8.GetBytes(jsonCommand);
+//    }
 }

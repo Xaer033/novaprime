@@ -26,4 +26,5 @@ public class UnitData : ScriptableObject
     public float accelerationTimeGround = 0.05f;
 
     public LayerMask targetLayerMask;
+    public MachineGunData machineGunData;
 }

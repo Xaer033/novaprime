@@ -16,7 +16,7 @@ public interface IAvatarController : ITimeWarpTarget
     void SetVelocity(Vector3 velocity);
     
     void Start(GameSystems gameSystems);
-    void FixedStep(float deltaTime);
+    void FixedStep(float deltaTime, FrameInput input);
     void Step(float deltaTime);
 
 }

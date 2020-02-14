@@ -17,8 +17,6 @@ public class SinglePlayerCampaignMode : NotificationDispatcher, IGameModeControl
     {
        _playFieldController = new PlayFieldController();
        _playFieldController.Start();
-       
-
     }
 
     public void FixedStep(float fixedDeltaTime)
@@ -39,6 +37,10 @@ public class SinglePlayerCampaignMode : NotificationDispatcher, IGameModeControl
 
     public void CleanUp()
     {
+        if (_playFieldController != null)
+        {
+            _playFieldController.CleanUp();
+        }
     }
 
    

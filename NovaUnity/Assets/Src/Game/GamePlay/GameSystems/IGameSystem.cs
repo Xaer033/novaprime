@@ -1,8 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using GhostGen;
 
-public interface IGameSystem 
+public interface IGameSystem : IEventDispatcher
 {
     // Start is called before the first frame update
     void Start(GameSystems gameSystems, GameState gameState);

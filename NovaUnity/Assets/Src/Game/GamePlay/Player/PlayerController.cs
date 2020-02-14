@@ -9,7 +9,6 @@ public class PlayerController : NotificationDispatcher, IAvatarController
 
     private float _timeToWallUnstick;
     private float _wallSlideVelocity;
-    private bool _isWallSliding;
 
     private float _midairJumpTimer;
     private float _coyoteJumpTimer;
@@ -46,6 +45,10 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         return _input;
     }
 
+    public void SetInput(IInputGenerator input)
+    {
+        _input = input;
+    }
 
     public Vector3 GetPosition()
     {
@@ -56,9 +59,6 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     {
         set
         {
-            PlayerInput pInput = _input as PlayerInput;
-            
-            pInput.playerNumber = value;
             _state.playerNumber = value;
         }
     }
@@ -86,6 +86,11 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         _state.stateType = PlayerActivityType.ACTIVE;
     }
 
+    public AvatarView GetView()
+    {
+        return _view;
+    }
+
     public FrameInput lastInput
     {
         get { return _lastInput; }
@@ -111,8 +116,6 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     // Update is called once per frame
     public void Step(float deltaTime)
     {
-        _lastInput = _input.GetInput();
-        
         float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
 //        _view.transform.localPosition = Vector3.Lerp(_previousPosition, _state.position, alpha);
 //        _view.transform.localPosition = _state.position;
@@ -189,7 +192,10 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         }
 
         // Clear buffered input as we handled it above (for transient button up/down events that may get missed in a fixedUpdate
-        _input.Clear();
+        if (_input != null)
+        {
+            _input.Clear();
+        }
     }
 
     public void OnTimeWarpEnter(float timeScale)

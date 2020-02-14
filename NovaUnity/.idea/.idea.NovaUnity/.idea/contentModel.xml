@@ -56,6 +56,7 @@
               <e p="GameState.cs" t="Include" />
               <e p="GameSystems" t="Include">
                 <e p="AvatarSystem.cs" t="Include" />
+                <e p="GamePlayEventType.cs" t="Include" />
                 <e p="GameSystems.cs" t="Include" />
                 <e p="IGameSystem.cs" t="Include" />
                 <e p="ProjectileSystem.cs" t="Include" />

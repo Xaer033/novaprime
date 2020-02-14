@@ -43,7 +43,11 @@ public class GruntController : NotificationDispatcher, IAvatarController
         return _input;
     }
 
-   
+    public void SetInput(IInputGenerator input)
+    {
+        _input = input;
+    }
+    
     public UnitType GetUnitType()
     {
         return _unit.type;
@@ -52,6 +56,11 @@ public class GruntController : NotificationDispatcher, IAvatarController
     public Vector3 GetPosition()
     {
         return _state.position;
+    }
+
+    public AvatarView GetView()
+    {
+        return _view;
     }
     
     public string GetUUID()
@@ -159,6 +168,11 @@ public class GruntController : NotificationDispatcher, IAvatarController
             {
                 _machineGunController.Fire(aimPosition);
             }
+        }
+
+        if (_input != null)
+        {
+            _input.Clear();
         }
     }
 

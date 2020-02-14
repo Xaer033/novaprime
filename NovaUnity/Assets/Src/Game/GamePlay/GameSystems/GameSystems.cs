@@ -9,7 +9,7 @@ public class GameSystems : GhostGen.NotificationDispatcher
     private Dictionary<Type, IGameSystem> _gameSystemMap = new Dictionary<Type, IGameSystem>();
     
     public ProjectileSystem projectileSystem { get; private set; }
-    public AvatarSystem AvatarSystem { get; private set; }
+    public AvatarSystem avatarSystem { get; private set; }
 
     
     public T GetSystem<T>() where T : IGameSystem
@@ -29,11 +29,10 @@ public class GameSystems : GhostGen.NotificationDispatcher
         _gameState = gameState;
         
         projectileSystem = new ProjectileSystem(125);
-        AvatarSystem = new AvatarSystem();
-        
-        
+        avatarSystem = new AvatarSystem();
+
         _gameSystemMap.Add(typeof(ProjectileSystem), projectileSystem);
-        _gameSystemMap.Add(typeof(AvatarSystem), AvatarSystem);
+        _gameSystemMap.Add(typeof(AvatarSystem), avatarSystem);
     }
 
     public void Start()

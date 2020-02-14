@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class ProjectileSystem : NotificationDispatcher, IGameSystem
 {
+    private GameSystems _gameSystems;
+    
     private ProjectileState[] _projectilePool;
     private BulletView[] _projectileViewPool;
     
@@ -19,6 +21,8 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
     
     public void Start(GameSystems gameSystems, GameState gameState)
     {
+        _gameSystems = gameSystems;
+        
         BulletView projectileTemplate = Singleton.instance.gameplayResources.bulletView;
         for (int i = 0; i < _poolSize; ++i)
         {
@@ -103,6 +107,8 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
                 state.velocity = direction * state.speed;
                 
                 view.Reset(position);
+                
+                _gameSystems.DispatchEvent(GamePlayEventType.PROJECTILE_SPAWNED, false, state);
                 return state;
             }
         }

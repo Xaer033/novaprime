@@ -27,10 +27,16 @@ public class PlayerState
     public PlayerActivityType stateType;
 
     public MachineGunState machineGunState;
+    
+    public float timeToWallUnstick;
+    public float wallSlideVelocity;
+    public float midairJumpTimer;
+    public float coyoteJumpTimer;
+    public Vector3 previousPosition;
+    public float velocityXSmoothing;
 
     public string uuid;
     
-   
 }
 
 public enum PlayerActivityType

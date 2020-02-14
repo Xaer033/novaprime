@@ -10,6 +10,13 @@ public class PlayFieldController : NotificationDispatcher
     private GameState _gameState;
     private GameSystems _gameSystems;
     private PlayerActions _pAction;
+
+    private IInputGenerator _playerInput;
+    private IInputGenerator _gruntInput;
+    private PlayerController _playerController;
+    private GruntController _gruntController;
+
+    private GameplayCamera _cam;
     
     public void Start()
     {
@@ -22,17 +29,17 @@ public class PlayFieldController : NotificationDispatcher
         _gameSystems.Start();
         
         AvatarSystem aSystem = _gameSystems.GetSystem<AvatarSystem>();
-        PlayerController pController = aSystem.Spawn<PlayerController>( "player", Vector3.up * 2.0f);
-        pController.playerNumber = 0;
-
+        _playerController = aSystem.Spawn<PlayerController>( "player", Vector3.up * 2.0f);
+        _playerInput = _playerController.GetInput();
         
-        
-        aSystem.Spawn<IAvatarController>( "grunt", Vector3.right * 2 + Vector3.up * 2.0f);
-        aSystem.Spawn<IAvatarController>( "grunt", Vector3.left * 4.0f + Vector3.up * 2.0f);
-
+        aSystem.Spawn<GruntController>( "grunt", Vector3.right * 2 + Vector3.up * 2.0f);
+        _gruntController = aSystem.Spawn<GruntController>( "grunt", Vector3.left * 4.0f + Vector3.up * 2.0f);
+        _gruntInput = _gruntController.GetInput();
         
         _pAction = new PlayerActions();
         _pAction.Gameplay.Enable();
+
+        _cam = GameObject.FindObjectOfType<GameplayCamera>();
     }
 
     public void Step(float deltaTime)
@@ -51,6 +58,26 @@ public class PlayFieldController : NotificationDispatcher
         }
         
         //Debug STUFF
+        if (Keyboard.current.f2Key.wasPressedThisFrame)
+        {
+            _cam.ClearTargets();
+            
+            IInputGenerator currentInput = _gruntController.GetInput();
+            if (currentInput == _gruntInput)
+            {
+                _playerController.SetInput(null);
+                _gruntController.SetInput(_playerInput);
+                _cam.AddTarget(_gruntController.GetView().transform);
+            }
+            else
+            {
+                _playerController.SetInput(_playerInput);
+                _gruntController.SetInput(_gruntInput);
+                _cam.AddTarget(_playerController.GetView().transform);
+            }
+            
+        }
+        
         if (_pAction.Gameplay.reset.triggered)
         {
             _gameState.playerStateList[0].position = Vector3.zero;

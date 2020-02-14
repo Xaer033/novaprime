@@ -6,10 +6,13 @@ public interface IAvatarController : ITimeWarpTarget
 {
     UnitType GetUnitType();
     IInputGenerator GetInput();
+    void SetInput(IInputGenerator input);
 
     string GetUUID();
 
     Vector3 GetPosition();
+
+    AvatarView GetView();
     
     void Move(Vector3 moveDelta, bool isOnPlatform);
 

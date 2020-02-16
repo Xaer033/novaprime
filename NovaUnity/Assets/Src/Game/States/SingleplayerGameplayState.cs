@@ -68,10 +68,16 @@ public class SingleplayerGameplayState : IGameState
         }
     }
 
+    public void LateStep(float deltaTime)
+    {
+        if (_gameModeController != null)
+        {
+            _gameModeController.LateStep(deltaTime);
+        }
+    }
+    
     public void Exit()
 	{
-		Debug.Log ("Exiting In Gameplay State");
-
         _gameModeController.RemoveListener(GameEventType.GAME_OVER, onGameOver);
         _gameModeController.CleanUp();   
     }

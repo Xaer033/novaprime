@@ -14,10 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameplayCamera: {fileID: 750901081596856283, guid: 57845569f40ecc84f89fd329f71426f5,
     type: 3}
-  avatar: {fileID: 1315047983, guid: 4d9e1bc12d1bcd24b8367c65543d09b6, type: 3}
-  machineGunView: {fileID: -2973457739781033346, guid: 76b7b00ebdb9a7f4397284dc79fbe64c,
-    type: 3}
   bulletView: {fileID: -1901877338219026376, guid: a67d08bde992529428ee0d38b34637eb,
     type: 3}
   inputList: {fileID: 4900000, guid: 02af8773cccfdb442a1dd51eff737344, type: 3}
+  healthUIPrefab: {fileID: 114593122990014430, guid: a1559d4617b0bbe4197dead18dc12b6c,
+    type: 3}
   unitMap: {fileID: 11400000, guid: cd32ba94df0d4e44f8d1c06bdc747cc8, type: 2}

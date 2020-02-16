@@ -35,17 +35,45 @@
               <e p="StringUtil.cs" t="Include" />
             </e>
             <e p="GamePlay" t="Include">
+              <e p="Attacking" t="Include">
+                <e p="AttackData.cs" t="Include" />
+                <e p="AttackResult.cs" t="Include" />
+                <e p="AttackType.cs" t="Include" />
+                <e p="DamageType.cs" t="Include" />
+                <e p="IAttacker.cs" t="Include" />
+                <e p="IAttackTarget.cs" t="Include" />
+              </e>
+              <e p="Avatars" t="Include">
+                <e p="AvatarConstrainer.cs" t="Include" />
+                <e p="AvatarState.cs" t="Include" />
+                <e p="AvatarView.cs" t="Include" />
+                <e p="Enemies" t="Include">
+                  <e p="EnemyState.cs" t="Include" />
+                  <e p="Grunt" t="Include">
+                    <e p="GruntBrain.cs" t="Include" />
+                    <e p="GruntController.cs" t="Include" />
+                  </e>
+                </e>
+                <e p="HealthUIView.cs" t="Include" />
+                <e p="IAvatarController.cs" t="Include" />
+                <e p="IInputGenerator.cs" t="Include" />
+                <e p="IPlatformPassenger.cs" t="Include" />
+                <e p="Player" t="Include">
+                  <e p="PlayerActions.cs" t="Include" />
+                  <e p="PlayerController.cs" t="Include" />
+                  <e p="PlayerInput.cs" t="Include" />
+                  <e p="PlayerState.cs" t="Include" />
+                </e>
+                <e p="RaycastController.cs" t="Include" />
+                <e p="UnitMap.cs" t="Include" />
+                <e p="UnitStats.cs" t="Include" />
+                <e p="UnitType.cs" t="Include" />
+              </e>
               <e p="Camera" t="Include">
                 <e p="GameplayCamera.cs" t="Include" />
+                <e p="GuiCameraTag.cs" t="Include" />
               </e>
               <e p="CollisionInfo.cs" t="Include" />
-              <e p="Enemies" t="Include">
-                <e p="EnemyState.cs" t="Include" />
-                <e p="Grunt" t="Include">
-                  <e p="GruntBrain.cs" t="Include" />
-                  <e p="GruntController.cs" t="Include" />
-                </e>
-              </e>
               <e p="FrameInput.cs" t="Include" />
               <e p="GameContext.cs" t="Include" />
               <e p="GameEventType.cs" t="Include" />
@@ -58,34 +86,19 @@
                 <e p="AvatarSystem.cs" t="Include" />
                 <e p="GamePlayEventType.cs" t="Include" />
                 <e p="GameSystems.cs" t="Include" />
+                <e p="HealthUISystem.cs" t="Include" />
                 <e p="IGameSystem.cs" t="Include" />
                 <e p="ProjectileSystem.cs" t="Include" />
               </e>
-              <e p="IAvatarController.cs" t="Include" />
-              <e p="IInputGenerator.cs" t="Include" />
-              <e p="NewBehaviourScript.cs" t="Include" />
               <e p="Platforms" t="Include">
                 <e p="PlatformView.cs" t="Include" />
               </e>
-              <e p="Player" t="Include">
-                <e p="AvatarConstrainer.cs" t="Include" />
-                <e p="AvatarView.cs" t="Include" />
-                <e p="IPlatformPassenger.cs" t="Include" />
-                <e p="PlayerActions.cs" t="Include" />
-                <e p="PlayerController.cs" t="Include" />
-                <e p="PlayerInput.cs" t="Include" />
-                <e p="PlayerState.cs" t="Include" />
-              </e>
               <e p="PlayFieldController.cs" t="Include" />
-              <e p="RaycastController.cs" t="Include" />
               <e p="TimeWarpers" t="Include">
                 <e p="ITimeWarpTarget.cs" t="Include" />
                 <e p="TimeWarpFieldController.cs" t="Include" />
                 <e p="TimeWarpShaderHelper.cs" t="Include" />
               </e>
-              <e p="UnitData.cs" t="Include" />
-              <e p="UnitMap.cs" t="Include" />
-              <e p="UnitType.cs" t="Include" />
               <e p="Weapons" t="Include">
                 <e p="BulletView.cs" t="Include" />
                 <e p="MachineGunController.cs" t="Include" />

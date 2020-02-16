@@ -6,4 +6,6 @@ public interface IGameSystem : IEventDispatcher
     void Start(GameSystems gameSystems, GameState gameState);
     void FixedStep(float deltaTime);
     void Step(float deltaTime);
+    void LateStep(float deltaTime);
+    void CleanUp();
 }

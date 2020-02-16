@@ -69,6 +69,16 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         }
     }
 
+    public void LateStep(float deltaTime)
+    {
+        
+    }
+
+    public void CleanUp()
+    {
+        
+    }
+
     public IAvatarController GetController(string uuid)
     {
         return _avatarLookUpMap[uuid];
@@ -133,7 +143,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     {
         AvatarView view = GameObject.Instantiate<AvatarView>(unit.view);
         EnemyState state = EnemyState.Create(uuid, position);
-        GruntBrain input = new GruntBrain(_gameSystems, unit.data, state);
+        GruntBrain input = new GruntBrain(_gameSystems, unit.stats, state);
         GruntController controller = new GruntController(unit, state, view, input);
         controller.Start(_gameSystems);
 
@@ -166,6 +176,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         StreamWriter writer = new StreamWriter("Assets/Resources/inputList.txt", false, Encoding.UTF8);
        
         JsonWriter jsonWriter = new JsonTextWriter(writer);
+        jsonWriter.Formatting = Formatting.Indented;
         jsonWriter.WriteStartArray();
         foreach (var input in _frameInputList)
         {

@@ -39,6 +39,11 @@ public class IntroState : IGameState
         //Camera.main.transform.LookAt(lookPos, grav.normalized);
     }
 
+    public void LateStep( float p_deltaTime )
+    {
+		
+    }
+
     public void Exit( )
 	{
 	//	_controller.getUI().rem

@@ -4,8 +4,9 @@ using UnityEngine;
 public class ProjectileSystem : NotificationDispatcher, IGameSystem
 {
     private GameSystems _gameSystems;
+    private GameState _gameState;
     
-    private ProjectileState[] _projectilePool;
+//    private ProjectileState[] _projectilePool;
     private BulletView[] _projectileViewPool;
     
     private int _poolSize;
@@ -14,7 +15,6 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
     public ProjectileSystem(int poolSize)
     {
         _poolSize = poolSize;
-        _projectilePool = new ProjectileState[poolSize];
         _projectileViewPool = new BulletView[poolSize];
         _raycastHitList = new RaycastHit[3];
     }
@@ -22,13 +22,16 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
     public void Start(GameSystems gameSystems, GameState gameState)
     {
         _gameSystems = gameSystems;
+        _gameState = gameState;
         
         BulletView projectileTemplate = Singleton.instance.gameplayResources.bulletView;
         for (int i = 0; i < _poolSize; ++i)
         {
-            _projectilePool[i] = new ProjectileState();
+            ProjectileState state = new ProjectileState();
+            _gameState.projectileStateList.Add(state);
+            
             _projectileViewPool[i] = GameObject.Instantiate<BulletView>(projectileTemplate);
-            _projectileViewPool[i].state = _projectilePool[i];
+            _projectileViewPool[i].state = state;
             _projectileViewPool[i].Recycle();
         }
     }
@@ -40,14 +43,14 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
     
     public void FixedStep(float deltaTime)
     {
-        if (_projectilePool == null || _projectileViewPool == null)
+        if (_gameState.projectileStateList == null || _projectileViewPool == null)
         {
             return;
         }
 
         for (int i = 0; i < _poolSize; ++i)
         {
-            ProjectileState state = _projectilePool[i];
+            ProjectileState state = _gameState.projectileStateList[i];
             BulletView view = _projectileViewPool[i];
             
             if (state.isActive)
@@ -62,10 +65,19 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
                 
                 Debug.DrawRay(rayStart, bulletDir * lookAhead, Color.green);
                 
-                int hitCount = Physics.RaycastNonAlloc(rayStart, bulletDir, _raycastHitList, lookAhead, view.collisionMask);
+                int hitCount = Physics.RaycastNonAlloc(rayStart, bulletDir, _raycastHitList, lookAhead, state.data.targetMask);
                 if(hitCount > 0)
                 {
-                    
+                    RaycastHit hit = _raycastHitList[0];
+                    IAttackTarget target = hit.collider.GetComponent<IAttackTarget>();
+
+                    if (target != null)
+                    {
+                        AttackData damageData = new AttackData(state.data.damageType, state.damage, state.velocity.normalized);
+                        AttackResult result = target.TakeDamage(damageData);
+
+                        _gameSystems.DispatchEvent(GamePlayEventType.AVATAR_DAMAGED, false, result);
+                    }
                     //Do damage
                     state.isActive = false;
                 }
@@ -88,17 +100,31 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         }
     }
 
+
+    public void LateStep(float deltaTime)
+    {
+        
+    }
+    
+    public void CleanUp()
+    {
+        for (int i = 0; i < _projectileViewPool.Length; ++i)
+        {
+            GameObject.Destroy(_projectileViewPool[i]);
+        }
+    }
+
     public ProjectileState Spawn(ProjectileData data, Vector3 position, Vector3 direction)
     {
         for (int i = 0; i < _poolSize; ++i)
         {
-            ProjectileState state = _projectilePool[i];
+            ProjectileState state = _gameState.projectileStateList[i];
             BulletView view = _projectileViewPool[i];
             
             if (!state.isActive)
             {
                 state.isActive = true;
-                state.type = data.type;
+                state.data = data;
                 state.speed = data.speed;
                 state.damage = data.damage;
                 state.deathTimer = data.deathTimer;

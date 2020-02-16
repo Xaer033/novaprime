@@ -23,6 +23,11 @@ public class MainMenuState : IGameState
 		
     }
 
+    public void LateStep( float p_deltaTime )
+    {
+		
+    }
+
     public void Exit( )
 	{
 	//	_controller.getUI().rem

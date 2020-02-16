@@ -12,7 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7ddf3d6d8e0f4c45b05afa5ecb29391, type: 3}
   m_Name: BulletData
   m_EditorClassIdentifier: 
-  type: 1
+  targetMask:
+    serializedVersion: 2
+    m_Bits: 4608
+  damageType: 0
+  attackType: 0
   speed: 65
   damage: 5
   deathTimer: 20

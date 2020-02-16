@@ -35,6 +35,14 @@ public class SinglePlayerCampaignMode : NotificationDispatcher, IGameModeControl
         }
     }
 
+    public void LateStep(float deltaTime)
+    {
+        if (_playFieldController != null)
+        {
+            _playFieldController.LateStep(deltaTime);
+        } 
+    }
+    
     public void CleanUp()
     {
         if (_playFieldController != null)
@@ -42,9 +50,4 @@ public class SinglePlayerCampaignMode : NotificationDispatcher, IGameModeControl
             _playFieldController.CleanUp();
         }
     }
-
-   
-
-   
-
 }

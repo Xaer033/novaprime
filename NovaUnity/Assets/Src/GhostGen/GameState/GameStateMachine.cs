@@ -30,6 +30,14 @@ namespace GhostGen
 			}
 		}
 
+		public void LateStep(float p_deltaTime)
+		{
+			if (_currentState != null)
+			{
+				_currentState.LateStep(p_deltaTime);
+			}
+		}
+		
 		public void ChangeState( string stateId, object changeStateInfo = null )
 		{
 			if (_currentId == stateId)

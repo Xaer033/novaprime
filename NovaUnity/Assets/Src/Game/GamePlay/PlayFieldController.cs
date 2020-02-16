@@ -89,9 +89,20 @@ public class PlayFieldController : NotificationDispatcher
         }
     }
 
+    public void LateStep(float deltaTime)
+    {
+        if (_gameSystems != null)
+        {
+            _gameSystems.LateStep(deltaTime);
+        }
+    }
     public void CleanUp()
     {
-        
+        if (_gameSystems != null)
+        {
+            _gameSystems.CleanUp();
+        }
+
         _removeCallbacks();
 
         RemoveAllListeners();

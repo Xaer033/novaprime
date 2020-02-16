@@ -359,6 +359,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4440354854320000}
+  - component: {fileID: 8201278829882606598}
   m_Layer: 5
   m_Name: GuiPrefab
   m_TagString: GuiObject
@@ -383,3 +384,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8201278829882606598
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1987084902344520}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c06d0c2062a49042b45e41f176f6ae3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _camera: {fileID: 20282306674493882}
+  _canvas: {fileID: 223930707856539494}
+  _dynamicCanvas: {fileID: 223252943188328862}
+  _eventSystem: {fileID: 114583798240227224}

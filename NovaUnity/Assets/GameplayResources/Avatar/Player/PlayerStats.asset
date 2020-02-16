@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e10d088b42ddee94fbc84a347dd5952b, type: 3}
+  m_Name: PlayerStats
+  m_EditorClassIdentifier: 
+  maxHealth: 100
+  maxJumpHeight: 2.5
+  minJumpHeight: 0.28
+  timeToJumpApex: 0.4
+  coyoteTime: 0.1
+  jumpRememberDelay: 0.0895
+  wallStickTime: 0.2
+  wallSlideSpeedMax: 0
+  wallSlideSpeedDampTime: 0
+  wallJumpClimb: {x: 4, y: 10}
+  wallJumpOff: {x: 6, y: 3}
+  wallJumpLeap: {x: 8, y: 8}
+  speed: 4.5
+  terminalVelocity: 15
+  accelerationTimeAir: 0.15
+  accelerationTimeDoubleJumpAir: 0.375
+  accelerationTimeGround: 0.05
+  targetLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  machineGunData: {fileID: 11400000, guid: 4b17b859321cf394b98dacaa960d30ae, type: 2}

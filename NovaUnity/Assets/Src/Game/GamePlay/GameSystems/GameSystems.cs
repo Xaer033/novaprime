@@ -10,7 +10,7 @@ public class GameSystems : GhostGen.NotificationDispatcher
     
     public ProjectileSystem projectileSystem { get; private set; }
     public AvatarSystem avatarSystem { get; private set; }
-
+    public HealthUISystem healthUISystem { get; private set; }
     
     public T GetSystem<T>() where T : IGameSystem
     {
@@ -30,9 +30,11 @@ public class GameSystems : GhostGen.NotificationDispatcher
         
         projectileSystem = new ProjectileSystem(125);
         avatarSystem = new AvatarSystem();
+        healthUISystem = new HealthUISystem();
 
         _gameSystemMap.Add(typeof(ProjectileSystem), projectileSystem);
         _gameSystemMap.Add(typeof(AvatarSystem), avatarSystem);
+        _gameSystemMap.Add(typeof(HealthUISystem), healthUISystem);
     }
 
     public void Start()
@@ -56,6 +58,22 @@ public class GameSystems : GhostGen.NotificationDispatcher
         foreach (var pair in _gameSystemMap)
         {
             pair.Value.Step(deltaTime);
+        }
+    }
+
+    public void LateStep(float deltaTime)
+    {
+        foreach (var pair in _gameSystemMap)
+        {
+            pair.Value.LateStep(deltaTime);
+        }
+    }
+    
+    public void CleanUp()
+    {
+        foreach (var pair in _gameSystemMap)
+        {
+            pair.Value.CleanUp();
         }
     }
 }

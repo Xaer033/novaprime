@@ -60,6 +60,11 @@ public class Singleton : MonoBehaviour
     {
         gameStateMachine.FixedStep(Time.fixedDeltaTime);
     }
+    
+    public void LateUpdate()
+    {
+        gameStateMachine.LateStep(Time.deltaTime);
+    }
 
     public static Singleton instance
     {

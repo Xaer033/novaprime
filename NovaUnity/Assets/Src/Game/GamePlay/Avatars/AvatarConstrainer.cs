@@ -100,7 +100,7 @@ public class AvatarConstrainer : MonoBehaviour
             Vector3 firstRayOrigin = rayOrigin;
             firstRayOrigin += Vector3.up * (_raycastController.horizontalRaySpacing * i);
             
-            Debug.DrawRay(firstRayOrigin, Vector3.right * directionX * rayLength, Color.red);
+            Debug.DrawRay(firstRayOrigin, Vector3.right * directionX, Color.cyan);
             
             int hitCount = Physics.RaycastNonAlloc(firstRayOrigin, Vector3.right * directionX, _raycastHits, rayLength, collisionMask);
             // Potential future bug for not looping through all hitCount

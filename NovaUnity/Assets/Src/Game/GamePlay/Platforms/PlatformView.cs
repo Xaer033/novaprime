@@ -74,7 +74,6 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
         _movePassengers(true);
         transform.Translate(velocity);
         _movePassengers(false);
-
     }
 
     private Vector3 _calculatePlatformMovement(float deltaTime, float time)

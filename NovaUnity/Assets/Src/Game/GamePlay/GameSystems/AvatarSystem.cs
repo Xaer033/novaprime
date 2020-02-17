@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using GhostGen;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Bson;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -40,6 +41,10 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         _gameSystems = gameSystems;
         _gameState = gameState;
         _fixedStepCount = 0;
+        
+        _gameState.playerStateList.Clear();
+        _gameState.enemyStateList.Clear();
+        _gameSystems.AddListener(GamePlayEventType.SPAWN_POINT_TRIGGERED, onSpawnPointTriggered);
     }
 
     public void FixedStep(float deltaTime)
@@ -76,7 +81,21 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
 
     public void CleanUp()
     {
+        _gameSystems.RemoveListener(GamePlayEventType.SPAWN_POINT_TRIGGERED, onSpawnPointTriggered);
         
+        
+        GameplayCamera cam = _getGameplayCamera();
+        cam.ClearTargets();
+        
+        for (int i = 0; i < _avatarControllerList.Count; ++i)
+        {
+            AvatarView view = _avatarControllerList[i].GetView();
+            GameObject.Destroy(view.gameObject);
+        }
+        _avatarControllerList.Clear();
+        
+        _gameState.playerStateList.Clear();
+        _gameState.enemyStateList.Clear();
     }
 
     public IAvatarController GetController(string uuid)
@@ -129,7 +148,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
             Debug.LogError("Could not find or create gameplay camera! Aborting player creation");
         }
         
-        PlayerState state = PlayerState.Create(uuid, 0, position);
+        PlayerState state = PlayerState.Create(uuid, unit.stats, position);
 
         PlayerInput input = new PlayerInput(0, cam.gameCamera);
         PlayerController controller = new PlayerController(unit, state, view, input);
@@ -141,8 +160,8 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
 
     private IAvatarController _spawnEnemy(string uuid, UnitMap.Unit unit, Vector3 position)
     {
-        AvatarView view = GameObject.Instantiate<AvatarView>(unit.view);
-        EnemyState state = EnemyState.Create(uuid, position);
+        AvatarView view = GameObject.Instantiate<AvatarView>(unit.view, position, Quaternion.identity);
+        EnemyState state = EnemyState.Create(uuid, unit.stats, position);
         GruntBrain input = new GruntBrain(_gameSystems, unit.stats, state);
         GruntController controller = new GruntController(unit, state, view, input);
         controller.Start(_gameSystems);
@@ -171,22 +190,33 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         return _camera;
     }
 
+    private void onSpawnPointTriggered(GeneralEvent e)
+    {
+        SpawnPointData spawnData = (SpawnPointData) e.data;
+        if (spawnData.spawnType == SpawnType.AVATAR)
+        {
+            string unitId = spawnData.subtypeId;
+            Vector3 position = spawnData.position;
+            Spawn<IAvatarController>(unitId, position);
+        }
+    }
+
     private void SaveToFile()
     {
-        StreamWriter writer = new StreamWriter("Assets/Resources/inputList.txt", false, Encoding.UTF8);
+//        StreamWriter writer = new StreamWriter("Assets/Resources/inputList.txt", false, Encoding.UTF8);
+        BinaryWriter writer = new BinaryWriter(File.Open("Assets/Resources/inputList.dat", FileMode.Create));
        
-        JsonWriter jsonWriter = new JsonTextWriter(writer);
+        JsonWriter jsonWriter = new BsonWriter(writer);
         jsonWriter.Formatting = Formatting.Indented;
         jsonWriter.WriteStartArray();
         foreach (var input in _frameInputList)
         {
             string jsonInput = JsonUtility.ToJson(input);
-            jsonWriter.WriteRaw(jsonInput);
+            jsonWriter.WriteValue(jsonInput);
         }
         jsonWriter.WriteEndArray();
         jsonWriter.Flush();
         jsonWriter.Close();
-        
     }
 //    private static byte[] ToByteArray(PlayerState command)
 //    {

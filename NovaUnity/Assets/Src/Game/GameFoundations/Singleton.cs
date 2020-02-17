@@ -23,7 +23,8 @@ public class Singleton : MonoBehaviour
 
     private Transform _sceneRoot;
     private GameObject _singleGameObject;
-
+    private int _tickCount;
+    
     private static object _lock = new object();
     private static bool applicationIsQuitting = false;
     private static Singleton _instance = null;
@@ -59,11 +60,14 @@ public class Singleton : MonoBehaviour
     public void FixedUpdate()
     {
         gameStateMachine.FixedStep(Time.fixedDeltaTime);
+        _tickCount++;
+
     }
     
     public void LateUpdate()
     {
         gameStateMachine.LateStep(Time.deltaTime);
+        _tickCount = 0;
     }
 
     public static Singleton instance

@@ -1,4 +1,5 @@
-﻿using GhostGen;
+﻿using System.Collections.Generic;
+using GhostGen;
 using UnityEngine;
 
 public class ProjectileSystem : NotificationDispatcher, IGameSystem
@@ -7,7 +8,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
     private GameState _gameState;
     
 //    private ProjectileState[] _projectilePool;
-    private BulletView[] _projectileViewPool;
+    private List<BulletView> _projectileViewPool;
     
     private int _poolSize;
     private RaycastHit[] _raycastHitList;
@@ -15,7 +16,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
     public ProjectileSystem(int poolSize)
     {
         _poolSize = poolSize;
-        _projectileViewPool = new BulletView[poolSize];
+        _projectileViewPool = new List<BulletView>(poolSize);
         _raycastHitList = new RaycastHit[3];
     }
     
@@ -30,9 +31,10 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
             ProjectileState state = new ProjectileState();
             _gameState.projectileStateList.Add(state);
             
-            _projectileViewPool[i] = GameObject.Instantiate<BulletView>(projectileTemplate);
-            _projectileViewPool[i].state = state;
-            _projectileViewPool[i].Recycle();
+            BulletView view = GameObject.Instantiate<BulletView>(projectileTemplate);
+            view.state = state;
+            view.Recycle();
+            _projectileViewPool.Add(view);
         }
     }
 
@@ -108,10 +110,12 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
     
     public void CleanUp()
     {
-        for (int i = 0; i < _projectileViewPool.Length; ++i)
+        for (int i = 0; i < _projectileViewPool.Count; ++i)
         {
-            GameObject.Destroy(_projectileViewPool[i]);
+            GameObject.Destroy(_projectileViewPool[i].gameObject);
         }
+
+        _gameState.projectileStateList.Clear();
     }
 
     public ProjectileState Spawn(ProjectileData data, Vector3 position, Vector3 direction)

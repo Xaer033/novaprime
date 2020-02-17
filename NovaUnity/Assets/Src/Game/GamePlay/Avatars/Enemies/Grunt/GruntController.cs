@@ -61,9 +61,9 @@ public class GruntController : NotificationDispatcher, IAvatarController
         return _state;
     }
 
-    public UnitStats GetStats()
+    public UnitMap.Unit GetUnit()
     {
-        return _unitStats;
+        return _unit;
     }
     
     public string GetUUID()

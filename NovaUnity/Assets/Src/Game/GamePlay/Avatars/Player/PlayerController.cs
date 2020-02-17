@@ -64,7 +64,8 @@ public class PlayerController : NotificationDispatcher, IAvatarController
 
     public AttackResult TakeDamage(AttackData attackData)
     {
-        Vector3 hitBumpForce = new Vector3(attackData.hitDirection.x, 1.0f, 0.0f) * 2.0f;
+        float vBump = collisionInfo.below ? 2.0f : _state.velocity.y;
+        Vector3 hitBumpForce = new Vector3(attackData.hitDirection.x * 3.0f, vBump, 0.0f);
         SetVelocity(hitBumpForce);
         
         _state.health = _state.health - attackData.potentialDamage;
@@ -105,9 +106,9 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         return _state;
     }
     
-    public UnitStats GetStats()
+    public UnitMap.Unit GetUnit()
     {
-        return _unitStats;
+        return _unit;
     }
     
     public void SetVelocity(Vector3 velocity)

@@ -13,7 +13,7 @@ public interface IAvatarController : ITimeWarpTarget, IAttackTarget
     AvatarView GetView();
     AvatarState GetState();
 
-    UnitStats GetStats();
+    UnitMap.Unit GetUnit();
     
     void Move(Vector3 moveDelta, bool isOnPlatform);
 

@@ -6,6 +6,7 @@ using UnityEngine;
 public class HealthUISystem : NotificationDispatcher, IGameSystem
 {
     public const int kMaxUIView = 35;
+    public float scaleConst = 30.0f;
 
     private GuiCameraTag _guiCameraTag;
     
@@ -14,10 +15,9 @@ public class HealthUISystem : NotificationDispatcher, IGameSystem
         get { return _guiCameraTag.dynamicCanvas; }
     }
 
-    public float scaleConst = 12.0f;
 
     private Stack<HealthUIView> _viewPool = new Stack<HealthUIView>(kMaxUIView);
-    private Dictionary<IAvatarController, HealthUIView> _inUseMap= new Dictionary<IAvatarController, HealthUIView>(kMaxUIView);
+    private Dictionary<IAvatarController, HealthUIView> _inUseMap = new Dictionary<IAvatarController, HealthUIView>(kMaxUIView);
     private RectTransform _canvasRectTransform;
     
     private Camera _camera;
@@ -111,12 +111,14 @@ public class HealthUISystem : NotificationDispatcher, IGameSystem
         
         foreach(var pair in _inUseMap)
         {
+            pair.Value.KillTween(false);
             GameObject.Destroy(pair.Value.gameObject);        
         }
 
-        HealthUIView v = null;
-        while(v = _viewPool.Pop())
+        while(_viewPool.Count > 0)
         {
+            HealthUIView v = _viewPool.Pop();
+            v.KillTween(false);
             GameObject.Destroy(v.gameObject);
         }
     }
@@ -127,7 +129,7 @@ public class HealthUISystem : NotificationDispatcher, IGameSystem
 
         if(view != null)
         {
-            float health = (float)c.GetState().health / (float)c.GetStats().maxHealth;
+            float health = (float)c.GetState().health / (float)c.GetUnit().stats.maxHealth;
             view.SetHealthFill(health, ()=> recycleView(c));
         }
     }

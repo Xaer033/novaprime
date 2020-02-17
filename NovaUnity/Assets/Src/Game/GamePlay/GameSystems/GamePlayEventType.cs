@@ -1,5 +1,7 @@
 ﻿public class GamePlayEventType
 {
+    public const string SPAWN_POINT_TRIGGERED = "gameplay_spawnpoint_triggered";
+    
     public const string AVATAR_SPAWNED = "gameplay_avatar_spawned";
     public const string AVATAR_DAMAGED = "gameplay_avatar_damaged";
     public const string AVATAR_DESTROYED = "gameplay_avatar_destroyed";

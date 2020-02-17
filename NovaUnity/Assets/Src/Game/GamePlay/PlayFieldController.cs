@@ -20,28 +20,34 @@ public class PlayFieldController : NotificationDispatcher
     
     public void Start()
     {
-        _addCallbacks();
-        
         UnityEngine.Random.InitState(666);
 
         _gameState = new GameState();
         _gameSystems = new GameSystems(_gameState);
         _gameSystems.Start();
         
-        AvatarSystem aSystem = _gameSystems.GetSystem<AvatarSystem>();
-        _playerController = aSystem.Spawn<PlayerController>( "player", Vector3.up * 2.0f);
-        _playerInput = _playerController.GetInput();
-        
-        aSystem.Spawn<GruntController>( "grunt", Vector3.right * 2 + Vector3.up * 2.0f);
-        _gruntController = aSystem.Spawn<GruntController>( "grunt", Vector3.left * 4.0f + Vector3.up * 2.0f);
-        _gruntInput = _gruntController.GetInput();
+//        AvatarSystem aSystem = _gameSystems.GetSystem<AvatarSystem>();
+//        _playerController = aSystem.Spawn<PlayerController>( "player", Vector3.up * 2.0f);
+//        _playerInput = _playerController.GetInput();
+//        
+//        aSystem.Spawn<GruntController>( "grunt", Vector3.right * 2 + Vector3.up * 2.0f);
+//        _gruntController = aSystem.Spawn<GruntController>( "grunt", Vector3.left * 4.0f + Vector3.up * 2.0f);
+//        _gruntInput = _gruntController.GetInput();
         
         _pAction = new PlayerActions();
         _pAction.Gameplay.Enable();
 
         _cam = GameObject.FindObjectOfType<GameplayCamera>();
+        
+        _addCallbacks();
     }
 
+    public void Restart()
+    {
+        CleanUp();
+        Start();
+    }
+    
     public void Step(float deltaTime)
     {
         if (_gameSystems != null)
@@ -77,16 +83,16 @@ public class PlayFieldController : NotificationDispatcher
             }
             
         }
-        
-        if (_pAction.Gameplay.reset.triggered)
-        {
-            _gameState.playerStateList[0].position = Vector3.zero;
-        }
 
+        
+        
+
+        
         if (_pAction.Gameplay.exit.triggered)
         {
             Application.Quit();
         }
+        
     }
 
     public void LateStep(float deltaTime)
@@ -95,13 +101,25 @@ public class PlayFieldController : NotificationDispatcher
         {
             _gameSystems.LateStep(deltaTime);
         }
+
+        if (_pAction.Gameplay.reset.triggered)
+        {
+            Restart();
+        }
     }
+    
     public void CleanUp()
     {
         if (_gameSystems != null)
         {
             _gameSystems.CleanUp();
         }
+
+        _gruntController = null;
+        _gruntInput = null;
+
+        _playerController = null;
+        _playerInput = null;
 
         _removeCallbacks();
 
@@ -129,12 +147,28 @@ public class PlayFieldController : NotificationDispatcher
     
     private void   _addCallbacks()
     {
-  
+        _gameSystems.AddListener(GamePlayEventType.AVATAR_SPAWNED, onAvatarSpawned);
     }
 
     private void _removeCallbacks()
     {
-
+        _gameSystems.RemoveListener(GamePlayEventType.AVATAR_SPAWNED, onAvatarSpawned);
     }
 
+    private void onAvatarSpawned(GeneralEvent e)
+    {
+        IAvatarController controller = (IAvatarController)e.data;
+        string id = controller.GetUnit().id;
+        
+        if (id == "player")
+        {
+            _playerController = controller as PlayerController;
+            _playerInput = _playerController.GetInput();
+        }
+        else if (id == "grunt" && _gruntInput == null)
+        {
+            _gruntController = controller as GruntController;
+            _gruntInput = _gruntController.GetInput();
+        }
+    }
 }

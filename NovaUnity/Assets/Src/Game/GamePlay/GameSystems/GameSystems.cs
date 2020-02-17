@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using GhostGen;
 using UnityEngine;
 
-public class GameSystems : GhostGen.NotificationDispatcher
+public class GameSystems : NotificationDispatcher
 {
     private GameState _gameState;
     private Dictionary<Type, IGameSystem> _gameSystemMap = new Dictionary<Type, IGameSystem>();
@@ -11,6 +11,7 @@ public class GameSystems : GhostGen.NotificationDispatcher
     public ProjectileSystem projectileSystem { get; private set; }
     public AvatarSystem avatarSystem { get; private set; }
     public HealthUISystem healthUISystem { get; private set; }
+    public SpawnPointSystem spawnPointSystem { get; private set; }
     
     public T GetSystem<T>() where T : IGameSystem
     {
@@ -28,13 +29,15 @@ public class GameSystems : GhostGen.NotificationDispatcher
     {
         _gameState = gameState;
         
-        projectileSystem = new ProjectileSystem(125);
-        avatarSystem = new AvatarSystem();
-        healthUISystem = new HealthUISystem();
-
+        projectileSystem     = new ProjectileSystem(125);
+        avatarSystem         = new AvatarSystem();
+        healthUISystem       = new HealthUISystem();
+        spawnPointSystem     = new SpawnPointSystem();
+        
         _gameSystemMap.Add(typeof(ProjectileSystem), projectileSystem);
-        _gameSystemMap.Add(typeof(AvatarSystem), avatarSystem);
-        _gameSystemMap.Add(typeof(HealthUISystem), healthUISystem);
+        _gameSystemMap.Add(typeof(AvatarSystem),     avatarSystem);
+        _gameSystemMap.Add(typeof(HealthUISystem),   healthUISystem);
+        _gameSystemMap.Add(typeof(SpawnPointSystem), spawnPointSystem);
     }
 
     public void Start()

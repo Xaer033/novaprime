@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 750901081596856263}
   m_Layer: 8
   m_Name: GameplayCamera
-  m_TagString: MainCamera
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -46,11 +46,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d18def174457dcc409fee946b556f725, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  focusAreaSize: {x: 1, y: 1}
-  targetOffset: {x: 0, y: 1, z: -46}
-  lookAheadDistanceX: 1
-  lookSmoothTimeX: 0.5
-  lookSmoothTimeY: 0.2
+  targetOffset: {x: 0, y: 1, z: -81.6}
+  lookSmoothTimeX: 0.2
+  minZoom: 6.4
+  maxZoom: 7.51
+  limit: 23.98
+  targetList: []
 --- !u!20 &750901081596856262
 Camera:
   m_ObjectHideFlags: 0
@@ -64,7 +65,7 @@ Camera:
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
-  m_FOVAxisMode: 0
+  m_FOVAxisMode: 1
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
   m_FocalLength: 50
@@ -74,11 +75,11 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 16
-  far clip plane: 112
-  field of view: 16
+  near clip plane: 30
+  far clip plane: 200
+  field of view: 9.0347395
   orthographic: 0
-  orthographic size: 5
+  orthographic size: 7.2
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2

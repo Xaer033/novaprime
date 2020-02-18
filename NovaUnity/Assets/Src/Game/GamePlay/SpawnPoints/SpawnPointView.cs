@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UnityEditor;
+using UnityEngine;
 
 public class SpawnPointView : MonoBehaviour
 {
@@ -9,13 +10,25 @@ public class SpawnPointView : MonoBehaviour
     
     public SpawnPointData spawnPointData;
     
+#if UNITY_EDITOR
+
     private void OnDrawGizmos()
     {
+        const float kCharTextWidth = 0.08f;
         
         Gizmos.color = new Color(0.8f, 0.2f, 0.3f, 0.8f);
         Vector3 platformSize = triggerCollider != null ?  triggerCollider.bounds.size : Vector3.one;
         Gizmos.DrawCube(transform.position, platformSize);
+
+        Vector3 textPosition = transform.position + (Vector3.up * (triggerCollider.bounds.size.y + 0.1f));
+        float size = HandleUtility.GetHandleSize(textPosition);
+        
+        textPosition.x -= (gameObject.name.Length * kCharTextWidth * size) / 2.0f;
+        Handles.Label(textPosition, gameObject.name);
+        
     }
+#endif
+    
 }
 
 [System.Serializable]

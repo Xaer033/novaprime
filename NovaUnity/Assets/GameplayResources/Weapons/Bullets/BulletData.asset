@@ -18,5 +18,5 @@ MonoBehaviour:
   damageType: 0
   attackType: 0
   speed: 65
-  damage: 5
+  damage: 25
   deathTimer: 20

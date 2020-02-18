@@ -29,6 +29,8 @@ public class GruntController : NotificationDispatcher, IAvatarController
         _view.controller = this;
 
         _input = input;
+        
+        view.AddListener("onAnimDeathComplete", onAnimDeathComplete);
     }
 
     public IInputGenerator GetInput()
@@ -78,7 +80,16 @@ public class GruntController : NotificationDispatcher, IAvatarController
     
     public AttackResult TakeDamage(AttackData attackData)
     {
-        _state.health = _state.health - attackData.potentialDamage;
+        if (_state.health > 0)
+        {
+            _state.health = _state.health - attackData.potentialDamage;
+
+            if (isDead)
+            {
+                _view.SetAnimationTrigger("deathTrigger");
+            }
+        }
+        
         return new AttackResult(this, attackData.potentialDamage, _state.health, !isDead );
     }
     
@@ -89,7 +100,7 @@ public class GruntController : NotificationDispatcher, IAvatarController
 
     public bool isDead
     {
-        get { return _state.health <= health; }
+        get { return _state.health <= 0.0f; }
     }
 
     // Start is called before the first frame update
@@ -170,7 +181,11 @@ public class GruntController : NotificationDispatcher, IAvatarController
                 _state.velocity.y = 0;
             }
         }
-        
+
+        if (isDead)
+        {
+            _view.constrainer.maxSlopeAngle = 10.0f;
+        }
         
         if (_view)
         {
@@ -339,5 +354,12 @@ public class GruntController : NotificationDispatcher, IAvatarController
         }
 
         return isWallSliding;
+    }
+
+    private void onAnimDeathComplete(GeneralEvent e)
+    {
+        AnimationEventDispatcher.AnimationEventData data = (AnimationEventDispatcher.AnimationEventData)e.data;
+        _view.DeathFadeOut(() => { });
+        
     }
 }

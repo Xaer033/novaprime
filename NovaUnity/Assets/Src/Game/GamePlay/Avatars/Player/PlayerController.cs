@@ -79,7 +79,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
 
     public bool isDead
     {
-        get { return _state.health <= health; }
+        get { return _state.health <= 0.0f; }
     }
     
     // Start is called before the first frame update

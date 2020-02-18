@@ -4,11 +4,12 @@ using UnityEngine;
 
 public class GruntBrain : IInputGenerator
 {
-    private const float kTickRate = 0.1f;
+    private const float kTickRate = 0.07f;
         
     private UnitStats _unitStats;
     private EnemyState _state;
     private GameSystems _gameSystems;
+    private AvatarSystem _avatarSystem;
     private IAvatarController _targetController;
 
     private FrameInput _lastInput;
@@ -23,6 +24,8 @@ public class GruntBrain : IInputGenerator
 
         _state.aiState = AiState.TARGETING;
         _currentTickRate = kTickRate;
+
+        _avatarSystem = _gameSystems.GetSystem<AvatarSystem>();
     }
 
     public FrameInput GetInput()
@@ -37,8 +40,14 @@ public class GruntBrain : IInputGenerator
 
         _lastUpdate = now;
         _currentTickRate = kTickRate + Random.Range(0.0f, 0.15f);
+        
         FrameInput frameInput = new FrameInput();
-
+        
+        if (_state.health <= 0)
+        {
+            _state.aiState = AiState.DEAD;
+        }
+        
         switch (_state.aiState)
         {
             case AiState.NONE:
@@ -53,6 +62,8 @@ public class GruntBrain : IInputGenerator
             case AiState.ATTACKING:
                 _handleAttackingState(ref frameInput);
                 break;
+            
+            case AiState.DEAD: break;
         }
 
         _lastInput = frameInput;
@@ -124,16 +135,22 @@ public class GruntBrain : IInputGenerator
 
         RaycastHit hit;
         Vector3 movementDir = new Vector3(input.horizontalMovement, 0, 0);
-        
-        bool isEnemyHit = Physics.Raycast(startPosition, (Vector3.left * 0.02f + movementDir).normalized, out hit, 2.5f, LayerMask.GetMask(new []{"enemies"}) );
+
+        Vector3 fellowGruntCheckDir = (Vector3.left * 0.02f + movementDir).normalized;
+        Debug.DrawRay(startPosition, fellowGruntCheckDir, Color.green, 0.4f);
+
+        bool isEnemyHit = Physics.Raycast(startPosition, fellowGruntCheckDir, out hit, 2.5f, LayerMask.GetMask(new []{"enemies"}) );
         if (isEnemyHit)
         {
-            input.horizontalMovement =  hit.distance * Mathf.Sign(hit.normal.x) * 0.5f;
+            IAvatarController fellowGrunt = _avatarSystem.GetController(hit.transform.name);
+            if (!fellowGrunt.isDead)
+            {
+                input.horizontalMovement =  hit.distance * Mathf.Sign(hit.normal.x) * 0.5f;
+            }
         }
         
-        Debug.DrawRay(startPosition, movementDir.normalized * 1.0f, Color.green, 0.4f);
-        bool isHit = Physics.Raycast(startPosition, movementDir.normalized, out hit, 1.0f, LayerMask.GetMask(new []{"obsticals"}) );
-        if (isHit || (Mathf.Abs(_state.velocity.x) < 0.001f && _state.isWallSliding))
+         bool isHit = Physics.Raycast(startPosition, movementDir.normalized, out hit, 1.0f, LayerMask.GetMask(new []{"obsticals"}) );
+        if (isHit || (Mathf.Abs(_state.velocity.x) < 0.001f && _state.isWallSliding) )
         {
             input.jumpPressed = true;
         }

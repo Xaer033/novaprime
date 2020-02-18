@@ -1,11 +1,15 @@
+using System;
+using GhostGen;
 using UnityEngine;
 
-public class AvatarView : MonoBehaviour, IPlatformPassenger, ITimeWarpTarget, IAttackTarget
+public class AvatarView : EventDispatcherBehavior, IPlatformPassenger, ITimeWarpTarget, IAttackTarget
 {
     public AvatarConstrainer constrainer;
     public Transform armHook;
     public Transform _healthPositionHook;
 
+    public Animator _animator;
+    
     public void Aim(Vector3 cursorPosition)
     {
         if (armHook)
@@ -23,6 +27,23 @@ public class AvatarView : MonoBehaviour, IPlatformPassenger, ITimeWarpTarget, IA
             weaponTransform.localPosition = Vector3.zero;
             weaponTransform.localRotation = Quaternion.identity;
             weaponTransform.localScale = Vector3.one;
+        }
+    }
+
+    public void SetAnimationTrigger(string animName)
+    {
+        if (_animator != null)
+        {
+            _animator.SetTrigger(animName);
+        }
+    }
+
+    public void DeathFadeOut(Action onComplete)
+    {
+        Debug.Log("Fade this bitch out");
+        if (onComplete != null)
+        {
+            onComplete();
         }
     }
     

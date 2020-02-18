@@ -47,6 +47,22 @@ public class HealthUISystem : NotificationDispatcher, IGameSystem
 
     public void FixedStep(float deltaTime)
     {
+        
+    }
+
+    public void LateStep(float deltaTime)
+    {
+        _updateHealthViews();
+    }
+
+    // Update is called once per frame
+    public void Step(float deltaTime)
+    {
+        
+    }
+
+    private void _updateHealthViews()
+    {
         if(cam == null || canvas == null)
         {
             return;
@@ -68,18 +84,7 @@ public class HealthUISystem : NotificationDispatcher, IGameSystem
             view.transform.localScale = _savedScale * scaleMod;
         }
     }
-
-    public void LateStep(float deltaTime)
-    {
-        
-    }
-
-    // Update is called once per frame
-    public void Step(float deltaTime)
-    {
-        
-    }
-
+    
     private Vector2 getScreenPositionFromWorldPosition(Vector3 worldPostion, Camera camera)
     {
         Vector2 viewportPosition = camera.WorldToViewportPoint(worldPostion);

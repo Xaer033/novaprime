@@ -165,8 +165,9 @@ public class AvatarConstrainer : MonoBehaviour
     protected void _verticalCollisions(ref Vector3 moveDelta)
     {
         float directionY = Mathf.Sign(moveDelta.y);
-        
-        float walkStepHeight = directionY == 1 ? 0 : _walkStepHeight;
+
+        bool isOnSlope = (_collisionInfo.climbingSlope || _collisionInfo.decendingSlope);
+        float walkStepHeight = directionY == 1 || isOnSlope ? 0 : _walkStepHeight;
         float rayLength = Mathf.Abs(moveDelta.y) + _raycastController.skinHeight + walkStepHeight;
         
         int inputDirY =  _input.verticalMovement == 0 ?  0 : _input.verticalMovement < 0 ? -1 : 1;

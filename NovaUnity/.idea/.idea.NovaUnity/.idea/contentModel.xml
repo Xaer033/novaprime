@@ -19,12 +19,10 @@
             <e p="TimeWarpShader.shader" t="Include" />
           </e>
         </e>
-        <e p="Resources" t="Include">
-          <e p="inputList.txt" t="Include" />
-        </e>
         <e p="Src" t="Include">
           <e p="Game" t="Include">
             <e p="GameFoundations" t="Include">
+              <e p="AnimationEventDispatcher.cs" t="Include" />
               <e p="BaseController.cs" t="Include" />
               <e p="GameConfig.cs" t="Include" />
               <e p="GameplayResources.cs" t="Include" />

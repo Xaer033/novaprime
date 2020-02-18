@@ -38,5 +38,6 @@ public enum AiState
     IDLE,
     ACTIVE_HUNTING,
     TARGETING,
-    ATTACKING
+    ATTACKING, 
+    DEAD
 }

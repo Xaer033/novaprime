@@ -21,10 +21,12 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     private Dictionary<string, IAvatarController> _avatarLookUpMap;
 
     private List<FrameInput> _frameInputList;
+
+    private int _spawnCount;
     
     private GameplayCamera _camera;
-    private static int _spawnCount = 0;
-    private int _fixedStepCount;
+    private GameObject _playerParent;
+    private GameObject _enemyParent;
     
     public AvatarSystem()
     {
@@ -32,15 +34,15 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         _avatarControllerList       = new List<IAvatarController>(200);
         _avatarLookUpMap            = new Dictionary<string, IAvatarController>();
         _frameInputList             = new List<FrameInput>();
-
-//        _playerActionList         = new List<PlayerActions>(kMaxPlayerCount);
+        
+        _playerParent    = new GameObject("PlayerParent");
+        _enemyParent     = new GameObject("EnemyParent");
     }
     
     public void Start(GameSystems gameSystems, GameState gameState)
     {
         _gameSystems = gameSystems;
         _gameState = gameState;
-        _fixedStepCount = 0;
         
         _gameState.playerStateList.Clear();
         _gameState.enemyStateList.Clear();
@@ -62,8 +64,6 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         {
             SaveToFile();
         }
-
-        _fixedStepCount++;
     }
 
     public void Step(float deltaTime)
@@ -105,12 +105,11 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     
     public T Spawn<T>(string unitId, Vector3 position) where T : IAvatarController
     {
-        _spawnCount++;
-
         UnitMap.Unit unit = _unitMap.GetUnit(unitId);
         string uuid = _generateUUID(unit);
         
         IAvatarController controller = _spawnAvatar(uuid, unit, position);
+        controller.GetView().gameObject.name = uuid;
 
         if (controller != null)
         {
@@ -120,6 +119,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
             _gameSystems.DispatchEvent(GamePlayEventType.AVATAR_SPAWNED, false, controller);
         }
 
+        _spawnCount++;
         return (T)controller;
     }
 
@@ -136,7 +136,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
 
     private PlayerController _spawnPlayer(string uuid, UnitMap.Unit unit, Vector3 position)
     {
-        AvatarView view = GameObject.Instantiate<AvatarView>(unit.view);
+        AvatarView view = GameObject.Instantiate<AvatarView>(unit.view, _playerParent.transform);
 
         GameplayCamera cam = _getGameplayCamera();
         if (cam != null)
@@ -160,7 +160,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
 
     private IAvatarController _spawnEnemy(string uuid, UnitMap.Unit unit, Vector3 position)
     {
-        AvatarView view = GameObject.Instantiate<AvatarView>(unit.view, position, Quaternion.identity);
+        AvatarView view = GameObject.Instantiate<AvatarView>(unit.view, position, Quaternion.identity,  _enemyParent.transform);
         EnemyState state = EnemyState.Create(uuid, unit.stats, position);
         GruntBrain input = new GruntBrain(_gameSystems, unit.stats, state);
         GruntController controller = new GruntController(unit, state, view, input);

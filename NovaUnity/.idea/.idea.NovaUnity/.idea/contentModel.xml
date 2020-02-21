@@ -7,6 +7,11 @@
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
         <e p="GameplayResources" t="Include">
+          <e p="Avatar" t="Include">
+            <e p="Player" t="Include">
+              <e p="PlayerActions.cs" t="Include" />
+            </e>
+          </e>
           <e p="Environment" t="Include">
             <e p="Skybox" t="Include">
               <e p="readme.txt" t="Include" />
@@ -57,7 +62,6 @@
                 <e p="IInputGenerator.cs" t="Include" />
                 <e p="IPlatformPassenger.cs" t="Include" />
                 <e p="Player" t="Include">
-                  <e p="PlayerActions.cs" t="Include" />
                   <e p="PlayerController.cs" t="Include" />
                   <e p="PlayerInput.cs" t="Include" />
                   <e p="PlayerState.cs" t="Include" />

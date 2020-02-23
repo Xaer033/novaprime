@@ -57,11 +57,11 @@ public class MachineGunController
 
         Vector3 adjustedPos = visualWeaponPos + (viewDir * 20.0f);
         
-        RaycastHit hit;
-        bool isHit = Physics.Raycast(visualWeaponPos, (adjustedPos - visualWeaponPos).normalized, out hit, 20.0f, _machineGunData.targetLayerMask);
-        if (isHit)
+        RaycastHit2D[] raycastHits = new RaycastHit2D[1];
+        int hitCount = Physics2D.RaycastNonAlloc(visualWeaponPos, (adjustedPos - visualWeaponPos).normalized, raycastHits, 20.0f, _machineGunData.targetLayerMask);
+        if (hitCount > 0)
         {
-            adjustedPos = hit.point;
+            adjustedPos = raycastHits[0].point;
         }
 
 //        Debug.DrawRay(adjustedPos, Vector3.up, Color.red, 1.0f);

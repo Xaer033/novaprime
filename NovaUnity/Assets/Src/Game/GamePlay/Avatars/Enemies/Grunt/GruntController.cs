@@ -6,8 +6,6 @@ public class GruntController : NotificationDispatcher, IAvatarController
     private AvatarView _view;
 
     private float _gravity;
-
-    
     
     private FrameInput _lastInput;
     private IInputGenerator _input;

@@ -15,6 +15,7 @@ public class GruntBrain : IInputGenerator
     private FrameInput _lastInput;
     private double _lastUpdate;
     private float _currentTickRate;
+    private RaycastHit2D[] _raycastHits;
     
     public GruntBrain(GameSystems gameSystems, UnitStats stats, EnemyState state)
     {
@@ -26,6 +27,8 @@ public class GruntBrain : IInputGenerator
         _currentTickRate = kTickRate;
 
         _avatarSystem = _gameSystems.GetSystem<AvatarSystem>();
+        
+        _raycastHits = new RaycastHit2D[1];
     }
 
     public FrameInput GetInput()
@@ -82,7 +85,7 @@ public class GruntBrain : IInputGenerator
         uuid = "";
         c = null;
 
-        Collider[] colliderList = Physics.OverlapSphere(_state.position, 5.0f, _unitStats.targetLayerMask);
+        Collider2D[] colliderList = Physics2D.OverlapCircleAll(_state.position, 5.0f, _unitStats.targetLayerMask);
         for (int i = 0; i < colliderList.Length; ++i)
         {
             AvatarView view = colliderList[i].GetComponent<AvatarView>();
@@ -133,15 +136,16 @@ public class GruntBrain : IInputGenerator
             input.horizontalMovement = -dirToTarget.normalized.x;
         }
 
-        RaycastHit hit;
+        RaycastHit2D hit;
         Vector3 movementDir = new Vector3(input.horizontalMovement, 0, 0);
 
         Vector3 fellowGruntCheckDir = (Vector3.left * 0.02f + movementDir).normalized;
         Debug.DrawRay(startPosition, fellowGruntCheckDir, Color.green, 0.4f);
 
-        bool isEnemyHit = Physics.Raycast(startPosition, fellowGruntCheckDir, out hit, 2.5f, LayerMask.GetMask(new []{"enemies"}) );
-        if (isEnemyHit)
+        int enemyHitCount = Physics2D.RaycastNonAlloc(startPosition, fellowGruntCheckDir, _raycastHits, 2.5f, LayerMask.GetMask(new []{"enemies"}) );
+        if (enemyHitCount > 0)
         {
+            hit = _raycastHits[0];
             IAvatarController fellowGrunt = _avatarSystem.GetController(hit.transform.name);
             if (!fellowGrunt.isDead)
             {
@@ -149,8 +153,8 @@ public class GruntBrain : IInputGenerator
             }
         }
         
-         bool isHit = Physics.Raycast(startPosition, movementDir.normalized, out hit, 1.0f, LayerMask.GetMask(new []{"obsticals"}) );
-        if (isHit || (Mathf.Abs(_state.velocity.x) < 0.001f && _state.isWallSliding) )
+        int wallHitCount = Physics2D.RaycastNonAlloc(startPosition, movementDir.normalized, _raycastHits, 1.0f, LayerMask.GetMask(new []{"obsticals"}) );
+        if (wallHitCount > 0 || (Mathf.Abs(_state.velocity.x) < 0.001f && _state.isWallSliding) )
         {
             input.jumpPressed = true;
         }
@@ -164,8 +168,8 @@ public class GruntBrain : IInputGenerator
         
         Debug.DrawRay(startPosition, dirToTarget.normalized * 8.0f, Color.green, 0.4f);
 
-        bool canHitPlayer = Physics.Raycast(startPosition, dirToTarget.normalized ,out hit, 8.0f, LayerMask.GetMask(new []{"obsticals", "player"}) );
-        if (canHitPlayer && hit.collider.gameObject.layer == LayerMask.NameToLayer("player"))
+        int hitPlayerCount = Physics2D.RaycastNonAlloc(startPosition, dirToTarget.normalized, _raycastHits, 8.0f, LayerMask.GetMask(new []{"obsticals", "player"}) );
+        if (hitPlayerCount > 0 && _raycastHits[0].collider.gameObject.layer == LayerMask.NameToLayer("player"))
         {
             input.useCusorPosition = true;
             input.cursorPosition = targetPosition;

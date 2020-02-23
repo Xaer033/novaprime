@@ -31,16 +31,17 @@ public class AnimationEventDispatcher : StateMachineBehaviour
         public readonly int layerIndex;
     }
     
-    public override void OnStateMachineEnter(
-        Animator animator,
-        int stateMachinePathHash,
-        AnimatorControllerPlayable controller)
+    private void SetDispatcher(Animator animator)
     {
-        _dispatcher = animator.GetComponent<IEventDispatcher>();
+        if (_dispatcher == null)
+        {
+            _dispatcher = animator.GetComponent<IEventDispatcher>();
+        }
     }
     
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
+        SetDispatcher(animator);
         if (!string.IsNullOrEmpty(onStateEnterEventName) && _dispatcher != null)
         {
             AnimationEventData data = new AnimationEventData(animator, stateInfo, layerIndex);
@@ -50,6 +51,7 @@ public class AnimationEventDispatcher : StateMachineBehaviour
 
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
+        SetDispatcher(animator);
         if (!string.IsNullOrEmpty(onStateExitEventName) && _dispatcher != null)
         {
             AnimationEventData data = new AnimationEventData(animator, stateInfo, layerIndex);
@@ -59,6 +61,7 @@ public class AnimationEventDispatcher : StateMachineBehaviour
 
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
+        SetDispatcher(animator);
         if (!string.IsNullOrEmpty(onStateUpdateEventName) && _dispatcher != null)
         {
             AnimationEventData data = new AnimationEventData(animator, stateInfo, layerIndex);
@@ -68,6 +71,7 @@ public class AnimationEventDispatcher : StateMachineBehaviour
 
     override public void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
+        SetDispatcher(animator);
         if (!string.IsNullOrEmpty(onStateMoveEventName) && _dispatcher != null)
         {
             AnimationEventData data = new AnimationEventData(animator, stateInfo, layerIndex);

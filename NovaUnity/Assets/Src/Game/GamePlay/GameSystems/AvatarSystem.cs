@@ -96,6 +96,9 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         
         _gameState.playerStateList.Clear();
         _gameState.enemyStateList.Clear();
+        
+        GameObject.Destroy(_playerParent);
+        GameObject.Destroy(_enemyParent);
     }
 
     public IAvatarController GetController(string uuid)

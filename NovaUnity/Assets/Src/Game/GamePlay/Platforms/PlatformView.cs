@@ -24,7 +24,7 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
     public float distanceBetweenRays = 0.2f;
 
 
-    public Collider collisionCollider;
+    public Collider2D collisionCollider;
 
     private RaycastController _raycastController;
     private HashSet<Transform> _movedPassengersSet = new HashSet<Transform>();
@@ -35,12 +35,12 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
     private float _percentBetweenWaypoints;
     private float _nextMoveTime;
     private float _timeScale = 1.0f;
-    private RaycastHit[] _raycastHits;
+    private RaycastHit2D[] _raycastHits;
     private Vector3[] _globalWayPoints;
     // Start is called before the first frame update
     void Awake()
     {
-        _raycastHits = new RaycastHit[10];
+        _raycastHits = new RaycastHit2D[10];
         
         _raycastController = new RaycastController(distanceBetweenRays, collisionCollider, passengerMask);
         _globalWayPoints = new Vector3[localWaypoints.Length];
@@ -155,10 +155,10 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
                
                 Debug.DrawRay(rayOrigin, Vector3.up * directionY * rayLength, Color.blue);
 
-                int hitCount = Physics.RaycastNonAlloc(rayOrigin, Vector3.up * directionY, _raycastHits, rayLength, passengerMask);
+                int hitCount = Physics2D.RaycastNonAlloc(rayOrigin, Vector3.up * directionY, _raycastHits, rayLength, passengerMask);
                 for (int x = 0; x < hitCount; ++x)
                 {
-                    RaycastHit hit = _raycastHits[x];
+                    RaycastHit2D hit = _raycastHits[x];
                     if (Mathf.Abs(hit.distance) > 0)
                     {
                         if (!_movedPassengersSet.Contains(hit.transform))
@@ -191,11 +191,11 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
                 
                 Debug.DrawRay(rayOrigin, Vector3.right * directionX * rayLength, Color.yellow);
 
-                int hitCount = Physics.RaycastNonAlloc(rayOrigin, Vector3.right * directionX, _raycastHits, rayLength, passengerMask);
+                int hitCount = Physics2D.RaycastNonAlloc(rayOrigin, Vector3.right * directionX, _raycastHits, rayLength, passengerMask);
 
                 for (int x = 0; x < hitCount; ++x)
                 {
-                    RaycastHit hit = _raycastHits[x];
+                    RaycastHit2D hit = _raycastHits[x];
                     if (Mathf.Abs(hit.distance) > 0)
                     {
                         if (!_movedPassengersSet.Contains(hit.transform))
@@ -228,11 +228,11 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
                
                 Debug.DrawRay(rayOrigin, Vector3.up * rayLength, Color.green);
                 
-                int hitCount = Physics.RaycastNonAlloc(rayOrigin, Vector3.up, _raycastHits, rayLength, passengerMask);
+                int hitCount = Physics2D.RaycastNonAlloc(rayOrigin, Vector3.up, _raycastHits, rayLength, passengerMask);
                 
                 for (int x = 0; x < hitCount; ++x)
                 {
-                    RaycastHit hit = _raycastHits[x];
+                    RaycastHit2D hit = _raycastHits[x];
                     if(Mathf.Abs(hit.distance) > 0)
                     {
                         if (!_movedPassengersSet.Contains(hit.transform))

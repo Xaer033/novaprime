@@ -7,8 +7,10 @@ public class AvatarView : EventDispatcherBehavior, IPlatformPassenger, ITimeWarp
     public AvatarConstrainer constrainer;
     public Transform armHook;
     public Transform _healthPositionHook;
-
-    public Animator _animator;
+    public Transform _viewRoot;
+    
+    [SerializeField]
+    private Animator _animator;
     
     public void Aim(Vector3 cursorPosition)
     {
@@ -17,8 +19,23 @@ public class AvatarView : EventDispatcherBehavior, IPlatformPassenger, ITimeWarp
             Vector3 delta = (cursorPosition - armHook.position).normalized;
             armHook.rotation = Quaternion.LookRotation(delta, Vector3.up);
         }
+
+
+        if (_viewRoot != null)
+        {
+            bool isFlipped = cursorPosition.x < transform.position.x;
+            Vector3 localScale = _viewRoot.localScale;
+            localScale.x = isFlipped ?  -Mathf.Abs(localScale.x) : Mathf.Abs(localScale.x);
+            _viewRoot.localScale = localScale;
+        }
     }
 
+    public Animator animator
+    {
+        get { return _animator; }
+        set { _animator = value; }
+    }
+    
     public void SetWeapon(Transform weaponTransform)
     {
         if (weaponTransform && armHook)

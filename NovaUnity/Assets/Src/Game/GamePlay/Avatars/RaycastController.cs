@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class RaycastController
@@ -14,7 +12,7 @@ public class RaycastController
     public float distanceBetweenRays { get; set; }
     
 
-    public Collider collider { get; set; }
+    public Collider2D collider { get; set; }
    public float horizontalRaySpacing { get; private set;}
    public float verticalRaySpacing { get; private set;}
     
@@ -34,7 +32,7 @@ public class RaycastController
         public Vector3 bottomRight;
     }
     
-    public RaycastController(float distBetweenRays, Collider boundsCollider, LayerMask collisionLayerMask, float collisionSkinWidth = 0.015f, float collisionSkinHeight = 0.015f)
+    public RaycastController(float distBetweenRays, Collider2D boundsCollider, LayerMask collisionLayerMask, float collisionSkinWidth = 0.015f, float collisionSkinHeight = 0.015f)
     {
         distanceBetweenRays = distBetweenRays;
         horizontalRaySpacing = 0;

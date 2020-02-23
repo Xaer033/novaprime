@@ -29,4 +29,5 @@ public class UnitStats : ScriptableObject
 
     public LayerMask targetLayerMask;
     public MachineGunData machineGunData;
+    public float animationRunSpeed;
 }

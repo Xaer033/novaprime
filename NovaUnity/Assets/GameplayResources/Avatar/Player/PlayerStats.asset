@@ -15,7 +15,7 @@ MonoBehaviour:
   maxHealth: 100
   maxJumpHeight: 2.5
   minJumpHeight: 0.28
-  timeToJumpApex: 0.4
+  timeToJumpApex: 0.45
   coyoteTime: 0.1
   jumpRememberDelay: 0.0895
   wallStickTime: 0.2
@@ -24,13 +24,13 @@ MonoBehaviour:
   wallJumpClimb: {x: 4, y: 10}
   wallJumpOff: {x: 6, y: 3}
   wallJumpLeap: {x: 8, y: 8}
-  speed: 4
+  speed: 5
   terminalVelocity: 15
-  accelerationTimeAir: 0.15
+  accelerationTimeAir: 0.1
   accelerationTimeDoubleJumpAir: 0.375
   accelerationTimeGround: 0.05
   targetLayerMask:
     serializedVersion: 2
     m_Bits: 0
   machineGunData: {fileID: 11400000, guid: 4b17b859321cf394b98dacaa960d30ae, type: 2}
-  animationRunSpeed: 0.75
+  animationRunSpeed: 0.7

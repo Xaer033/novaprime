@@ -17,6 +17,6 @@ MonoBehaviour:
     m_Bits: 4608
   damageType: 0
   attackType: 0
-  speed: 65
+  speed: 45
   damage: 25
   deathTimer: 20

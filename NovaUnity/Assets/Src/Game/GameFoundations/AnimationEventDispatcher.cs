@@ -1,9 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using GhostGen;
-using UnityEditorInternal;
+﻿using GhostGen;
 using UnityEngine;
-using UnityEngine.Animations;
 
 public class AnimationEventDispatcher : StateMachineBehaviour
 {

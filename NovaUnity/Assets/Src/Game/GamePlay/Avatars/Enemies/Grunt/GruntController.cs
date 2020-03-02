@@ -357,7 +357,7 @@ public class GruntController : NotificationDispatcher, IAvatarController
     private void onAnimDeathComplete(GeneralEvent e)
     {
         AnimationEventDispatcher.AnimationEventData data = (AnimationEventDispatcher.AnimationEventData)e.data;
-        _view.DeathFadeOut(() => { });
+        _view.DeathFadeOut(() => { _view.constrainer.collisionCollider.enabled = false; });
         
     }
 }

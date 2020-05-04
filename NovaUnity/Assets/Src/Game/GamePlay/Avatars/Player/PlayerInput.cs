@@ -55,7 +55,7 @@ public class PlayerInput : IInputGenerator
         _lastJumpAxis = jumpAction;
 
         input.primaryFire = _pAction.Gameplay.primaryFire.ReadValue<float>() > 0.01f;
-        input.secondaryFire = Input.GetMouseButton(1);
+        input.secondaryFire = Mouse.current.rightButton.isPressed;
         
         input.cursorPosition = _camera != null ? _camera.ScreenToWorldPoint(new Vector3(aimPosition.x, aimPosition.y, Mathf.Abs(_camera.transform.position.z))) : Vector3.zero;
         input.cursorPosition.z = 0;

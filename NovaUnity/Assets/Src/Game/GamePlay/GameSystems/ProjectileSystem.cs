@@ -11,13 +11,13 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
     private List<BulletView> _projectileViewPool;
     
     private int _poolSize;
-    private RaycastHit[] _raycastHitList;
+    private RaycastHit2D[] _raycastHitList;
     
     public ProjectileSystem(int poolSize)
     {
         _poolSize = poolSize;
         _projectileViewPool = new List<BulletView>(poolSize);
-        _raycastHitList = new RaycastHit[3];
+        _raycastHitList = new RaycastHit2D[3];
     }
     
     public void Start(GameSystems gameSystems, GameState gameState)
@@ -67,10 +67,10 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
                 
                 Debug.DrawRay(rayStart, bulletDir * lookAhead, Color.green);
                 
-                int hitCount = Physics.RaycastNonAlloc(rayStart, bulletDir, _raycastHitList, lookAhead, state.data.targetMask);
+                int hitCount = Physics2D.RaycastNonAlloc(rayStart, bulletDir, _raycastHitList, lookAhead, state.data.targetMask);
                 if(hitCount > 0)
                 {
-                    RaycastHit hit = _raycastHitList[0];
+                    RaycastHit2D hit = _raycastHitList[0];
                     IAttackTarget target = hit.collider.GetComponent<IAttackTarget>();
 
                     if (target != null)

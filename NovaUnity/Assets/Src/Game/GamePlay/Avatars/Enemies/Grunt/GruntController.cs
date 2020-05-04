@@ -6,8 +6,6 @@ public class GruntController : NotificationDispatcher, IAvatarController
     private AvatarView _view;
 
     private float _gravity;
-
-    
     
     private FrameInput _lastInput;
     private IInputGenerator _input;
@@ -359,7 +357,7 @@ public class GruntController : NotificationDispatcher, IAvatarController
     private void onAnimDeathComplete(GeneralEvent e)
     {
         AnimationEventDispatcher.AnimationEventData data = (AnimationEventDispatcher.AnimationEventData)e.data;
-        _view.DeathFadeOut(() => { });
+        _view.DeathFadeOut(() => { _view.constrainer.collisionCollider.enabled = false; });
         
     }
 }

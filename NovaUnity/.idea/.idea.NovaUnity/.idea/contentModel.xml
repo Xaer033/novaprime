@@ -89,21 +89,27 @@
                 <e p="ProjectileSystem.cs" t="Include" />
                 <e p="SpawnPointSystem.cs" t="Include" />
               </e>
-              <e p="Platforms" t="Include">
-                <e p="PlatformView.cs" t="Include" />
+              <e p="Interactable" t="Include">
+                <e p="Destructables" t="Include">
+                  <e p="LightFixture.cs" t="Include" />
+                </e>
+                <e p="Platforms" t="Include">
+                  <e p="PlatformView.cs" t="Include" />
+                </e>
+                <e p="SpawnPoints" t="Include">
+                  <e p="SpawnPointState.cs" t="Include" />
+                  <e p="SpawnPointView.cs" t="Include" />
+                </e>
+                <e p="TimeWarpers" t="Include">
+                  <e p="ITimeWarpTarget.cs" t="Include" />
+                  <e p="TimeWarpFieldController.cs" t="Include" />
+                  <e p="TimeWarpShaderHelper.cs" t="Include" />
+                </e>
               </e>
               <e p="PlayFieldController.cs" t="Include" />
-              <e p="SpawnPoints" t="Include">
-                <e p="SpawnPointState.cs" t="Include" />
-                <e p="SpawnPointView.cs" t="Include" />
-              </e>
-              <e p="TimeWarpers" t="Include">
-                <e p="ITimeWarpTarget.cs" t="Include" />
-                <e p="TimeWarpFieldController.cs" t="Include" />
-                <e p="TimeWarpShaderHelper.cs" t="Include" />
-              </e>
               <e p="Weapons" t="Include">
                 <e p="BulletView.cs" t="Include" />
+                <e p="IWeaponController.cs" t="Include" />
                 <e p="MachineGunController.cs" t="Include" />
                 <e p="MachineGunData.cs" t="Include" />
                 <e p="MachineGunState.cs" t="Include" />

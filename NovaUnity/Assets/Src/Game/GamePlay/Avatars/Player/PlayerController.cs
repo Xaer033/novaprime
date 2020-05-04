@@ -18,6 +18,8 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     private UnitStats _unitStats;
     private GameSystems _gameSystems;
     
+    
+    
     public PlayerController(UnitMap.Unit unit, PlayerState state, AvatarView view, IInputGenerator input)
     {
         _unit = unit;
@@ -132,34 +134,28 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     public void Step(float deltaTime)
     {
         float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
-//        _view.transform.localPosition = Vector3.Lerp(_previousPosition, _state.position, alpha);
-//        _view.transform.localPosition = _state.position;
+//        _view.transform.localPosition = Vector3.Lerp(_state.previousPosition, _state.position, alpha);
+
     }
 
     public void FixedStep(float deltaTime, FrameInput input)
     {
         _lastInput = input;
-
+        AnimationInfo animationInfo = new AnimationInfo();
+        
         deltaTime = _lastInput.secondaryFire ? deltaTime * 0.5f : deltaTime;
         deltaTime = deltaTime * _state.timeScale;
 
-
-        Vector3 aimDirection = _lastInput.cursorDirection.normalized;
-        Vector3 aimPosition = _lastInput.useCusorPosition ? _lastInput.cursorPosition : _state.position + (aimDirection * 4.0f);
-        Debug.DrawRay(_state.position, aimDirection, Color.cyan, 0.2f);
-
-        const float kDebugLineSize = 0.2f;
-        Debug.DrawLine(aimPosition + Vector3.down * kDebugLineSize, aimPosition + Vector3.up     * kDebugLineSize, Color.cyan, 0.2f);
-        Debug.DrawLine(aimPosition + Vector3.left * kDebugLineSize, aimPosition + Vector3.right  * kDebugLineSize, Color.cyan, 0.2f);
-    
-        
         int wallDirX = _view.constrainer.collisionInfo.left ? -1 : 1;
         int inputDirX = Mathf.Abs(_lastInput.horizontalMovement) < 0.5f ? 0 : _lastInput.horizontalMovement < 0 ? -1 : 1;
         
         _handleDirectionMovement(ref _state.velocity, deltaTime);
-
-        _state.isWallSliding = _handleWallSliding(ref _state.velocity, deltaTime, wallDirX, inputDirX);
-        _handleJumping(ref _state.velocity, deltaTime, _state.isWallSliding, wallDirX, inputDirX);
+        animationInfo.isRunning = Mathf.Abs(_state.velocity.x) > 0.001f;
+        animationInfo.runSpeed = _state.velocity.x * _unitStats.animationRunSpeed;
+       
+        _state.isWallSliding     = _handleWallSliding(ref _state.velocity, deltaTime, wallDirX, inputDirX);
+        animationInfo.canJump    = _handleJumping(ref _state.velocity, deltaTime, _state.isWallSliding, wallDirX, inputDirX);
+        animationInfo.isWallSliding = _state.isWallSliding;
         
         Move(_state.velocity * deltaTime, false);
         
@@ -167,12 +163,18 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         {
             _state.coyoteJumpTimer = _unitStats.coyoteTime;
             _state.jumpCount = 0;
+            animationInfo.isGrounded = true;
         }
         else
         {
             if (_state.coyoteJumpTimer <= 0 && _state.jumpCount == 0 && !_state.isWallSliding)
             {
                 _state.jumpCount++;
+            }
+
+            if (_state.velocity.y < 0)
+            {
+                animationInfo.isFalling = true;
             }
         }
         
@@ -189,10 +191,25 @@ public class PlayerController : NotificationDispatcher, IAvatarController
             }
         }
 
+        // Aim
+        Vector3 aimDirection = _lastInput.cursorDirection.normalized;
+        Vector3 aimPosition = _lastInput.useCusorPosition ? _lastInput.cursorPosition : _state.position + (aimDirection * 4.0f);
+
         if (_view)
         {
-            // Aim
+          Debug.DrawRay(_state.position, aimDirection, Color.cyan, 0.2f);
+
+            const float kDebugLineSize = 0.2f;
+            Debug.DrawLine(aimPosition + Vector3.down * kDebugLineSize, aimPosition + Vector3.up     * kDebugLineSize, Color.cyan, 0.2f);
+            Debug.DrawLine(aimPosition + Vector3.left * kDebugLineSize, aimPosition + Vector3.right  * kDebugLineSize, Color.cyan, 0.2f);
+
+            bool isFlipped = aimPosition.x < _view.transform.position.x;
+            animationInfo.isBackPedaling = (isFlipped && _state.velocity.x > 0.0f) || (!isFlipped && _state.velocity.x < 0.0f);
+            
+            animationInfo.runSpeed *= isFlipped ? -1.0f : 1.0f;
+
             _view.Aim(aimPosition);
+            handleAnimationStates(animationInfo);
         }
 
             // Weapon Handling
@@ -205,7 +222,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
                 _machineGunController.Fire(aimPosition);
             }
         }
-
+        
         // Clear buffered input as we handled it above (for transient button up/down events that may get missed in a fixedUpdate
         if (_input != null)
         {
@@ -244,8 +261,10 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         }
     }
     
-    private void _handleJumping(ref Vector3 velocity, float deltaTime, bool isWallSliding, int wallDirX, int inputDirX)
+    private bool _handleJumping(ref Vector3 velocity, float deltaTime, bool isWallSliding, int wallDirX, int inputDirX)
     {
+        bool isJumping = false;
+        
         float timeToJumpApex = _unitStats.timeToJumpApex;
         _gravity = -(2 * _unitStats.maxJumpHeight) / (timeToJumpApex * timeToJumpApex);
         
@@ -282,6 +301,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
                     velocity.y = _unitStats.wallJumpLeap.y;
                 }
 
+                isJumping = true;
                 _state.jumpCount = 3;
                 _state.midairJumpTimer = 0;
             }
@@ -298,6 +318,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
                             velocity.x = jumpDirection.x;
                             velocity.y = jumpDirection.y;
                         
+                            isJumping = true;
                             _state.jumpCount++;
                         }
                     }
@@ -309,6 +330,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
                             velocity.x = inputDirX * _unitStats.wallJumpOff.x;
                         }
                     
+                        isJumping = true;
                         _state.jumpCount++;
                     }
 
@@ -328,6 +350,8 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         
         _state.midairJumpTimer -= deltaTime;
         _state.coyoteJumpTimer -= deltaTime;
+
+        return isJumping;
     }
 
 
@@ -370,5 +394,49 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         }
 
         return isWallSliding;
+    }
+
+    private void handleAnimationStates(AnimationInfo animInfo)
+    {
+        AnimatorStateInfo state = _view.animator.GetCurrentAnimatorStateInfo(0);
+        if (animInfo.canJump)
+        {
+            _view.animator.SetTrigger("jumpTrigger");
+        }
+        else if (animInfo.isGrounded)
+        {
+            if (animInfo.isRunning && !state.IsName("Running"))
+            {
+                _view.animator.SetTrigger("runTrigger");
+            }
+            else if(!animInfo.isRunning && !state.IsName("Idle"))
+            {
+                _view.animator.SetTrigger("idleTrigger");
+            }
+        }
+        else if(!animInfo.isGrounded)
+        {
+            if (animInfo.isFalling && !state.IsName("Falling"))
+            {
+                _view.animator.SetTrigger("fallingTrigger");  
+            }
+        }
+
+        float abs = Mathf.Abs(animInfo.runSpeed);
+        float sign = Mathf.Sign(animInfo.runSpeed);
+        float runSpeed = abs < 0.12f ? 0.12f * sign : animInfo.runSpeed;
+        _view.animator.SetFloat("runSpeedScale", runSpeed);
+
+    }
+
+    private struct AnimationInfo
+    {
+        public bool canJump;
+        public bool isRunning;
+        public bool isGrounded;
+        public bool isFalling;
+        public float runSpeed;
+        public bool isBackPedaling;
+        public bool isWallSliding;
     }
 }

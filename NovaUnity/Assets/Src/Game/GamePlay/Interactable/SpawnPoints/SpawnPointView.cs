@@ -10,7 +10,7 @@ public class SpawnPointView : MonoBehaviour
     
     public SpawnPointData spawnPointData;
     
-#if UNITY_EDITOR
+//#if UNITY_EDITOR
 
     private void OnDrawGizmos()
     {
@@ -27,7 +27,7 @@ public class SpawnPointView : MonoBehaviour
         Handles.Label(textPosition, gameObject.name);
         
     }
-#endif
+//#endif
     
 }
 

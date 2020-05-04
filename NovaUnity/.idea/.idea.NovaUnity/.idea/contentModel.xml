@@ -109,6 +109,7 @@
               <e p="PlayFieldController.cs" t="Include" />
               <e p="Weapons" t="Include">
                 <e p="BulletView.cs" t="Include" />
+                <e p="IWeaponController.cs" t="Include" />
                 <e p="MachineGunController.cs" t="Include" />
                 <e p="MachineGunData.cs" t="Include" />
                 <e p="MachineGunState.cs" t="Include" />

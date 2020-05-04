@@ -134,8 +134,8 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     public void Step(float deltaTime)
     {
         float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
-//        _view.transform.localPosition = Vector3.Lerp(_previousPosition, _state.position, alpha);
-//        _view.transform.localPosition = _state.position;
+//        _view.transform.localPosition = Vector3.Lerp(_state.previousPosition, _state.position, alpha);
+
     }
 
     public void FixedStep(float deltaTime, FrameInput input)

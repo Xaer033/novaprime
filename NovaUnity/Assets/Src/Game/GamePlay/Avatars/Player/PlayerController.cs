@@ -12,7 +12,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     
     private float _resetPlatformTime;
 
-    private MachineGunController _machineGunController;
+    private IWeaponController _machineGunController;
     private PlayerState _state;
     private UnitMap.Unit _unit;
     private UnitStats _unitStats;

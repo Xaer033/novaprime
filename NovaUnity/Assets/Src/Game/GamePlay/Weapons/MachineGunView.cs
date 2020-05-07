@@ -1,16 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using DG.Tweening;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class MachineGunView : MonoBehaviour
+public class MachineGunView : MonoBehaviour, IWeaponView
 {
     private const int kFXPoolSize = 50;
     
     // (This should all be in a weapon class)
     public GameObject _bulletFXPrefab;
     
-    public Transform barrelHook;
+    public Transform _barrelHook;
     
     public MachineGunController controller { get; set; }
     
@@ -29,7 +26,12 @@ public class MachineGunView : MonoBehaviour
             controller.OnTimeWarpExit();
         }
     }
-
+    
+    public Transform barrelHook
+    {
+        get { return _barrelHook; }
+    }
+    
     public void Fire(Vector3 target, float speedx)
     {
 //        float speed = bulletSpeed;

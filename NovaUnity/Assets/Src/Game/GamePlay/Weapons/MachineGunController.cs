@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class MachineGunController
+public class MachineGunController : IWeaponController
 {
     private GameSystems _gameSystems;
     private Vector3 _aimPosition;
 
-    private MachineGunView _view;
+    private IWeaponView _view;
     private MachineGunState _state;
     private MachineGunData _machineGunData;
 
-    public MachineGunView view
+    public IWeaponView view
     {
         get { return _view; }
     }
@@ -75,7 +72,7 @@ public class MachineGunController
     private Vector3 getFireDirection(Vector3 forward, float range)
     {
         Vector3 perp = Vector3.Cross(forward, _view.barrelHook.right);
-        Vector3 offset = perp.normalized * UnityEngine.Random.Range(-range, range); // * Replace this with predicable seeded random function
+        Vector3 offset = perp.normalized * Random.Range(-range, range); // * Replace this with predicable seeded random function
         Vector3 result = forward + offset;
         return result.normalized;
     }

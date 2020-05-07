@@ -156,4 +156,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _bulletFXPrefab: {fileID: 6696625390528277400, guid: a67d08bde992529428ee0d38b34637eb,
     type: 3}
-  barrelHook: {fileID: 743820590236552186}
+  _barrelHook: {fileID: 743820590236552186}

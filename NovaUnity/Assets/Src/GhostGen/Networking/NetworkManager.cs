@@ -1,15 +1,18 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+using System.Linq;
+using Bolt;
+using Bolt.Matchmaking;
 using ExitGames.Client.Photon;
+using UdpKit;
 using UnityEngine;
-using GhostGen;
+using Bolt;
+
 //using Photon.Pun;
 //using Photon.Realtime;
 
-public class NetworkManager  : MonoBehaviour//, IInitializable, ILateDisposable, IOnEventCallback
+public class NetworkManager  : GlobalEventListener//, IInitializable, ILateDisposable, IOnEventCallback
 {
-    /*
+
     public const string kGameVersion = "0.1.0";
     public const int kMaxPlayers = 4;
 
@@ -20,12 +23,18 @@ public class NetworkManager  : MonoBehaviour//, IInitializable, ILateDisposable,
     public event Action onJoinedRoom;
     public event Action onLeftLobby;
     public event Action onLeftRoom;
-    public event Action<List<RoomInfo>> onReceivedRoomListUpdate;
-    public event Action<Player> onPlayerConnected;
-    public event Action<Player> onPlayerDisconnected;
+    public event Action onNetworkStart;
+    public event Action<UdpSession, IProtocolToken> onSessionJoined;
+    public event Action<BoltConnection> onConnection;
+    
+    
+    // public event Action<List<RoomInfo>> onReceivedRoomListUpdate;
+    // public event Action<Player> onPlayerConnected;
+    // public event Action<Player> onPlayerDisconnected;
 
     public void Initialize()
     {
+        
 //        PhotonNetwork.OnEventCall += onCustomEventCallback;
     }
 
@@ -38,55 +47,117 @@ public class NetworkManager  : MonoBehaviour//, IInitializable, ILateDisposable,
         onJoinedRoom = null;
         onLeftLobby = null;
         onLeftRoom = null;
-        onReceivedRoomListUpdate = null;
-        onPlayerConnected = null;
-        onPlayerDisconnected = null;
+        onNetworkStart = null;
+        onConnection = null;
+        onSessionJoined = null;
+        // onReceivedRoomListUpdate = null;
+        // onPlayerConnected = null;
+        // onPlayerDisconnected = null;
 
-        if (PhotonNetwork.IsConnected)
+        if (BoltNetwork.IsConnected)
         {
             Disconnect();
         }
     }
 
-    public bool Connect()
+    public void CreateSession(string sessionId, IProtocolToken token)
     {
-        if (PhotonNetwork.IsConnected)
+        BoltMatchmaking.CreateSession(sessionId, token);
+    }
+    
+    public void StartServer(UdpEndPoint endPoint)
+    {
+        if (BoltNetwork.IsConnected)
         {
             Debug.Log("Network: Already Connected!");
-            return false;
+            return;
         }
 
         //PhotonNetwork.autoJoinLobby = true;
-        return PhotonNetwork.ConnectUsingSettings();
+        BoltLauncher.StartServer(endPoint);
+    }
+
+    public void StartSinglePlayer()
+    {
+        BoltLauncher.StartSinglePlayer();
+    }
+    
+    public void JoinServer(UdpEndPoint endPoint)
+    {
+        BoltLauncher.StartClient(endPoint);
+    }
+    
+    public override void BoltStartFailed(UdpConnectionDisconnectReason disconnectReason)
+    {
+        BoltLog.Error("Failed to Start");
+    }
+
+    public override void BoltStartDone()
+    {
+        if(onNetworkStart != null)
+        {
+            onNetworkStart();
+        }
+    }
+
+    public override void Connected(BoltConnection connection)
+    {
+        if(onConnection != null)
+        {
+            onConnection(connection);
+        }
+    }
+
+    public override void SessionConnected(UdpSession session, IProtocolToken token)
+    {
+        if (onSessionJoined != null)
+        {
+            onSessionJoined(session, token);
+        }
+    }
+    
+    public void OnConnectedToServer()
+    {
+        // if (onConnection != null)
+        // {
+        //     onConnection()
+        // }
     }
 
     public void Disconnect()
     {
-        PhotonNetwork.Disconnect();
+        BoltLauncher.Shutdown();
     }
 
     public bool isConnected
     {
-        get { return PhotonNetwork.IsConnected; }
+        get { return BoltNetwork.IsConnected; }
     }
 
-    public Player GetPlayerById(int playerId)
+    public BoltConnection GetPlayerById(uint playerId)
     {
-        Player[] playerList = PhotonNetwork.PlayerList;
-
+        BoltConnection connection = default;
+        
+        BoltConnection[] playerList = BoltNetwork.Connections.ToList().ToArray();
+    
         int count = playerList.Length;
         for(int i = 0; i < count; ++i)
         {
-            if(playerId == playerList[i].ActorNumber)
+            if(playerId == playerList[i].ConnectionId)
             {
-                return playerList[i];
+                connection = playerList[i];
+                break;
             }
         }
-        return null;
+        return connection;
     }
 
+    public void OnNetworkStartDone()
+    {
+        
+    }
     /// PUN Callbacks
-    public override void OnCreatedRoom()
+    public void OnCreatedRoom()
     {
         if(onCreatedRoom != null)
         {
@@ -102,59 +173,60 @@ public class NetworkManager  : MonoBehaviour//, IInitializable, ILateDisposable,
         }
     }
 
-    public virtual void ON(object[] codeAndMsg)
+
+    public virtual void OnError(object[] codeAndMsg)
     {
         Debug.Log(string.Format("Error:{0}, {1}", codeAndMsg[0], codeAndMsg[1]));
     }
 
-    public override void OnRoomListUpdate(List<RoomInfo> roomList)
-    {
-        Debug.Log("-On Received Room list update: "  + roomList.Count);
-        if (onReceivedRoomListUpdate != null)
-        {
-            onReceivedRoomListUpdate(roomList);
-        }
-    }
+    // public void OnRoomListUpdate(List<RoomInfo> roomList)
+    // {
+    //     Debug.Log("-On Received Room list update: "  + roomList.Count);
+    //     if (onReceivedRoomListUpdate != null)
+    //     {
+    //         onReceivedRoomListUpdate(roomList);
+    //     }
+    // }
 
-    public override void OnConnectedToMaster()
+    public void OnConnectedToMaster()
     {
         //Debug.Log("-Joining Lobby-");
         //PhotonNetwork.JoinLobby();
     }
 
-    public override void OnJoinedLobby()
+    public void OnJoinedLobby(UdpEvent updEvent)
     {
-        Debug.Log("Joined Lobby: " + PhotonNetwork.CurrentLobby.Type.ToString());
+        Debug.Log("Joined Lobby: " + updEvent.ToString());
         safeCall(onJoinedLobby);
     }
 
-    public override void OnJoinedRoom()
+    public void OnJoinedRoom()
     {
         safeCall(onJoinedRoom);
     }
 
-    public override void OnPlayerEnteredRoom(Player newPlayer)
-    {
-        if(onPlayerConnected != null)
-        {
-            onPlayerConnected(newPlayer);
-        }
-    }
+    // public override void OnPlayerEnteredRoom(Player newPlayer)
+    // {
+    //     if(onPlayerConnected != null)
+    //     {
+    //         onPlayerConnected(newPlayer);
+    //     }
+    // }
+    //
+    // public override void OnPlayerLeftRoom(Player otherPlayer)
+    // {
+    //     if (onPlayerDisconnected != null)
+    //     {
+    //         onPlayerDisconnected(otherPlayer);
+    //     }
+    // }
 
-    public override void OnPlayerLeftRoom(Player otherPlayer)
-    {
-        if (onPlayerDisconnected != null)
-        {
-            onPlayerDisconnected(otherPlayer);
-        }
-    }
-
-    public override void OnLeftRoom()
+    public void OnLeftRoom()
     {
         safeCall(onLeftRoom);
     }
 
-    public override void OnLeftLobby()
+    public void OnLeftLobby()
     {
         safeCall(onLeftLobby);
     }
@@ -175,5 +247,4 @@ public class NetworkManager  : MonoBehaviour//, IInitializable, ILateDisposable,
             callback();
         }
     }
-    */
 }

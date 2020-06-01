@@ -15,14 +15,17 @@ public class IntroState : IGameState
         DOTween.Init(true, true, LogBehaviour.ErrorsOnly);
 
         _stateMachine = stateMachine;
-        _gotoSplash = true;
-        
+        Singleton.instance.networkManager.onNetworkStart += onNetworkStart;
+        Singleton.instance.networkManager.CreateSession("Help", null);
+        Singleton.instance.networkManager.StartSinglePlayer();
     }
 
     public void FixedStep(float fixedDeltaTime)
     {
 	    
     }
+    
+    
     public void Step( float p_deltaTime )
 	{
 		if (_gotoSplash) 
@@ -46,7 +49,14 @@ public class IntroState : IGameState
 
     public void Exit( )
 	{
+		
+		Singleton.instance.networkManager.onNetworkStart -= onNetworkStart;
 	//	_controller.getUI().rem
 		//_backButton.onClick.RemoveAllListeners ();
 	}
+
+    private void onNetworkStart()
+    {
+	    _gotoSplash = true;
+    }
 }

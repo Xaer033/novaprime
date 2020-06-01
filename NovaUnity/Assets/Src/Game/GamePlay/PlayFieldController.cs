@@ -71,7 +71,7 @@ public class PlayFieldController : NotificationDispatcher
             IInputGenerator currentInput = _gruntController.GetInput();
             if (currentInput == _gruntInput)
             {
-                _playerController.SetInput(null);
+                _playerController.SetInput(_gruntInput);
                 _gruntController.SetInput(_playerInput);
                 _cam.AddTarget(_gruntController.GetView().transform);
             }
@@ -84,10 +84,6 @@ public class PlayFieldController : NotificationDispatcher
             
         }
 
-        
-        
-
-        
         if (_pAction.Gameplay.exit.triggered)
         {
             Application.Quit();

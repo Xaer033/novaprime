@@ -40,9 +40,16 @@ namespace Photon.Realtime
     /// </remarks>
     public class LoadBalancingPeer : PhotonPeer
     {
-        protected internal static Type PingImplementation = null;
+        /// <summary>Obsolete accessor to the RegionHandler.PingImplementation.</summary>
+        [Obsolete("Use RegionHandler.PingImplementation directly.")]
+        protected internal static Type PingImplementation
+        {
+            get { return RegionHandler.PingImplementation; }
+            set { RegionHandler.PingImplementation = value; }
+        }
 
-        private readonly Dictionary<byte, object> opRaiseEventParameters = new Dictionary<byte, object>(); // used in OpRaiseEvent() (avoids lots of new Dictionary() calls)
+
+        private readonly Pool<Dictionary<byte, object>> paramDictionaryPool = new Pool<Dictionary<byte, object>>(() => new Dictionary<byte, object>(), x => x.Clear(), 1); // used in OpRaiseEvent() (avoids lots of new Dictionary() calls)
 
 
         /// <summary>
@@ -71,31 +78,20 @@ namespace Photon.Realtime
         [System.Diagnostics.Conditional("SUPPORTED_UNITY")]
         private void ConfigUnitySockets()
         {
-            #if !NETFX_CORE && !NO_SOCKET
-            PingImplementation = typeof(PingMono);
-            #endif
-            #if UNITY_WEBGL
-            PingImplementation = typeof(PingHttp);
-            #endif
-            #if !UNITY_EDITOR && NETFX_CORE
-            PingImplementation = typeof(PingWindowsStore);
-            #endif
-
-
             Type websocketType = null;
             #if UNITY_XBOXONE && !UNITY_EDITOR
-            websocketType = Type.GetType("ExitGames.Client.Photon.SocketWebTcpNativeDynamic, PhotonWebSocket", false);
+            websocketType = Type.GetType("ExitGames.Client.Photon.SocketNativeSource, PhotonRealtime", false);
             if (websocketType == null)
             {
-                websocketType = Type.GetType("ExitGames.Client.Photon.SocketWebTcpNativeDynamic, Assembly-CSharp-firstpass", false);
+                websocketType = Type.GetType("ExitGames.Client.Photon.SocketNativeSource, Assembly-CSharp-firstpass", false);
             }
             if (websocketType == null)
             {
-                websocketType = Type.GetType("ExitGames.Client.Photon.SocketWebTcpNativeDynamic, Assembly-CSharp", false);
+                websocketType = Type.GetType("ExitGames.Client.Photon.SocketNativeSource, Assembly-CSharp", false);
             }
             if (websocketType == null)
             {
-                Debug.LogError("UNITY_XBOXONE is defined but peer could not find SocketWebTcpNativeDynamic. Check your project files to make sure the native WSS implementation is available. Won't connect.");
+                Debug.LogError("UNITY_XBOXONE is defined but peer could not find SocketNativeSource. Check your project files to make sure the native WSS implementation is available. Won't connect.");
             }
             #else
             // to support WebGL export in Unity, we find and assign the SocketWebTcp class (if it's in the project).
@@ -126,7 +122,7 @@ namespace Photon.Realtime
 
         public virtual bool OpGetRegions(string appId)
         {
-            Dictionary<byte, object> parameters = new Dictionary<byte, object>();
+            Dictionary<byte, object> parameters = new Dictionary<byte, object>(1);
             parameters[(byte)ParameterCode.ApplicationId] = appId;
 
             return this.SendOperation(OperationCode.GetRegions, parameters, new SendOptions() { Reliability = true, Encrypt = true });
@@ -173,18 +169,8 @@ namespace Photon.Realtime
         }
 
 
-        /// <summary>Used in the RoomOptionFlags parameter, this bitmask toggles options in the room.</summary>
-        enum RoomOptionBit : int
-        {
-            CheckUserOnJoin = 0x01,  // toggles a check of the UserId when joining (enabling returning to a game)
-            DeleteCacheOnLeave = 0x02,  // deletes cache on leave
-            SuppressRoomEvents = 0x04,  // suppresses all room events
-            PublishUserId = 0x08,  // signals that we should publish userId
-            DeleteNullProps = 0x10,  // signals that we should remove property if its value was set to null. see RoomOption to Delete Null Properties
-            BroadcastPropsChangeToAll = 0x20,  // signals that we should send PropertyChanged event to all room players including initiator
-        }
-
-        private void RoomOptionsToOpParameters(Dictionary<byte, object> op, RoomOptions roomOptions)
+        /// <summary>Used by OpJoinRoom and by OpCreateRoom alike.</summary>
+        private void RoomOptionsToOpParameters(Dictionary<byte, object> op, RoomOptions roomOptions, bool usePropertiesKey = false)
         {
             if (roomOptions == null)
             {
@@ -200,7 +186,15 @@ namespace Photon.Realtime
             {
                 gameProperties[GamePropertyKey.MaxPlayers] = roomOptions.MaxPlayers;
             }
-            op[ParameterCode.GameProperties] = gameProperties;
+
+            if (!usePropertiesKey)
+            {
+                op[ParameterCode.GameProperties] = gameProperties;  // typically, the key for game props is 248
+            }
+            else
+            {
+                op[ParameterCode.Properties] = gameProperties;      // when an op uses 248 as filter, the "create room" props can be set as 251
+            }
 
 
             int flags = 0;  // a new way to send the room options as bitwise-flags
@@ -309,7 +303,7 @@ namespace Photon.Realtime
                 this.RoomOptionsToOpParameters(op, opParams.RoomOptions);
             }
 
-            //this.Listener.DebugReturn(DebugLevel.INFO, "CreateGame: " + SupportClass.DictionaryToString(op));
+            //this.Listener.DebugReturn(DebugLevel.INFO, "OpCreateRoom: " + SupportClass.DictionaryToString(op));
             return this.SendOperation(OperationCode.CreateGame, op, SendOptions.SendReliable);
         }
 
@@ -372,7 +366,7 @@ namespace Photon.Realtime
                 }
             }
 
-            // UnityEngine.Debug.Log("JoinGame: " + SupportClass.DictionaryToString(op));
+            //this.Listener.DebugReturn(DebugLevel.INFO, "OpJoinRoom: " + SupportClass.DictionaryToString(op));
             return this.SendOperation(OperationCode.JoinGame, op, SendOptions.SendReliable);
         }
 
@@ -425,7 +419,74 @@ namespace Photon.Realtime
                 opParameters[ParameterCode.Add] = opJoinRandomRoomParams.ExpectedUsers;
             }
 
-            //this.Listener.DebugReturn(DebugLevel.INFO, "OpJoinRandom: " + SupportClass.DictionaryToString(opParameters));
+            //this.Listener.DebugReturn(DebugLevel.INFO, "OpJoinRandomRoom: " + SupportClass.DictionaryToString(opParameters));
+            return this.SendOperation(OperationCode.JoinRandomGame, opParameters, SendOptions.SendReliable);
+        }
+
+        /// <summary>
+        /// Only used on the Master Server. It will assign a game server and room to join-or-create.
+        /// On the Game Server, the OpJoin is used with option "create if not exists".
+        /// </summary>
+        public virtual bool OpJoinRandomOrCreateRoom(OpJoinRandomRoomParams opJoinRandomRoomParams, EnterRoomParams createRoomParams)
+        {
+            if (this.DebugOut >= DebugLevel.INFO)
+            {
+                this.Listener.DebugReturn(DebugLevel.INFO, "OpJoinRandomOrCreateRoom()");
+            }
+
+            // join random room parameters:
+
+            Hashtable expectedRoomProperties = new Hashtable();
+            expectedRoomProperties.MergeStringKeys(opJoinRandomRoomParams.ExpectedCustomRoomProperties);
+            if (opJoinRandomRoomParams.ExpectedMaxPlayers > 0)
+            {
+                expectedRoomProperties[GamePropertyKey.MaxPlayers] = opJoinRandomRoomParams.ExpectedMaxPlayers;
+            }
+
+            Dictionary<byte, object> opParameters = new Dictionary<byte, object>();
+            if (expectedRoomProperties.Count > 0)
+            {
+                opParameters[ParameterCode.GameProperties] = expectedRoomProperties;    // used as filter. below, RoomOptionsToOpParameters has usePropertiesKey = true
+            }
+
+            if (opJoinRandomRoomParams.MatchingType != MatchmakingMode.FillRoom)
+            {
+                opParameters[ParameterCode.MatchMakingType] = (byte)opJoinRandomRoomParams.MatchingType;
+            }
+
+            if (opJoinRandomRoomParams.TypedLobby != null && !opJoinRandomRoomParams.TypedLobby.IsDefault)
+            {
+                opParameters[ParameterCode.LobbyName] = opJoinRandomRoomParams.TypedLobby.Name;
+                opParameters[ParameterCode.LobbyType] = (byte)opJoinRandomRoomParams.TypedLobby.Type;
+            }
+
+            if (!string.IsNullOrEmpty(opJoinRandomRoomParams.SqlLobbyFilter))
+            {
+                opParameters[ParameterCode.Data] = opJoinRandomRoomParams.SqlLobbyFilter;
+            }
+
+            if (opJoinRandomRoomParams.ExpectedUsers != null && opJoinRandomRoomParams.ExpectedUsers.Length > 0)
+            {
+                opParameters[ParameterCode.Add] = opJoinRandomRoomParams.ExpectedUsers;
+            }
+
+
+            // parameters for creating a room if needed ("or create" part of the operation)
+            // partial copy of OpCreateRoom
+
+            opParameters[ParameterCode.JoinMode] = (byte)JoinMode.CreateIfNotExists;
+
+            if (createRoomParams != null)
+            {
+                if (!string.IsNullOrEmpty(createRoomParams.RoomName))
+                {
+                    opParameters[ParameterCode.RoomName] = createRoomParams.RoomName;
+                }
+
+                this.RoomOptionsToOpParameters(opParameters, createRoomParams.RoomOptions, true);
+            }
+
+            //this.Listener.DebugReturn(DebugLevel.INFO, "OpJoinRandomOrCreateRoom: " + SupportClass.DictionaryToString(opParameters, false));
             return this.SendOperation(OperationCode.JoinRandomGame, opParameters, SendOptions.SendReliable);
         }
 
@@ -565,11 +626,11 @@ namespace Photon.Realtime
                 this.Listener.DebugReturn(DebugLevel.INFO, "OpSetPropertiesOfActor()");
             }
 
-            if (actorNr <= 0 || actorProperties == null)
+            if (actorNr <= 0 || actorProperties == null || actorProperties.Count == 0)
             {
                 if (this.DebugOut >= DebugLevel.INFO)
                 {
-                    this.Listener.DebugReturn(DebugLevel.INFO, "OpSetPropertiesOfActor not sent. ActorNr must be > 0 and actorProperties != null.");
+                    this.Listener.DebugReturn(DebugLevel.INFO, "OpSetPropertiesOfActor not sent. ActorNr must be > 0 and actorProperties must be not null nor empty.");
                 }
                 return false;
             }
@@ -592,11 +653,11 @@ namespace Photon.Realtime
         }
 
 
-        protected void OpSetPropertyOfRoom(byte propCode, object value)
+        protected bool OpSetPropertyOfRoom(byte propCode, object value)
         {
             Hashtable properties = new Hashtable();
             properties[propCode] = value;
-            this.OpSetPropertiesOfRoom(properties);
+            return this.OpSetPropertiesOfRoom(properties);
         }
 
         public bool OpSetCustomPropertiesOfRoom(Hashtable gameProperties)
@@ -617,6 +678,14 @@ namespace Photon.Realtime
             if (this.DebugOut >= DebugLevel.INFO)
             {
                 this.Listener.DebugReturn(DebugLevel.INFO, "OpSetPropertiesOfRoom()");
+            }
+            if (gameProperties == null || gameProperties.Count == 0)
+            {
+                if (this.DebugOut >= DebugLevel.INFO)
+                {
+                    this.Listener.DebugReturn(DebugLevel.INFO, "OpSetPropertiesOfRoom not sent. gameProperties must be not null nor empty.");
+                }
+                return false;
             }
 
             Dictionary<byte, object> opParameters = new Dictionary<byte, object>();
@@ -705,7 +774,7 @@ namespace Photon.Realtime
                 }
             }
 
-            return this.SendOperation(OperationCode.Authenticate, opParameters, new SendOptions() { Reliability = true, Encrypt = this.IsEncryptionAvailable });
+            return this.SendOperation(OperationCode.Authenticate, opParameters, new SendOptions() { Reliability = true, Encrypt = true });
         }
 
 
@@ -729,7 +798,7 @@ namespace Photon.Realtime
         {
             if (this.DebugOut >= DebugLevel.INFO)
             {
-                this.Listener.DebugReturn(DebugLevel.INFO, "OpAuthenticateOnce()");
+                this.Listener.DebugReturn(DebugLevel.INFO, "OpAuthenticateOnce(): authValues = "  + authValues + ", region = " + regionCode + ", encryption = " + encryptionMode);
             }
 
 
@@ -787,7 +856,7 @@ namespace Photon.Realtime
                 }
             }
 
-            return this.SendOperation(OperationCode.AuthenticateOnce, opParameters, new SendOptions() { Reliability = true, Encrypt = this.IsEncryptionAvailable });
+            return this.SendOperation(OperationCode.AuthenticateOnce, opParameters, new SendOptions() { Reliability = true, Encrypt = true });
         }
 
         /// <summary>
@@ -836,56 +905,63 @@ namespace Photon.Realtime
         /// <returns>If operation could be enqueued for sending. Sent when calling: Service or SendOutgoingCommands.</returns>
         public virtual bool OpRaiseEvent(byte eventCode, object customEventContent, RaiseEventOptions raiseEventOptions, SendOptions sendOptions)
         {
-            this.opRaiseEventParameters.Clear(); // re-used private variable to avoid many new Dictionary() calls (garbage collection)
-            if (raiseEventOptions != null)
+            var paramDict = this.paramDictionaryPool.Pop();
+            try
             {
-                if (raiseEventOptions.CachingOption != EventCaching.DoNotCache)
+                if (raiseEventOptions != null)
                 {
-                    this.opRaiseEventParameters[(byte)ParameterCode.Cache] = (byte)raiseEventOptions.CachingOption;
+                    if (raiseEventOptions.CachingOption != EventCaching.DoNotCache)
+                    {
+                        paramDict[(byte)ParameterCode.Cache] = (byte)raiseEventOptions.CachingOption;
+                    }
+                    switch (raiseEventOptions.CachingOption)
+                    {
+                        case EventCaching.SliceSetIndex:
+                        case EventCaching.SlicePurgeIndex:
+                        case EventCaching.SlicePurgeUpToIndex:
+                            //this.opParameters[(byte) ParameterCode.CacheSliceIndex] =
+                            //    (byte) raiseEventOptions.CacheSliceIndex;
+                            return this.SendOperation(OperationCode.RaiseEvent, paramDict, sendOptions);
+                        case EventCaching.SliceIncreaseIndex:
+                        case EventCaching.RemoveFromRoomCacheForActorsLeft:
+                            return this.SendOperation(OperationCode.RaiseEvent, paramDict, sendOptions);
+                        case EventCaching.RemoveFromRoomCache:
+                            if (raiseEventOptions.TargetActors != null)
+                            {
+                                paramDict[(byte)ParameterCode.ActorList] = raiseEventOptions.TargetActors;
+                            }
+                            break;
+                        default:
+                            if (raiseEventOptions.TargetActors != null)
+                            {
+                                paramDict[(byte)ParameterCode.ActorList] = raiseEventOptions.TargetActors;
+                            }
+                            else if (raiseEventOptions.InterestGroup != 0)
+                            {
+                                paramDict[(byte)ParameterCode.Group] = raiseEventOptions.InterestGroup;
+                            }
+                            else if (raiseEventOptions.Receivers != ReceiverGroup.Others)
+                            {
+                                paramDict[(byte)ParameterCode.ReceiverGroup] = (byte)raiseEventOptions.Receivers;
+                            }
+                            if (raiseEventOptions.Flags.HttpForward)
+                            {
+                                paramDict[(byte)ParameterCode.EventForward] = raiseEventOptions.Flags.WebhookFlags;
+                            }
+                            break;
+                    }
                 }
-                switch (raiseEventOptions.CachingOption)
+                paramDict[(byte)ParameterCode.Code] = (byte)eventCode;
+                if (customEventContent != null)
                 {
-                    case EventCaching.SliceSetIndex:
-                    case EventCaching.SlicePurgeIndex:
-                    case EventCaching.SlicePurgeUpToIndex:
-                        //this.opParameters[(byte) ParameterCode.CacheSliceIndex] =
-                        //    (byte) raiseEventOptions.CacheSliceIndex;
-                        return this.SendOperation(OperationCode.RaiseEvent, this.opRaiseEventParameters, sendOptions);
-                    case EventCaching.SliceIncreaseIndex:
-                    case EventCaching.RemoveFromRoomCacheForActorsLeft:
-                        return this.SendOperation(OperationCode.RaiseEvent, this.opRaiseEventParameters, sendOptions);
-                    case EventCaching.RemoveFromRoomCache:
-                        if (raiseEventOptions.TargetActors != null)
-                        {
-                            this.opRaiseEventParameters[(byte)ParameterCode.ActorList] = raiseEventOptions.TargetActors;
-                        }
-                        break;
-                    default:
-                        if (raiseEventOptions.TargetActors != null)
-                        {
-                            this.opRaiseEventParameters[(byte)ParameterCode.ActorList] = raiseEventOptions.TargetActors;
-                        }
-                        else if (raiseEventOptions.InterestGroup != 0)
-                        {
-                            this.opRaiseEventParameters[(byte)ParameterCode.Group] = raiseEventOptions.InterestGroup;
-                        }
-                        else if (raiseEventOptions.Receivers != ReceiverGroup.Others)
-                        {
-                            this.opRaiseEventParameters[(byte)ParameterCode.ReceiverGroup] = (byte)raiseEventOptions.Receivers;
-                        }
-                        if (raiseEventOptions.Flags.HttpForward)
-                        {
-                            this.opRaiseEventParameters[(byte)ParameterCode.EventForward] = raiseEventOptions.Flags.WebhookFlags;
-                        }
-                        break;
+                    paramDict[(byte)ParameterCode.Data] = customEventContent;
                 }
+                return this.SendOperation(OperationCode.RaiseEvent, paramDict, sendOptions);
             }
-            this.opRaiseEventParameters[(byte)ParameterCode.Code] = (byte)eventCode;
-            if (customEventContent != null)
+            finally
             {
-                this.opRaiseEventParameters[(byte)ParameterCode.Data] = customEventContent;
+                this.paramDictionaryPool.Push(paramDict);
             }
-            return this.SendOperation(OperationCode.RaiseEvent, this.opRaiseEventParameters, sendOptions);
         }
 
 
@@ -900,7 +976,7 @@ namespace Photon.Realtime
             {
                 this.Listener.DebugReturn(DebugLevel.ALL, "OpSettings()");
             }
-            
+
             Dictionary<byte, object> opParameters = new Dictionary<byte, object>();
 
             // implementation for Master Server:
@@ -919,6 +995,16 @@ namespace Photon.Realtime
         }
     }
 
+    /// <summary>Used in the RoomOptionFlags parameter, this bitmask toggles options in the room.</summary>
+    internal enum RoomOptionBit : int
+    {
+        CheckUserOnJoin = 0x01,  // toggles a check of the UserId when joining (enabling returning to a game)
+        DeleteCacheOnLeave = 0x02,  // deletes cache on leave
+        SuppressRoomEvents = 0x04,  // suppresses all room events
+        PublishUserId = 0x08,  // signals that we should publish userId
+        DeleteNullProps = 0x10,  // signals that we should remove property if its value was set to null. see RoomOption to Delete Null Properties
+        BroadcastPropsChangeToAll = 0x20,  // signals that we should send PropertyChanged event to all room players including initiator
+    }
 
     /// <summary>
     /// Options for OpFindFriends can be combined to filter which rooms of friends are returned.
@@ -954,26 +1040,47 @@ namespace Photon.Realtime
     }
 
 
-
+    /// <summary>
+    /// Parameters for the matchmaking of JoinRandomRoom and JoinRandomOrCreateRoom.
+    /// </summary>
+    /// <remarks>
+    /// More about matchmaking: <see cref="https://doc.photonengine.com/en-us/pun/current/manuals-and-demos/matchmaking-and-lobby"/>.
+    /// </remarks>
     public class OpJoinRandomRoomParams
     {
+        /// <summary>The custom room properties a room must have to fit. All key-values must be present to match. In SQL Lobby, use SqlLobbyFilter instead.</summary>
         public Hashtable ExpectedCustomRoomProperties;
+        /// <summary>Filters by the MaxPlayers value of rooms.</summary>
         public byte ExpectedMaxPlayers;
+        /// <summary>The MatchmakingMode affects how rooms get filled. By default, the server fills rooms.</summary>
         public MatchmakingMode MatchingType;
+        /// <summary>The lobby in which to match. The type affects how filters are applied.</summary>
         public TypedLobby TypedLobby;
+        /// <summary>SQL query to filter room matches. For default-typed lobbies, use ExpectedCustomRoomProperties instead.</summary>
         public string SqlLobbyFilter;
+        /// <summary>The expected users list blocks player slots for your friends or team mates to join the room, too.</summary>
+        /// <remarks>See: https://doc.photonengine.com/en-us/pun/v2/lobby-and-matchmaking/matchmaking-and-lobby#matchmaking_slot_reservation </remarks>
         public string[] ExpectedUsers;
     }
 
+    /// <summary>Parameters for creating rooms.</summary>
     public class EnterRoomParams
     {
+        /// <summary>The name of the room to create. If null, the server generates a unique name. If not null, it must be unique and new or will cause an error.</summary>
         public string RoomName;
+        /// <summary>The RoomOptions define the optional behaviour of rooms.</summary>
         public RoomOptions RoomOptions;
+        /// <summary>A lobby to attach the new room to. If set, this overrides a joined lobby (if any).</summary>
         public TypedLobby Lobby;
+        /// <summary>The custom player properties that describe this client / user. Keys must be strings.</summary>
         public Hashtable PlayerProperties;
+        /// <summary>Internally used value to skip some values when the operation is sent to the Master Server.</summary>
         protected internal bool OnGameServer = true; // defaults to true! better send more parameter than too few (GS needs all)
+        /// <summary>Matchmaking can optionally create a room if it is not existing. Also useful, when joining a room with a team: It does not matter who is first.</summary>
         public bool CreateIfNotExists;
+        /// <summary>Signals, if the user attempts to return to a room or joins one. Set by the methods that call an operation.</summary>
         public bool RejoinOnly;
+        /// <summary>A list of users who are expected to join the room along with this client. Reserves slots for rooms with MaxPlayers value.</summary>
         public string[] ExpectedUsers;
     }
 
@@ -1035,7 +1142,7 @@ namespace Photon.Realtime
         /// <summary>(32762) All servers are busy. This is a temporary issue and the game logic should try again after a brief wait time.</summary>
         /// <remarks>
         /// This error may happen for all operations that create rooms. The operation response will contain this error code.
-        /// 
+        ///
         /// This error is very unlikely to happen as we monitor load on all servers and add them on demand.
         /// However, it's good to be prepared for a shortage of machines or surge in CCUs.
         /// </remarks>
@@ -1247,10 +1354,10 @@ namespace Photon.Realtime
         [Obsolete("Use PropertiesChanged now.")]
         public const byte SetProperties = (byte)253;
 
-        /// <summary>(252) When player left game unexpected and the room has a playerTtl != 0, this event is fired to let everyone know about the timeout.</summary>
+        /// (252) When player left game unexpected and the room has a playerTtl != 0, this event is fired to let everyone know about the timeout.
         /// Obsolete. Replaced by Leave. public const byte Disconnect = LiteEventCode.Disconnect;
 
-        /// <summary>(251) Sent by Photon Cloud when a plugin-call or webhook-call failed. Usually, the execution on the server continues, despite the issue. Contains: ParameterCode.Info.</summary>
+        /// <summary>(251) Sent by Photon Cloud when a plugin-call or webhook-call failed or events cache limit exceeded. Usually, the execution on the server continues, despite the issue. Contains: ParameterCode.Info.</summary>
         /// <seealso cref="https://doc.photonengine.com/en-us/realtime/current/reference/webhooks#options"/>
         public const byte ErrorInfo = 251;
 
@@ -1472,7 +1579,7 @@ namespace Photon.Realtime
 
         /// <summary>(200) Informs user about version of plugin load to game</summary>
         public const byte PluginVersion = 200;
-        
+
         /// <summary>(196) Cluster info provided in OpAuthenticate/OpAuthenticateOnce responses.</summary>
         public const byte Cluster = 196;
 
@@ -1835,12 +1942,11 @@ namespace Photon.Realtime
         //public int CacheSliceIndex;
     }
 
-    /// <summary>
-    /// Options of lobby types available. Lobby types might be implemented in certain Photon versions and won't be available on older servers.
-    /// </summary>
+    /// <summary>Types of lobbies define their behaviour and capabilities. Check each value for details.</summary>
+    /// <remarks>Values of this enum must be matched by the server.</remarks>
     public enum LobbyType :byte
     {
-        /// <summary>This lobby is used unless another is defined by game or JoinRandom. Room-lists will be sent and JoinRandomRoom can filter by matching properties.</summary>
+        /// <summary>Standard type and behaviour: While joined to this lobby clients get room-lists and JoinRandomRoom can use a simple filter to match properties (perfectly).</summary>
         Default = 0,
         /// <summary>This lobby type lists rooms like Default but JoinRandom has a parameter for SQL-like "where" clauses for filtering. This allows bigger, less, or and and combinations.</summary>
         SqlLobby = 2,
@@ -1850,87 +1956,64 @@ namespace Photon.Realtime
 
     /// <summary>Refers to a specific lobby on the server.</summary>
     /// <remarks>
-    /// The name and type are the unique identifier for a lobby.<br/>
-    /// A lobby with a null or empty name is considered the default lobby no matter the type set here.
+    /// Name and Type combined are the unique identifier for a lobby.<br/>
+    /// The server will create lobbies "on demand", so no registration or setup is required.<br/>
+    /// An empty or null Name always points to the "default lobby" as special case.
     /// </remarks>
     public class TypedLobby
     {
-        private string name;
-
         /// <summary>
-        /// Name of the lobby this game gets added to.
-        /// Default: null, attached to default lobby (<see cref="TypedLobby.Default"/>).
+        /// Name of the lobby. Default: null, pointing to the "default lobby".
         /// </summary>
         /// <remarks>
-        /// Lobbies are unique per Name plus Type, so the same name can be used when several types are existing.
-        /// If the Name is null or empty, it is always the default lobby.
+        /// If Name is null or empty, a TypedLobby will point to the "default lobby". This ignores the Type value and always acts as  <see cref="LobbyType.Default"/>.
         /// </remarks>
-        public string Name
-        {
-            get { return name; }
-            set
-            {
-                if (!string.IsNullOrEmpty(value) || type == LobbyType.Default)
-                {
-                    name = value;
-                }
-            }
-        }
-
-        private LobbyType type;
+        public string Name;
 
         /// <summary>
-        /// Type of the lobby this game gets added to.
-        /// Default: <see cref="LobbyType.Default"/>, attached to default lobby (<see cref="TypedLobby.Default"/>).
+        /// Type (and behaviour) of the lobby.
         /// </summary>
         /// <remarks>
-        /// If the Name is null or empty the Type can only be <see cref="LobbyType.Default"/>.
-        /// <see cref="LobbyType.Default"/> is not the same thing as the default lobby (<see cref="TypedLobby.Default"/>).
+        /// An empty or null Name always points to the "default lobby" as special case.
         /// </remarks>
-        public LobbyType Type
-        {
-            get { return type; }
-            set
-            {
-                if (!IsDefault)
-                {
-                    type = value;
-                }
-            }
-        }
+        public LobbyType Type;
 
         /// <summary>
-        /// Returns a reference to the default lobby which is the unique lobby that has a null name and is of type <see cref="LobbyType.Default"/>.
+        /// A reference to the default lobby which is the unique lobby that uses null as name and is of type <see cref="LobbyType.Default"/>.
         /// </summary>
         /// <remarks>
-        /// No other lobby can have a null or empty name.
-        /// <see cref="LobbyType.Default"/> is not the same thing as the default lobby.
-        /// On the other hand, this is a shortcut and reusable reference to the default lobby.
-        /// It is meant as a timer and allocation saver.
-        /// Do not change its Name or Type.
-        /// If you need a different lobby create another one.
+        /// There is only a single lobby with an empty name on the server. It is always of type  <see cref="LobbyType.Default"/>.<br/>
+        /// On the other hand, this is a shortcut and reusable reference to the default lobby.<br/>
+        /// Do not change Name or Type.<br/>
         /// </remarks>
         public static readonly TypedLobby Default = new TypedLobby();
+
         /// <summary>
-        /// Returns whether or not this lobby is considered default lobby (<see cref="TypedLobby.Default"/>).
+        /// Returns whether or not this instance points to the "default lobby" (<see cref="TypedLobby.Default"/>).
         /// </summary>
         /// <remarks>
         /// This comes up to checking if the Name is null or empty.
-        /// <see cref="LobbyType.Default"/> is not the same thing as the default lobby (<see cref="TypedLobby.Default"/>).
+        /// <see cref="LobbyType.Default"/> is not the same thing as the "default lobby" (<see cref="TypedLobby.Default"/>).
         /// </remarks>
         public bool IsDefault { get { return string.IsNullOrEmpty(this.Name); } }
 
-        public TypedLobby()
+
+        /// <summary>
+        /// Creates a TypedLobby instance. Unless Name is changed, this points to the "default lobby" (<see cref="TypedLobby.Default"/>).
+        /// </summary>
+        internal TypedLobby()
         {
         }
 
+        /// <summary>
+        /// Sets Name and Type of the new instance. Make sure name is not empty or null, as that always points to the "default lobby" (<see cref="TypedLobby.Default"/>).
+        /// </summary>
+        /// <param name="name">Some string to identify a lobby.</param>
+        /// <param name="type">The type of a lobby defines it's capabilities and behaviour.</param>
         public TypedLobby(string name, LobbyType type)
         {
-            if (!string.IsNullOrEmpty(name))
-            {
-                this.Name = name;
-                this.Type = type;
-            }
+            this.Name = name;
+            this.Type = type;
         }
 
         public override string ToString()
@@ -1939,9 +2022,16 @@ namespace Photon.Realtime
         }
     }
 
+
+    /// <summary>
+    /// Info for a lobby on the server. Used when <see cref="LoadBalancingClient.EnableLobbyStatistics"/> is true.
+    /// </summary>
     public class TypedLobbyInfo : TypedLobby
     {
+        /// <summary>Count of players that currently joined this lobby.</summary>
         public int PlayerCount;
+
+        /// <summary>Count of rooms currently associated with this lobby.</summary>
         public int RoomCount;
 
         public override string ToString()

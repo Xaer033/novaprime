@@ -1,7 +1,4 @@
 ﻿using GhostGen;
-using System.Collections;
-using Photon.Pun.UtilityScripts;
-using UnityEngine;
 
 public class MainMenuState : IGameState
 {

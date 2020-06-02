@@ -126,7 +126,9 @@ public class PlayerController : NotificationDispatcher, IAvatarController
 
             _state.previousPosition = _state.position;
             _state.position = _state.position + constrainedMoveDelta;
-            _view.transform.localPosition = _state.position;
+
+            _view._viewRoot.localPosition = Vector3.zero;
+            _view.transform.position = _state.position;
         }
     }
     
@@ -134,7 +136,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     public void Step(float deltaTime)
     {
         float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
-//        _view.transform.localPosition = Vector3.Lerp(_state.previousPosition, _state.position, alpha);
+        _view._viewRoot.position = Vector3.Lerp(_state.previousPosition, _state.position, alpha);
 
     }
 

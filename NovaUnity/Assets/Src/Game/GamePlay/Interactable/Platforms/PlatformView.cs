@@ -25,12 +25,14 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
 
 
     public Collider2D collisionCollider;
+    public Transform _viewRoot;
 
     private RaycastController _raycastController;
     private HashSet<Transform> _movedPassengersSet = new HashSet<Transform>();
     private List<PassengerMovement> _passengerMovementList = new List<PassengerMovement>();
     private Dictionary<Transform, IPlatformPassenger> _passengerDict = new Dictionary<Transform, IPlatformPassenger>();
 
+    private Vector3 _prevPosition;
     private int _fromWaypointIndex;
     private float _percentBetweenWaypoints;
     private float _nextMoveTime;
@@ -71,11 +73,21 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
         
         _calculatePassengerMovement(velocity);
 
+        _prevPosition = transform.position;
+        
         _movePassengers(true);
         transform.Translate(velocity);
         _movePassengers(false);
+        
+        _viewRoot.localPosition = Vector3.zero;
     }
 
+    void Update()
+    {
+        float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
+       _viewRoot.position = Vector3.Lerp(_prevPosition, transform.position, alpha);
+    }
+    
     private Vector3 _calculatePlatformMovement(float deltaTime, float time)
     {
         if (time < _nextMoveTime)

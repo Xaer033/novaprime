@@ -9,6 +9,10 @@ public class AvatarView : EventDispatcherBehavior, IPlatformPassenger, ITimeWarp
     public Transform _healthPositionHook;
     public Transform _viewRoot;
     
+    
+    [SerializeField]
+    private NetworkEntity _networkEntity;
+    
     [SerializeField]
     private Animator _animator;
     
@@ -28,6 +32,12 @@ public class AvatarView : EventDispatcherBehavior, IPlatformPassenger, ITimeWarp
             localScale.x = isFlipped ?  -Mathf.Abs(localScale.x) : Mathf.Abs(localScale.x);
             _viewRoot.localScale = localScale;
         }
+    }
+
+    public NetworkEntity netEntity
+    {
+        get => _networkEntity;
+        set => _networkEntity = value;
     }
 
     public Animator animator

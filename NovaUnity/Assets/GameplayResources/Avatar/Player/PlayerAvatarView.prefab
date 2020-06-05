@@ -432,6 +432,7 @@ GameObject:
   - component: {fileID: 9125514036299057097}
   - component: {fileID: 8866287814259327232}
   - component: {fileID: 3253615202563350316}
+  - component: {fileID: 4782951062848739999}
   m_Layer: 10
   m_Name: PlayerAvatarView
   m_TagString: Untagged
@@ -472,6 +473,7 @@ MonoBehaviour:
   armHook: {fileID: 7402611272870614619}
   _healthPositionHook: {fileID: 4718428796640834636}
   _viewRoot: {fileID: 2906751426590334483}
+  _networkEntity: {fileID: 0}
   _animator: {fileID: 3253615202563350316}
 --- !u!114 &9125514036299057097
 MonoBehaviour:
@@ -537,6 +539,35 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &4782951062848739999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5789754299105121112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -36112512, guid: 5b00bf8b25851d440940a40ec23344f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _sceneGuid: 
+  _serializerGuid: 42a27124-34d4-48c3-8bf4-333871d328e0
+  _prefabId: 1
+  _updateRate: 1
+  _autoFreezeProxyFrames: 0
+  _clientPredicted: 1
+  _allowInstantiateOnClient: 1
+  _persistThroughSceneLoads: 0
+  _sceneObjectDestroyOnDetach: 1
+  _sceneObjectAutoAttach: 1
+  _alwaysProxy: 0
+  _detachOnDisable: 1
+  _allowFirstReplicationWhenFrozen: 0
+  _autoRemoveChildEntities: 0
+  _entityBehaviourQueryOption: 0
+  _entityPriorityCalculatorQueryOption: 0
+  _entityReplicationFilterQueryOption: 0
 --- !u!1 &5789754300994217977
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,8 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Bolt;
+using UdpKit;
 using UnityEngine;
 
-public struct FrameInput
+public struct FrameInput : IProtocolToken
 {
     // Range of -1 to 1
     public float horizontalMovement;
@@ -19,4 +21,15 @@ public struct FrameInput
     public Vector3 cursorPosition;
     public Vector3 cursorDirection;
     public bool useCusorPosition;
+
+    public void Write(UdpPacket packet)
+    {
+        
+    }
+    
+    public void Read(UdpPacket packet)
+    {
+        
+    }
+
 }

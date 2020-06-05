@@ -19,6 +19,22 @@
             <e p="TimeWarpShader.shader" t="Include" />
           </e>
         </e>
+        <e p="Samples" t="Include">
+          <e p="2D SpriteShape" t="Include">
+            <e p="3.0.11" t="Include">
+              <e p="Sprite Shape Extras" t="Include">
+                <e p="Scripts" t="Include">
+                  <e p="Clipper.cs" t="Include" />
+                  <e p="ConformingSpline.cs" t="Include" />
+                  <e p="GeometryCollider.cs" t="Include" />
+                  <e p="LegacyCollider.cs" t="Include" />
+                  <e p="SimpleDraw.cs" t="Include" />
+                  <e p="Sprinkler.cs" t="Include" />
+                </e>
+              </e>
+            </e>
+          </e>
+        </e>
         <e p="Src" t="Include">
           <e p="Game" t="Include">
             <e p="GameFoundations" t="Include">
@@ -57,6 +73,7 @@
                 <e p="IInputGenerator.cs" t="Include" />
                 <e p="IPlatformPassenger.cs" t="Include" />
                 <e p="Player" t="Include">
+                  <e p="NetworkEntity.cs" t="Include" />
                   <e p="PlayerActions.cs" t="Include" />
                   <e p="PlayerController.cs" t="Include" />
                   <e p="PlayerInput.cs" t="Include" />

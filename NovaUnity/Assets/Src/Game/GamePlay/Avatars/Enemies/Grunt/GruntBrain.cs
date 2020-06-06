@@ -89,7 +89,7 @@ public class GruntBrain : IInputGenerator
         for (int i = 0; i < colliderList.Length; ++i)
         {
             AvatarView view = colliderList[i].GetComponent<AvatarView>();
-            if (view != null)
+            if (view != null && view.controller != null)
             {
                 uuid = view.controller.GetUUID();
                 c = view.controller;

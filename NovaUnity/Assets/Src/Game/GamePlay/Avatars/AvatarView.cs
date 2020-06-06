@@ -52,8 +52,8 @@ public class AvatarView : EventDispatcherBehavior, IPlatformPassenger, ITimeWarp
         {
             weaponTransform.SetParent(armHook);
             weaponTransform.localPosition = Vector3.zero;
-            weaponTransform.localRotation = Quaternion.identity;
-            weaponTransform.localScale = Vector3.one;
+            // weaponTransform.localRotation = Quaternion.identity;
+            // weaponTransform.localScale = Vector3.one;
         }
     }
 

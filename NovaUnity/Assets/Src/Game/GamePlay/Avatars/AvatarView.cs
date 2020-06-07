@@ -1,6 +1,7 @@
 using System;
 using GhostGen;
 using UnityEngine;
+using UnityEngine.Animations;
 
 public class AvatarView : EventDispatcherBehavior, IPlatformPassenger, ITimeWarpTarget, IAttackTarget
 {
@@ -8,6 +9,8 @@ public class AvatarView : EventDispatcherBehavior, IPlatformPassenger, ITimeWarp
     public Transform armHook;
     public Transform _healthPositionHook;
     public Transform _viewRoot;
+    public ParentConstraint _leftHandConstraint;
+    public ParentConstraint _rightHandConstraint;
     
     
     [SerializeField]
@@ -46,12 +49,11 @@ public class AvatarView : EventDispatcherBehavior, IPlatformPassenger, ITimeWarp
         set { _animator = value; }
     }
     
-    public void SetWeapon(Transform weaponTransform)
+    public void SetWeapon(IWeaponView weaponView)
     {
-        if (weaponTransform && armHook)
+        if (weaponView != null && armHook != null)
         {
-            weaponTransform.SetParent(armHook);
-            weaponTransform.localPosition = Vector3.zero;
+            weaponView.Attach(armHook, _leftHandConstraint, _rightHandConstraint);
             // weaponTransform.localRotation = Quaternion.identity;
             // weaponTransform.localScale = Vector3.one;
         }

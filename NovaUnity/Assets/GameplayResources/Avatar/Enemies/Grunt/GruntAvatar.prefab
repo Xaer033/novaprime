@@ -222,6 +222,10 @@ MonoBehaviour:
   constrainer: {fileID: 9125514036299057097}
   armHook: {fileID: 7402611272870614619}
   _healthPositionHook: {fileID: 1121882207068058647}
+  _viewRoot: {fileID: 449116805717182556}
+  _leftHandConstraint: {fileID: 0}
+  _rightHandConstraint: {fileID: 0}
+  _networkEntity: {fileID: 0}
   _animator: {fileID: 1366838402536065113}
 --- !u!114 &9125514036299057097
 MonoBehaviour:

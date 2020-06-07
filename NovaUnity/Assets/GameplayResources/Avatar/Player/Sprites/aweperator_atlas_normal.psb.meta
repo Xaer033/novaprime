@@ -102,19 +102,19 @@ ScriptedImporter:
     internalID: 0
     spriteBone:
     - name: lArm_1
-      position: {x: 14.590607, y: 20.976791, z: 0}
-      rotation: {x: 0, y: 0, z: -0.0621374, w: 0.9980677}
-      length: 42.24424
+      position: {x: 10.8479, y: 14.989243, z: 0}
+      rotation: {x: 0, y: 0, z: 0.02456191, w: 0.99969834}
+      length: 45.715687
       parentId: -1
     - name: lArm_2
-      position: {x: 42.244205, y: 0.0000014666157, z: 0}
-      rotation: {x: 0, y: 0, z: 0.10473788, w: 0.9944999}
-      length: 52.58968
+      position: {x: 45.71565, y: 0.000005941702, z: 0}
+      rotation: {x: 0, y: 0, z: 0.003974348, w: 0.99999213}
+      length: 52.482914
       parentId: 0
     - name: lArm_3
-      position: {x: 52.589672, y: 0.000016431904, z: 0}
-      rotation: {x: 0, y: 0, z: 0.0047216606, w: 0.99998885}
-      length: 15.790428
+      position: {x: 52.48288, y: 0.00014492543, z: 0}
+      rotation: {x: 0, y: 0, z: 0.01893406, w: 0.99982077}
+      length: 15.790427
       parentId: 1
     spriteOutline: []
     vertices:
@@ -2006,19 +2006,19 @@ ScriptedImporter:
     internalID: 0
     spriteBone:
     - name: rArm_1
-      position: {x: 117.64282, y: 23.210281, z: 10}
-      rotation: {x: 0, y: 0, z: 0.9993864, w: 0.03502572}
-      length: 42.771072
+      position: {x: 116.14601, y: 20.96492, z: 10}
+      rotation: {x: 0, y: 0, z: 1, w: -0.0000017276524}
+      length: 41.169174
       parentId: -1
     - name: rArm_2
-      position: {x: 42.771057, y: -0.0000016114062, z: 0}
-      rotation: {x: 0, y: 0, z: 0.10398932, w: 0.9945785}
-      length: 45.009853
+      position: {x: 41.169178, y: 0.000010196074, z: 0}
+      rotation: {x: 0, y: 0, z: 0.010815423, w: 0.9999416}
+      length: 44.590626
       parentId: 0
     - name: rArm_3
-      position: {x: 45.00985, y: 0.000017265626, z: 10}
-      rotation: {x: 0, y: 0, z: -0.046296753, w: 0.9989277}
-      length: 28.05736
+      position: {x: 44.590633, y: 0.00013627185, z: 10}
+      rotation: {x: 0, y: 0, z: 0.0120139, w: 0.9999279}
+      length: 28.057367
       parentId: 1
     spriteOutline: []
     vertices:
@@ -3149,8 +3149,8 @@ ScriptedImporter:
     internalID: 0
     spriteBone:
     - name: spine_3
-      position: {x: 37.988403, y: 8.696106, z: 6}
-      rotation: {x: 0, y: 0, z: 0.80438995, w: 0.5941016}
+      position: {x: 37.988403, y: 8.696213, z: 6}
+      rotation: {x: 0, y: 0, z: 0.80439013, w: 0.5941014}
       length: 71.268555
       parentId: -1
     spriteOutline: []
@@ -3687,13 +3687,13 @@ ScriptedImporter:
     spriteBone:
     - name: spine_1
       position: {x: 41.76024, y: 4.356735, z: 5}
-      rotation: {x: 0, y: 0, z: 0.70710796, w: 0.70710564}
-      length: 48.65506
+      rotation: {x: 0, y: 0, z: 0.7017386, w: 0.71243453}
+      length: 48.416573
       parentId: -1
     - name: spine_2
-      position: {x: 48.655067, y: -0.00001100665, z: 5}
-      rotation: {x: 0, y: 0, z: -0.16018671, w: 0.9870868}
-      length: 35.506443
+      position: {x: 48.416576, y: -0.0000044358794, z: 5}
+      rotation: {x: 0, y: 0, z: -0.14196247, w: 0.98987204}
+      length: 35.51482
       parentId: 0
     spriteOutline: []
     vertices:
@@ -5153,17 +5153,17 @@ ScriptedImporter:
     bones:
     - name: spine_1
       position: {x: 250.76024, y: 73.356735, z: 5}
-      rotation: {x: 0, y: 0, z: 0.70710796, w: 0.70710564}
-      length: 48.65506
+      rotation: {x: 0, y: 0, z: 0.7017386, w: 0.71243453}
+      length: 48.41657
       parentId: -1
     - name: spine_2
-      position: {x: 48.655064, y: -0.000010529788, z: 5}
-      rotation: {x: 0, y: 0, z: -0.1601867, w: 0.9870868}
-      length: 35.506443
+      position: {x: 48.416573, y: 0.0000036136241, z: 5}
+      rotation: {x: 0, y: 0, z: -0.14196247, w: 0.98987204}
+      length: 35.51482
       parentId: 0
     - name: spine_3
-      position: {x: 35.506435, y: -0.000011674894, z: 6}
-      rotation: {x: 0, y: 0, z: 0.30518052, w: 0.9522945}
+      position: {x: 35.514816, y: -0.000014386731, z: 6}
+      rotation: {x: 0, y: 0, z: 0.2948103, w: 0.9555558}
       length: 71.26855
       parentId: 1
     - name: rFoot
@@ -5177,40 +5177,35 @@ ScriptedImporter:
       length: 19.97348
       parentId: -1
     - name: rArm_1
-      position: {x: 3.313082, y: 72.90641, z: 10}
-      rotation: {x: 0, y: -0, z: 0.7902663, w: 0.6127636}
-      length: 42.77107
+      position: {x: 2.3265553, y: 74.35543, z: 10}
+      rotation: {x: 0, y: -0, z: 0.8048406, w: 0.5934911}
+      length: 41.16917
       parentId: 1
     - name: rArm_2
-      position: {x: 42.771065, y: -0.0000028715958, z: 0}
-      rotation: {x: 0, y: 0, z: 0.1039893, w: 0.9945784}
-      length: 45.00986
+      position: {x: 41.16917, y: 0.00000034739588, z: 0}
+      rotation: {x: 0, y: 0, z: 0.010815458, w: 0.9999415}
+      length: 44.590622
       parentId: 5
     - name: rArm_3
-      position: {x: 45.009857, y: 0.000010762659, z: 10}
-      rotation: {x: 0, y: 0, z: -0.046296734, w: 0.9989278}
+      position: {x: 44.59063, y: 0.00012993487, z: 10}
+      rotation: {x: 0, y: 0, z: 0.01201383, w: 0.9999278}
       length: 28.057362
       parentId: 6
     - name: lArm_1
-      position: {x: 44.501736, y: -76.69338, z: 0}
-      rotation: {x: 0, y: 0, z: -0.63398665, w: 0.773344}
-      length: 42.244244
+      position: {x: 36.01432, y: -75.06484, z: 0}
+      rotation: {x: 0, y: 0, z: -0.57354504, w: 0.8191741}
+      length: 45.71568
       parentId: 1
     - name: lArm_2
-      position: {x: 42.244225, y: 0.00000028507588, z: 0}
-      rotation: {x: 0, y: 0, z: 0.10473789, w: 0.99449986}
-      length: 52.58968
+      position: {x: 45.715656, y: 0.0000127907915, z: 0}
+      rotation: {x: 0, y: 0, z: 0.0039743227, w: 0.99999213}
+      length: 52.482903
       parentId: 8
     - name: lArm_3
-      position: {x: 52.589664, y: 0.0000015589837, z: 0}
-      rotation: {x: 0, y: 0, z: 0.004721642, w: 0.9999889}
+      position: {x: 52.482876, y: 0.00015337206, z: 0}
+      rotation: {x: 0, y: 0, z: 0.01893408, w: 0.99982077}
       length: 15.790425
       parentId: 9
-    - name: weaponHook
-      position: {x: 255.36475, y: 131.94861, z: 5}
-      rotation: {x: 0, y: 0, z: -0.01878138, w: 0.99982363}
-      length: 19.556
-      parentId: -1
     parts:
     - spritePosition:
         x: 323

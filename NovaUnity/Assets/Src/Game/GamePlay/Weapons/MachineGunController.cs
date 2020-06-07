@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Animations;
 
 public class MachineGunController : IWeaponController
 {
@@ -35,6 +36,13 @@ public class MachineGunController : IWeaponController
         _view.OnTimeWarpExit();
     }
 
+    public void Attach(Transform bodyParentHook, 
+                       ParentConstraint leftHandConstraint, 
+                       ParentConstraint rightHandConstraint)
+    {
+        view.Attach(bodyParentHook, leftHandConstraint, rightHandConstraint);
+    }
+    
     public void FixedStep(float deltaTime)
     {
         if (_state.fireTimer > 0)
@@ -55,7 +63,12 @@ public class MachineGunController : IWeaponController
         Vector3 adjustedPos = visualWeaponPos + (viewDir * 20.0f);
         
         RaycastHit2D[] raycastHits = new RaycastHit2D[1];
-        int hitCount = Physics2D.RaycastNonAlloc(visualWeaponPos, (adjustedPos - visualWeaponPos).normalized, raycastHits, 20.0f, _machineGunData.targetLayerMask);
+        int hitCount = Physics2D.RaycastNonAlloc(visualWeaponPos, 
+                                                 (adjustedPos - visualWeaponPos).normalized, 
+                                                 raycastHits, 
+                                                 20.0f, 
+                                                 _machineGunData.targetLayerMask);
+        
         if (hitCount > 0)
         {
             adjustedPos = raycastHits[0].point;

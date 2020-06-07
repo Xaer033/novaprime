@@ -93,7 +93,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         _gravity = -(2 * _unitStats.maxJumpHeight) / (timeToJumpApex * timeToJumpApex);
 
         _machineGunController = new MachineGunController(_gameSystems, _state.machineGunState, _unitStats.machineGunData);
-        _view.SetWeapon(_machineGunController.view.transform);
+        _view.SetWeapon(_machineGunController.view);
         
         _state.stateType = PlayerActivityType.ACTIVE;
     }

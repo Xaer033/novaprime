@@ -179,8 +179,9 @@ public class HealthUISystem : NotificationDispatcher, IGameSystem
 
     private HealthUIView getView(IAvatarController c)
     {
-        HealthUIView view;
-        if(!_inUseMap.TryGetValue(c, out view))
+        HealthUIView view = null;
+        
+        if(c != null && !_inUseMap.TryGetValue(c, out view))
         {
             view = popView(c);
             if(view != null)
@@ -188,6 +189,7 @@ public class HealthUISystem : NotificationDispatcher, IGameSystem
                 _inUseMap.Add(c, view);
             }
         }
+        
         return view;
     }
 

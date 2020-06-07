@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Data;
+using UnityEngine;
+using UnityEngine.Animations;
 
 public class MachineGunView : MonoBehaviour, IWeaponView
 {
@@ -6,8 +8,23 @@ public class MachineGunView : MonoBehaviour, IWeaponView
     
     // (This should all be in a weapon class)
     public GameObject _bulletFXPrefab;
+
+    [SerializeField] 
+    private Transform _leftHandHook;
     
-    public Transform _barrelHook;
+    [SerializeField] 
+    private Transform _rightHandHook;
+    
+    [SerializeField]
+    private Transform _barrelHook;
+
+    [SerializeField]
+    private ParentConstraint _parentConstraint;
+
+    [SerializeField]
+    private Animator _animator;
+    
+    private int attachParentIndex;
     
     public MachineGunController controller { get; set; }
     
@@ -31,9 +48,83 @@ public class MachineGunView : MonoBehaviour, IWeaponView
     {
         get { return _barrelHook; }
     }
+
+    public Transform leftHandHook
+    {
+        get { return _leftHandHook; }
+    }
+
+    public Transform rightHandHook
+    {
+        get { return _rightHandHook; }
+    }
+    
+    public void Attach(Transform bodyParentHook, ParentConstraint leftHandConstraint, ParentConstraint rightHandConstraint)
+    {
+        if(_parentConstraint != null && bodyParentHook != null)
+        {
+            transform.SetParent(bodyParentHook.transform);
+            transform.localPosition = Vector3.zero;
+            transform.localRotation = Quaternion.identity;
+            
+            //  _parentConstraint.transform.position = bodyParentHook.position;
+            //  _parentConstraint.transform.rotation = bodyParentHook.rotation;
+            //
+            // ConstraintSource source = new ConstraintSource();
+            // source.weight = 1.0f;
+            // source.sourceTransform = bodyParentHook;
+            // attachParentIndex = _parentConstraint.AddSource(source);
+            // _parentConstraint.weight = 1.0f;
+            // _parentConstraint.constraintActive = true;
+        }
+        
+        if(leftHandConstraint != null )
+        {
+            if(leftHandHook != null)
+            {
+                leftHandConstraint.transform.position = leftHandHook.position;
+                leftHandConstraint.transform.rotation = leftHandHook.rotation;
+                
+                ConstraintSource leftHandSource = new ConstraintSource();
+                leftHandSource.weight = 1.0f;
+                leftHandSource.sourceTransform = leftHandHook;
+                leftHandConstraint.AddSource(leftHandSource);
+                leftHandConstraint.weight = 1.0f;
+            }
+            else
+            {
+                leftHandConstraint.weight = 0;
+            }
+        }
+
+        if(rightHandConstraint != null)
+        {
+            if(rightHandHook != null)
+            {
+                rightHandConstraint.transform.position = rightHandHook.position;
+                rightHandConstraint.transform.rotation = rightHandHook.rotation;
+                    
+                ConstraintSource rightHandSource = new ConstraintSource();
+                rightHandSource.weight = 1.0f;
+                rightHandSource.sourceTransform = rightHandHook;
+                rightHandConstraint.AddSource(rightHandSource);
+                rightHandConstraint.weight = 1.0f;
+            }
+            else
+            {
+                rightHandConstraint.weight = 0;
+            }
+        } 
+    }
     
     public void Fire(Vector3 target, float speedx)
     {
+        if(_animator != null)
+        {
+            int fireIndex = Random.Range(0, 2);
+            _animator.SetInteger("primaryFireIndex", fireIndex);
+            _animator.SetTrigger("primaryFire");
+        }
 //        float speed = bulletSpeed;
 //        Vector3 startPos = barrelHook.position;
 //

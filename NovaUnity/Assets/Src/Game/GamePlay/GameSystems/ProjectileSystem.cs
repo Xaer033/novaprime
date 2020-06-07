@@ -25,13 +25,14 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         _gameSystems = gameSystems;
         _gameState = gameState;
         
+        GameObject bulletParent = new GameObject("BulletParent");
         BulletView projectileTemplate = Singleton.instance.gameplayResources.bulletView;
         for (int i = 0; i < _poolSize; ++i)
         {
             ProjectileState state = new ProjectileState();
             _gameState.projectileStateList.Add(state);
             
-            BulletView view = GameObject.Instantiate<BulletView>(projectileTemplate);
+            BulletView view = GameObject.Instantiate<BulletView>(projectileTemplate, bulletParent.transform);
             view.state = state;
             view.Recycle();
             _projectileViewPool.Add(view);
@@ -40,7 +41,18 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
 
     public void Step(float deltaTime)
     {
-        
+        // float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
+        //
+        // for(int i = 0; i < _poolSize; ++i)
+        // {
+        //     ProjectileState state = _gameState.projectileStateList[i];
+        //     BulletView view = _projectileViewPool[i];
+        //
+        //     if(state.isActive)
+        //     {
+        //         view.transform.position = Vector3.Lerp(state.prevPosition, state.position, alpha);
+        //     }
+        // }
     }
     
     public void FixedStep(float deltaTime)
@@ -83,9 +95,11 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
                     //Do damage
                     state.isActive = false;
                 }
-                
+
+                state.prevPosition = state.position;
                 state.position += (state.velocity * scaledDeltaTime);
                 view.transform.position = state.position;
+                
 
                 if (state.deathTimer <= 0.0f)
                 {

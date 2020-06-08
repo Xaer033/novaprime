@@ -144,7 +144,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         GameplayCamera cam = _getGameplayCamera();
         if (cam != null)
         {
-            cam.AddTarget(view.transform);
+            cam.AddTarget(view._viewRoot);
         }
         else
         {

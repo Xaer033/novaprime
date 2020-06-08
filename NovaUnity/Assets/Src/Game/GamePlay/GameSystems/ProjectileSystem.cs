@@ -1,14 +1,19 @@
 ﻿using System.Collections.Generic;
 using GhostGen;
+using UnityEditor;
 using UnityEngine;
 
 public class ProjectileSystem : NotificationDispatcher, IGameSystem
 {
     private GameSystems _gameSystems;
     private GameState _gameState;
+
+    private GameObject _bulletParent;
     
 //    private ProjectileState[] _projectilePool;
     private List<BulletView> _projectileViewPool;
+    private List<ParticleSystem> _projectileImpactViewList;
+    private List<ParticleSystem> _bloodImpactViewList;
     
     private int _poolSize;
     private RaycastHit2D[] _raycastHitList;
@@ -17,6 +22,9 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
     {
         _poolSize = poolSize;
         _projectileViewPool = new List<BulletView>(poolSize);
+        _projectileImpactViewList = new List<ParticleSystem>(poolSize);
+        _bloodImpactViewList = new List<ParticleSystem>(40);
+        
         _raycastHitList = new RaycastHit2D[3];
     }
     
@@ -25,17 +33,31 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         _gameSystems = gameSystems;
         _gameState = gameState;
         
-        GameObject bulletParent = new GameObject("BulletParent");
+        _bulletParent = new GameObject("BulletParent");
         BulletView projectileTemplate = Singleton.instance.gameplayResources.bulletView;
+        ParticleSystem bulletImpactTemplate = Singleton.instance.gameplayResources.bulletImpactFX;
+        ParticleSystem bloodImpactTemplate = Singleton.instance.gameplayResources.avatarImpactFX;
+        
         for (int i = 0; i < _poolSize; ++i)
         {
             ProjectileState state = new ProjectileState();
             _gameState.projectileStateList.Add(state);
             
-            BulletView view = GameObject.Instantiate<BulletView>(projectileTemplate, bulletParent.transform);
+            BulletView view = GameObject.Instantiate<BulletView>(projectileTemplate, _bulletParent.transform);
             view.state = state;
             view.Recycle();
             _projectileViewPool.Add(view);
+
+
+            ParticleSystem impactFX =
+                GameObject.Instantiate<ParticleSystem>(bulletImpactTemplate, _bulletParent.transform);
+            impactFX.Stop();
+            _projectileImpactViewList.Add(impactFX);
+            
+            ParticleSystem bloodImpactFX =
+                GameObject.Instantiate<ParticleSystem>(bloodImpactTemplate, _bulletParent.transform);
+            bloodImpactFX.Stop();
+            _bloodImpactViewList.Add(bloodImpactFX);
         }
     }
 
@@ -62,6 +84,9 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
             return;
         }
 
+        _projectileImpactViewList.Sort(_impactFXSort);
+        _bloodImpactViewList.Sort(_impactFXSort);
+        
         for (int i = 0; i < _poolSize; ++i)
         {
             ProjectileState state = _gameState.projectileStateList[i];
@@ -84,15 +109,25 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
                 {
                     RaycastHit2D hit = _raycastHitList[0];
                     IAttackTarget target = hit.collider.GetComponent<IAttackTarget>();
-
+                    var impactList = _projectileImpactViewList;
+                    
+                    //Do damage
                     if (target != null)
                     {
+                        impactList = _bloodImpactViewList;
                         AttackData damageData = new AttackData(state.data.damageType, state.damage, state.velocity.normalized);
                         AttackResult result = target.TakeDamage(damageData);
 
                         _gameSystems.DispatchEvent(GamePlayEventType.AVATAR_DAMAGED, false, result);
                     }
-                    //Do damage
+                    
+                    
+                    ParticleSystem impactFX = _activateImpactFX(impactList, bulletDir, hit);
+                    if(impactFX == null)
+                    {
+                        Debug.LogWarning("Could not create impactFX!");
+                    }
+                    
                     state.isActive = false;
                 }
 
@@ -128,7 +163,14 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         {
             GameObject.Destroy(_projectileViewPool[i].gameObject);
         }
+        
+        for (int i = 0; i < _projectileImpactViewList.Count; ++i)
+        {
+            GameObject.Destroy(_projectileImpactViewList[i].gameObject);
+        }
 
+        GameObject.Destroy(_bulletParent);
+        
         _gameState.projectileStateList.Clear();
     }
 
@@ -158,5 +200,45 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         }
 
         return null;
+    }
+
+    private int _impactFXSort(ParticleSystem a, ParticleSystem b)
+    {
+        return b.isPlaying.CompareTo(a.isPlaying);
+    }
+
+    private ParticleSystem _getAvailableImpact(List<ParticleSystem> impactList)
+    {
+        for(int i = 0; i < impactList.Count; ++i)
+        {
+            if(!impactList[i].isPlaying)
+            {
+                return impactList[i];
+            }
+        }
+
+        return null;
+    }
+
+    private ParticleSystem _activateImpactFX(List<ParticleSystem> impactList, Vector3 bulletDir, RaycastHit2D hit)
+    {
+        //Handle impact fx
+        ParticleSystem impactFX = _getAvailableImpact(impactList);
+        if(impactFX != null)
+        {
+            Vector3 faceDir = Vector3.Reflect(bulletDir, hit.normal);
+            Vector3 calculatedRot = Quaternion.LookRotation(faceDir).eulerAngles;
+            //Randomize it a bit
+            calculatedRot.x += Random.Range(-35, 35);
+            
+            impactFX.Clear();
+            impactFX.transform.position = hit.point;
+            impactFX.transform.rotation = Quaternion.LookRotation(faceDir);
+            impactFX.transform.localRotation = Quaternion.Euler(calculatedRot);
+            impactFX.Play();
+        }
+
+        return impactFX;
+
     }
 }

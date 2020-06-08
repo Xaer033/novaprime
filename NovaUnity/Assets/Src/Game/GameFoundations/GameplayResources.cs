@@ -5,6 +5,9 @@ public class GameplayResources : ScriptableObject
 {
     public GameplayCamera gameplayCamera;
     public BulletView bulletView;
+    public ParticleSystem bulletImpactFX;
+    public ParticleSystem avatarImpactFX;
+    
     public TextAsset inputList;
 
     public HealthUIView healthUIPrefab;

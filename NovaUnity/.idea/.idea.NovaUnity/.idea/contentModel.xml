@@ -40,6 +40,7 @@
             <e p="GameFoundations" t="Include">
               <e p="AnimationEventDispatcher.cs" t="Include" />
               <e p="BaseController.cs" t="Include" />
+              <e p="FootIK.cs" t="Include" />
               <e p="GameConfig.cs" t="Include" />
               <e p="GameplayResources.cs" t="Include" />
               <e p="GuiManager.cs" t="Include" />

@@ -73,13 +73,13 @@ public class PlayFieldController : NotificationDispatcher
             {
                 _playerController.SetInput(_gruntInput);
                 _gruntController.SetInput(_playerInput);
-                _cam.AddTarget(_gruntController.GetView().transform);
+                _cam.AddTarget(_gruntController.GetView()._viewRoot);
             }
             else
             {
                 _playerController.SetInput(_playerInput);
                 _gruntController.SetInput(_gruntInput);
-                _cam.AddTarget(_playerController.GetView().transform);
+                _cam.AddTarget(_playerController.GetView()._viewRoot);
             }
             
         }

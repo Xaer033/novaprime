@@ -1,9 +1,12 @@
 ﻿using System.Collections.Generic;
+using Cinemachine;
 using UnityEngine;
 
 [RequireComponent(typeof(Camera))]
 public class GameplayCamera : MonoBehaviour
 {
+    public CinemachineVirtualCamera cineCamera;
+    
     public Vector3 targetOffset;
     public float lookSmoothTimeX;
     public float minZoom;
@@ -30,6 +33,8 @@ public class GameplayCamera : MonoBehaviour
 
     public void AddTarget(Transform t)
     {
+        cineCamera.Follow = t;
+        cineCamera.transform.position = t.position;
         if (targetList != null)
         {
             targetList.Add(t);
@@ -38,6 +43,8 @@ public class GameplayCamera : MonoBehaviour
 
     public void RemoveTarget(Transform t)
     {
+        cineCamera.Follow = null;
+        
         if (targetList != null)
         {
             targetList.Remove(t);
@@ -46,6 +53,8 @@ public class GameplayCamera : MonoBehaviour
 
     public void ClearTargets()
     {
+        cineCamera.Follow = null;
+
         if (targetList != null)
         {
             targetList.Clear();
@@ -57,17 +66,17 @@ public class GameplayCamera : MonoBehaviour
     }
     
     // Update is called once per frame
-    void LateUpdate()
-    {
-        Bounds boundObj = _getBounds();
-
-        float distance = boundObj.size.x;
-        float newZoom = Mathf.Lerp(maxZoom, minZoom, distance / limit);
-        _camera.fieldOfView = Mathf.Lerp(_camera.fieldOfView, newZoom, Time.deltaTime);
-        
-        Vector3 center = boundObj.center + targetOffset;
-        transform.position = Vector3.SmoothDamp(transform.position, center, ref _smoothVelocity, lookSmoothTimeX);
-    }
+    // void LateUpdate()
+    // {
+    //     Bounds boundObj = _getBounds();
+    //
+    //     float distance = boundObj.size.x;
+    //     float newZoom = Mathf.Lerp(maxZoom, minZoom, distance / limit);
+    //     _camera.fieldOfView = Mathf.Lerp(_camera.fieldOfView, newZoom, Time.deltaTime);
+    //     
+    //     Vector3 center = boundObj.center + targetOffset;
+    //     transform.position = Vector3.SmoothDamp(transform.position, center, ref _smoothVelocity, lookSmoothTimeX);
+    // }
 
     private Bounds _getBounds()
     {

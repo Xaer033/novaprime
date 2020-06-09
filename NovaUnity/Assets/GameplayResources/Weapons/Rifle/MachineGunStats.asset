@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e9d537100020a604a90df1e0bbe23fc3, type: 3}
-  m_Name: MachineGunData
+  m_Name: MachineGunStats
   m_EditorClassIdentifier: 
   targetLayerMask:
     serializedVersion: 2

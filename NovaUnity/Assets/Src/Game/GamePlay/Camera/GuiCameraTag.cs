@@ -4,16 +4,16 @@ using UnityEngine.EventSystems;
 public class GuiCameraTag : MonoBehaviour
 {
     [SerializeField]
-    private Camera _camera;
+    public Camera _camera;
 
     [SerializeField]
-    private Canvas _canvas;
+    public Canvas _canvas;
 
     [SerializeField]
-    private Canvas _dynamicCanvas;
+    public Canvas _dynamicCanvas;
 
     [SerializeField]
-    private EventSystem _eventSystem;
+    public EventSystem _eventSystem;
     
     public Camera cam
     {

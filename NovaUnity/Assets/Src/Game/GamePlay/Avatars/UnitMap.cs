@@ -9,7 +9,7 @@ public class UnitMap : ScriptableObject
     private Dictionary<string, Unit> _unitMap = new Dictionary<string, Unit>();
 
     [SerializeField]
-    private List<Unit> _unitList;
+    public List<Unit> _unitList;
 
     public void OnEnable()
     {

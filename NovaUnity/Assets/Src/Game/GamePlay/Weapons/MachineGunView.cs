@@ -4,27 +4,27 @@ using UnityEngine.Animations;
 
 public class MachineGunView : MonoBehaviour, IWeaponView
 {
-    private const int kFXPoolSize = 50;
-    
-    // (This should all be in a weapon class)
-    public GameObject _bulletFXPrefab;
-
-    [SerializeField] 
-    private Transform _leftHandHook;
+    [SerializeField]
+    public ParticleSystem _muzzleFlashFX;
     
     [SerializeField] 
-    private Transform _rightHandHook;
+    public Transform _leftHandHook;
+    
+    [SerializeField] 
+    public Transform _rightHandHook;
     
     [SerializeField]
-    private Transform _barrelHook;
+    public Transform _barrelHook;
 
     [SerializeField]
-    private ParentConstraint _parentConstraint;
+    public ParentConstraint _parentConstraint;
 
     [SerializeField]
-    private Animator _animator;
+    public Animator _animator;
     
     private int attachParentIndex;
+    private ParticleSystem[] _muzzleFireList;
+    private int _muzzleIndex;
     
     public MachineGunController controller { get; set; }
     
@@ -57,6 +57,20 @@ public class MachineGunView : MonoBehaviour, IWeaponView
     public Transform rightHandHook
     {
         get { return _rightHandHook; }
+    }
+
+    private void Awake()
+    {
+        _muzzleFireList = new ParticleSystem[3];
+        for(int i = 0; i < _muzzleFireList.Length; ++i)
+        {
+            _muzzleFireList[i] = GameObject.Instantiate<ParticleSystem>(_muzzleFlashFX, 
+                                                                        _barrelHook.transform.position, 
+                                                                        _barrelHook.transform.rotation, 
+                                                                        _barrelHook.transform);
+            
+        }
+        _muzzleIndex = 0;
     }
     
     public void Attach(Transform bodyParentHook, ParentConstraint leftHandConstraint, ParentConstraint rightHandConstraint)
@@ -125,36 +139,17 @@ public class MachineGunView : MonoBehaviour, IWeaponView
             _animator.SetInteger("primaryFireIndex", fireIndex);
             _animator.SetTrigger("primaryFire");
         }
-//        float speed = bulletSpeed;
-//        Vector3 startPos = barrelHook.position;
-//
-//        TrailRenderer fx = getNextFX();
-//        Tween t = _fxTweens[_fxIndex];
-//
-//        //fx.Clear();
-//
-//        fx.transform.position = startPos;
-//        
-//        t = fx.transform.DOMove(target, speed);
-//        t.SetEase(Ease.Linear);
-//        t.SetSpeedBased(true);
-//
-//        t.OnStart(() =>
-//        {
-//            // fx.time = time;
-//            fx.transform.position = startPos;
-//            fx.transform.LookAt(target, Vector3.up);
-//            fx.gameObject.SetActive(true);
-//            //fx.emitting = (true);
-//            fx.Clear();
-//        });
-//
-//        t.OnComplete(()=>
-//        {
-//            //fx.Clear();
-//            //fx.emitting = (false);
-//            fx.gameObject.SetActive(false);
-//            t = null;
-//        });
+
+        ParticleSystem muzzleFX = _retrieveMuzzleFX();
+        if(muzzleFX != null)
+        {
+            muzzleFX.Clear();
+            muzzleFX.Play();
+        }
+    }
+
+    private ParticleSystem _retrieveMuzzleFX()
+    {
+        return _muzzleFireList[_muzzleIndex++ % _muzzleFireList.Length];
     }
 }

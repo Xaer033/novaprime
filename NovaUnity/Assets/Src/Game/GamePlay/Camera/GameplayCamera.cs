@@ -34,7 +34,8 @@ public class GameplayCamera : MonoBehaviour
     public void AddTarget(Transform t)
     {
         cineCamera.Follow = t;
-        cineCamera.transform.position = t.position;
+        cineCamera.enabled = true;
+        // cineCamera.transform.position = t.position;
         if (targetList != null)
         {
             targetList.Add(t);

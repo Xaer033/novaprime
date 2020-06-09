@@ -1,11 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using GhostGen;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Bson;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -207,19 +201,19 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     private void SaveToFile()
     {
 //        StreamWriter writer = new StreamWriter("Assets/Resources/inputList.txt", false, Encoding.UTF8);
-        BinaryWriter writer = new BinaryWriter(File.Open("Assets/Resources/inputList.dat", FileMode.Create));
-       
-        JsonWriter jsonWriter = new BsonWriter(writer);
-        jsonWriter.Formatting = Formatting.Indented;
-        jsonWriter.WriteStartArray();
-        foreach (var input in _frameInputList)
-        {
-            string jsonInput = JsonUtility.ToJson(input);
-            jsonWriter.WriteValue(jsonInput);
-        }
-        jsonWriter.WriteEndArray();
-        jsonWriter.Flush();
-        jsonWriter.Close();
+        // BinaryWriter writer = new BinaryWriter(File.Open("Assets/Resources/inputList.dat", FileMode.Create));
+        //
+        // JsonWriter jsonWriter = new BsonWriter(writer);
+        // jsonWriter.Formatting = Formatting.Indented;
+        // jsonWriter.WriteStartArray();
+        // foreach (var input in _frameInputList)
+        // {
+        //     string jsonInput = JsonUtility.ToJson(input);
+        //     jsonWriter.WriteValue(jsonInput);
+        // }
+        // jsonWriter.WriteEndArray();
+        // jsonWriter.Flush();
+        // jsonWriter.Close();
     }
 //    private static byte[] ToByteArray(PlayerState command)
 //    {

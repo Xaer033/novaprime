@@ -94,8 +94,11 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
         {
             return Vector3.zero;
         }
-        
-        _fromWaypointIndex %= _globalWayPoints.Length;
+
+        if(_globalWayPoints.Length > 0)
+        {
+            _fromWaypointIndex %= _globalWayPoints.Length;
+        }
         
         int toWaypointIndex = (_fromWaypointIndex + 1) % _globalWayPoints.Length;
         Vector3 fromWaypoint = _globalWayPoints[_fromWaypointIndex];

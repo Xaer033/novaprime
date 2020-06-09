@@ -10,7 +10,7 @@ public class FootIK : MonoBehaviour
     public float footOffset = 1;
     
     [SerializeField]
-    private Animator _animator;
+    public Animator _animator;
 
     private RaycastHit2D[] _rayList;
     // Start is called before the first frame update

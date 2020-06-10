@@ -6,7 +6,7 @@ using UnityEngine;
 public class AvatarConstrainer : MonoBehaviour
 {
     private const int kRaycastHitCount = 20;
-    private const float kFallThroughPlatformWaitDuration = 0.15f;
+    private const float kFallThroughPlatformWaitDuration = 0.25f;
     
     public Collider2D collisionCollider;
     

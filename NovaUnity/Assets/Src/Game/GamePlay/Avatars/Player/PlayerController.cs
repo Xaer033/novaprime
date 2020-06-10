@@ -30,6 +30,8 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         _view.controller = this;
 
         _input = input;
+        
+        _view.AddListener("onIdleEnter", onIdleEnter);
     }
 
     public IInputGenerator GetInput()
@@ -440,7 +442,14 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         _view.animator.SetFloat("runSpeedScale", runSpeed);
 
     }
-
+    
+    private void onIdleEnter(GeneralEvent e)
+    {
+        AnimationEventDispatcher.AnimationEventData data = (AnimationEventDispatcher.AnimationEventData)e.data;
+        Debug.Log("Idle Entered");
+            
+    }
+    
     private struct AnimationInfo
     {
         public bool canJump;

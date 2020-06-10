@@ -403,17 +403,27 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         AnimatorStateInfo state = _view.animator.GetCurrentAnimatorStateInfo(0);
         if (animInfo.canJump)
         {
+            _view.PlayFootPuffFx();
             _view.animator.SetTrigger("jumpTrigger");
         }
         else if (animInfo.isGrounded)
         {
             if (animInfo.isRunning && !state.IsName("Running"))
             {
+                if(state.IsName("Falling"))
+                {
+                    _view.PlayFootPuffFx();
+                }
                 _view.animator.SetTrigger("runTrigger");
             }
             else if(!animInfo.isRunning && !state.IsName("Idle"))
             {
+                if(!state.IsName("Running"))
+                {
+                    _view.PlayFootPuffFx();
+                }
                 _view.animator.SetTrigger("idleTrigger");
+                
             }
         }
         else if(!animInfo.isGrounded)

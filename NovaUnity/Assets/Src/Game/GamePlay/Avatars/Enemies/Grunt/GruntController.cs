@@ -17,13 +17,13 @@ public class GruntController : NotificationDispatcher, IAvatarController
     private UnitStats _unitStats;
     private GameSystems _gameSystems;
     
-    public GruntController(UnitMap.Unit unit, EnemyState state, AvatarView view, IInputGenerator input)
+    public GruntController(UnitMap.Unit unit, EnemyState state, IAvatarView view, IInputGenerator input)
     {
         _unit = unit;
         _unitStats = unit.stats;
         _state = state;
         
-        _view = view;
+        _view = view as AvatarView;
         _view.controller = this;
 
         _input = input;
@@ -31,14 +31,10 @@ public class GruntController : NotificationDispatcher, IAvatarController
         view.AddListener("onAnimDeathComplete", onAnimDeathComplete);
     }
 
-    public IInputGenerator GetInput()
+    public IInputGenerator input
     {
-        return _input;
-    }
-
-    public void SetInput(IInputGenerator input)
-    {
-        _input = input;
+        get { return _input; }
+        set { _input = value; }
     }
     
     public UnitType GetUnitType()
@@ -109,7 +105,8 @@ public class GruntController : NotificationDispatcher, IAvatarController
         float timeToJumpApex = _unitStats.timeToJumpApex;
         _gravity = -(2 * _unitStats.maxJumpHeight) / (timeToJumpApex * timeToJumpApex);
         
-        _machineGunController = new MachineGunController(_gameSystems, _state.machineGunState, _unitStats.machineGunData);
+        ProjectileSystem projectileSystem = gameSystems.GetSystem<ProjectileSystem>();
+        _machineGunController = new MachineGunController(projectileSystem, _state.machineGunState, _unitStats.machineGunData);
         _view.SetWeapon(_machineGunController.view);
     }
 

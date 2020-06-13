@@ -10,8 +10,10 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     private GameState _gameState;
     private GameSystems _gameSystems;
 
+    private GameplayResources _gameplayResources;
+    
     private UnitMap _unitMap;
-    private List<IAvatarController>      _avatarControllerList;
+    private List<IAvatarController> _avatarControllerList;
     private Dictionary<string, IAvatarController> _avatarLookUpMap;
 
     private List<FrameInput> _frameInputList;
@@ -22,9 +24,10 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     private GameObject _playerParent;
     private GameObject _enemyParent;
     
-    public AvatarSystem()
+    public AvatarSystem(GameplayResources gameplayResources)
     {
-        _unitMap = Singleton.instance.gameplayResources.unitMap;
+        _gameplayResources = gameplayResources;
+        _unitMap = _gameplayResources.unitMap;
         _avatarControllerList       = new List<IAvatarController>(200);
         _avatarLookUpMap            = new Dictionary<string, IAvatarController>();
         _frameInputList             = new List<FrameInput>();
@@ -47,7 +50,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     {
         for (int i = 0; i < _avatarControllerList.Count; ++i)
         {
-            IInputGenerator inputGenerator = _avatarControllerList[i].GetInput();
+            IInputGenerator inputGenerator = _avatarControllerList[i].input;
             FrameInput input = inputGenerator != null ? inputGenerator.GetInput() : default(FrameInput);
             _frameInputList.Add(input);            
             // This is kinda cool, cuz now we can swap input generators or save/store them for replays
@@ -133,12 +136,12 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
 
     private PlayerController _spawnPlayer(string uuid, UnitMap.Unit unit, Vector3 position)
     {
-        AvatarView view = GameObject.Instantiate<AvatarView>(unit.view, _playerParent.transform);
+        AvatarView view = GameObject.Instantiate<AvatarView>(unit.view as AvatarView, _playerParent.transform);
 
         GameplayCamera cam = _getGameplayCamera();
         if (cam != null)
         {
-            cam.AddTarget(view._viewRoot);
+            cam.AddTarget(view.cameraTargetGroup.transform);
         }
         else
         {
@@ -157,8 +160,10 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
 
     private IAvatarController _spawnEnemy(string uuid, UnitMap.Unit unit, Vector3 position)
     {
-        AvatarView view = GameObject.Instantiate<AvatarView>(unit.view, position, Quaternion.identity,  _enemyParent.transform);
+        AvatarView view = GameObject.Instantiate<AvatarView>(unit.view as AvatarView, position, Quaternion.identity,  _enemyParent.transform);
+        
         EnemyState state = EnemyState.Create(uuid, unit.stats, position);
+        
         GruntBrain input = new GruntBrain(_gameSystems, unit.stats, state);
         GruntController controller = new GruntController(unit, state, view, input);
         controller.Start(_gameSystems);
@@ -182,14 +187,14 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         _camera = GameObject.FindObjectOfType<GameplayCamera>();
         if (_camera == null)
         {
-            _camera = GameObject.Instantiate<GameplayCamera>(Singleton.instance.gameplayResources.gameplayCamera);
+            _camera = GameObject.Instantiate<GameplayCamera>(_gameplayResources.gameplayCamera);
         }
         return _camera;
     }
 
     private void onSpawnPointTriggered(GeneralEvent e)
     {
-        SpawnPointData spawnData = (SpawnPointData) e.data;
+        SpawnPointData spawnData = (SpawnPointData)e.data;
         if (spawnData.spawnType == SpawnType.AVATAR)
         {
             string unitId = spawnData.subtypeId;

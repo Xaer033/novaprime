@@ -34,7 +34,7 @@ AnimatorStateMachine:
   m_StateMachineBehaviours: []
   m_AnyStatePosition: {x: 260, y: 10, z: 0}
   m_EntryPosition: {x: -80, y: 10, z: 0}
-  m_ExitPosition: {x: -340, y: 370, z: 0}
+  m_ExitPosition: {x: -80, y: 420, z: 0}
   m_ParentStateMachinePosition: {x: 800, y: 20, z: 0}
   m_DefaultState: {fileID: 4309447658092178469}
 --- !u!1101 &-6938371338650320939
@@ -371,7 +371,8 @@ AnimatorState:
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: -990714659876265397}
-  m_StateMachineBehaviours: []
+  m_StateMachineBehaviours:
+  - {fileID: 8243198946741816132}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 1
   m_WriteDefaultValues: 1
@@ -477,6 +478,23 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
+--- !u!114 &8243198946741816132
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e915256232058d741ae9f382360831f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bubbling: 0
+  onStateEnterEventName: onIdleEnter
+  onStateExitEventName: 
+  onStateUpdateEventName: 
+  onStateMoveEventName: 
 --- !u!1101 &8384603644448580696
 AnimatorStateTransition:
   m_ObjectHideFlags: 1

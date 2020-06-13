@@ -20,13 +20,13 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     
     
     
-    public PlayerController(UnitMap.Unit unit, PlayerState state, AvatarView view, IInputGenerator input)
+    public PlayerController(UnitMap.Unit unit, PlayerState state, IAvatarView view, IInputGenerator input)
     {
         _unit = unit;
         _unitStats = unit.stats;
         _state = state;
         
-        _view = view;
+        _view = view as AvatarView;
         _view.controller = this;
 
         _input = input;
@@ -34,16 +34,12 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         _view.AddListener("onIdleEnter", onIdleEnter);
     }
 
-    public IInputGenerator GetInput()
+    public IInputGenerator input
     {
-        return _input;
+        get { return _input; }
+        set { _input = value; }
     }
-
-    public void SetInput(IInputGenerator input)
-    {
-        _input = input;
-    }
-
+    
     public Vector3 GetPosition()
     {
         return _state.position;
@@ -94,7 +90,8 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         float timeToJumpApex = _unitStats.timeToJumpApex;
         _gravity = -(2 * _unitStats.maxJumpHeight) / (timeToJumpApex * timeToJumpApex);
 
-        _machineGunController = new MachineGunController(_gameSystems, _state.machineGunState, _unitStats.machineGunData);
+        ProjectileSystem projectileSystem = gameSystems.GetSystem<ProjectileSystem>();
+        _machineGunController = new MachineGunController(projectileSystem, _state.machineGunState, _unitStats.machineGunData);
         _view.SetWeapon(_machineGunController.view);
         
         _state.stateType = PlayerActivityType.ACTIVE;
@@ -195,13 +192,17 @@ public class PlayerController : NotificationDispatcher, IAvatarController
             }
         }
 
+        Vector3 aimStartPosition = _view.armHook.position;
+        Vector3 cursorDir = (_lastInput.cursorPosition - aimStartPosition).normalized;
+        float distance = 5.5f;
+        
         // Aim
         Vector3 aimDirection = _lastInput.cursorDirection.normalized;
-        Vector3 aimPosition = _lastInput.useCusorPosition ? _lastInput.cursorPosition : _state.position + (aimDirection * 4.0f);
+        Vector3 aimPosition = _lastInput.useCusorPosition ? aimStartPosition + (cursorDir * distance) : aimStartPosition + (aimDirection * distance);
 
         if (_view)
         {
-          Debug.DrawRay(_state.position, aimDirection, Color.cyan, 0.2f);
+          Debug.DrawRay(aimStartPosition, aimDirection, Color.cyan, 0.2f);
 
             const float kDebugLineSize = 0.2f;
             Debug.DrawLine(aimPosition + Vector3.down * kDebugLineSize, aimPosition + Vector3.up     * kDebugLineSize, Color.cyan, 0.2f);

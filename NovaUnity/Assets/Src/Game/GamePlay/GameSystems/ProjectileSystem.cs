@@ -7,6 +7,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
 {
     private GameSystems _gameSystems;
     private GameState _gameState;
+    private GameplayResources _gameplayResources;
 
     private GameObject _bulletParent;
     
@@ -18,8 +19,9 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
     private int _poolSize;
     private RaycastHit2D[] _raycastHitList;
     
-    public ProjectileSystem(int poolSize)
+    public ProjectileSystem(GameplayResources gameplayResources, int poolSize)
     {
+        _gameplayResources = gameplayResources;
         _poolSize = poolSize;
         _projectileViewPool = new List<BulletView>(poolSize);
         _projectileImpactViewList = new List<ParticleSystem>(poolSize);
@@ -34,9 +36,9 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         _gameState = gameState;
         
         _bulletParent = new GameObject("BulletParent");
-        BulletView projectileTemplate = Singleton.instance.gameplayResources.bulletView;
-        ParticleSystem bulletImpactTemplate = Singleton.instance.gameplayResources.bulletImpactFX;
-        ParticleSystem bloodImpactTemplate = Singleton.instance.gameplayResources.avatarImpactFX;
+        BulletView projectileTemplate = _gameplayResources.bulletView;
+        ParticleSystem bulletImpactTemplate = _gameplayResources.bulletImpactFX;
+        ParticleSystem bloodImpactTemplate = _gameplayResources.avatarImpactFX;
         
         for (int i = 0; i < _poolSize; ++i)
         {
@@ -169,6 +171,11 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
             GameObject.Destroy(_projectileImpactViewList[i].gameObject);
         }
 
+        for(int i = 0; i < _bloodImpactViewList.Count; ++i)
+        {
+            GameObject.Destroy(_bloodImpactViewList[i].gameObject);
+        }
+
         GameObject.Destroy(_bulletParent);
         
         _gameState.projectileStateList.Clear();
@@ -206,6 +213,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
     {
         return b.isPlaying.CompareTo(a.isPlaying);
     }
+    
 
     private ParticleSystem _getAvailableImpact(List<ParticleSystem> impactList)
     {

@@ -6,6 +6,7 @@ using UnityEngine.InputSystem;
 
 public class PlayFieldController : NotificationDispatcher
 {
+    private GameplayResources _gameplayResources;
     private GameplayCamera _gameplayCamera;
     private GameState _gameState;
     private GameSystems _gameSystems;
@@ -17,13 +18,17 @@ public class PlayFieldController : NotificationDispatcher
     private GruntController _gruntController;
 
     private GameplayCamera _cam;
-    
+
+    public PlayFieldController(GameplayResources gameplayResources)
+    {
+        _gameplayResources = gameplayResources;
+    }
     public void Start()
     {
         UnityEngine.Random.InitState(666);
 
         _gameState = new GameState();
-        _gameSystems = new GameSystems(_gameState);
+        _gameSystems = new GameSystems(_gameState, _gameplayResources);
         _gameSystems.Start();
         
 //        AvatarSystem aSystem = _gameSystems.GetSystem<AvatarSystem>();
@@ -68,18 +73,18 @@ public class PlayFieldController : NotificationDispatcher
         {
             _cam.ClearTargets();
             
-            IInputGenerator currentInput = _gruntController.GetInput();
+            IInputGenerator currentInput = _gruntController.input;
             if (currentInput == _gruntInput)
             {
-                _playerController.SetInput(_gruntInput);
-                _gruntController.SetInput(_playerInput);
-                _cam.AddTarget(_gruntController.GetView()._viewRoot);
+                _playerController.input = _gruntInput;
+                _gruntController.input = _playerInput;
+                _cam.AddTarget(_gruntController.GetView().cameraTargetGroup.transform);
             }
             else
             {
-                _playerController.SetInput(_playerInput);
-                _gruntController.SetInput(_gruntInput);
-                _cam.AddTarget(_playerController.GetView()._viewRoot);
+                _playerController.input = _playerInput;
+                _gruntController.input = _gruntInput;
+                _cam.AddTarget(_playerController.GetView().cameraTargetGroup.transform);
             }
             
         }
@@ -159,12 +164,12 @@ public class PlayFieldController : NotificationDispatcher
         if (id == "player")
         {
             _playerController = controller as PlayerController;
-            _playerInput = _playerController.GetInput();
+            _playerInput = _playerController.input;
         }
         else if (id == "grunt" && _gruntInput == null)
         {
             _gruntController = controller as GruntController;
-            _gruntInput = _gruntController.GetInput();
+            _gruntInput = _gruntController.input;
         }
     }
 }

@@ -219,12 +219,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2700068edd8b7f4c8bf04c2f90f9da6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cameraTargetGroup: {fileID: 0}
   constrainer: {fileID: 9125514036299057097}
   armHook: {fileID: 7402611272870614619}
+  _cursorTarget: {fileID: 0}
   _healthPositionHook: {fileID: 1121882207068058647}
   _viewRoot: {fileID: 449116805717182556}
+  _leftFootHook: {fileID: 0}
+  _rightFootHook: {fileID: 0}
   _leftHandConstraint: {fileID: 0}
   _rightHandConstraint: {fileID: 0}
+  _jumpPuffFXPrefab: {fileID: 0}
   _networkEntity: {fileID: 0}
   _animator: {fileID: 1366838402536065113}
 --- !u!114 &9125514036299057097
@@ -242,7 +247,7 @@ MonoBehaviour:
   collisionCollider: {fileID: 4184586487202221508}
   collisionMask:
     serializedVersion: 2
-    m_Bits: 1536
+    m_Bits: 512
   distanceBetweenRays: 0.175
   maxSlopeAngle: 50
   walkStepRayPercentage: 0.32

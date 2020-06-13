@@ -3,8 +3,8 @@
 public interface IAvatarController : ITimeWarpTarget, IAttackTarget
 {
     UnitType GetUnitType();
-    IInputGenerator GetInput();
-    void SetInput(IInputGenerator input);
+    
+    IInputGenerator input { get; set; }
 
     string GetUUID();
 

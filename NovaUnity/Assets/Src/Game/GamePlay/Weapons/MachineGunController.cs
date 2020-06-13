@@ -9,6 +9,8 @@ public class MachineGunController : IWeaponController
     private IWeaponView _view;
     private MachineGunState _state;
     private MachineGunData _machineGunData;
+    private ProjectileSystem _projectileSystem;
+    
 
     public IWeaponView view
     {
@@ -16,11 +18,13 @@ public class MachineGunController : IWeaponController
     }
     
 
-    public MachineGunController(GameSystems gameSystems, MachineGunState state, MachineGunData data)
+    public MachineGunController(ProjectileSystem projectileSystem, 
+                                MachineGunState state, 
+                                MachineGunData data)
     {
-        _gameSystems = gameSystems;
         _state = state;
         _machineGunData = data;
+        _projectileSystem = projectileSystem;
         
         // Move this later
         _view = GameObject.Instantiate<MachineGunView>(_machineGunData.view);
@@ -54,7 +58,9 @@ public class MachineGunController : IWeaponController
     public void Fire(Vector3 targetPos)
     {
         if(_state.fireTimer > 0)
+        {
             return;
+        }
         
         Vector3 visualWeaponPos = _view.barrelHook.position;
         Vector3 viewDir = getFireDirection(_view.barrelHook.forward, 0.05f);//(targetPos - visualWeaponPos).normalized;
@@ -77,7 +83,7 @@ public class MachineGunController : IWeaponController
 //        Debug.DrawRay(adjustedPos, Vector3.up, Color.red, 1.0f);
         _view.Fire(adjustedPos, 10.0f);
 
-        _gameSystems.projectileSystem.Spawn(_machineGunData.projectileData, visualWeaponPos, viewDir);
+        _projectileSystem.Spawn(_machineGunData.projectileData, visualWeaponPos, viewDir);
         
         _state.fireTimer = _machineGunData.fireCooldownSeconds;
     }

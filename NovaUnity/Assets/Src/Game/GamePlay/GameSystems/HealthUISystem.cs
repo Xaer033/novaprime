@@ -1,12 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using GhostGen;
 using UnityEngine;
 
 public class HealthUISystem : NotificationDispatcher, IGameSystem
 {
     public const int kMaxUIView = 35;
-    public float scaleConst = 30.0f;
+    public float scaleConst = 10.0f;
 
     private GuiCameraTag _guiCameraTag;
     

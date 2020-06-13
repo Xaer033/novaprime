@@ -15,17 +15,23 @@ public class SpawnPointView : MonoBehaviour
     private void OnDrawGizmos()
     {
         const float kCharTextWidth = 0.08f;
+
+        if(triggerCollider == null || transform == null)
+        {
+            return;
+        }
         
         Gizmos.color = new Color(0.8f, 0.2f, 0.3f, 0.8f);
-        Vector3 platformSize = triggerCollider != null ?  triggerCollider.bounds.size : Vector3.one;
+        Bounds triggerBounds = triggerCollider.bounds;
+
+        Vector3 platformSize = triggerBounds.size;
         Gizmos.DrawCube(transform.position, platformSize);
 
-        Vector3 textPosition = transform.position + (Vector3.up * (triggerCollider.bounds.size.y + 0.1f));
+        Vector3 textPosition = transform.position + (Vector3.up * (triggerBounds.size.y + 0.1f));
         float size = HandleUtility.GetHandleSize(textPosition);
         
         textPosition.x -= (gameObject.name.Length * kCharTextWidth * size) / 2.0f;
         Handles.Label(textPosition, gameObject.name);
-        
     }
 #endif
     

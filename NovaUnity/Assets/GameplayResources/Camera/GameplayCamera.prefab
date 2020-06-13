@@ -54,10 +54,10 @@ MonoBehaviour:
   m_LookAt: {fileID: 0}
   m_Follow: {fileID: 0}
   m_Lens:
-    FieldOfView: 10
+    FieldOfView: 40
     OrthographicSize: 7.2
     NearClipPlane: 2
-    FarClipPlane: 150
+    FarClipPlane: 300
     Dutch: 0
     LensShift: {x: 0, y: 0}
   m_Transitions:
@@ -75,7 +75,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 485278243}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a2fba25a5cd15594e8f050a11e386c80, type: 3}
   m_Name: 
@@ -141,29 +141,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ad980451443d70438faac0bc6c235a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_LookaheadTime: 0.182
+  m_LookaheadTime: 0.084
   m_LookaheadSmoothing: 4.4
   m_LookaheadIgnoreY: 1
-  m_XDamping: 2.44
-  m_YDamping: 0.99
+  m_XDamping: 5.05
+  m_YDamping: 5.05
   m_ZDamping: 1
   m_ScreenX: 0.5
-  m_ScreenY: 0.5
-  m_CameraDistance: 50
-  m_DeadZoneWidth: 0.1049572
-  m_DeadZoneHeight: 0.0859919
+  m_ScreenY: 0.4999998
+  m_CameraDistance: 17
+  m_DeadZoneWidth: 0.3398483
+  m_DeadZoneHeight: 0.5163463
   m_DeadZoneDepth: 0
   m_UnlimitedSoftZone: 0
-  m_SoftZoneWidth: 0.2491631
-  m_SoftZoneHeight: 0.3604408
+  m_SoftZoneWidth: 0.5445698
+  m_SoftZoneHeight: 0.8010659
   m_BiasX: 0
-  m_BiasY: 0.00000021717939
+  m_BiasY: 0
   m_CenterOnActivate: 1
   m_GroupFramingMode: 2
   m_AdjustmentMode: 0
   m_GroupFramingSize: 0.8
-  m_MaxDollyIn: 5000
-  m_MaxDollyOut: 5000
+  m_MaxDollyIn: 1207
+  m_MaxDollyOut: 5716
   m_MinimumDistance: 1
   m_MaximumDistance: 5000
   m_MinimumFOV: 3
@@ -238,7 +238,7 @@ Camera:
   m_BackGroundColor: {r: 0.37878248, g: 0.51752704, b: 0.6037736, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
-  m_FOVAxisMode: 1
+  m_FOVAxisMode: 0
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
   m_FocalLength: 50
@@ -249,8 +249,8 @@ Camera:
     width: 1
     height: 1
   near clip plane: 2
-  far clip plane: 150
-  field of view: 10
+  far clip plane: 300
+  field of view: 40
   orthographic: 0
   orthographic size: 7.2
   m_Depth: 1

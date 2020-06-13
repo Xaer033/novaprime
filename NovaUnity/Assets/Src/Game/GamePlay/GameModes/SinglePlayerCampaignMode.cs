@@ -15,7 +15,9 @@ public class SinglePlayerCampaignMode : NotificationDispatcher, IGameModeControl
     
     public void Start(object context)
     {
-       _playFieldController = new PlayFieldController();
+        GameplayResources gameplayResources = Singleton.instance.gameplayResources;
+        
+       _playFieldController = new PlayFieldController(gameplayResources);
        _playFieldController.Start();
     }
 

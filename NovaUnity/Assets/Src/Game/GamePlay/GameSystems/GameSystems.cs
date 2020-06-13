@@ -6,6 +6,8 @@ using UnityEngine;
 public class GameSystems : NotificationDispatcher
 {
     private GameState _gameState;
+    private GameplayResources _gameplayResources;
+    
     private Dictionary<Type, IGameSystem> _gameSystemMap = new Dictionary<Type, IGameSystem>();
     
     public ProjectileSystem projectileSystem { get; private set; }
@@ -25,12 +27,12 @@ public class GameSystems : NotificationDispatcher
         return (T)system;
     }
     
-    public GameSystems(GameState gameState)
+    public GameSystems(GameState gameState, GameplayResources gameplayResources)
     {
         _gameState = gameState;
         
-        projectileSystem     = new ProjectileSystem(125);
-        avatarSystem         = new AvatarSystem();
+        projectileSystem     = new ProjectileSystem(gameplayResources, 125);
+        avatarSystem         = new AvatarSystem(gameplayResources);
         healthUISystem       = new HealthUISystem();
         spawnPointSystem     = new SpawnPointSystem();
         

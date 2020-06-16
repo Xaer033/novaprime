@@ -105,6 +105,7 @@
                 <e p="GameSystems.cs" t="Include" />
                 <e p="HealthUISystem.cs" t="Include" />
                 <e p="IGameSystem.cs" t="Include" />
+                <e p="PlatformSystem.cs" t="Include" />
                 <e p="ProjectileSystem.cs" t="Include" />
                 <e p="SpawnPointSystem.cs" t="Include" />
               </e>
@@ -113,7 +114,9 @@
                   <e p="LightFixture.cs" t="Include" />
                 </e>
                 <e p="Platforms" t="Include">
+                  <e p="PlatformState.cs" t="Include" />
                   <e p="PlatformView.cs" t="Include" />
+                  <e p="TimePlatformController.cs" t="Include" />
                 </e>
                 <e p="SpawnPoints" t="Include">
                   <e p="SpawnPointState.cs" t="Include" />
@@ -162,6 +165,7 @@
             </e>
             <e p="GeneralUtilities" t="Include">
               <e p="IPostInit.cs" t="Include" />
+              <e p="MathUtil.cs" t="Include" />
               <e p="MultiMap.cs" t="Include" />
             </e>
             <e p="GhostGenAssemblies.asmdef" t="Include" />

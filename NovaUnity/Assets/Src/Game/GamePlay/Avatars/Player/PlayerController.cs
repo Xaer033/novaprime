@@ -90,26 +90,26 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         float timeToJumpApex = _unitStats.timeToJumpApex;
         _gravity = -(2 * _unitStats.maxJumpHeight) / (timeToJumpApex * timeToJumpApex);
 
-        ProjectileSystem projectileSystem = gameSystems.GetSystem<ProjectileSystem>();
+        ProjectileSystem projectileSystem = gameSystems.Get<ProjectileSystem>();
         _machineGunController = new MachineGunController(projectileSystem, _state.machineGunState, _unitStats.machineGunData);
         _view.SetWeapon(_machineGunController.view);
         
         _state.stateType = PlayerActivityType.ACTIVE;
     }
 
-    public AvatarView GetView()
+    public AvatarView view
     {
-        return _view;
+        get { return _view; }
     }
     
-    public AvatarState GetState()
+    public AvatarState state
     {
-        return _state;
+        get { return _state; }
     }
     
-    public UnitMap.Unit GetUnit()
+    public UnitMap.Unit unit
     {
-        return _unit;
+        get { return _unit; }
     }
     
     public void SetVelocity(Vector3 velocity)
@@ -126,7 +126,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
             _state.previousPosition = _state.position;
             _state.position = _state.position + constrainedMoveDelta;
 
-            _view._viewRoot.localPosition = Vector3.zero;
+            _view._viewRoot.position = _state.previousPosition;
             _view.transform.position = _state.position;
         }
     }

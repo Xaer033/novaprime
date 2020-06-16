@@ -67,33 +67,6 @@ public class PlayFieldController : NotificationDispatcher
         {
             _gameSystems.FixedStep(fixedDeltaTime);
         }
-        
-        //Debug STUFF
-        if (Keyboard.current.f2Key.wasPressedThisFrame)
-        {
-            _cam.ClearTargets();
-            
-            IInputGenerator currentInput = _gruntController.input;
-            if (currentInput == _gruntInput)
-            {
-                _playerController.input = _gruntInput;
-                _gruntController.input = _playerInput;
-                _cam.AddTarget(_gruntController.GetView().cameraTargetGroup.transform);
-            }
-            else
-            {
-                _playerController.input = _playerInput;
-                _gruntController.input = _gruntInput;
-                _cam.AddTarget(_playerController.GetView().cameraTargetGroup.transform);
-            }
-            
-        }
-
-        if (_pAction.Gameplay.exit.triggered)
-        {
-            Application.Quit();
-        }
-        
     }
 
     public void LateStep(float deltaTime)
@@ -106,6 +79,33 @@ public class PlayFieldController : NotificationDispatcher
         if (_pAction.Gameplay.reset.triggered)
         {
             Restart();
+        }
+        
+                
+        //Debug STUFF
+        if (Keyboard.current.f2Key.wasPressedThisFrame)
+        {
+            _cam.ClearTargets();
+            
+            IInputGenerator currentInput = _gruntController.input;
+            if (currentInput == _gruntInput)
+            {
+                _playerController.input = _gruntInput;
+                _gruntController.input = _playerInput;
+                _cam.AddTarget(_gruntController.view.cameraTargetGroup.transform);
+            }
+            else
+            {
+                _playerController.input = _playerInput;
+                _gruntController.input = _gruntInput;
+                _cam.AddTarget(_playerController.view.cameraTargetGroup.transform);
+            }
+            
+        }
+
+        if (_pAction.Gameplay.exit.triggered)
+        {
+            Application.Quit();
         }
     }
     
@@ -159,7 +159,7 @@ public class PlayFieldController : NotificationDispatcher
     private void onAvatarSpawned(GeneralEvent e)
     {
         IAvatarController controller = (IAvatarController)e.data;
-        string id = controller.GetUnit().id;
+        string id = controller.unit.id;
         
         if (id == "player")
         {

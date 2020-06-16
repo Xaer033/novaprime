@@ -28,9 +28,9 @@ MonoBehaviour:
       additive: 0
   - enabled: 0
     name: Weird
-    maskTextureChannel: 0
+    maskTextureChannel: 1
     renderTextureScale: 1
-    blendMode: 2
+    blendMode: 0
     customBlendFactors:
       multiplicative: 0
       additive: 0

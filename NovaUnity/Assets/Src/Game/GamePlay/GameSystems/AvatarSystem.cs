@@ -86,7 +86,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         
         for (int i = 0; i < _avatarControllerList.Count; ++i)
         {
-            AvatarView view = _avatarControllerList[i].GetView();
+            AvatarView view = _avatarControllerList[i].view;
             GameObject.Destroy(view.gameObject);
         }
         _avatarControllerList.Clear();
@@ -109,7 +109,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         string uuid = _generateUUID(unit);
         
         IAvatarController controller = _spawnAvatar(uuid, unit, position);
-        controller.GetView().gameObject.name = uuid;
+        controller.view.gameObject.name = uuid;
 
         if (controller != null)
         {
@@ -118,8 +118,6 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
             
             _gameSystems.DispatchEvent(GamePlayEventType.AVATAR_SPAWNED, false, controller);
         }
-
-        _spawnCount++;
         return (T)controller;
     }
 
@@ -174,7 +172,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
 
     private string _generateUUID(UnitMap.Unit unit)
     {
-        return StringUtil.CreateMD5(unit.id + "_" + _spawnCount);
+        return StringUtil.CreateMD5(unit.id + "_" + (_spawnCount++));
     }
 
     private GameplayCamera _getGameplayCamera()

@@ -16,7 +16,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4608
   damageType: 0
-  attackType: 0
+  attackType: 2
   speed: 45
   damage: 25
   deathTimer: 20

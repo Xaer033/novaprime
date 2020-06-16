@@ -1,10 +1,20 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Sirenix.Serialization;
 using UnityEngine;
 
 public class TimeWarpFieldController : MonoBehaviour
 {
+    [Serializable]
+    public class LayerMaskScale
+    {
+        public LayerMask layerMask;
+        public float timeScale;
+    }
+    
+    public List<LayerMaskScale> affectedLayerList;
+    
     public LayerMask affectedLayers;
     public Renderer _renderer;
     
@@ -17,10 +27,9 @@ public class TimeWarpFieldController : MonoBehaviour
     private Material _timeWarpMat;
 
     private Vector3 _initialRendererScale;
-    private Collider _collider;
-    private Collider[] _colliderList;
+    private Collider2D[] _colliderList;
     
-    private Dictionary<Collider, ITimeWarpTarget> _timeWarpMap = new Dictionary<Collider, ITimeWarpTarget>();
+    private Dictionary<Collider2D, ITimeWarpTarget> _timeWarpMap = new Dictionary<Collider2D, ITimeWarpTarget>();
     
     private HashSet<ITimeWarpTarget> _insideSet = new HashSet<ITimeWarpTarget>();
     private List<ITimeWarpTarget> _insideList = new List<ITimeWarpTarget>();
@@ -28,7 +37,7 @@ public class TimeWarpFieldController : MonoBehaviour
 
     void Awake()
     {
-        _colliderList = new Collider[50];
+        _colliderList = new Collider2D[50];
         _radiusShaderId = Shader.PropertyToID("_radius");
         if (_renderer)
         {
@@ -48,7 +57,7 @@ public class TimeWarpFieldController : MonoBehaviour
         
         _currentSphereTargets.Clear();
         
-        int colliderCount = Physics.OverlapSphereNonAlloc(transform.position, radius, _colliderList, affectedLayers);
+        int colliderCount = Physics2D.OverlapCircleNonAlloc(transform.position, radius, _colliderList, affectedLayers);
         _generateCurrentTargetList(ref _currentSphereTargets, _colliderList, colliderCount);
         
         for (int i = 0; i < _currentSphereTargets.Count; ++i)
@@ -79,11 +88,11 @@ public class TimeWarpFieldController : MonoBehaviour
         }
     }
     
-    private void _generateCurrentTargetList(ref List<ITimeWarpTarget> targetList, Collider[] colliderList, int colliderCount)
+    private void _generateCurrentTargetList(ref List<ITimeWarpTarget> targetList, Collider2D[] colliderList, int colliderCount)
     {
         for (int i = 0; i < colliderCount; ++i)
         {
-            Collider collider = colliderList[i];
+            Collider2D collider = colliderList[i];
             ITimeWarpTarget target;
             if (!_timeWarpMap.TryGetValue(collider, out target))
             {

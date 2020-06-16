@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using GhostGen;
 using UnityEditor;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class ProjectileSystem : NotificationDispatcher, IGameSystem
 {
@@ -65,18 +67,18 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
 
     public void Step(float deltaTime)
     {
-        // float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
-        //
-        // for(int i = 0; i < _poolSize; ++i)
-        // {
-        //     ProjectileState state = _gameState.projectileStateList[i];
-        //     BulletView view = _projectileViewPool[i];
-        //
-        //     if(state.isActive)
-        //     {
-        //         view.transform.position = Vector3.Lerp(state.prevPosition, state.position, alpha);
-        //     }
-        // }
+        float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
+        
+        for(int i = 0; i < _poolSize; ++i)
+        {
+            ProjectileState state = _gameState.projectileStateList[i];
+            BulletView view = _projectileViewPool[i];
+        
+            if(state.isActive)
+            {
+                view.transform.position = Vector3.Lerp(state.prevPosition, state.position, alpha);
+            }
+        }
     }
     
     public void FixedStep(float deltaTime)
@@ -135,7 +137,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
 
                 state.prevPosition = state.position;
                 state.position += (state.velocity * scaledDeltaTime);
-                view.transform.position = state.position;
+                // view.transform.position = state.position;
                 
 
                 if (state.deathTimer <= 0.0f)
@@ -197,9 +199,13 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
                 state.deathTimer = data.deathTimer;
                 state.timeScale = 1.0f;
                 state.position = position;
+                state.prevPosition = position;
                 state.velocity = direction * state.speed;
                 
                 view.Reset(position);
+                Vector3 eulerAngles = view.transform.eulerAngles;
+                eulerAngles.z = Mathf.Atan2(-direction.y, -direction.x) * Mathf.Rad2Deg;
+                view.transform.rotation = Quaternion.Euler(eulerAngles);
                 
                 _gameSystems.DispatchEvent(GamePlayEventType.PROJECTILE_SPAWNED, false, state);
                 return state;

@@ -14,14 +14,6 @@
                     "interactions": ""
                 },
                 {
-                    "name": "aimDirection",
-                    "type": "Value",
-                    "id": "1e0c5b10-3b0e-43a1-b55d-aa5e630c4afb",
-                    "expectedControlType": "Stick",
-                    "processors": "",
-                    "interactions": ""
-                },
-                {
                     "name": "jump",
                     "type": "Value",
                     "id": "b7a4321e-b150-40b3-bf73-64749dae1e2f",
@@ -62,6 +54,14 @@
                     "interactions": ""
                 },
                 {
+                    "name": "aimDirection",
+                    "type": "Value",
+                    "id": "1e0c5b10-3b0e-43a1-b55d-aa5e630c4afb",
+                    "expectedControlType": "Stick",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
                     "name": "exit",
                     "type": "Button",
                     "id": "80c9640c-df71-402a-9234-283b434bef95",
@@ -98,28 +98,6 @@
                     "processors": "",
                     "groups": "Gamepad",
                     "action": "primaryFire",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "f01c000f-0b6d-4dea-9d43-2d908347424d",
-                    "path": "*/{Secondary2DMotion}",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Gamepad",
-                    "action": "aimDirection",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "d156bcba-e7f0-4902-bac1-a503805bc725",
-                    "path": "",
-                    "interactions": "",
-                    "processors": "ScaleVector2(x=0,y=0)",
-                    "groups": "KeyboardMouse",
-                    "action": "aimDirection",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -307,6 +285,17 @@
                     "processors": "",
                     "groups": "Gamepad",
                     "action": "reset",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f01c000f-0b6d-4dea-9d43-2d908347424d",
+                    "path": "*/{Secondary2DMotion}",
+                    "interactions": "",
+                    "processors": "StickDeadzone(min=0.25),NormalizeVector2",
+                    "groups": "Gamepad",
+                    "action": "aimDirection",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

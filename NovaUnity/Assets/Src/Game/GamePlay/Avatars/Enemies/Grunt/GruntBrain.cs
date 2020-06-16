@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GruntBrain : IInputGenerator
 {
-    private const float kTickRate = 0.07f;
+    private const float kTickRate = 0.08f;
         
     private UnitStats _unitStats;
     private EnemyState _state;
@@ -26,7 +26,7 @@ public class GruntBrain : IInputGenerator
         _state.aiState = AiState.TARGETING;
         _currentTickRate = kTickRate;
 
-        _avatarSystem = _gameSystems.GetSystem<AvatarSystem>();
+        _avatarSystem = _gameSystems.Get<AvatarSystem>();
         
         _raycastHits = new RaycastHit2D[1];
     }
@@ -73,8 +73,6 @@ public class GruntBrain : IInputGenerator
         return frameInput;
     }
 
-
-
     public void Clear()
     {
 
@@ -120,7 +118,7 @@ public class GruntBrain : IInputGenerator
 
     private void _handleAttackingState(ref FrameInput input)
     {
-        Vector3 targetPosition = (_targetController.GetState().position + Vector3.up * 0.35f) + (_state.velocity * Time.fixedDeltaTime);
+        Vector3 targetPosition = (_targetController.state.position + Vector3.up * 0.35f) + (_state.velocity * Time.fixedDeltaTime);
         Vector3 startPosition = _state.position + Vector3.up * 0.85f;
         
         Vector3 dirToTarget = targetPosition - startPosition;

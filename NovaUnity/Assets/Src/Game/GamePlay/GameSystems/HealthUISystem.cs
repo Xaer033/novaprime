@@ -72,7 +72,7 @@ public class HealthUISystem : NotificationDispatcher, IGameSystem
             IAvatarController c = pair.Key;
             HealthUIView view = pair.Value;
 
-            Vector3 worldHealthPos = c.GetView().GetHealthPosition();
+            Vector3 worldHealthPos = c.view.GetHealthPosition();
             Vector3 anchorPos = getScreenPositionFromWorldPosition(worldHealthPos, cam);
             view.rectTransform.anchoredPosition = anchorPos;
 
@@ -133,7 +133,7 @@ public class HealthUISystem : NotificationDispatcher, IGameSystem
 
         if(view != null)
         {
-            float health = (float)c.GetState().health / (float)c.GetUnit().stats.maxHealth;
+            float health = (float)c.state.health / (float)c.unit.stats.maxHealth;
             view.SetHealthFill(health, ()=> recycleView(c));
         }
     }

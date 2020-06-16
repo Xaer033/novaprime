@@ -58,7 +58,7 @@ public class RaycastController
 
     public void UpdateRaycastOrigins()
     {
-//        _calculateRaySpacing(); // *TEMP*
+        _calculateRaySpacing(); // *TEMP*
         _updateRaycastOrigins();
     }
     

@@ -24,6 +24,9 @@ public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPasseng
 
     private ParticleSystem _leftFootPuffFx;
     private ParticleSystem _rightFootPuffFx;
+
+    private Quaternion _weaponRotation;
+    private Quaternion _prevWeaponRotation;
     
     private void Awake()
     {
@@ -44,6 +47,15 @@ public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPasseng
             }
         }
     }
+
+    private void Update()
+    {
+        float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
+        if(armHook != null)
+        {
+            armHook.rotation = Quaternion.Slerp(_prevWeaponRotation, _weaponRotation, alpha);
+        }
+    }
     
     public void Aim(Vector3 cursorPosition)
     {
@@ -55,7 +67,10 @@ public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPasseng
         if (armHook != null)
         {
             Vector3 delta = (cursorPosition - armHook.position).normalized;
-            armHook.rotation = Quaternion.LookRotation(delta, Vector3.up);
+            // armHook.rotation =
+
+            _prevWeaponRotation = _weaponRotation;
+            _weaponRotation = Quaternion.LookRotation(delta, Vector3.up);
         }
 
         if (_viewRoot != null)

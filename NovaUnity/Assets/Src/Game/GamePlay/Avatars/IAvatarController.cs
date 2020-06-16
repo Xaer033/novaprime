@@ -10,10 +10,9 @@ public interface IAvatarController : ITimeWarpTarget, IAttackTarget
 
     Vector3 GetPosition();
 
-    AvatarView GetView();
-    AvatarState GetState();
-
-    UnitMap.Unit GetUnit();
+    AvatarView view { get; }
+    AvatarState state { get; }
+    UnitMap.Unit unit { get; }
     
     void Move(Vector3 moveDelta, bool isOnPlatform);
 

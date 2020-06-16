@@ -47,19 +47,19 @@ public class GruntController : NotificationDispatcher, IAvatarController
         return _state.position;
     }
 
-    public AvatarView GetView()
+    public AvatarView view
     {
-        return _view;
+        get { return _view; }
     }
-
-    public AvatarState GetState()
+    
+    public AvatarState state
     {
-        return _state;
+        get { return _state; }
     }
-
-    public UnitMap.Unit GetUnit()
+    
+    public UnitMap.Unit unit
     {
-        return _unit;
+        get { return _unit; }
     }
     
     public string GetUUID()
@@ -105,7 +105,7 @@ public class GruntController : NotificationDispatcher, IAvatarController
         float timeToJumpApex = _unitStats.timeToJumpApex;
         _gravity = -(2 * _unitStats.maxJumpHeight) / (timeToJumpApex * timeToJumpApex);
         
-        ProjectileSystem projectileSystem = gameSystems.GetSystem<ProjectileSystem>();
+        ProjectileSystem projectileSystem = gameSystems.Get<ProjectileSystem>();
         _machineGunController = new MachineGunController(projectileSystem, _state.machineGunState, _unitStats.machineGunData);
         _view.SetWeapon(_machineGunController.view);
     }
@@ -184,7 +184,6 @@ public class GruntController : NotificationDispatcher, IAvatarController
         
         if (_view)
         {
-            // Aim
             _view.Aim(aimPosition);
         }
 

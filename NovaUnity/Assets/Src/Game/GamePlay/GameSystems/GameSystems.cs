@@ -10,12 +10,7 @@ public class GameSystems : NotificationDispatcher
     
     private Dictionary<Type, IGameSystem> _gameSystemMap = new Dictionary<Type, IGameSystem>();
     
-    public ProjectileSystem projectileSystem { get; private set; }
-    public AvatarSystem avatarSystem { get; private set; }
-    public HealthUISystem healthUISystem { get; private set; }
-    public SpawnPointSystem spawnPointSystem { get; private set; }
-    
-    public T GetSystem<T>() where T : IGameSystem
+    public T Get<T>() where T : IGameSystem
     {
         IGameSystem system;
         if (!_gameSystemMap.TryGetValue(typeof(T), out system))
@@ -31,15 +26,23 @@ public class GameSystems : NotificationDispatcher
     {
         _gameState = gameState;
         
-        projectileSystem     = new ProjectileSystem(gameplayResources, 125);
-        avatarSystem         = new AvatarSystem(gameplayResources);
-        healthUISystem       = new HealthUISystem();
-        spawnPointSystem     = new SpawnPointSystem();
+        IGameSystem projectileSystem     = new ProjectileSystem(gameplayResources, 125);
+        IGameSystem avatarSystem         = new AvatarSystem(gameplayResources);
+        IGameSystem healthUISystem       = new HealthUISystem();
+        IGameSystem spawnPointSystem     = new SpawnPointSystem();
+        IGameSystem platformSystems      = new PlatformSystem();
+
+        _addSystem(projectileSystem);
+        _addSystem(avatarSystem);
+        _addSystem(healthUISystem);
+        _addSystem(spawnPointSystem);
+        _addSystem(platformSystems);
         
-        _gameSystemMap.Add(typeof(ProjectileSystem), projectileSystem);
-        _gameSystemMap.Add(typeof(AvatarSystem),     avatarSystem);
-        _gameSystemMap.Add(typeof(HealthUISystem),   healthUISystem);
-        _gameSystemMap.Add(typeof(SpawnPointSystem), spawnPointSystem);
+        // _gameSystemMap.Add(typeof(ProjectileSystem), projectileSystem);
+        // _gameSystemMap.Add(typeof(AvatarSystem),     avatarSystem);
+        // _gameSystemMap.Add(typeof(HealthUISystem),   healthUISystem);
+        // _gameSystemMap.Add(typeof(SpawnPointSystem), spawnPointSystem);
+        // _gameSystemMap.Add(typeof(PlatformSystem),   platformSystems);
     }
 
     public void Start()
@@ -80,5 +83,10 @@ public class GameSystems : NotificationDispatcher
         {
             pair.Value.CleanUp();
         }
+    }
+
+    private void _addSystem(IGameSystem gameSystem)
+    {
+        _gameSystemMap.Add(gameSystem.GetType(), gameSystem);
     }
 }

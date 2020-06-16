@@ -22,13 +22,17 @@ public class BulletView : MonoBehaviour, ITimeWarpTarget
 
     public void Recycle()
     {
+        _trailRenderer.Clear();
+        _trailRenderer.emitting = false;
         gameObject.SetActive(false);
     }
 
     public void Reset(Vector3 position)
     {
         transform.position = position;
-        _trailRenderer.Clear();
         gameObject.SetActive(true);
+        
+        _trailRenderer.Clear();
+        _trailRenderer.emitting = true;
     }
 }

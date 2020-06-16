@@ -27,14 +27,6 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                     ""interactions"": """"
                 },
                 {
-                    ""name"": ""aimDirection"",
-                    ""type"": ""Value"",
-                    ""id"": ""1e0c5b10-3b0e-43a1-b55d-aa5e630c4afb"",
-                    ""expectedControlType"": ""Stick"",
-                    ""processors"": """",
-                    ""interactions"": """"
-                },
-                {
                     ""name"": ""jump"",
                     ""type"": ""Value"",
                     ""id"": ""b7a4321e-b150-40b3-bf73-64749dae1e2f"",
@@ -75,6 +67,14 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                     ""interactions"": """"
                 },
                 {
+                    ""name"": ""aimDirection"",
+                    ""type"": ""Value"",
+                    ""id"": ""1e0c5b10-3b0e-43a1-b55d-aa5e630c4afb"",
+                    ""expectedControlType"": ""Stick"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
                     ""name"": ""exit"",
                     ""type"": ""Button"",
                     ""id"": ""80c9640c-df71-402a-9234-283b434bef95"",
@@ -111,28 +111,6 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
                     ""action"": ""primaryFire"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""f01c000f-0b6d-4dea-9d43-2d908347424d"",
-                    ""path"": ""*/{Secondary2DMotion}"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Gamepad"",
-                    ""action"": ""aimDirection"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""d156bcba-e7f0-4902-bac1-a503805bc725"",
-                    ""path"": """",
-                    ""interactions"": """",
-                    ""processors"": ""ScaleVector2(x=0,y=0)"",
-                    ""groups"": ""KeyboardMouse"",
-                    ""action"": ""aimDirection"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -322,6 +300,17 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                     ""action"": ""reset"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f01c000f-0b6d-4dea-9d43-2d908347424d"",
+                    ""path"": ""*/{Secondary2DMotion}"",
+                    ""interactions"": """",
+                    ""processors"": ""StickDeadzone(min=0.25),NormalizeVector2"",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""aimDirection"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -354,12 +343,12 @@ public class @PlayerActions : IInputActionCollection, IDisposable
         // Gameplay
         m_Gameplay = asset.FindActionMap("Gameplay", throwIfNotFound: true);
         m_Gameplay_primaryFire = m_Gameplay.FindAction("primaryFire", throwIfNotFound: true);
-        m_Gameplay_aimDirection = m_Gameplay.FindAction("aimDirection", throwIfNotFound: true);
         m_Gameplay_jump = m_Gameplay.FindAction("jump", throwIfNotFound: true);
         m_Gameplay_horizontalMovement = m_Gameplay.FindAction("horizontalMovement", throwIfNotFound: true);
         m_Gameplay_verticalMovement = m_Gameplay.FindAction("verticalMovement", throwIfNotFound: true);
         m_Gameplay_forcePad = m_Gameplay.FindAction("forcePad", throwIfNotFound: true);
         m_Gameplay_aimAbsolute = m_Gameplay.FindAction("aimAbsolute", throwIfNotFound: true);
+        m_Gameplay_aimDirection = m_Gameplay.FindAction("aimDirection", throwIfNotFound: true);
         m_Gameplay_exit = m_Gameplay.FindAction("exit", throwIfNotFound: true);
         m_Gameplay_reset = m_Gameplay.FindAction("reset", throwIfNotFound: true);
         // Menu
@@ -414,12 +403,12 @@ public class @PlayerActions : IInputActionCollection, IDisposable
     private readonly InputActionMap m_Gameplay;
     private IGameplayActions m_GameplayActionsCallbackInterface;
     private readonly InputAction m_Gameplay_primaryFire;
-    private readonly InputAction m_Gameplay_aimDirection;
     private readonly InputAction m_Gameplay_jump;
     private readonly InputAction m_Gameplay_horizontalMovement;
     private readonly InputAction m_Gameplay_verticalMovement;
     private readonly InputAction m_Gameplay_forcePad;
     private readonly InputAction m_Gameplay_aimAbsolute;
+    private readonly InputAction m_Gameplay_aimDirection;
     private readonly InputAction m_Gameplay_exit;
     private readonly InputAction m_Gameplay_reset;
     public struct GameplayActions
@@ -427,12 +416,12 @@ public class @PlayerActions : IInputActionCollection, IDisposable
         private @PlayerActions m_Wrapper;
         public GameplayActions(@PlayerActions wrapper) { m_Wrapper = wrapper; }
         public InputAction @primaryFire => m_Wrapper.m_Gameplay_primaryFire;
-        public InputAction @aimDirection => m_Wrapper.m_Gameplay_aimDirection;
         public InputAction @jump => m_Wrapper.m_Gameplay_jump;
         public InputAction @horizontalMovement => m_Wrapper.m_Gameplay_horizontalMovement;
         public InputAction @verticalMovement => m_Wrapper.m_Gameplay_verticalMovement;
         public InputAction @forcePad => m_Wrapper.m_Gameplay_forcePad;
         public InputAction @aimAbsolute => m_Wrapper.m_Gameplay_aimAbsolute;
+        public InputAction @aimDirection => m_Wrapper.m_Gameplay_aimDirection;
         public InputAction @exit => m_Wrapper.m_Gameplay_exit;
         public InputAction @reset => m_Wrapper.m_Gameplay_reset;
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
@@ -447,9 +436,6 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                 @primaryFire.started -= m_Wrapper.m_GameplayActionsCallbackInterface.OnPrimaryFire;
                 @primaryFire.performed -= m_Wrapper.m_GameplayActionsCallbackInterface.OnPrimaryFire;
                 @primaryFire.canceled -= m_Wrapper.m_GameplayActionsCallbackInterface.OnPrimaryFire;
-                @aimDirection.started -= m_Wrapper.m_GameplayActionsCallbackInterface.OnAimDirection;
-                @aimDirection.performed -= m_Wrapper.m_GameplayActionsCallbackInterface.OnAimDirection;
-                @aimDirection.canceled -= m_Wrapper.m_GameplayActionsCallbackInterface.OnAimDirection;
                 @jump.started -= m_Wrapper.m_GameplayActionsCallbackInterface.OnJump;
                 @jump.performed -= m_Wrapper.m_GameplayActionsCallbackInterface.OnJump;
                 @jump.canceled -= m_Wrapper.m_GameplayActionsCallbackInterface.OnJump;
@@ -465,6 +451,9 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                 @aimAbsolute.started -= m_Wrapper.m_GameplayActionsCallbackInterface.OnAimAbsolute;
                 @aimAbsolute.performed -= m_Wrapper.m_GameplayActionsCallbackInterface.OnAimAbsolute;
                 @aimAbsolute.canceled -= m_Wrapper.m_GameplayActionsCallbackInterface.OnAimAbsolute;
+                @aimDirection.started -= m_Wrapper.m_GameplayActionsCallbackInterface.OnAimDirection;
+                @aimDirection.performed -= m_Wrapper.m_GameplayActionsCallbackInterface.OnAimDirection;
+                @aimDirection.canceled -= m_Wrapper.m_GameplayActionsCallbackInterface.OnAimDirection;
                 @exit.started -= m_Wrapper.m_GameplayActionsCallbackInterface.OnExit;
                 @exit.performed -= m_Wrapper.m_GameplayActionsCallbackInterface.OnExit;
                 @exit.canceled -= m_Wrapper.m_GameplayActionsCallbackInterface.OnExit;
@@ -478,9 +467,6 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                 @primaryFire.started += instance.OnPrimaryFire;
                 @primaryFire.performed += instance.OnPrimaryFire;
                 @primaryFire.canceled += instance.OnPrimaryFire;
-                @aimDirection.started += instance.OnAimDirection;
-                @aimDirection.performed += instance.OnAimDirection;
-                @aimDirection.canceled += instance.OnAimDirection;
                 @jump.started += instance.OnJump;
                 @jump.performed += instance.OnJump;
                 @jump.canceled += instance.OnJump;
@@ -496,6 +482,9 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                 @aimAbsolute.started += instance.OnAimAbsolute;
                 @aimAbsolute.performed += instance.OnAimAbsolute;
                 @aimAbsolute.canceled += instance.OnAimAbsolute;
+                @aimDirection.started += instance.OnAimDirection;
+                @aimDirection.performed += instance.OnAimDirection;
+                @aimDirection.canceled += instance.OnAimDirection;
                 @exit.started += instance.OnExit;
                 @exit.performed += instance.OnExit;
                 @exit.canceled += instance.OnExit;
@@ -552,12 +541,12 @@ public class @PlayerActions : IInputActionCollection, IDisposable
     public interface IGameplayActions
     {
         void OnPrimaryFire(InputAction.CallbackContext context);
-        void OnAimDirection(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
         void OnHorizontalMovement(InputAction.CallbackContext context);
         void OnVerticalMovement(InputAction.CallbackContext context);
         void OnForcePad(InputAction.CallbackContext context);
         void OnAimAbsolute(InputAction.CallbackContext context);
+        void OnAimDirection(InputAction.CallbackContext context);
         void OnExit(InputAction.CallbackContext context);
         void OnReset(InputAction.CallbackContext context);
     }

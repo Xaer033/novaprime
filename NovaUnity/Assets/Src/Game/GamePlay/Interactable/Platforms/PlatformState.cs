@@ -3,12 +3,6 @@ using UnityEngine;
 
 public class PlatformState
 {
-    public enum CycleMode
-    {
-        YOYO,
-        CYCLIC
-    }
-
     public PlatformState(Vector3 startPosition, int raycastArraySize, Vector3[] localWayPoints)
     {
         int raycastSize = raycastArraySize > 0 ? raycastArraySize : 1;

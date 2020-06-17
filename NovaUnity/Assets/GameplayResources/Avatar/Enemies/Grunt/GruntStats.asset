@@ -33,3 +33,4 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1024
   machineGunData: {fileID: 11400000, guid: d3d2225bbbf5d0e439f02d629a0e8c9d, type: 2}
+  animationRunSpeed: 0

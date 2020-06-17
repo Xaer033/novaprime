@@ -114,7 +114,10 @@
                   <e p="LightFixture.cs" t="Include" />
                 </e>
                 <e p="Platforms" t="Include">
+                  <e p="BasePlatformController.cs" t="Include" />
+                  <e p="PlatformCycleMode.cs" t="Include" />
                   <e p="PlatformState.cs" t="Include" />
+                  <e p="PlatformType.cs" t="Include" />
                   <e p="PlatformView.cs" t="Include" />
                   <e p="TimePlatformController.cs" t="Include" />
                 </e>

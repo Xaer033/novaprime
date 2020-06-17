@@ -3,17 +3,20 @@ using UnityEngine;
 
 public class PlatformSystem : NotificationDispatcher, IGameSystem
 {
-
     private TimePlatformController _timePlatformController;
     private PlatformView[] _platformViewList;
 
     private GameState _gameState;
     
+    
+    public int priority { get; set; }
+    
     public PlatformSystem()
     {
         _timePlatformController = new TimePlatformController();
     }
-    
+
+
     // Start is called before the first frame update
     public void Start(GameSystems gameSystems, GameState gameState)
     {
@@ -51,7 +54,7 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
             float adjustedDeltaTime = deltaTime * state.timeScale;
             
             // can use different controllers for different platforms
-            _timePlatformController.UpdatePlatform(state, view, adjustedDeltaTime, time );
+            _timePlatformController.UpdatePlatform(state, view, adjustedDeltaTime, time);
         }
     }
     

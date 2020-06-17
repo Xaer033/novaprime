@@ -7,7 +7,10 @@ public class SpawnPointSystem : NotificationDispatcher, IGameSystem
     private GameState _gameState;
 
     private SpawnPointView[] _spawnPointViewList;
-
+    
+    
+    public int priority { get; set; }
+    
     //Ensures that dependencies are initialized first
     public SpawnPointSystem()
     {

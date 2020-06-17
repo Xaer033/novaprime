@@ -24,6 +24,9 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     private GameObject _playerParent;
     private GameObject _enemyParent;
     
+    
+    public int priority { get; set; }
+    
     public AvatarSystem(GameplayResources gameplayResources)
     {
         _gameplayResources = gameplayResources;

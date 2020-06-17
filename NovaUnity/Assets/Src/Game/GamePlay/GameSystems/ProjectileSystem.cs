@@ -21,6 +21,9 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
     private int _poolSize;
     private RaycastHit2D[] _raycastHitList;
     
+    
+    public int priority { get; set; }
+    
     public ProjectileSystem(GameplayResources gameplayResources, int poolSize)
     {
         _gameplayResources = gameplayResources;
@@ -204,7 +207,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
                 
                 view.Reset(position);
                 Vector3 eulerAngles = view.transform.eulerAngles;
-                eulerAngles.z = Mathf.Atan2(-direction.y, -direction.x) * Mathf.Rad2Deg;
+                eulerAngles.z = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
                 view.transform.rotation = Quaternion.Euler(eulerAngles);
                 
                 _gameSystems.DispatchEvent(GamePlayEventType.PROJECTILE_SPAWNED, false, state);

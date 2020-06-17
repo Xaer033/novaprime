@@ -9,6 +9,7 @@ public class GameSystems : NotificationDispatcher
     private GameplayResources _gameplayResources;
     
     private Dictionary<Type, IGameSystem> _gameSystemMap = new Dictionary<Type, IGameSystem>();
+    private List<IGameSystem> _sortedSystemList = new List<IGameSystem>(20);
     
     public T Get<T>() where T : IGameSystem
     {
@@ -28,65 +29,73 @@ public class GameSystems : NotificationDispatcher
         
         IGameSystem projectileSystem     = new ProjectileSystem(gameplayResources, 125);
         IGameSystem avatarSystem         = new AvatarSystem(gameplayResources);
-        IGameSystem healthUISystem       = new HealthUISystem();
+        IGameSystem healthUiSystem       = new HealthUISystem();
         IGameSystem spawnPointSystem     = new SpawnPointSystem();
         IGameSystem platformSystems      = new PlatformSystem();
-
-        _addSystem(projectileSystem);
-        _addSystem(avatarSystem);
-        _addSystem(healthUISystem);
-        _addSystem(spawnPointSystem);
-        _addSystem(platformSystems);
+ 
+        // Higher priority value goes first
+        _addSystem(40, avatarSystem);
+        _addSystem(30, spawnPointSystem);
+        _addSystem(20, platformSystems);
+        _addSystem(10, projectileSystem);
+        _addSystem( 0, healthUiSystem);
         
-        // _gameSystemMap.Add(typeof(ProjectileSystem), projectileSystem);
-        // _gameSystemMap.Add(typeof(AvatarSystem),     avatarSystem);
-        // _gameSystemMap.Add(typeof(HealthUISystem),   healthUISystem);
-        // _gameSystemMap.Add(typeof(SpawnPointSystem), spawnPointSystem);
-        // _gameSystemMap.Add(typeof(PlatformSystem),   platformSystems);
+        
+        _sortedSystemList.Sort(_sortSystems);
     }
 
     public void Start()
     {
-        foreach (var pair in _gameSystemMap)
+        for(int i = 0; i < _sortedSystemList.Count; ++i)
         {
-            pair.Value.Start(this, _gameState);
+            _sortedSystemList[i].Start(this, _gameState);
         }
     }
     
-    public void FixedStep(float deltaTime)
+    public void FixedStep(float fixedDeltaTime)
     {
-        foreach (var pair in _gameSystemMap)
+        for(int i = 0; i < _sortedSystemList.Count; ++i)
         {
-            pair.Value.FixedStep(deltaTime);
+            _sortedSystemList[i].FixedStep(fixedDeltaTime);
         }
     }
 
     public void Step(float deltaTime)
     {
-        foreach (var pair in _gameSystemMap)
+        for(int i = 0; i < _sortedSystemList.Count; ++i)
         {
-            pair.Value.Step(deltaTime);
+            _sortedSystemList[i].Step(deltaTime);
         }
     }
 
     public void LateStep(float deltaTime)
     {
-        foreach (var pair in _gameSystemMap)
+        for(int i = 0; i < _sortedSystemList.Count; ++i)
         {
-            pair.Value.LateStep(deltaTime);
+            _sortedSystemList[i].LateStep(deltaTime);
         }
     }
     
     public void CleanUp()
     {
-        foreach (var pair in _gameSystemMap)
+        for(int i = 0; i < _sortedSystemList.Count; ++i)
         {
-            pair.Value.CleanUp();
+            _sortedSystemList[i].CleanUp();
         }
+        
+        _sortedSystemList.Clear();
+        _gameSystemMap.Clear();
     }
 
-    private void _addSystem(IGameSystem gameSystem)
+    private void _addSystem(int priority, IGameSystem gameSystem)
     {
+        gameSystem.priority = priority;
         _gameSystemMap.Add(gameSystem.GetType(), gameSystem);
+        _sortedSystemList.Add(gameSystem);
+    }
+
+    private int _sortSystems(IGameSystem a, IGameSystem b)
+    {
+        return b.priority.CompareTo(a.priority);
     }
 }

@@ -8,11 +8,6 @@ public class HealthUISystem : NotificationDispatcher, IGameSystem
     public float scaleConst = 10.0f;
 
     private GuiCameraTag _guiCameraTag;
-    
-    public Canvas canvas
-    {
-        get { return _guiCameraTag.dynamicCanvas; }
-    }
 
 
     private Stack<HealthUIView> _viewPool = new Stack<HealthUIView>(kMaxUIView);
@@ -21,7 +16,13 @@ public class HealthUISystem : NotificationDispatcher, IGameSystem
     
     private Camera _camera;
     private Vector3 _savedScale;
-
+    
+    public Canvas canvas
+    {
+        get { return _guiCameraTag.dynamicCanvas; }
+    }
+    
+    public int priority { get; set; }
 
     public void Start(GameSystems gameSystems, GameState gameState)
     {

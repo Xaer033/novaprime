@@ -1,12 +1,10 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 public class PlatformView : MonoBehaviour, ITimeWarpTarget
 {
-    public PlatformState.CycleMode cycleMode;
+    
+    public PlatformCycleMode cycleMode;
     public float waitTime;
     [Range(0,2)]
     public float easeAmount = 1;
@@ -24,6 +22,8 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
 
     
     public PlatformState state;
+    
+    [HideInInspector]
     public Vector3 startPosition;
     public RaycastController _raycastController;
     
@@ -44,12 +44,6 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
         state.timeScale = 1.0f;
     }
 
-    void Update()
-    {
-    //     float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
-    //    _viewRoot.position = Vector3.Lerp(state.prevPosition, state.position, alpha);
-    }
-    
     private void OnDrawGizmos()
     {
         if (localWaypoints != null)

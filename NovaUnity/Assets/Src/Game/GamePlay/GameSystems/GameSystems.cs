@@ -32,14 +32,15 @@ public class GameSystems : NotificationDispatcher
         IGameSystem healthUiSystem       = new HealthUISystem();
         IGameSystem spawnPointSystem     = new SpawnPointSystem();
         IGameSystem platformSystems      = new PlatformSystem();
+        IGameSystem triggerSystems       = new TriggerSystem(); 
  
         // Higher priority value goes first
+        _addSystem(50, triggerSystems);
         _addSystem(40, avatarSystem);
         _addSystem(30, spawnPointSystem);
         _addSystem(20, platformSystems);
         _addSystem(10, projectileSystem);
         _addSystem( 0, healthUiSystem);
-        
         
         _sortedSystemList.Sort(_sortSystems);
     }

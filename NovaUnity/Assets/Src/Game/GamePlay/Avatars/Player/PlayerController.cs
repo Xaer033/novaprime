@@ -447,7 +447,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     private void onIdleEnter(GeneralEvent e)
     {
         AnimationEventDispatcher.AnimationEventData data = (AnimationEventDispatcher.AnimationEventData)e.data;
-        Debug.Log("Idle Entered");
+        // Debug.Log("Idle Entered");
             
     }
     

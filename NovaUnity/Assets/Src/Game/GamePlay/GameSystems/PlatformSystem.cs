@@ -1,4 +1,5 @@
-﻿using GhostGen;
+﻿using System.Collections.Generic;
+using GhostGen;
 using UnityEngine;
 
 public class PlatformSystem : NotificationDispatcher, IGameSystem
@@ -7,12 +8,15 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
     private PlatformView[] _platformViewList;
 
     private GameState _gameState;
-    
+    private TriggerSystem _triggerSystem;
+    private Dictionary<string, PlatformState> _triggerPlatforms;
     
     public int priority { get; set; }
     
     public PlatformSystem()
     {
+        _triggerPlatforms = new Dictionary<string, PlatformState>();
+        
         _timePlatformController = new TimePlatformController();
     }
 
@@ -21,6 +25,10 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
     public void Start(GameSystems gameSystems, GameState gameState)
     {
         _gameState = gameState;
+
+        _triggerSystem = gameSystems.Get<TriggerSystem>();
+        _triggerSystem.AddListener(TriggerEventType.ENTER.ToString(), onTriggerEnter);
+        
         _platformViewList = GameObject.FindObjectsOfType<PlatformView>();
 
         // No Platforms in the level
@@ -92,6 +100,22 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
         if(_gameState != null)
         {
             _gameState.projectileStateList.Clear();
+        }
+
+        if(_triggerSystem != null)
+        {
+            _triggerSystem.RemoveListener(TriggerEventType.ENTER.ToString(), onTriggerEnter);
+        }
+    }
+
+
+    private void onTriggerEnter(GeneralEvent e)
+    {
+        string triggerTag = (string) e.data;
+        
+        if(triggerTag == "e1")
+        {
+            Debug.Log("Got dat e1 boi");
         }
     }
 }

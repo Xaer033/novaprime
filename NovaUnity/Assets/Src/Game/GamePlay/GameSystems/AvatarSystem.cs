@@ -137,7 +137,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
 
     private PlayerController _spawnPlayer(string uuid, UnitMap.Unit unit, Vector3 position)
     {
-        AvatarView view = GameObject.Instantiate<AvatarView>(unit.view as AvatarView, _playerParent.transform);
+        AvatarView view = GameObject.Instantiate<AvatarView>(unit.view as AvatarView, position, Quaternion.identity, _playerParent.transform);
 
         GameplayCamera cam = _getGameplayCamera();
         if (cam != null)

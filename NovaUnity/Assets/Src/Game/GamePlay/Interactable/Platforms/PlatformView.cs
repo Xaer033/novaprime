@@ -1,8 +1,11 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 public class PlatformView : MonoBehaviour, ITimeWarpTarget
 {
+    public PlatformType platformType;
+    public string triggerTag;
     
     public PlatformCycleMode cycleMode;
     public float waitTime;

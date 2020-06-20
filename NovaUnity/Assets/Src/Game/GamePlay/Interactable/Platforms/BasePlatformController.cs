@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class BasePlatformController
 {
-    public void UpdatePlatform(PlatformState state, PlatformView view, float deltaTime, float time)
+    public void UpdatePlatform(PlatformState state, PlatformView view, float adjustedDeltaTime, float time)
     {
         view._raycastController.UpdateRaycastOrigins();
-        Vector3 newVelocity = calculatePlatformMovement(state, view, deltaTime, time);
+        Vector3 newVelocity = calculatePlatformMovement(state, view, adjustedDeltaTime, time);
         
         calculatePassengerMovement(state, view, state.velocity);
 
@@ -40,7 +40,7 @@ public class BasePlatformController
         }
     }
     
-    protected virtual Vector3 calculatePlatformMovement(PlatformState state, PlatformView view, float deltaTime, float time)
+    protected virtual Vector3 calculatePlatformMovement(PlatformState state, PlatformView view, float adjustedDeltaTime, float time)
     {
         return Vector3.zero;
     }

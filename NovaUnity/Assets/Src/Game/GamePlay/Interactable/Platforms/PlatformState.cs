@@ -27,6 +27,7 @@ public class PlatformState
     public int fromWaypointIndex;
     public float percentBetweenWaypoints;
     public float nextMoveTime;
+    public bool wasTriggered;
     public float timeScale = 1.0f;
     
     public RaycastHit2D[] raycastHits;

@@ -5,19 +5,22 @@ using UnityEngine;
 public class PlatformSystem : NotificationDispatcher, IGameSystem
 {
     private TimePlatformController _timePlatformController;
+    private TriggerPlatformController _triggerPlatformController;
+    
     private PlatformView[] _platformViewList;
 
     private GameState _gameState;
     private TriggerSystem _triggerSystem;
-    private Dictionary<string, PlatformState> _triggerPlatforms;
+    private Dictionary<string, List<PlatformState>> _triggerPlatforms;
     
     public int priority { get; set; }
     
     public PlatformSystem()
     {
-        _triggerPlatforms = new Dictionary<string, PlatformState>();
+        _triggerPlatforms = new Dictionary<string, List<PlatformState>>();
         
         _timePlatformController = new TimePlatformController();
+        _triggerPlatformController = new TriggerPlatformController();
     }
 
 
@@ -27,7 +30,10 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
         _gameState = gameState;
 
         _triggerSystem = gameSystems.Get<TriggerSystem>();
-        _triggerSystem.AddListener(TriggerEventType.ENTER.ToString(), onTriggerEnter);
+        _triggerSystem.AddListener(TriggerEventType.ENTER.ToString(), onTrigger);
+        _triggerSystem.AddListener(TriggerEventType.EXIT.ToString(), onTrigger);
+        _triggerSystem.AddListener(TriggerEventType.ACTION.ToString(), onTrigger);
+        _triggerSystem.AddListener(TriggerEventType.ATTACKED.ToString(), onTrigger);
         
         _platformViewList = GameObject.FindObjectsOfType<PlatformView>();
 
@@ -46,6 +52,11 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
                 PlatformState state = new PlatformState(view.startPosition, 10, view.localWaypoints);
                 view.state = state;
                 _gameState.platformStateList.Add(state);
+
+                if(view.platformType == PlatformType.TRIGGER)
+                {
+                    addTriggerPlatform(view.triggerTag, state);
+                }
             }
         }
     }
@@ -62,7 +73,16 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
             float adjustedDeltaTime = deltaTime * state.timeScale;
             
             // can use different controllers for different platforms
-            _timePlatformController.UpdatePlatform(state, view, adjustedDeltaTime, time);
+            switch(view.platformType)
+            { 
+                case PlatformType.AUTO_TIME:
+                    _timePlatformController.UpdatePlatform(state, view, adjustedDeltaTime, time);
+                    break;
+                
+                case PlatformType.TRIGGER:
+                    _triggerPlatformController.UpdatePlatform(state, view, adjustedDeltaTime, time);
+                    break;
+            }
         }
     }
     
@@ -99,23 +119,48 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
     {
         if(_gameState != null)
         {
-            _gameState.projectileStateList.Clear();
+            _gameState.platformStateList.Clear();
         }
 
+        if(_triggerPlatforms != null)
+        { 
+            _triggerPlatforms.Clear();
+        }
+        
         if(_triggerSystem != null)
         {
-            _triggerSystem.RemoveListener(TriggerEventType.ENTER.ToString(), onTriggerEnter);
+            _triggerSystem.RemoveListener(TriggerEventType.ENTER.ToString(), onTrigger);
+            _triggerSystem.RemoveListener(TriggerEventType.EXIT.ToString(), onTrigger);
+            _triggerSystem.RemoveListener(TriggerEventType.ACTION.ToString(), onTrigger);
+            _triggerSystem.RemoveListener(TriggerEventType.ATTACKED.ToString(), onTrigger);
         }
     }
 
 
-    private void onTriggerEnter(GeneralEvent e)
+    private void onTrigger(GeneralEvent e)
     {
         string triggerTag = (string) e.data;
-        
-        if(triggerTag == "e1")
+
+        List<PlatformState> triggerPlatList;
+        if(_triggerPlatforms.TryGetValue(triggerTag, out triggerPlatList))
         {
-            Debug.Log("Got dat e1 boi");
+            for(int i = 0; i < triggerPlatList.Count; ++i)
+            {
+                triggerPlatList[i].wasTriggered = true;
+            }
         }
     }
+
+    private void addTriggerPlatform(string triggerTag, PlatformState state)
+    {
+        List<PlatformState> triggerPlatList;
+        if(!_triggerPlatforms.TryGetValue(triggerTag, out triggerPlatList))
+        {
+            triggerPlatList = new List<PlatformState>(4);
+            _triggerPlatforms.Add(triggerTag, triggerPlatList);
+        }
+        
+        triggerPlatList.Add(state);
+    }
+
 }

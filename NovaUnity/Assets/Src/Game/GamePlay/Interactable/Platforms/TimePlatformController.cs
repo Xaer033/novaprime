@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class TimePlatformController : BasePlatformController
 {
-    protected override Vector3 calculatePlatformMovement(PlatformState state, PlatformView view, float deltaTime, float time)
+    protected override Vector3 calculatePlatformMovement(PlatformState state, PlatformView view, float adjustedDeltaTime, float time)
     {
         if (time < state.nextMoveTime)
         {
@@ -21,7 +21,9 @@ public class TimePlatformController : BasePlatformController
         Vector3 toWaypoint = state.globalWayPoints[toWaypointIndex];
         float distanceBetweenWaypoint = Vector3.Distance(fromWaypoint, toWaypoint);
         float validDistance = distanceBetweenWaypoint > 0 ? distanceBetweenWaypoint : 0.001f; 
-        state.percentBetweenWaypoints += deltaTime * view.speed / validDistance;
+        
+        // Delta time has already been mutliplied by state.timeScale
+        state.percentBetweenWaypoints += adjustedDeltaTime * view.speed / validDistance;
         state.percentBetweenWaypoints = Mathf.Clamp01(state.percentBetweenWaypoints);
         
         float lerpValue = MathUtil.Ease(state.percentBetweenWaypoints, view.easeAmount);

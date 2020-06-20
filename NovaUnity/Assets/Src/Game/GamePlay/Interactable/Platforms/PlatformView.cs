@@ -4,20 +4,20 @@ using UnityEngine.Serialization;
 
 public class PlatformView : MonoBehaviour, ITimeWarpTarget
 {
+    public PlatformData data;
     public PlatformType platformType;
     public string triggerTag;
-    
     public PlatformCycleMode cycleMode;
     public float waitTime;
     [Range(0,2)]
     public float easeAmount = 1;
-    
     public float speed;
-    public Vector3[] localWaypoints;
+    [HideInInspector]
+    public Vector3 startPosition;
     
+    public Vector3[] localWaypoints;
     public LayerMask passengerMask;
     public float distanceBetweenRays = 0.2f;
-
 
     public Collider2D collisionCollider;
     [FormerlySerializedAs("_viewRoot")]
@@ -26,8 +26,6 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
     
     public PlatformState state;
     
-    [HideInInspector]
-    public Vector3 startPosition;
     public RaycastController _raycastController;
     
     // Start is called before the first frame update

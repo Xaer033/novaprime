@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using GhostGen;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -81,10 +79,7 @@ public class TriggerSystem : NotificationDispatcher, IGameSystem
        }
 
        t.onTriggerEvent += onTriggerForward;
-       
-       
-       
-       
+
        _triggerSet.Add(t);
        _triggerList.Add(t);
     }

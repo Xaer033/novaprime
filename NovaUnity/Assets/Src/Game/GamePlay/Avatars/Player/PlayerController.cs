@@ -8,7 +8,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     private float _gravity;
 
     private FrameInput _lastInput;
-    private IInputGenerator _input;
+    private IInputGenerator _inputGen;
     
     private float _resetPlatformTime;
 
@@ -17,10 +17,11 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     private UnitMap.Unit _unit;
     private UnitStats _unitStats;
     private GameSystems _gameSystems;
+    private Collider2D[] _interactColliderList;
     
     
     
-    public PlayerController(UnitMap.Unit unit, PlayerState state, IAvatarView view, IInputGenerator input)
+    public PlayerController(UnitMap.Unit unit, PlayerState state, IAvatarView view, IInputGenerator inputGen)
     {
         _unit = unit;
         _unitStats = unit.stats;
@@ -29,22 +30,23 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         _view = view as AvatarView;
         _view.controller = this;
 
-        _input = input;
+        _inputGen = inputGen;
+        _interactColliderList = new Collider2D[5];
         
         _view.AddListener("onIdleEnter", onIdleEnter);
     }
 
     public IInputGenerator input
     {
-        get { return _input; }
-        set { _input = value; }
+        get { return _inputGen; }
+        set { _inputGen = value; }
     }
     
     public Vector3 GetPosition()
     {
         return _state.position;
     }
-    
+
     public int playerNumber
     {
         set
@@ -57,9 +59,9 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         return _unit.type;
     }
 
-    public string GetUUID()
+    public string uuid
     {
-        return _state.uuid;
+        get { return _state.uuid; }
     }
 
     public AttackResult TakeDamage(AttackData attackData)
@@ -69,7 +71,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         SetVelocity(hitBumpForce);
         
         _state.health = _state.health - attackData.potentialDamage;
-        return new AttackResult(this, attackData.potentialDamage, _state.health, !isDead );
+        return new AttackResult(attackData, this, attackData.potentialDamage, _state.health);
     }
     
     public int health
@@ -90,9 +92,11 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         float timeToJumpApex = _unitStats.timeToJumpApex;
         _gravity = -(2 * _unitStats.maxJumpHeight) / (timeToJumpApex * timeToJumpApex);
 
+        
         ProjectileSystem projectileSystem = gameSystems.Get<ProjectileSystem>();
         _machineGunController = new MachineGunController(projectileSystem, _state.machineGunState, _unitStats.machineGunData);
-        _view.SetWeapon(_machineGunController.view);
+        _view.SetWeapon(uuid, _machineGunController);
+        
         
         _state.stateType = PlayerActivityType.ACTIVE;
     }
@@ -147,6 +151,8 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         deltaTime = _lastInput.secondaryFire ? deltaTime * 0.5f : deltaTime;
         deltaTime = deltaTime * _state.timeScale;
 
+        _handleInteract(_lastInput);
+        
         int wallDirX = _view.constrainer.collisionInfo.left ? -1 : 1;
         int inputDirX = Mathf.Abs(_lastInput.horizontalMovement) < 0.5f ? 0 : _lastInput.horizontalMovement < 0 ? -1 : 1;
         
@@ -229,9 +235,9 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         }
         
         // Clear buffered input as we handled it above (for transient button up/down events that may get missed in a fixedUpdate
-        if (_input != null)
+        if (_inputGen != null)
         {
-            _input.Clear();
+            _inputGen.Clear();
         }
     }
 
@@ -249,7 +255,6 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     {
         get { return _view.constrainer.collisionInfo; }
     }
-    
 
     private void _handleDirectionMovement(ref Vector3 velocity, float deltaTime)
     {
@@ -365,6 +370,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         bool isWallSliding = false;
         
         bool wallOnSide = collisionInfo.left || collisionInfo.right;// pushingLeftWall || pushingRightWall;
+        
         if (wallOnSide && !collisionInfo.below && velocity.y < 0)
         {
             isWallSliding = true;
@@ -401,6 +407,38 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         return isWallSliding;
     }
 
+    private void _handleInteract(FrameInput input)
+    {
+        if(!input.interactPressed)
+        {
+            return;
+        }
+
+        Vector3 upVector = Vector3.up * 1.0f;
+        Vector3 rightVector = Vector3.right * _view._viewRoot.localScale.x * 1f;
+        
+        Vector3 p1 = _state.position;
+        Vector3 p2 = p1 + rightVector + upVector;
+        
+        Debug.DrawLine(p1, p1 + upVector, Color.yellow, 1.0f);
+        Debug.DrawLine(p1, p1 + rightVector, Color.yellow, 1.0f);
+        Debug.DrawLine(p1 + upVector, p2, Color.yellow, 1.0f);
+        Debug.DrawLine(p1 + rightVector, p2, Color.yellow, 1.0f);
+        
+        int hitCount = Physics2D.OverlapAreaNonAlloc(p1, p2, _interactColliderList);
+        for(int i= 0; i < hitCount; ++i)
+        {
+            Collider2D col = _interactColliderList[i];
+            // Optimize
+            InteractTrigger trigger = col.GetComponent<InteractTrigger>();
+            if(trigger != null)
+            {
+                trigger.Interact(this);
+            }
+        }
+        
+    }
+    
     private void handleAnimationStates(AnimationInfo animInfo)
     {
         AnimatorStateInfo state = _view.animator.GetCurrentAnimatorStateInfo(0);

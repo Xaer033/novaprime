@@ -10,7 +10,12 @@ public class MachineGunController : IWeaponController
     private MachineGunState _state;
     private MachineGunData _machineGunData;
     private ProjectileSystem _projectileSystem;
-    
+    private string _ownerUUID;
+
+    public void Attach(Transform bodyParentHook, ParentConstraint leftHandConstraint, ParentConstraint rightHandConstraint)
+    {
+        throw new System.NotImplementedException();
+    }
 
     public IWeaponView view
     {
@@ -40,11 +45,16 @@ public class MachineGunController : IWeaponController
         _view.OnTimeWarpExit();
     }
 
-    public void Attach(Transform bodyParentHook, 
+    public void Attach(string ownerUUID, 
+                       Transform bodyParentHook, 
                        ParentConstraint leftHandConstraint, 
                        ParentConstraint rightHandConstraint)
     {
-        view.Attach(bodyParentHook, leftHandConstraint, rightHandConstraint);
+        _ownerUUID = ownerUUID;
+        if(view != null)
+        {
+            view.Attach(bodyParentHook, leftHandConstraint, rightHandConstraint);
+        }
     }
     
     public void FixedStep(float deltaTime)
@@ -83,7 +93,7 @@ public class MachineGunController : IWeaponController
 //        Debug.DrawRay(adjustedPos, Vector3.up, Color.red, 1.0f);
         _view.Fire(adjustedPos, 10.0f);
 
-        _projectileSystem.Spawn(_machineGunData.projectileData, visualWeaponPos, viewDir);
+        _projectileSystem.Spawn(_ownerUUID, _machineGunData.projectileData, visualWeaponPos, viewDir);
         
         _state.fireTimer = _machineGunData.fireCooldownSeconds;
     }

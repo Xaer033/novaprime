@@ -338,7 +338,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   collisionMask:
     serializedVersion: 2
-    m_Bits: 6656
+    m_Bits: 72192
   _trailRenderer: {fileID: 1753894756286364932}
 --- !u!61 &5784512913063852355
 BoxCollider2D:

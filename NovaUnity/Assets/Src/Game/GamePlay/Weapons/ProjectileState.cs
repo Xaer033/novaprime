@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ProjectileState
 {
@@ -12,6 +10,7 @@ public class ProjectileState
     public float timeScale;
     public int damage;
     public float deathTimer;
+    public string ownerUUID;
 
     public ProjectileData data;
 }

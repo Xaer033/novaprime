@@ -43,7 +43,7 @@
                     "id": "8eb7cd73-d6f8-4c3f-821f-4e0e765a9719",
                     "expectedControlType": "",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "Press"
                 },
                 {
                     "name": "aimAbsolute",
@@ -76,6 +76,14 @@
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": ""
+                },
+                {
+                    "name": "action",
+                    "type": "Button",
+                    "id": "6fb0df71-7383-4455-9825-b43df4fd99c1",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Press"
                 }
             ],
             "bindings": [
@@ -215,7 +223,7 @@
                     "name": "",
                     "id": "edf069ee-6cd1-4861-b1e4-6f083653b322",
                     "path": "<Gamepad>/rightStickPress",
-                    "interactions": "Press",
+                    "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
                     "action": "forcePad",
@@ -296,6 +304,28 @@
                     "processors": "StickDeadzone(min=0.25),NormalizeVector2",
                     "groups": "Gamepad",
                     "action": "aimDirection",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4df7fa91-c913-4b87-ac93-1e1d51537ec4",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "action",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b89db55d-2755-4278-993c-69b0840305b9",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardMouse",
+                    "action": "action",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

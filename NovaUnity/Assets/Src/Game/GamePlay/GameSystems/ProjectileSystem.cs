@@ -121,14 +121,25 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
                     //Do damage
                     if (target != null)
                     {
-                        impactList = _bloodImpactViewList;
-                        AttackData damageData = new AttackData(state.data.damageType, state.damage, state.velocity.normalized);
+                        int layer = hit.transform.gameObject.layer;
+                        
+                        if(layer == LayerMask.NameToLayer("player") ||
+                           layer == LayerMask.NameToLayer("enemies"))
+                        {
+                            impactList = _bloodImpactViewList;
+                        }
+                        
+                        AttackData damageData = new AttackData(state.ownerUUID, view.gameObject.layer, state.data.damageType, state.damage, state.velocity.normalized);
                         AttackResult result = target.TakeDamage(damageData);
 
                         _gameSystems.DispatchEvent(GamePlayEventType.AVATAR_DAMAGED, false, result);
                     }
+
+                    switch(hit.transform.gameObject.layer)
+                    {
                     
-                    
+                        
+                    }
                     ParticleSystem impactFX = _activateImpactFX(impactList, bulletDir, hit);
                     if(impactFX == null)
                     {
@@ -186,7 +197,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         _gameState.projectileStateList.Clear();
     }
 
-    public ProjectileState Spawn(ProjectileData data, Vector3 position, Vector3 direction)
+    public ProjectileState Spawn(string ownerUUID, ProjectileData data, Vector3 position, Vector3 direction)
     {
         for (int i = 0; i < _poolSize; ++i)
         {
@@ -196,6 +207,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
             if (!state.isActive)
             {
                 state.isActive = true;
+                state.ownerUUID = ownerUUID;
                 state.data = data;
                 state.speed = data.speed;
                 state.damage = data.damage;

@@ -1,5 +1,6 @@
 ﻿public enum PlatformCycleMode
 {
     YOYO,
-    CYCLIC
+    CYCLIC,
+    ONCE
 }

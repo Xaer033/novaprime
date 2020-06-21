@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using GhostGen;
 using UnityEngine;
 
@@ -139,8 +140,9 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
 
     private void onTrigger(GeneralEvent e)
     {
-        string triggerTag = (string) e.data;
-
+        Hashtable table = (Hashtable) e.data;
+        string triggerTag = table["tag"] as string;
+        
         List<PlatformState> triggerPlatList;
         if(_triggerPlatforms.TryGetValue(triggerTag, out triggerPlatList))
         {

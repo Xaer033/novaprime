@@ -1,4 +1,5 @@
 ﻿public interface IAttacker
 {
-    AttackData CreateAttackData();
+    string name { get; }
+    // AttackData CreateAttackData();
 }

@@ -56,7 +56,7 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                     ""id"": ""8eb7cd73-d6f8-4c3f-821f-4e0e765a9719"",
                     ""expectedControlType"": """",
                     ""processors"": """",
-                    ""interactions"": """"
+                    ""interactions"": ""Press""
                 },
                 {
                     ""name"": ""aimAbsolute"",
@@ -89,6 +89,14 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""action"",
+                    ""type"": ""Button"",
+                    ""id"": ""6fb0df71-7383-4455-9825-b43df4fd99c1"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press""
                 }
             ],
             ""bindings"": [
@@ -228,7 +236,7 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                     ""name"": """",
                     ""id"": ""edf069ee-6cd1-4861-b1e4-6f083653b322"",
                     ""path"": ""<Gamepad>/rightStickPress"",
-                    ""interactions"": ""Press"",
+                    ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
                     ""action"": ""forcePad"",
@@ -311,6 +319,28 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                     ""action"": ""aimDirection"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4df7fa91-c913-4b87-ac93-1e1d51537ec4"",
+                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""action"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b89db55d-2755-4278-993c-69b0840305b9"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""action"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -351,6 +381,7 @@ public class @PlayerActions : IInputActionCollection, IDisposable
         m_Gameplay_aimDirection = m_Gameplay.FindAction("aimDirection", throwIfNotFound: true);
         m_Gameplay_exit = m_Gameplay.FindAction("exit", throwIfNotFound: true);
         m_Gameplay_reset = m_Gameplay.FindAction("reset", throwIfNotFound: true);
+        m_Gameplay_action = m_Gameplay.FindAction("action", throwIfNotFound: true);
         // Menu
         m_Menu = asset.FindActionMap("Menu", throwIfNotFound: true);
     }
@@ -411,6 +442,7 @@ public class @PlayerActions : IInputActionCollection, IDisposable
     private readonly InputAction m_Gameplay_aimDirection;
     private readonly InputAction m_Gameplay_exit;
     private readonly InputAction m_Gameplay_reset;
+    private readonly InputAction m_Gameplay_action;
     public struct GameplayActions
     {
         private @PlayerActions m_Wrapper;
@@ -424,6 +456,7 @@ public class @PlayerActions : IInputActionCollection, IDisposable
         public InputAction @aimDirection => m_Wrapper.m_Gameplay_aimDirection;
         public InputAction @exit => m_Wrapper.m_Gameplay_exit;
         public InputAction @reset => m_Wrapper.m_Gameplay_reset;
+        public InputAction @action => m_Wrapper.m_Gameplay_action;
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -460,6 +493,9 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                 @reset.started -= m_Wrapper.m_GameplayActionsCallbackInterface.OnReset;
                 @reset.performed -= m_Wrapper.m_GameplayActionsCallbackInterface.OnReset;
                 @reset.canceled -= m_Wrapper.m_GameplayActionsCallbackInterface.OnReset;
+                @action.started -= m_Wrapper.m_GameplayActionsCallbackInterface.OnAction;
+                @action.performed -= m_Wrapper.m_GameplayActionsCallbackInterface.OnAction;
+                @action.canceled -= m_Wrapper.m_GameplayActionsCallbackInterface.OnAction;
             }
             m_Wrapper.m_GameplayActionsCallbackInterface = instance;
             if (instance != null)
@@ -491,6 +527,9 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                 @reset.started += instance.OnReset;
                 @reset.performed += instance.OnReset;
                 @reset.canceled += instance.OnReset;
+                @action.started += instance.OnAction;
+                @action.performed += instance.OnAction;
+                @action.canceled += instance.OnAction;
             }
         }
     }
@@ -549,6 +588,7 @@ public class @PlayerActions : IInputActionCollection, IDisposable
         void OnAimDirection(InputAction.CallbackContext context);
         void OnExit(InputAction.CallbackContext context);
         void OnReset(InputAction.CallbackContext context);
+        void OnAction(InputAction.CallbackContext context);
     }
     public interface IMenuActions
     {

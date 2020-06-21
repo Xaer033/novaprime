@@ -89,7 +89,7 @@ public class GruntBrain : IInputGenerator
             AvatarView view = colliderList[i].GetComponent<AvatarView>();
             if (view != null && view.controller != null)
             {
-                uuid = view.controller.GetUUID();
+                uuid = view.controller.uuid;
                 c = view.controller;
                 return true;
             }
@@ -118,6 +118,13 @@ public class GruntBrain : IInputGenerator
 
     private void _handleAttackingState(ref FrameInput input)
     {
+        _targetController = _avatarSystem.GetController(_state.targetUUID);
+        if(_targetController == null)
+        {
+            _state.aiState = AiState.IDLE;
+            return;
+        }
+        
         Vector3 targetPosition = (_targetController.state.position + Vector3.up * 0.35f) + (_state.velocity * Time.fixedDeltaTime);
         Vector3 startPosition = _state.position + Vector3.up * 0.85f;
         
@@ -145,7 +152,7 @@ public class GruntBrain : IInputGenerator
         {
             hit = _raycastHits[0];
             IAvatarController fellowGrunt = _avatarSystem.GetController(hit.transform.name);
-            if (!fellowGrunt.isDead)
+            if (fellowGrunt.health > 0)
             {
                 input.horizontalMovement =  hit.distance * Mathf.Sign(hit.normal.x) * 0.5f;
             }
@@ -164,21 +171,18 @@ public class GruntBrain : IInputGenerator
             }
         }
         
+        input.useCusorPosition = true;
         Debug.DrawRay(startPosition, dirToTarget.normalized * 8.0f, Color.green, 0.4f);
 
         int hitPlayerCount = Physics2D.RaycastNonAlloc(startPosition, dirToTarget.normalized, _raycastHits, 8.0f, LayerMask.GetMask(new []{"obsticals", "player"}) );
         if (hitPlayerCount > 0 && _raycastHits[0].collider.gameObject.layer == LayerMask.NameToLayer("player"))
         {
-            input.useCusorPosition = true;
             input.cursorPosition = targetPosition;
-
             input.primaryFire = true;
         }
         else
         {
-            input.useCusorPosition = true;
             input.cursorPosition = _lastInput.cursorPosition;
-
             input.primaryFire = false;
         }
     }

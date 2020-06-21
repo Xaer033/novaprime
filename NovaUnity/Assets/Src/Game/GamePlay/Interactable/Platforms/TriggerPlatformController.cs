@@ -18,8 +18,15 @@ public class TriggerPlatformController : BasePlatformController
             state.fromWaypointIndex %= state.globalWayPoints.Length;
         }
 
+        
         int fromWaypointIndex = state.fromWaypointIndex;
         int toWaypointIndex = (state.fromWaypointIndex + 1) % state.globalWayPoints.Length;
+        
+        if(fromWaypointIndex + 1 >= state.globalWayPoints.Length && view.cycleMode == PlatformCycleMode.ONCE)
+        {
+            return Vector3.zero;
+        }
+            
         if(fromWaypointIndex == 0 && toWaypointIndex == 1 && state.percentBetweenWaypoints < 0.0001f)
         {
             if(state.wasTriggered)
@@ -30,7 +37,6 @@ public class TriggerPlatformController : BasePlatformController
             {
                 return Vector3.zero;
             }
-            // 
         }
         else
         {
@@ -55,8 +61,10 @@ public class TriggerPlatformController : BasePlatformController
             state.fromWaypointIndex++;
 
             state.nextMoveTime = time + view.waitTime;
-            if(view.cycleMode == PlatformCycleMode.YOYO && state.fromWaypointIndex >= state.globalWayPoints.Length - 1)
-            {
+            
+            //Got to the end of the waypoint array
+            if(state.fromWaypointIndex >= state.globalWayPoints.Length - 1 && view.cycleMode == PlatformCycleMode.YOYO)
+            { 
                 state.percentBetweenWaypoints = fromWaypointIndex == 0 ? 0.0015f : 0.0f;
                 state.fromWaypointIndex = 0;
                 Array.Reverse(state.globalWayPoints);

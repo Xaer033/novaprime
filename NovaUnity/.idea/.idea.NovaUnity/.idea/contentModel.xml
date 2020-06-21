@@ -134,10 +134,12 @@
                   <e p="TimeWarpShaderHelper.cs" t="Include" />
                 </e>
                 <e p="Triggers" t="Include">
+                  <e p="AttackedTrigger.cs" t="Include" />
+                  <e p="InteractTrigger.cs" t="Include" />
                   <e p="ITrigger.cs" t="Include" />
-                  <e p="PlatformTrigger.cs" t="Include" />
                   <e p="Trigger.cs" t="Include" />
                   <e p="TriggerEventType.cs" t="Include" />
+                  <e p="VolumeTrigger.cs" t="Include" />
                 </e>
               </e>
               <e p="PlayFieldController.cs" t="Include" />

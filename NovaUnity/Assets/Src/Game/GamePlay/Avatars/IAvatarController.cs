@@ -6,9 +6,7 @@ public interface IAvatarController : ITimeWarpTarget, IAttackTarget
     
     IInputGenerator input { get; set; }
 
-    string GetUUID();
-
-    Vector3 GetPosition();
+    string uuid { get; }
 
     AvatarView view { get; }
     AvatarState state { get; }

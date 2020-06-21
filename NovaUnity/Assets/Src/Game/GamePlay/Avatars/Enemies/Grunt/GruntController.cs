@@ -41,12 +41,12 @@ public class GruntController : NotificationDispatcher, IAvatarController
     {
         return _unit.type;
     }
-    
-    public Vector3 GetPosition()
-    {
-        return _state.position;
-    }
 
+    public string uuid
+    {
+        get { return _state.uuid; }
+    }
+    
     public AvatarView view
     {
         get { return _view; }
@@ -61,11 +61,6 @@ public class GruntController : NotificationDispatcher, IAvatarController
     {
         get { return _unit; }
     }
-    
-    public string GetUUID()
-    {
-        return _state.uuid;
-    }
 
     public void SetVelocity(Vector3 velocity)
     {
@@ -78,13 +73,19 @@ public class GruntController : NotificationDispatcher, IAvatarController
         {
             _state.health = _state.health - attackData.potentialDamage;
 
+            if(_state.aiState == AiState.IDLE || _state.aiState == AiState.TARGETING)
+            {
+                _state.targetUUID = attackData.attackerUUID;
+                _state.aiState = AiState.ATTACKING;
+            }
+            
             if (isDead)
             {
                 _view.SetAnimationTrigger("deathTrigger");
             }
         }
         
-        return new AttackResult(this, attackData.potentialDamage, _state.health, !isDead );
+        return new AttackResult(attackData, this, attackData.potentialDamage, _state.health);
     }
     
     public int health
@@ -107,7 +108,8 @@ public class GruntController : NotificationDispatcher, IAvatarController
         
         ProjectileSystem projectileSystem = gameSystems.Get<ProjectileSystem>();
         _machineGunController = new MachineGunController(projectileSystem, _state.machineGunState, _unitStats.machineGunData);
-        _view.SetWeapon(_machineGunController.view);
+        _view.SetWeapon(uuid, _machineGunController);
+        
     }
 
     public FrameInput lastInput
@@ -121,15 +123,19 @@ public class GruntController : NotificationDispatcher, IAvatarController
         {
             Vector3 constrainedMoveDelta = _view.constrainer.Move(moveDelta, isOnPlatform, _lastInput);
 
+            _state.previousPosition = _state.position;
             _state.position = _state.position + constrainedMoveDelta;
-            _view.transform.localPosition = _state.position;
+
+            _view._viewRoot.position = _state.previousPosition;
+            _view.transform.position = _state.position;
         }
     }
     
     // Update is called once per frame
     public void Step(float deltaTime)
     {
-        
+        float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
+        _view._viewRoot.position = Vector3.Lerp(_state.previousPosition, _state.position, alpha);
     }
 
     public void FixedStep(float deltaTime, FrameInput input)

@@ -94,11 +94,11 @@ public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPasseng
         set { _animator = value; }
     }
     
-    public void SetWeapon(IWeaponView weaponView)
+    public void SetWeapon(string ownerUUID, IWeaponController weaponController)
     {
-        if (weaponView != null && armHook != null)
+        if (weaponController != null && armHook != null)
         {
-            weaponView.Attach(armHook, _leftHandConstraint, _rightHandConstraint);
+            weaponController.Attach(ownerUUID,armHook, _leftHandConstraint, _rightHandConstraint);
             // weaponTransform.localRotation = Quaternion.identity;
             // weaponTransform.localScale = Vector3.one;
         }
@@ -175,7 +175,7 @@ public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPasseng
     }
     public bool    isDead 
     { 
-        get { return controller != null ? controller.isDead : false; } 
+        get { return controller != null ? controller.health <= 0 : false; } 
     }
     
     public IAvatarController controller { get; set; }

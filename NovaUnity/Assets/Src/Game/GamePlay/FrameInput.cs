@@ -15,6 +15,8 @@ public struct FrameInput : IProtocolToken
     
     public bool jumpPressed;
     public bool jumpReleased;
+
+    public bool interactPressed;
     
     public bool primaryFire;
     public bool secondaryFire;

@@ -13,6 +13,8 @@ public class UnitStats : ScriptableObject
     public float coyoteTime = 0.1f;
     public float jumpRememberDelay = 0.0895f;
 
+    public List<string> climbableTags = new List<string>();
+    
     public float wallStickTime = 0.2f;
     public float wallSlideSpeedMax = 0.0f;
     public float wallSlideSpeedDampTime = 0.0f;
@@ -30,4 +32,5 @@ public class UnitStats : ScriptableObject
     public LayerMask targetLayerMask;
     public MachineGunData machineGunData;
     public float animationRunSpeed;
+    
 }

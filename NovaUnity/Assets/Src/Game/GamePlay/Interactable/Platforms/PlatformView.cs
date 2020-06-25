@@ -47,7 +47,7 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
 
     private void OnDrawGizmos()
     {
-        if (localWaypoints != null)
+        if (localWaypoints != null && collisionCollider != null)
         {
             float size = 0.3f;
             for (int i = 0; i < localWaypoints.Length; ++i)

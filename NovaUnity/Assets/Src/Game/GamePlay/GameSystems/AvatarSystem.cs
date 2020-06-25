@@ -89,7 +89,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         
         for (int i = 0; i < _avatarControllerList.Count; ++i)
         {
-            AvatarView view = _avatarControllerList[i].view;
+            IAvatarView view = _avatarControllerList[i].view;
             GameObject.Destroy(view.gameObject);
         }
         _avatarControllerList.Clear();

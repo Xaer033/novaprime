@@ -115,7 +115,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
                 if(hitCount > 0)
                 {
                     RaycastHit2D hit = _raycastHitList[0];
-                    IAttackTarget target = hit.collider.GetComponent<IAttackTarget>();
+                    IAttackTarget target = hit.collider.GetComponentInParent<IAttackTarget>();
                     var impactList = _projectileImpactViewList;
                     
                     //Do damage
@@ -123,7 +123,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
                     {
                         int layer = hit.transform.gameObject.layer;
                         
-                        if(layer == LayerMask.NameToLayer("player") ||
+                        if(layer == LayerMask.NameToLayer("playerHurtbox") ||
                            layer == LayerMask.NameToLayer("enemies"))
                         {
                             impactList = _bloodImpactViewList;

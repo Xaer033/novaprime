@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GruntBrain : IInputGenerator
 {
-    private const float kTickRate = 0.08f;
+    private const float kTickRate = 0.1f;
         
     private UnitStats _unitStats;
     private EnemyState _state;
@@ -86,7 +86,7 @@ public class GruntBrain : IInputGenerator
         Collider2D[] colliderList = Physics2D.OverlapCircleAll(_state.position, 5.0f, _unitStats.targetLayerMask);
         for (int i = 0; i < colliderList.Length; ++i)
         {
-            AvatarView view = colliderList[i].GetComponent<AvatarView>();
+            IAvatarView view = colliderList[i].GetComponent<IAvatarView>();
             if (view != null && view.controller != null)
             {
                 uuid = view.controller.uuid;

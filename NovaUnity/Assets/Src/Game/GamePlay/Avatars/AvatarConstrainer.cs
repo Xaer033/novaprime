@@ -136,11 +136,14 @@ public class AvatarConstrainer : MonoBehaviour
                     moveDelta.x += distanceToSlopeStart * directionX;
                 }
 
-                if (_collisionInfo.belowOld && i <= _walkStepIndex)
-                {
-                    _collisionInfo.stepUp = true;
-                }
-                else
+                // if (_collisionInfo.belowOld && 
+                //     i <= _walkStepIndex && 
+                //     !_collisionInfo.climbingSlope && 
+                //     !_collisionInfo.decendingSlope)
+                // {
+                //     _collisionInfo.stepUp = true;
+                // }
+                // else
                 {
                     _collisionInfo.stepUp = false;
                     

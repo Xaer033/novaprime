@@ -82,6 +82,12 @@ public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPasseng
         }
     }
 
+
+    public Transform cameraTarget
+    {
+        get { return cameraTargetGroup.transform; }
+    }
+    
     public NetworkEntity netEntity
     {
         get => _networkEntity;

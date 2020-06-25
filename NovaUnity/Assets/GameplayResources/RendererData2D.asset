@@ -43,13 +43,13 @@ MonoBehaviour:
       multiplicative: 0
       additive: 0
   - enabled: 0
-    name: Blend Style 3
+    name: character
     maskTextureChannel: 0
-    renderTextureScale: 1
-    blendMode: 1
+    renderTextureScale: 0.71
+    blendMode: 0
     customBlendFactors:
-      multiplicative: 0
-      additive: 0
+      multiplicative: 1.27
+      additive: -0.48
   m_UseDepthStencilBuffer: 1
   m_DefaultMaterialType: 0
   m_DefaultCustomMaterial: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3,

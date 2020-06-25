@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PlayerStats
   m_EditorClassIdentifier: 
   maxHealth: 100
-  maxJumpHeight: 2.5
+  maxJumpHeight: 2
   minJumpHeight: 0.28
   timeToJumpApex: 0.45
   coyoteTime: 0.1
@@ -24,9 +24,9 @@ MonoBehaviour:
   wallSlideSpeedDampTime: 0.1
   wallJumpClimb: {x: 7.5, y: 10}
   wallJumpOff: {x: 6, y: 3}
-  wallJumpLeap: {x: 8, y: 8}
-  speed: 5
-  terminalVelocity: 15
+  wallJumpLeap: {x: 12, y: 12}
+  speed: 4
+  terminalVelocity: 13
   accelerationTimeAir: 0.1
   accelerationTimeDoubleJumpAir: 0.375
   accelerationTimeGround: 0.05

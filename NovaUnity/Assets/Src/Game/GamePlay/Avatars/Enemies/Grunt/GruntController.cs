@@ -47,7 +47,7 @@ public class GruntController : NotificationDispatcher, IAvatarController
         get { return _state.uuid; }
     }
     
-    public AvatarView view
+    public IAvatarView view
     {
         get { return _view; }
     }

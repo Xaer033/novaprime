@@ -101,7 +101,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         _state.stateType = PlayerActivityType.ACTIVE;
     }
 
-    public AvatarView view
+    public IAvatarView view
     {
         get { return _view; }
     }

@@ -7,5 +7,7 @@ public interface IAvatarView : IEventDispatcher
     void SetWeapon(string ownerUUID, IWeaponController weaponController);
     void RequestMovement(PassengerMovement movement);
     
+    GameObject gameObject { get; }
+    Transform cameraTarget { get; }
     IAvatarController controller { get; }
 }

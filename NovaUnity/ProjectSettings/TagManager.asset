@@ -27,8 +27,8 @@ TagManager:
   - background
   - foreground
   - attackTrigger
-  - 
-  - 
+  - playerHurtbox
+  - enemyHurtbox
   - 
   - 
   - 
@@ -46,8 +46,14 @@ TagManager:
   - name: Background
     uniqueID: 1133647299
     locked: 0
+  - name: NearBackground
+    uniqueID: 466605049
+    locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: NearForeground
+    uniqueID: 4152655213
     locked: 0
   - name: Foreground
     uniqueID: 394597179

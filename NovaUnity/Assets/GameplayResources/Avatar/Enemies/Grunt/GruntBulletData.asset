@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetMask:
     serializedVersion: 2
-    m_Bits: 1536
+    m_Bits: 131584
   damageType: 0
   attackType: 2
   speed: 20

@@ -73,7 +73,8 @@ public class HealthUISystem : NotificationDispatcher, IGameSystem
             IAvatarController c = pair.Key;
             HealthUIView view = pair.Value;
 
-            Vector3 worldHealthPos = c.view.GetHealthPosition();
+            AvatarView aView = c.view as AvatarView;
+            Vector3 worldHealthPos = aView.GetHealthPosition();
             Vector3 anchorPos = getScreenPositionFromWorldPosition(worldHealthPos, cam);
             view.rectTransform.anchoredPosition = anchorPos;
 

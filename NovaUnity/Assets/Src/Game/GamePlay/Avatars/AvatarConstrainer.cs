@@ -23,6 +23,9 @@ public class AvatarConstrainer : MonoBehaviour
     private CollisionInfo _collisionInfo;
     private FrameInput _input;
     private RaycastHit2D[] _raycastHits;
+    private RaycastHit2D[] _leftSlopeCastHits;
+    private RaycastHit2D[] _rightSlopeCastHits;
+    private RaycastHit2D[] _otherHits;
     
     private float _resetPlatformTime;
 
@@ -34,6 +37,9 @@ public class AvatarConstrainer : MonoBehaviour
     void Awake()
     {
         _raycastHits = new RaycastHit2D[kRaycastHitCount];
+        _leftSlopeCastHits = new RaycastHit2D[1];
+        _rightSlopeCastHits = new RaycastHit2D[1];
+        _otherHits = new RaycastHit2D[10];
         
         _raycastController = new RaycastController(
             distanceBetweenRays,
@@ -57,8 +63,7 @@ public class AvatarConstrainer : MonoBehaviour
         _raycastController.UpdateRaycastOrigins();
         _walkStepIndex = Mathf.RoundToInt(_raycastController.verticalRayCount * walkStepRayPercentage);
         
-        _collisionInfo.Reset();
-        _collisionInfo.oldMoveDelta = moveDelta;
+        _collisionInfo.Reset(moveDelta);
 
         if (moveDelta.y < 0)
         {
@@ -86,7 +91,9 @@ public class AvatarConstrainer : MonoBehaviour
         float directionX = _collisionInfo.faceDir;
         float rayLength = Mathf.Abs(moveDelta.x) + _raycastController.skinWidth;
 
-       Vector3 rayOrigin = (directionX == -1) ? _raycastOrigins.bottomLeft : _raycastOrigins.bottomRight;
+        Vector3 firstRayOrigin = (directionX == -1) ? _raycastOrigins.bottomLeft : _raycastOrigins.bottomRight;
+        Vector3 antiRayOrigin = (directionX == -1) ? _raycastOrigins.bottomRight : _raycastOrigins.bottomLeft;
+        
         if (Mathf.Abs(moveDelta.x) < _raycastController.skinWidth)
         {
             rayLength = 2 * _raycastController.skinWidth;
@@ -94,15 +101,14 @@ public class AvatarConstrainer : MonoBehaviour
 
         _walkStepHeight =  (_raycastController.horizontalRaySpacing * _walkStepIndex);
         
-//        RaycastHit hit;
         for (int i = 0; i < _raycastController.horizontalRayCount; ++i)
         {
-            Vector3 firstRayOrigin = rayOrigin;
-            firstRayOrigin += Vector3.up * (_raycastController.horizontalRaySpacing * i);
+            Vector3 rayOrigin = firstRayOrigin;
+            rayOrigin += Vector3.up * (_raycastController.horizontalRaySpacing * i);
             
-            Debug.DrawRay(firstRayOrigin, Vector3.right * directionX, Color.cyan);
+            Debug.DrawRay(rayOrigin, Vector3.right * directionX, Color.cyan);
             
-            int hitCount = Physics2D.RaycastNonAlloc(firstRayOrigin, Vector3.right * directionX, _raycastHits, rayLength, collisionMask);
+            int hitCount = Physics2D.RaycastNonAlloc(rayOrigin, Vector3.right * directionX, _raycastHits, rayLength, collisionMask);
             // Potential future bug for not looping through all hitCount
             if (hitCount > 0)
             {
@@ -136,14 +142,14 @@ public class AvatarConstrainer : MonoBehaviour
                     moveDelta.x += distanceToSlopeStart * directionX;
                 }
 
-                // if (_collisionInfo.belowOld && 
-                //     i <= _walkStepIndex && 
-                //     !_collisionInfo.climbingSlope && 
-                //     !_collisionInfo.decendingSlope)
-                // {
-                //     _collisionInfo.stepUp = true;
-                // }
-                // else
+                if (_collisionInfo.belowOld && 
+                    i <= _walkStepIndex && 
+                    !_collisionInfo.climbingSlope && 
+                    !_collisionInfo.decendingSlope)
+                {
+                    _collisionInfo.stepUp = true;
+                }
+                else
                 {
                     _collisionInfo.stepUp = false;
                     
@@ -157,8 +163,15 @@ public class AvatarConstrainer : MonoBehaviour
                             moveDelta.y = Mathf.Tan(_collisionInfo.slopeAngle * Mathf.Deg2Rad) * Mathf.Abs(moveDelta.x);
                         }
 
-                        _collisionInfo.left = directionX == -1;
-                        _collisionInfo.right = directionX == 1;
+                        _collisionInfo.left = directionX < 0;
+                        _collisionInfo.right = directionX > 0;
+                        
+                        Vector3 antiRayPos = antiRayOrigin + (Vector3.up * _raycastController.horizontalRaySpacing * i);
+                        hitCount = Physics2D.RaycastNonAlloc(antiRayPos, Vector3.right * -directionX, _raycastHits, rayLength, collisionMask);
+                        if(hitCount > 0)
+                        {
+                            _collisionInfo.crushed = true;
+                        }
                     }
                 }
             }
@@ -178,6 +191,8 @@ public class AvatarConstrainer : MonoBehaviour
         for (int i = 0; i < _raycastController.verticalRayCount; ++i)
         {
             Vector3 rayOrigin = (directionY == -1) ? _raycastOrigins.bottomLeft : _raycastOrigins.topLeft;
+            Vector3 antiRayOrigin = (directionY == -1) ? _raycastOrigins.topLeft : _raycastOrigins.bottomLeft;
+            
             rayOrigin.y = rayOrigin.y + walkStepHeight;
             rayOrigin += Vector3.right * (_raycastController.verticalRaySpacing * i + moveDelta.x);
             
@@ -229,8 +244,20 @@ public class AvatarConstrainer : MonoBehaviour
                     moveDelta.x = moveDelta.y / Mathf.Tan(_collisionInfo.slopeAngle * Mathf.Deg2Rad) * Mathf.Sign(moveDelta.x);
                 }
                 
-                _collisionInfo.below = directionY == -1;
-                _collisionInfo.above = directionY == 1;
+                _collisionInfo.below = directionY < 0;
+                _collisionInfo.above = directionY > 0;
+
+                if(!activeHit.collider.CompareTag("Platform"))
+                {
+                    Vector3 crushedOrigin = antiRayOrigin +
+                                            (Vector3.right * (_raycastController.verticalRaySpacing * i + moveDelta.x));
+                    hitCount = Physics2D.RaycastNonAlloc(crushedOrigin, Vector3.up * -directionY, _raycastHits,
+                                                         rayLength, collisionMask);
+                    if(hitCount > 0)
+                    {
+                        _collisionInfo.crushed = true;
+                    }
+                }
             }
         }
 
@@ -279,21 +306,19 @@ public class AvatarConstrainer : MonoBehaviour
 
     private void _decsendSlope(ref Vector3 moveDelta)
     {
-        RaycastHit2D[] maxSlopeHitLeft = new RaycastHit2D[1];
-        RaycastHit2D[] maxSlopeHitRight = new RaycastHit2D[1];
-        bool isLeftHit     = Physics2D.RaycastNonAlloc(_raycastOrigins.bottomLeft, Vector2.down, maxSlopeHitLeft, Mathf.Abs(moveDelta.y) + _raycastController.skinHeight, collisionMask) > 0;
-        bool isRightHit    = Physics2D.RaycastNonAlloc(_raycastOrigins.bottomRight, Vector2.down, maxSlopeHitRight, Mathf.Abs(moveDelta.y) + _raycastController.skinHeight, collisionMask) > 0;
+        bool isLeftHit     = Physics2D.RaycastNonAlloc(_raycastOrigins.bottomLeft, Vector2.down, _leftSlopeCastHits, Mathf.Abs(moveDelta.y) + _raycastController.skinHeight, collisionMask) > 0;
+        bool isRightHit    = Physics2D.RaycastNonAlloc(_raycastOrigins.bottomRight, Vector2.down, _rightSlopeCastHits, Mathf.Abs(moveDelta.y) + _raycastController.skinHeight, collisionMask) > 0;
 
         if(isLeftHit ^ isRightHit)
         {
             if (isLeftHit)
             {
-                _slideDownMaxSlope(ref moveDelta, maxSlopeHitLeft[0]);
+                _slideDownMaxSlope(ref moveDelta, _leftSlopeCastHits[0]);
             }
 
             if (isRightHit)
             {
-                _slideDownMaxSlope(ref moveDelta, maxSlopeHitRight[0]);
+                _slideDownMaxSlope(ref moveDelta, _rightSlopeCastHits[0]);
             }
         }
 

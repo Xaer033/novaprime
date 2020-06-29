@@ -25,22 +25,7 @@ public class TriggerSystem : NotificationDispatcher, IGameSystem
 
         SceneManager.sceneLoaded += onSceneLoaded;
     }
-    
-    public void FixedStep(float fixedDeltaTime)
-    {
-        
-    }
-    
-    public void Step(float deltaTime)
-    {
-        
-    }
-    
-    public void LateStep(float deltaTime)
-    {
-        
-    }
-    
+
     public void CleanUp()
     {
         SceneManager.sceneLoaded -= onSceneLoaded;

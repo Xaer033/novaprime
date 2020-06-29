@@ -7,8 +7,9 @@ public class HealthUISystem : NotificationDispatcher, IGameSystem
     public const int kMaxUIView = 35;
     public float scaleConst = 10.0f;
 
+    private GameSystems _gameSystems;
     private GuiCameraTag _guiCameraTag;
-
+    private GameplayResources _gameplayResources;
 
     private Stack<HealthUIView> _viewPool = new Stack<HealthUIView>(kMaxUIView);
     private Dictionary<IAvatarController, HealthUIView> _inUseMap = new Dictionary<IAvatarController, HealthUIView>(kMaxUIView);
@@ -24,12 +25,23 @@ public class HealthUISystem : NotificationDispatcher, IGameSystem
     
     public int priority { get; set; }
 
+    public HealthUISystem(GameplayResources gameplayResources)
+    {
+        _gameplayResources = gameplayResources;
+    }
+    
     public void Start(GameSystems gameSystems, GameState gameState)
     {
+        _gameSystems = gameSystems;
+        _gameSystems.onLateStep += LateStep;
+        _gameSystems.AddListener(GamePlayEventType.AVATAR_SPAWNED, onAvatarSpawned);
+        _gameSystems.AddListener(GamePlayEventType.AVATAR_DAMAGED, onAvatarDamaged);
+        _gameSystems.AddListener(GamePlayEventType.AVATAR_DESTROYED, onAvatarDestroyed);
+        
         _guiCameraTag = GameObject.FindObjectOfType<GuiCameraTag>();
         _canvasRectTransform = _guiCameraTag.uiCanvas.transform as RectTransform;
 
-        HealthUIView healthUIPrefab = Singleton.instance.gameplayResources.healthUIPrefab;
+        HealthUIView healthUIPrefab = _gameplayResources.healthUIPrefab;
         _savedScale = healthUIPrefab.transform.localScale;
 
         for(int i = 0; i < kMaxUIView; ++i)
@@ -39,26 +51,11 @@ public class HealthUISystem : NotificationDispatcher, IGameSystem
                 canvas.transform, false);
             _viewPool.Push(view);
         }
-        
-        gameSystems.AddListener(GamePlayEventType.AVATAR_SPAWNED, onAvatarSpawned);
-        gameSystems.AddListener(GamePlayEventType.AVATAR_DAMAGED, onAvatarDamaged);
-        gameSystems.AddListener(GamePlayEventType.AVATAR_DESTROYED, onAvatarDestroyed);
-    }
-
-    public void FixedStep(float deltaTime)
-    {
-        
     }
 
     public void LateStep(float deltaTime)
     {
         _updateHealthViews();
-    }
-
-    // Update is called once per frame
-    public void Step(float deltaTime)
-    {
-        
     }
 
     private void _updateHealthViews()
@@ -111,9 +108,10 @@ public class HealthUISystem : NotificationDispatcher, IGameSystem
 
     public void CleanUp()
     {
-        RemoveListener(GamePlayEventType.AVATAR_SPAWNED, onAvatarSpawned);
-        RemoveListener(GamePlayEventType.AVATAR_DESTROYED, onAvatarDestroyed);
-        RemoveListener(GamePlayEventType.AVATAR_DAMAGED, onAvatarDamaged);
+        _gameSystems.onLateStep -= LateStep;
+        _gameSystems.RemoveListener(GamePlayEventType.AVATAR_SPAWNED, onAvatarSpawned);
+        _gameSystems.RemoveListener(GamePlayEventType.AVATAR_DESTROYED, onAvatarDestroyed);
+        _gameSystems.RemoveListener(GamePlayEventType.AVATAR_DAMAGED, onAvatarDamaged);
         
         foreach(var pair in _inUseMap)
         {

@@ -7,8 +7,7 @@ public class GameplayResources : ScriptableObject
     public BulletView bulletView;
     public ParticleSystem bulletImpactFX;
     public ParticleSystem avatarImpactFX;
-    
-    public TextAsset inputList;
+    public ParticleSystem jumpLandFX;
 
     public HealthUIView healthUIPrefab;
     public UnitMap unitMap;

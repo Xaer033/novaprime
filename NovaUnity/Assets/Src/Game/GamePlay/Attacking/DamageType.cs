@@ -9,5 +9,6 @@ public enum DamageType
     FIRE,
     ICE,
     VENOM,
-    CHAOS
+    CHAOS,
+    INSTANT
 }

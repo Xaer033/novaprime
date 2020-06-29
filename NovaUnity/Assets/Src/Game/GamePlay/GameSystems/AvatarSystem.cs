@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using GhostGen;
+using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -43,13 +44,16 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     {
         _gameSystems = gameSystems;
         _gameState = gameState;
+
+        _gameSystems.onStep += Step;
+        _gameSystems.onFixedStep += FixedStep;
+        _gameSystems.AddListener(GamePlayEventType.SPAWN_POINT_TRIGGERED, onSpawnPointTriggered);
         
         _gameState.playerStateList.Clear();
         _gameState.enemyStateList.Clear();
-        _gameSystems.AddListener(GamePlayEventType.SPAWN_POINT_TRIGGERED, onSpawnPointTriggered);
     }
 
-    public void FixedStep(float deltaTime)
+    public void FixedStep(float fixedDeltaTime)
     {
         for (int i = 0; i < _avatarControllerList.Count; ++i)
         {
@@ -57,7 +61,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
             FrameInput input = inputGenerator != null ? inputGenerator.GetInput() : default(FrameInput);
             _frameInputList.Add(input);            
             // This is kinda cool, cuz now we can swap input generators or save/store them for replays
-            _avatarControllerList[i].FixedStep(deltaTime, input);
+            _avatarControllerList[i].FixedStep(fixedDeltaTime, input);
         }
 
         if (Keyboard.current.f10Key.wasPressedThisFrame)
@@ -74,16 +78,8 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         }
     }
 
-    public void LateStep(float deltaTime)
-    {
-        
-    }
-
     public void CleanUp()
     {
-        _gameSystems.RemoveListener(GamePlayEventType.SPAWN_POINT_TRIGGERED, onSpawnPointTriggered);
-        
-        
         GameplayCamera cam = _getGameplayCamera();
         cam.ClearTargets();
         
@@ -92,18 +88,28 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
             IAvatarView view = _avatarControllerList[i].view;
             GameObject.Destroy(view.gameObject);
         }
-        _avatarControllerList.Clear();
-        
-        _gameState.playerStateList.Clear();
-        _gameState.enemyStateList.Clear();
         
         GameObject.Destroy(_playerParent);
         GameObject.Destroy(_enemyParent);
+        
+        _avatarControllerList.Clear();
+        _gameState.playerStateList.Clear();
+        _gameState.enemyStateList.Clear();
+        
+        _gameSystems.onStep -= Step;
+        _gameSystems.onFixedStep -= FixedStep;
+        _gameSystems.RemoveListener(GamePlayEventType.SPAWN_POINT_TRIGGERED, onSpawnPointTriggered);
     }
 
     public IAvatarController GetController(string uuid)
     {
-        return _avatarLookUpMap[uuid];
+        IAvatarController controller = null;
+        if(!_avatarLookUpMap.TryGetValue(uuid, out controller))
+        {
+            Debug.LogError("Could not retrieve Controller with uuid: " + uuid);
+        }
+
+        return controller;
     }
     
     public T Spawn<T>(string unitId, Vector3 position) where T : IAvatarController
@@ -112,10 +118,10 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         string uuid = _generateUUID(unit);
         
         IAvatarController controller = _spawnAvatar(uuid, unit, position);
-        controller.view.gameObject.name = uuid;
 
         if (controller != null)
         {
+            controller.view.gameObject.name = uuid;
             _avatarControllerList.Add(controller);
             _avatarLookUpMap.Add(uuid, controller);
             
@@ -164,9 +170,9 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         AvatarView view = GameObject.Instantiate<AvatarView>(unit.view as AvatarView, position, Quaternion.identity,  _enemyParent.transform);
         
         EnemyState state = EnemyState.Create(uuid, unit.stats, position);
-        
-        GruntBrain input = new GruntBrain(_gameSystems, unit.stats, state);
-        GruntController controller = new GruntController(unit, state, view, input);
+
+        IInputGenerator input = _createEnemyGenerator(unit, state);// new GruntBrain(_gameSystems, unit.stats, state);
+        IAvatarController controller = _createAvatarController(unit, state, view, input);
         controller.Start(_gameSystems);
 
         _gameState.enemyStateList.Add(state);
@@ -178,6 +184,32 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         return StringUtil.CreateMD5(unit.id + "_" + (_spawnCount++));
     }
 
+    private IInputGenerator _createEnemyGenerator(UnitMap.Unit unit, EnemyState state)
+    {
+        switch(unit.id)
+        {
+            case "grunt":   return new GruntBrain(_gameSystems, unit.stats, state);
+            case "bruiser": return new GruntBrain(_gameSystems, unit.stats, state);
+        }
+
+        return null;
+    }
+
+    private IAvatarController _createAvatarController(UnitMap.Unit unit, 
+                                                      AvatarState state, 
+                                                      IAvatarView view, 
+                                                      IInputGenerator inputGenerator)
+    {
+        switch(unit.id)
+        {
+            case "player":    return new PlayerController(unit, state, view, inputGenerator);
+            case "grunt":     return new GruntController(unit, state, view, inputGenerator);
+            case "bruiser":   return new BruiserController(unit, state, view, inputGenerator);
+        }
+
+        return null;
+    }
+    
     private GameplayCamera _getGameplayCamera()
     {
         if (_camera != null)

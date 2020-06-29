@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Utilities;
 
 public class PlayerInput : IInputGenerator
 {
@@ -22,27 +21,25 @@ public class PlayerInput : IInputGenerator
     {
         playerNumber = pNumber;
         _camera = playerCamera;
-
         
         _pAction = new PlayerActions();
         int count = InputSystem.devices.Count;
-//        _pAction.devices = new ReadOnlyArray<InputDevice>(InputSystem.devices.ToArray(), 4, 1);
+        
         _pAction.Gameplay.Enable();
     }
     
     public FrameInput GetInput()
     {
-//       pAction.FindAction("movement").ReadValue<>().movement;
         float horizontalMovement = _pAction.Gameplay.horizontalMovement.ReadValue<float>();// gamepad.leftStick.ReadValue();
         float verticalMovement = _pAction.Gameplay.verticalMovement.ReadValue<float>();// gamepad.leftStick.ReadValue();
 
         Vector2 aimStick = _pAction.Gameplay.aimDirection.ReadValue<Vector2>();
         Vector2 aimPosition = _pAction.Gameplay.aimAbsolute.ReadValue<Vector2>();//gamepad.rightStick.ReadValue();
-//        pAction = Singleton.instance.gameplayResources.p1Input;
+        
 
         bool interactPressed = _pAction.Gameplay.action.triggered;
         _interactPressed = !_interactPressed ? interactPressed : _interactPressed;
-        
+
         bool jumpAction = _pAction.Gameplay.jump.ReadValue<float>() > 0.01f;
         bool jumpAxisPressed = jumpAction && jumpAction != _lastJumpAxis;
         bool jumpAxisReleased = !jumpAction && jumpAction != _lastJumpAxis;

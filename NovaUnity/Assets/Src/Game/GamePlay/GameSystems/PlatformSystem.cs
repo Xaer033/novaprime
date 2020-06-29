@@ -10,7 +10,9 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
     
     private PlatformView[] _platformViewList;
 
+    private GameSystems _gameSystems;
     private GameState _gameState;
+    
     private TriggerSystem _triggerSystem;
     private Dictionary<string, List<PlatformState>> _triggerPlatforms;
     
@@ -28,8 +30,12 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
     // Start is called before the first frame update
     public void Start(GameSystems gameSystems, GameState gameState)
     {
+        _gameSystems = gameSystems;
         _gameState = gameState;
 
+        _gameSystems.onFixedStep += FixedStep;
+        _gameSystems.onStep += Step;
+        
         _triggerSystem = gameSystems.Get<TriggerSystem>();
         _triggerSystem.AddListener(TriggerEventType.ENTER.ToString(), onTrigger);
         _triggerSystem.AddListener(TriggerEventType.EXIT.ToString(), onTrigger);
@@ -110,14 +116,12 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
             view.viewRoot.position = Vector3.Lerp(state.prevPosition, state.position, alpha);
         }
     }
-    
-    public void LateStep(float deltaTime)
-    {
-    
-    }
-    
+
     public void CleanUp()
     {
+        _gameSystems.onFixedStep -= FixedStep;
+        _gameSystems.onStep -= Step;
+
         if(_gameState != null)
         {
             _gameState.platformStateList.Clear();

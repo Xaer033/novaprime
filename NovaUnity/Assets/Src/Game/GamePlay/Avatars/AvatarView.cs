@@ -1,59 +1,60 @@
 using System;
 using Cinemachine;
 using GhostGen;
+using Sirenix.OdinInspector;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Animations;
 
 public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPassenger, ITimeWarpTarget, IAttackTarget
 {
-    public CinemachineTargetGroup cameraTargetGroup;
-    public AvatarConstrainer constrainer;
-    public Transform armHook;
-    public Transform _cursorTarget;
-    public Transform _healthPositionHook;
+    
+    [BoxGroup("Hooks")]
     public Transform _viewRoot;
-    public Transform _leftFootHook;
-    public Transform _rightFootHook;
+    
+    
+    [BoxGroup("Hooks")]
+    public Transform _cursorTarget;
+    [BoxGroup("Hooks")]
+    public Transform _weaponHook;
+    [BoxGroup("Hooks")]
+    public Transform _healthPositionHook;
+    [BoxGroup("Hooks")]
+    public CinemachineTargetGroup cameraTargetGroup;
+    
+    [BoxGroup("Limb Hooks")]
     public ParentConstraint _leftHandConstraint;
+    [BoxGroup("Limb Hooks")]
     public ParentConstraint _rightHandConstraint;
-    public ParticleSystem _jumpPuffFXPrefab;
+    
+    public AvatarConstrainer constrainer;
     public NetworkEntity _networkEntity;
     public Animator _animator;
 
 
-    private ParticleSystem _leftFootPuffFx;
-    private ParticleSystem _rightFootPuffFx;
 
     private Quaternion _weaponRotation;
     private Quaternion _prevWeaponRotation;
     
     private void Awake()
     {
-        if(_jumpPuffFXPrefab != null)
-        {
-            if(_leftFootHook != null)
-            {
-                _leftFootPuffFx = GameObject.Instantiate<ParticleSystem>(_jumpPuffFXPrefab, _viewRoot);
-                _leftFootPuffFx.transform.localPosition = Vector3.zero;
-                _leftFootPuffFx.transform.localRotation = quaternion.identity;
-            }
-
-            if(_rightFootHook != null)
-            {
-                _rightFootPuffFx = GameObject.Instantiate<ParticleSystem>(_jumpPuffFXPrefab, _viewRoot);
-                _rightFootPuffFx.transform.localPosition = Vector3.zero;
-                _rightFootPuffFx.transform.localRotation = quaternion.identity;
-            }
-        }
+       
     }
 
     private void Update()
     {
         float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
-        if(armHook != null)
+        if(_weaponHook != null)
         {
-            armHook.rotation = Quaternion.Slerp(_prevWeaponRotation, _weaponRotation, alpha);
+            _weaponHook.rotation = Quaternion.Slerp(_prevWeaponRotation, _weaponRotation, alpha);
+        }
+    }
+    
+    public void SetWeapon(string ownerUUID, IWeaponController weaponController)
+    {
+        if (weaponController != null && _weaponHook != null)
+        {
+            weaponController.Attach(ownerUUID, _weaponHook, _leftHandConstraint, _rightHandConstraint);
         }
     }
     
@@ -64,11 +65,10 @@ public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPasseng
             _cursorTarget.position = cursorPosition;
         }
         
-        if (armHook != null)
+        if (_weaponHook != null)
         {
-            Vector3 delta = (cursorPosition - armHook.position).normalized;
-            // armHook.rotation =
-
+            Vector3 delta = (cursorPosition - _weaponHook.position).normalized;
+            
             _prevWeaponRotation = _weaponRotation;
             _weaponRotation = Quaternion.LookRotation(delta, Vector3.up);
         }
@@ -81,7 +81,6 @@ public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPasseng
             _viewRoot.localScale = localScale;
         }
     }
-
 
     public Transform cameraTarget
     {
@@ -99,24 +98,6 @@ public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPasseng
         get { return _animator; }
         set { _animator = value; }
     }
-    
-    public void SetWeapon(string ownerUUID, IWeaponController weaponController)
-    {
-        if (weaponController != null && armHook != null)
-        {
-            weaponController.Attach(ownerUUID,armHook, _leftHandConstraint, _rightHandConstraint);
-            // weaponTransform.localRotation = Quaternion.identity;
-            // weaponTransform.localScale = Vector3.one;
-        }
-    }
-
-    public void SetAnimationTrigger(string animName)
-    {
-        if (_animator != null)
-        {
-            _animator.SetTrigger(animName);
-        }
-    }
 
     public void DeathFadeOut(Action onComplete)
     {
@@ -127,20 +108,6 @@ public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPasseng
         }
     }
 
-    public void PlayFootPuffFx()
-    {
-        if(!_leftFootPuffFx.isPlaying)
-        {
-            _leftFootPuffFx.Clear();
-            _leftFootPuffFx.Play();
-        }
-        else
-        {
-            _rightFootPuffFx.Clear();
-            _rightFootPuffFx.Play();
-        }
-    }
-    
     public void RequestMovement(PassengerMovement movement)
     {
         if (controller != null)

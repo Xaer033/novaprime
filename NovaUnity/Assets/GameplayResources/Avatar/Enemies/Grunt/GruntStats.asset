@@ -18,6 +18,7 @@ MonoBehaviour:
   timeToJumpApex: 0.4
   coyoteTime: 0.1
   jumpRememberDelay: 0.0895
+  climbableTags: []
   wallStickTime: 0.2
   wallSlideSpeedMax: 0
   wallSlideSpeedDampTime: 0

@@ -10,6 +10,10 @@ public class GameSystems : NotificationDispatcher
     
     private Dictionary<Type, IGameSystem> _gameSystemMap = new Dictionary<Type, IGameSystem>();
     private List<IGameSystem> _sortedSystemList = new List<IGameSystem>(20);
+
+    public event Action<float> onStep;
+    public event Action<float> onFixedStep;
+    public event Action<float> onLateStep;
     
     public T Get<T>() where T : IGameSystem
     {
@@ -29,7 +33,7 @@ public class GameSystems : NotificationDispatcher
         
         IGameSystem projectileSystem     = new ProjectileSystem(gameplayResources, 125);
         IGameSystem avatarSystem         = new AvatarSystem(gameplayResources);
-        IGameSystem healthUiSystem       = new HealthUISystem();
+        IGameSystem healthUiSystem       = new HealthUISystem(gameplayResources);
         IGameSystem spawnPointSystem     = new SpawnPointSystem();
         IGameSystem platformSystems      = new PlatformSystem();
         IGameSystem triggerSystems       = new TriggerSystem(); 
@@ -55,26 +59,41 @@ public class GameSystems : NotificationDispatcher
     
     public void FixedStep(float fixedDeltaTime)
     {
-        for(int i = 0; i < _sortedSystemList.Count; ++i)
+        if(onFixedStep != null)
         {
-            _sortedSystemList[i].FixedStep(fixedDeltaTime);
+            onFixedStep(fixedDeltaTime);
         }
+        
+        // for(int i = 0; i < _sortedSystemList.Count; ++i)
+        // {
+        //     _sortedSystemList[i].FixedStep(fixedDeltaTime);
+        // }
     }
 
     public void Step(float deltaTime)
     {
-        for(int i = 0; i < _sortedSystemList.Count; ++i)
+        if(onStep != null)
         {
-            _sortedSystemList[i].Step(deltaTime);
+            onStep(deltaTime);
         }
+        
+        // for(int i = 0; i < _sortedSystemList.Count; ++i)
+        // {
+        //     _sortedSystemList[i].Step(deltaTime);
+        // }
     }
 
     public void LateStep(float deltaTime)
     {
-        for(int i = 0; i < _sortedSystemList.Count; ++i)
+        if(onLateStep != null)
         {
-            _sortedSystemList[i].LateStep(deltaTime);
+            onLateStep(deltaTime);
         }
+        
+        // for(int i = 0; i < _sortedSystemList.Count; ++i)
+        // {
+        //     _sortedSystemList[i].LateStep(deltaTime);
+        // }
     }
     
     public void CleanUp()

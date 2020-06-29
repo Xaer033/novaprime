@@ -83,11 +83,18 @@ public class GruntBrain : IInputGenerator
         uuid = "";
         c = null;
 
-        Collider2D[] colliderList = Physics2D.OverlapCircleAll(_state.position, 5.0f, _unitStats.targetLayerMask);
+        const float findRadius = 5.0f;
+        
+        Debug.DrawLine(_state.position, _state.position + Vector3.left  * findRadius, Color.blue, 0.5f);
+        Debug.DrawLine(_state.position, _state.position + Vector3.right * findRadius, Color.blue, 0.5f);
+        Debug.DrawLine(_state.position, _state.position + Vector3.up    * findRadius, Color.blue, 0.5f);
+        Debug.DrawLine(_state.position, _state.position + Vector3.down  * findRadius, Color.blue, 0.5f);
+        
+        Collider2D[] colliderList = Physics2D.OverlapCircleAll(_state.position, findRadius, _unitStats.targetLayerMask);
         for (int i = 0; i < colliderList.Length; ++i)
         {
             IAvatarView view = colliderList[i].GetComponent<IAvatarView>();
-            if (view != null && view.controller != null)
+            if (view != null && view.controller != null && view.controller.state.health > 0)
             {
                 uuid = view.controller.uuid;
                 c = view.controller;
@@ -124,8 +131,14 @@ public class GruntBrain : IInputGenerator
             _state.aiState = AiState.IDLE;
             return;
         }
+
+        if(_targetController.state.health <= 0)
+        {
+            _state.aiState = AiState.TARGETING;
+            return;
+        }
         
-        Vector3 targetPosition = (_targetController.state.position + Vector3.up * 0.35f) + (_state.velocity * Time.fixedDeltaTime);
+        Vector3 targetPosition = (_targetController.state.position + Vector3.up * 0.8f) + (_state.velocity * Time.fixedDeltaTime);
         Vector3 startPosition = _state.position + Vector3.up * 0.85f;
         
         Vector3 dirToTarget = targetPosition - startPosition;

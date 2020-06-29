@@ -22,6 +22,8 @@ public class SpawnPointSystem : NotificationDispatcher, IGameSystem
         _gameSystems = gameSystems;
         _gameState = gameState;
 
+        _gameSystems.onFixedStep += FixedStep;
+        
         _gameState.spawnPointStateList.Clear();
         _spawnPointViewList = GameObject.FindObjectsOfType<SpawnPointView>();
         for (int i = 0; i < _spawnPointViewList.Length; ++i)
@@ -33,11 +35,6 @@ public class SpawnPointSystem : NotificationDispatcher, IGameSystem
         }
     }
 
-    public void Step(float deltaTime)
-    {
-        
-    }
-    
     public void FixedStep(float deltaTime)
     {
         float now = Time.fixedTime;
@@ -54,14 +51,9 @@ public class SpawnPointSystem : NotificationDispatcher, IGameSystem
         }
     }
 
-
-    public void LateStep(float deltaTime)
-    {
-        
-    }
-    
     public void CleanUp()
     {
+        _gameSystems.onFixedStep -= FixedStep;
         _gameState.spawnPointStateList.Clear();
     }
 

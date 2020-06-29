@@ -39,6 +39,9 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
     {
         _gameSystems = gameSystems;
         _gameState = gameState;
+
+        _gameSystems.onStep += Step;
+        _gameSystems.onFixedStep += FixedStep;
         
         _bulletParent = new GameObject("BulletParent");
         BulletView projectileTemplate = _gameplayResources.bulletView;
@@ -124,12 +127,18 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
                         int layer = hit.transform.gameObject.layer;
                         
                         if(layer == LayerMask.NameToLayer("playerHurtbox") ||
-                           layer == LayerMask.NameToLayer("enemies"))
+                           layer == LayerMask.NameToLayer("enemyHurtbox"))
                         {
                             impactList = _bloodImpactViewList;
                         }
                         
-                        AttackData damageData = new AttackData(state.ownerUUID, view.gameObject.layer, state.data.damageType, state.damage, state.velocity.normalized);
+                        AttackData damageData = new AttackData(state.ownerUUID, 
+                                                               view.gameObject.layer, 
+                                                               state.data.damageType, 
+                                                               state.damage, 
+                                                               state.velocity.normalized,
+                                                               hit);
+                        
                         AttackResult result = target.TakeDamage(damageData);
 
                         _gameSystems.DispatchEvent(GamePlayEventType.AVATAR_DAMAGED, false, result);
@@ -169,12 +178,6 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         }
     }
 
-
-    public void LateStep(float deltaTime)
-    {
-        
-    }
-    
     public void CleanUp()
     {
         for (int i = 0; i < _projectileViewPool.Count; ++i)
@@ -195,6 +198,10 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         GameObject.Destroy(_bulletParent);
         
         _gameState.projectileStateList.Clear();
+        
+        
+        _gameSystems.onStep -= Step;
+        _gameSystems.onFixedStep -= FixedStep;
     }
 
     public ProjectileState Spawn(string ownerUUID, ProjectileData data, Vector3 position, Vector3 direction)
@@ -262,12 +269,10 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
             
             impactFX.Clear();
             impactFX.transform.position = hit.point;
-            impactFX.transform.rotation = Quaternion.LookRotation(faceDir);
             impactFX.transform.localRotation = Quaternion.Euler(calculatedRot);
             impactFX.Play();
         }
 
         return impactFX;
-
     }
 }

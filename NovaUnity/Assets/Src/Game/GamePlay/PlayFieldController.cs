@@ -59,6 +59,11 @@ public class PlayFieldController : NotificationDispatcher
         {
             _gameSystems.Step(deltaTime);
         }
+        
+        if (_pAction.Gameplay.reset.triggered)
+        {
+            Restart();
+        }
     }
 
     public void FixedStep(float fixedDeltaTime)
@@ -76,10 +81,6 @@ public class PlayFieldController : NotificationDispatcher
             _gameSystems.LateStep(deltaTime);
         }
 
-        if (_pAction.Gameplay.reset.triggered)
-        {
-            Restart();
-        }
         
                 
         //Debug STUFF

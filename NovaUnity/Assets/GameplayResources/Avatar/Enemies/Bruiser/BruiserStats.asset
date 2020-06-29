@@ -10,28 +10,28 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e10d088b42ddee94fbc84a347dd5952b, type: 3}
-  m_Name: PlayerStats
+  m_Name: BruiserStats
   m_EditorClassIdentifier: 
-  maxHealth: 100
-  maxJumpHeight: 2
-  minJumpHeight: 0.28
-  timeToJumpApex: 0.45
+  maxHealth: 300
+  maxJumpHeight: 1
+  minJumpHeight: 0.5
+  timeToJumpApex: 0.4
   coyoteTime: 0.1
   jumpRememberDelay: 0.0895
   climbableTags: []
   wallStickTime: 0.2
-  wallSlideSpeedMax: 1
+  wallSlideSpeedMax: 0
   wallSlideSpeedDampTime: 0
-  wallJumpClimb: {x: 7.5, y: 8.5}
+  wallJumpClimb: {x: 4, y: 10}
   wallJumpOff: {x: 6, y: 3}
-  wallJumpLeap: {x: 12, y: 10}
-  speed: 4
-  terminalVelocity: 13
-  accelerationTimeAir: 0.1
+  wallJumpLeap: {x: 8, y: 8}
+  speed: 2
+  terminalVelocity: 17
+  accelerationTimeAir: 0.15
   accelerationTimeDoubleJumpAir: 0.375
   accelerationTimeGround: 0.05
   targetLayerMask:
     serializedVersion: 2
-    m_Bits: 0
-  machineGunData: {fileID: 11400000, guid: 4b17b859321cf394b98dacaa960d30ae, type: 2}
-  animationRunSpeed: 0.7
+    m_Bits: 1024
+  machineGunData: {fileID: 11400000, guid: d3d2225bbbf5d0e439f02d629a0e8c9d, type: 2}
+  animationRunSpeed: 0

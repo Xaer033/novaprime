@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1121882207068058647}
-  m_Layer: 12
+  m_Layer: 18
   m_Name: healthPosition
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -39,7 +39,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7402611272870614619}
-  m_Layer: 12
+  m_Layer: 18
   m_Name: armHook
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -70,7 +70,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 449116805717182556}
-  m_Layer: 12
+  - component: {fileID: 6872295141574504935}
+  m_Layer: 18
   m_Name: AnimRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -94,6 +95,32 @@ Transform:
   m_Father: {fileID: 5789754299105121113}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!61 &6872295141574504935
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3976752322073459562}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0.39}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 0.43, y: 0.76}
+  m_EdgeRadius: 0
 --- !u!1 &4372011812732136923
 GameObject:
   m_ObjectHideFlags: 0
@@ -103,7 +130,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5893184266725767028}
-  m_Layer: 12
+  m_Layer: 18
   m_Name: weaponLookPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -135,7 +162,7 @@ GameObject:
   - component: {fileID: 1975189271847259609}
   - component: {fileID: 5727036435548383886}
   - component: {fileID: 6191800851597614576}
-  m_Layer: 12
+  m_Layer: 18
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -251,17 +278,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2700068edd8b7f4c8bf04c2f90f9da6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraTargetGroup: {fileID: 3242088991737931792}
-  constrainer: {fileID: 9125514036299057097}
-  armHook: {fileID: 7402611272870614619}
-  _cursorTarget: {fileID: 0}
-  _healthPositionHook: {fileID: 1121882207068058647}
   _viewRoot: {fileID: 449116805717182556}
-  _leftFootHook: {fileID: 0}
-  _rightFootHook: {fileID: 0}
+  _cursorTarget: {fileID: 5893184266725767028}
+  _weaponHook: {fileID: 7402611272870614619}
+  _healthPositionHook: {fileID: 1121882207068058647}
+  cameraTargetGroup: {fileID: 3242088991737931792}
   _leftHandConstraint: {fileID: 0}
   _rightHandConstraint: {fileID: 0}
-  _jumpPuffFXPrefab: {fileID: 0}
+  constrainer: {fileID: 9125514036299057097}
   _networkEntity: {fileID: 0}
   _animator: {fileID: 1366838402536065113}
 --- !u!114 &9125514036299057097
@@ -312,7 +336,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0.4}
@@ -337,7 +361,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5789754300994217958}
-  m_Layer: 12
+  m_Layer: 18
   m_Name: Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}

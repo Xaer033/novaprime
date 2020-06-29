@@ -63,6 +63,10 @@
                 <e p="AvatarState.cs" t="Include" />
                 <e p="AvatarView.cs" t="Include" />
                 <e p="Enemies" t="Include">
+                  <e p="Bruiser" t="Include">
+                    <e p="BruiserController.cs" t="Include" />
+                    <e p="BruiserView.cs" t="Include" />
+                  </e>
                   <e p="EnemyState.cs" t="Include" />
                   <e p="Grunt" t="Include">
                     <e p="GruntBrain.cs" t="Include" />
@@ -80,6 +84,7 @@
                   <e p="PlayerController.cs" t="Include" />
                   <e p="PlayerInput.cs" t="Include" />
                   <e p="PlayerState.cs" t="Include" />
+                  <e p="PlayerView.cs" t="Include" />
                 </e>
                 <e p="RaycastController.cs" t="Include" />
                 <e p="UnitMap.cs" t="Include" />

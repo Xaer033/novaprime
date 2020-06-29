@@ -16,17 +16,20 @@ public class CollisionInfo
     public Vector3 oldMoveDelta;
     public bool stepUp;
     public int faceDir;
+    public bool crushed;
 
     public bool fallingThroughPlatform;
 
-    public void Reset()
+    public void Reset(Vector3 oldDelta)
     {
+        oldMoveDelta = oldDelta;
         belowOld = below;
         above = below = right = left = false;
         stepUp = false;
         climbingSlope = false;
         decendingSlope = false;
         slidingDownMaxSlope = false;
+        crushed = false;
         slopeAngleOld = slopeAngle;
         slopeAngle = 0;
         slopeNormal = Vector3.zero;

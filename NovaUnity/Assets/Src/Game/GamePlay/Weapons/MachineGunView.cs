@@ -80,16 +80,6 @@ public class MachineGunView : MonoBehaviour, IWeaponView
             transform.SetParent(bodyParentHook.transform);
             transform.localPosition = Vector3.zero;
             transform.localRotation = Quaternion.identity;
-            
-            //  _parentConstraint.transform.position = bodyParentHook.position;
-            //  _parentConstraint.transform.rotation = bodyParentHook.rotation;
-            //
-            // ConstraintSource source = new ConstraintSource();
-            // source.weight = 1.0f;
-            // source.sourceTransform = bodyParentHook;
-            // attachParentIndex = _parentConstraint.AddSource(source);
-            // _parentConstraint.weight = 1.0f;
-            // _parentConstraint.constraintActive = true;
         }
         
         if(leftHandConstraint != null )

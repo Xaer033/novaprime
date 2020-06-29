@@ -20,7 +20,8 @@ MonoBehaviour:
     type: 3}
   avatarImpactFX: {fileID: 779176587194907432, guid: f1e1fca3b150b1540ac2d1f939d36ef6,
     type: 3}
-  inputList: {fileID: 4900000, guid: 02af8773cccfdb442a1dd51eff737344, type: 3}
+  jumpLandFX: {fileID: 4862772980790754323, guid: 3f5c7030f28234c478e31c1093fc1897,
+    type: 3}
   healthUIPrefab: {fileID: 114593122990014430, guid: a1559d4617b0bbe4197dead18dc12b6c,
     type: 3}
   unitMap: {fileID: 11400000, guid: cd32ba94df0d4e44f8d1c06bdc747cc8, type: 2}

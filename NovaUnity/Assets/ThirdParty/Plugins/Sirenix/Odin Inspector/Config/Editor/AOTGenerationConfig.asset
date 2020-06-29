@@ -16,5 +16,24 @@ MonoBehaviour:
   deleteDllAfterBuilds: 1
   AutomateForAllAOTPlatforms: 1
   automateForPlatforms: 0900000014000000
-  lastScan: 637275930124973982
-  supportSerializedTypes: []
+  lastScan: 637288001628331803
+  supportSerializedTypes:
+  - TypeName: IAvatarView, Assembly-CSharp
+    IsCustom: 0
+    Emit: 1
+  - TypeName: System.Collections.Generic.List`1[[UnitMap+Unit, Assembly-CSharp]],
+      mscorlib
+    IsCustom: 0
+    Emit: 1
+  - TypeName: System.String, mscorlib
+    IsCustom: 0
+    Emit: 1
+  - TypeName: UnitMap+Unit, Assembly-CSharp
+    IsCustom: 0
+    Emit: 1
+  - TypeName: UnitStats, Assembly-CSharp
+    IsCustom: 0
+    Emit: 1
+  - TypeName: UnitType, Assembly-CSharp
+    IsCustom: 0
+    Emit: 1

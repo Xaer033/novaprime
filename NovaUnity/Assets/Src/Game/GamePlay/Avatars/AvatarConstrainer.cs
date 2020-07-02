@@ -325,13 +325,12 @@ public class AvatarConstrainer : MonoBehaviour
         if (!_collisionInfo.slidingDownMaxSlope)
         {
             float directionX = Mathf.Sign(moveDelta.x);
-            RaycastHit2D[] hitList = new RaycastHit2D[1];
             Vector3 rayOrigin = (directionX == -1) ? _raycastOrigins.bottomRight :  _raycastOrigins.bottomLeft;
 
-            int hitCount = Physics2D.RaycastNonAlloc(rayOrigin, Vector3.down, hitList, Mathf.Infinity, collisionMask);
+            int hitCount = Physics2D.RaycastNonAlloc(rayOrigin, Vector3.down, _otherHits, Mathf.Infinity, collisionMask);
             if (hitCount > 0)
             {
-                RaycastHit2D hit = hitList[0];
+                RaycastHit2D hit = _otherHits[0];
                 
                 float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
                 if (Mathf.Abs(slopeAngle) > 0 && slopeAngle <= maxSlopeAngle)

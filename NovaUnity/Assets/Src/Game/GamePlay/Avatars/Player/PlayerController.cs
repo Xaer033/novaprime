@@ -21,6 +21,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     private PlayerActivityType _oldActivityType;
     private AttackData _killAttack;
     private int _crushedFrameCount;
+    private bool _didJumpRelease;
     
     
     
@@ -162,7 +163,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         
         deltaTime = input.secondaryFire ? deltaTime * 0.5f : deltaTime;
         deltaTime = deltaTime * _state.timeScale;
-        
+
         switch(_state.stateType)
         {
             case PlayerActivityType.ACTIVE:
@@ -244,9 +245,13 @@ public class PlayerController : NotificationDispatcher, IAvatarController
             _state.midairJumpTimer = _unitStats.jumpRememberDelay;
         }
 
-        bool didDoubleJump = (_state.jumpCount == 1 && input.jumpPressed);
+        bool didDoubleJump = (_state.jumpCount == 1 && input.jumpPressed && _didJumpRelease);
+        if(didDoubleJump || collisionInfo.below)
+        {
+            _didJumpRelease = false;
+        }
         
-        // This is so if the player jumps while in the air for a bit, we still jump when on floor
+        // This is so if the player jumps while in the air after walking off a cliff, we still jump
         if (_state.midairJumpTimer > 0)
         {
             if (isWallSliding)
@@ -307,6 +312,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
 
         if (input.jumpReleased)
         {
+            _didJumpRelease = true;
             if (velocity.y > minJumpVelocity)
             {
                 velocity.y = minJumpVelocity;
@@ -370,7 +376,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         }
 
         Vector3 upVector = Vector3.up * 1.0f;
-        Vector3 rightVector = Vector3.right * _view._viewRoot.localScale.x * 1f;
+        Vector3 rightVector = Vector3.right * _view.viewRoot.localScale.x * 1f;
         
         Vector3 p1 = _state.position;
         Vector3 p2 = p1 + rightVector + upVector;

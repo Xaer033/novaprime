@@ -157,19 +157,19 @@ public class GruntBrain : IInputGenerator
         RaycastHit2D hit;
         Vector3 movementDir = new Vector3(input.horizontalMovement, 0, 0);
 
-        Vector3 fellowGruntCheckDir = (Vector3.left * 0.02f + movementDir).normalized;
+        Vector3 fellowGruntCheckDir = (Vector3.left *  movementDir.x).normalized * 0.1f;
         Debug.DrawRay(startPosition, fellowGruntCheckDir, Color.green, 0.4f);
 
-        int enemyHitCount = Physics2D.RaycastNonAlloc(startPosition, fellowGruntCheckDir, _raycastHits, 2.5f, LayerMask.GetMask(new []{"enemies"}) );
-        if (enemyHitCount > 0)
-        {
-            hit = _raycastHits[0];
-            IAvatarController fellowGrunt = _avatarSystem.GetController(hit.transform.name);
-            if (fellowGrunt.health > 0)
-            {
-                input.horizontalMovement =  hit.distance * Mathf.Sign(hit.normal.x) * 0.5f;
-            }
-        }
+        // int enemyHitCount = Physics2D.RaycastNonAlloc(startPosition, fellowGruntCheckDir, _raycastHits, 2.5f, LayerMask.GetMask(new []{"enemies"}) );
+        // if (enemyHitCount > 0)
+        // {
+        //     hit = _raycastHits[0];
+        //     IAvatarController fellowGrunt = _avatarSystem.GetController(hit.transform.name);
+        //     if (fellowGrunt.health > 0)
+        //     {
+        //         input.horizontalMovement =  hit.distance * Mathf.Sign(hit.normal.x) * 0.5f;
+        //     }
+        // }
         
         int wallHitCount = Physics2D.RaycastNonAlloc(startPosition, movementDir.normalized, _raycastHits, 1.0f, LayerMask.GetMask(new []{"obsticals"}) );
         if (wallHitCount > 0 || (Mathf.Abs(_state.velocity.x) < 0.001f && _state.isWallSliding) )

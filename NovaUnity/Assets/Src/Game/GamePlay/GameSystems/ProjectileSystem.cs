@@ -144,11 +144,6 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
                         _gameSystems.DispatchEvent(GamePlayEventType.AVATAR_DAMAGED, false, result);
                     }
 
-                    switch(hit.transform.gameObject.layer)
-                    {
-                    
-                        
-                    }
                     ParticleSystem impactFX = _activateImpactFX(impactList, bulletDir, hit);
                     if(impactFX == null)
                     {

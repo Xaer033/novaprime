@@ -37,6 +37,39 @@ public class ScreenFader : MonoBehaviour
         return _fade(_canvasGroup.alpha, endAlpha, duration, callback);
     }
 
+    public Tween FadeInOut(float fadedInDelay, float duration, Action onFadeOut, Action onFadeIn)
+    {
+        if(_currentTween != null)
+        {
+            _currentTween.Kill();
+        }
+        
+        Sequence sequence = DOTween.Sequence();
+        
+        float halfDuration = duration / 2.0f;
+        
+        _canvasGroup.alpha = 0.0f;
+        Tween fadeOutTween =  _canvasGroup.DOFade(1.0f, halfDuration);
+        fadeOutTween.SetEase(Ease.OutQuad);
+        
+        Tween fadeInTween =  _canvasGroup.DOFade(0.0f, halfDuration);
+        fadeInTween.SetEase(Ease.InQuad);
+        
+        
+        sequence.Insert(0.0f, fadeOutTween);
+        if(onFadeOut != null)
+        {
+            sequence.InsertCallback(halfDuration, ()=> onFadeOut());
+        }
+        sequence.Insert(halfDuration + fadedInDelay, fadeInTween);
+        if(onFadeIn != null)
+        {
+            sequence.InsertCallback(duration + fadedInDelay, ()=> onFadeIn());
+        }
+
+        return sequence;
+    }
+    
     public Tween Fade(float startAlpha, float endAlpha, float duration = kDefaultFadeDuration, Action callback = null)
     {
         return _fade(startAlpha, endAlpha, duration, callback);
@@ -66,6 +99,7 @@ public class ScreenFader : MonoBehaviour
         }
 
         _currentTween = _canvasGroup.DOFade(endAlpha, duration);
+        _currentTween.SetEase(Ease.InOutQuad);
         _currentTween.OnComplete(OnFadeComplete);
 //        OnFadeComplete();
         return _currentTween;

@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using GhostGen;
+﻿using GhostGen;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -25,7 +23,7 @@ public class PlayFieldController : NotificationDispatcher
     }
     public void Start()
     {
-        UnityEngine.Random.InitState(666);
+        Random.InitState(666);
 
         _gameState = new GameState();
         _gameSystems = new GameSystems(_gameState, _gameplayResources);
@@ -49,8 +47,12 @@ public class PlayFieldController : NotificationDispatcher
 
     public void Restart()
     {
-        CleanUp();
-        Start();
+        ScreenFader fader = Singleton.instance.gui.screenFader;
+        fader.FadeInOut(0.35f, 0.35f, () =>
+        {
+            CleanUp();
+            Start();
+        }, null);
     }
     
     public void Step(float deltaTime)

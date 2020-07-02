@@ -67,16 +67,16 @@ public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPasseng
         
         if (_weaponHook != null)
         {
-            Vector3 delta = (cursorPosition - _weaponHook.position).normalized;
+            Vector3 delta = (cursorPosition - _weaponHook.position + (Vector3.left * 0.001f)).normalized;
             
             _prevWeaponRotation = _weaponRotation;
             _weaponRotation = Quaternion.LookRotation(delta, Vector3.up);
         }
 
-        if (_viewRoot != null)
+        if (viewRoot != null)
         {
             bool isFlipped = cursorPosition.x < transform.position.x;
-            Vector3 localScale = _viewRoot.localScale;
+            Vector3 localScale = viewRoot.localScale;
             localScale.x = isFlipped ?  -Mathf.Abs(localScale.x) : Mathf.Abs(localScale.x);
             _viewRoot.localScale = localScale;
         }
@@ -97,6 +97,11 @@ public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPasseng
     {
         get { return _animator; }
         set { _animator = value; }
+    }
+
+    public Transform viewRoot
+    {
+        get { return _viewRoot; }
     }
 
     public void DeathFadeOut(Action onComplete)

@@ -16,6 +16,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     private UnitMap _unitMap;
     private List<IAvatarController> _avatarControllerList;
     private Dictionary<string, IAvatarController> _avatarLookUpMap;
+    private Dictionary<string, FrameInput> _lastInputMap;
 
     private List<FrameInput> _frameInputList;
 
@@ -32,9 +33,10 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     {
         _gameplayResources = gameplayResources;
         _unitMap = _gameplayResources.unitMap;
-        _avatarControllerList       = new List<IAvatarController>(200);
-        _avatarLookUpMap            = new Dictionary<string, IAvatarController>();
-        _frameInputList             = new List<FrameInput>();
+        _avatarControllerList        = new List<IAvatarController>(200);
+        _avatarLookUpMap             = new Dictionary<string, IAvatarController>();
+        _frameInputList              = new List<FrameInput>();
+        _lastInputMap                = new Dictionary<string, FrameInput>();
         
         _playerParent    = new GameObject("PlayerParent");
         _enemyParent     = new GameObject("EnemyParent");
@@ -57,8 +59,11 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     {
         for (int i = 0; i < _avatarControllerList.Count; ++i)
         {
-            IInputGenerator inputGenerator = _avatarControllerList[i].input;
-            FrameInput input = inputGenerator != null ? inputGenerator.GetInput() : default(FrameInput);
+            IAvatarController controller = _avatarControllerList[i];
+            IInputGenerator inputGenerator = controller.input;
+            
+            FrameInput input = _lastInputMap.ContainsKey(controller.uuid) ? _lastInputMap[controller.uuid] : default(FrameInput);
+           
             _frameInputList.Add(input);            
             // This is kinda cool, cuz now we can swap input generators or save/store them for replays
             _avatarControllerList[i].FixedStep(fixedDeltaTime, input);
@@ -74,7 +79,12 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     {
         for (int i = 0; i < _avatarControllerList.Count; ++i)
         {
-            _avatarControllerList[i].Step(deltaTime);
+            IAvatarController controller = _avatarControllerList[i];
+            IInputGenerator inputGenerator = controller.input;
+
+            FrameInput frameInput = inputGenerator != null ? inputGenerator.GetInput() : default(FrameInput);
+            _lastInputMap[controller.uuid] = frameInput;
+            controller.Step(deltaTime);
         }
     }
 

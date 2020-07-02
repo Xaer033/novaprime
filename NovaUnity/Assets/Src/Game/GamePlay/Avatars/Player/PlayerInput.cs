@@ -65,7 +65,7 @@ public class PlayerInput : IInputGenerator
         input.horizontalMovement = horizontalMovement;
         input.verticalMovement = verticalMovement;
         
-        input.interactPressed = _interactPressed;
+        input.interactPressed = interactPressed;
         
         input.jumpPressed = _jumpPressed;
         input.jumpReleased = _jumpRelease;
@@ -77,7 +77,6 @@ public class PlayerInput : IInputGenerator
         input.cursorPosition.z = 0;
         input.useCusorPosition =  !_useGamePad;
         input.cursorDirection = _lastAimDirection;
-        
         return input;
     }
 

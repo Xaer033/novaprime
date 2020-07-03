@@ -519,6 +519,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
             if (_state.velocity.y < 0)
             {
                 animationInfo.isFalling = true;
+                _didJumpRelease = true;
             }
         }
         
@@ -535,17 +536,19 @@ public class PlayerController : NotificationDispatcher, IAvatarController
             }
         }
 
-        Vector3 aimStartPosition = _view._weaponHook.position;
-        Vector3 cursorDir = (input.cursorPosition - aimStartPosition).normalized;
-        float distance = 5.5f;
-        
-        // Aim
-        Vector3 aimDirection = input.cursorDirection.normalized;
-        Vector3 aimPosition = input.useCusorPosition ? aimStartPosition + (cursorDir * distance) : aimStartPosition + (aimDirection * distance);
-
         if (_view)
-        {
-          Debug.DrawRay(aimStartPosition, aimDirection, Color.cyan, 0.2f);
+        { 
+            const float kDistance = 5.5f;
+            Vector3 aimStartPosition = _view._weaponHook.position;
+            Vector3 cursorDir = (input.cursorPosition - aimStartPosition).normalized;
+        
+            // Aim
+            Vector3 aimDirection = input.cursorDirection.normalized;
+            Vector3 aimPosition = input.useCusorPosition ? 
+                aimStartPosition + (cursorDir * kDistance) : 
+                aimStartPosition + (aimDirection * kDistance);
+
+            Debug.DrawRay(aimStartPosition, aimDirection, Color.cyan, 0.2f);
 
             const float kDebugLineSize = 0.2f;
             Debug.DrawLine(aimPosition + Vector3.down * kDebugLineSize, aimPosition + Vector3.up     * kDebugLineSize, Color.cyan, 0.2f);
@@ -553,20 +556,19 @@ public class PlayerController : NotificationDispatcher, IAvatarController
 
             bool isFlipped = aimPosition.x < _view.transform.position.x;
             animationInfo.isBackPedaling = (isFlipped && _state.velocity.x > 0.0f) || (!isFlipped && _state.velocity.x < 0.0f);
-            
             animationInfo.runSpeed *= isFlipped ? -1.0f : 1.0f;
 
             _view.Aim(aimPosition);
-        }
-
+            
             // Weapon Handling
-        if (_machineGunController != null)
-        {
-            _machineGunController.FixedStep(deltaTime);
-
-            if (input.primaryFire)
+            if (_machineGunController != null)
             {
-                _machineGunController.Fire(aimPosition);
+                _machineGunController.FixedStep(deltaTime);
+
+                if (input.primaryFire)
+                {
+                    _machineGunController.Fire(aimPosition);
+                }
             }
         }
     }

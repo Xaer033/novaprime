@@ -16,7 +16,7 @@ MonoBehaviour:
   deleteDllAfterBuilds: 1
   AutomateForAllAOTPlatforms: 1
   automateForPlatforms: 0900000014000000
-  lastScan: 637292583241889656
+  lastScan: 637294724757969939
   supportSerializedTypes:
   - TypeName: IAvatarView, Assembly-CSharp
     IsCustom: 0

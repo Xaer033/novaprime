@@ -172,6 +172,15 @@ namespace GhostGen
         {
             if(view != null)
             {
+                UIView[] childViews = view.GetComponentsInChildren<UIView>();
+                for(int i = 0; i < childViews.Length; ++i)
+                {
+                    if(childViews[i] != null)
+                    {
+                        childViews[i].OnViewDispose();
+                    }
+                }
+                
                 view.RemoveAllListeners();
                 view.OnViewDispose();
                 GameObject.Destroy(view.gameObject);

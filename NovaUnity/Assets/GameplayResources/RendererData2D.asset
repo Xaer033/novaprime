@@ -45,8 +45,8 @@ MonoBehaviour:
   - enabled: 0
     name: character
     maskTextureChannel: 0
-    renderTextureScale: 0.71
-    blendMode: 0
+    renderTextureScale: 1
+    blendMode: 1
     customBlendFactors:
       multiplicative: 1.27
       additive: -0.48

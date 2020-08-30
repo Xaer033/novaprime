@@ -508,6 +508,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
             _state.coyoteJumpTimer = _unitStats.coyoteTime;
             _state.jumpCount = 0;
             animationInfo.isGrounded = true;
+            
         }
         else
         {

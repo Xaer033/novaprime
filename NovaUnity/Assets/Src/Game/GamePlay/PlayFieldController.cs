@@ -108,7 +108,7 @@ public class PlayFieldController : NotificationDispatcher
 
         if (_pAction.Gameplay.exit.triggered)
         {
-            Application.Quit();
+            Singleton.instance.gameStateMachine.ChangeState(NovaGameState.MAIN_MENU);
         }
     }
     

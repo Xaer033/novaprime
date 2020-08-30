@@ -6,8 +6,11 @@ public class MainMenuState : IGameState
 
 	public void Init( GameStateMachine stateMachine, object changeStateData )
 	{
-        _mainMenuController = new MainMenuController();
-        _mainMenuController.Start();
+		PlayerActions pAction = new PlayerActions();
+		pAction.Menu.Enable();
+		
+		_mainMenuController = new MainMenuController();
+        _mainMenuController.Start(stateMachine);
 	}
 	
 	public void FixedStep(float fixedDeltaTime)
@@ -28,7 +31,7 @@ public class MainMenuState : IGameState
     public void Exit( )
 	{
 	//	_controller.getUI().rem
-
+		_mainMenuController.RemoveView();
 	}
     
 }

@@ -1,9 +1,10 @@
 {
     "name": "GhostGenAssemblies",
     "references": [
-        "DOTween.Modules"
+        "DOTween.Modules",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro"
     ],
-    "optionalUnityReferences": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
@@ -11,5 +12,6 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": []
+    "versionDefines": [],
+    "noEngineReferences": false
 }

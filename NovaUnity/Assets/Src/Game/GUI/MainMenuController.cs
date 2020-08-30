@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using GhostGen;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.EventSystems;
 
 public class MainMenuController : BaseController 
 {
-    private MainMenuView    _mainMenuView;
-
-	public void Start () 
-	{
+    private GameStateMachine _gameStateMachine;
+    
+	public void Start (GameStateMachine stateMachine)
+    {
+        _gameStateMachine = stateMachine;
         _setupView();
 	}
     
@@ -17,21 +20,30 @@ public class MainMenuController : BaseController
     {
         viewFactory.CreateAsync<MainMenuView>("GUI/MainMenu/MainMenuView", v =>
         {
-            _mainMenuView = v;
-            Singleton.instance.gui.screenFader.FadeIn(3.35f, () =>
-            {
-                _mainMenuView.buttonGroupOne._quitButton.onClick.AddListener(onQuit);
-            });
+            view = v;
+            view.AddListener(MenuUIEventType.PLAY, onPlay);
+            view.AddListener(MenuUIEventType.CREDITS, onCredits);
+            view.AddListener(MenuUIEventType.QUIT, onQuit);
+            Singleton.instance.gui.screenFader.FadeIn();
         });
     }
-   
-
-    private void onCredits()
+    
+    private MainMenuView mainMenuView
+    {
+        get { return view as MainMenuView; }
+    }
+    
+    private void onPlay(GeneralEvent e)
+    {
+        _gameStateMachine.ChangeState(NovaGameState.SINGLEPLAYER_GAMEPLAY);
+    }
+    
+    private void onCredits(GeneralEvent e)
     {
         Debug.Log("Credits!");
     }
 
-    private void onQuit()
+    private void onQuit(GeneralEvent e)
     {
         Application.Quit();
 //        viewFactory.RemoveView(_mainMenuView);

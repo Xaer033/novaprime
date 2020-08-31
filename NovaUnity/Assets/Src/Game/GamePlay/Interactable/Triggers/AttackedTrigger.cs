@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using Boo.Lang;
 
 public class AttackedTrigger : Trigger, IAttackTarget
 {
@@ -10,7 +9,7 @@ public class AttackedTrigger : Trigger, IAttackTarget
         _triggerData = new Hashtable();
         _triggerData["tag"] = triggerTag;
     }
-    
+
     public AttackResult TakeDamage(AttackData attackData)
     {
         AttackResult result = new AttackResult(attackData, this, attackData.potentialDamage, health );

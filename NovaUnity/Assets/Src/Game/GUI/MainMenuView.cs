@@ -8,26 +8,6 @@ using UnityEngine.UI;
 
 public class MainMenuView : UIView
 {
-    
-    [System.Serializable]
-    public class ButtonGroupOne
-    {
-        public GameObject _container;
-        public GButton _startButton;
-        public GButton _creditsButton;
-        public GButton _quitButton;
-    }
-
-    [System.Serializable]
-    public class ButtonGroupTwo
-    {
-        public GameObject _container;
-        public GButton _singlePlayerBtn;
-        public GButton _passAndPlayBtn;
-        public GButton _onlineBtn;
-        public GButton _backBtn;
-    }
-
     // public ButtonGroupOne buttonGroupOne;
     // public ButtonGroupTwo buttonGroupTwo;
 

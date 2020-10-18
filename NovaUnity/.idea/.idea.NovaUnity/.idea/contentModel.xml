@@ -39,6 +39,16 @@
           <e p="Game" t="Include">
             <e p="GameFoundations" t="Include">
               <e p="AnimationEventDispatcher.cs" t="Include" />
+              <e p="Audio" t="Include">
+                <e p="AudioManager.cs" t="Include" />
+                <e p="Stores" t="Include">
+                  <e p="AbstractAudioStore.cs" t="Include" />
+                  <e p="AudioDictionary.cs" t="Include" />
+                  <e p="IAudioStore.cs" t="Include" />
+                  <e p="RandomStore.cs" t="Include" />
+                  <e p="SequentialStore.cs" t="Include" />
+                </e>
+              </e>
               <e p="BaseController.cs" t="Include" />
               <e p="FootIK.cs" t="Include" />
               <e p="GameConfig.cs" t="Include" />

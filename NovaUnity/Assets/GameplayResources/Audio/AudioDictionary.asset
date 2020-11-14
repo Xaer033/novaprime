@@ -12,4 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34d82879020d30744af0e784fa96a9d0, type: 3}
   m_Name: AudioDictionary
   m_EditorClassIdentifier: 
-  _audioList: []
+  _audioList:
+  - type: 2
+    audioStore: {fileID: 11400000, guid: 30a41bbbee12c8947abfb2b6019ec361, type: 2}

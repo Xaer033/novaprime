@@ -12,5 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 004d0d33a2040f1458e09683b0959fed, type: 3}
   m_Name: MachineGun
   m_EditorClassIdentifier: 
-  _audioList:
-  - {fileID: 0}
+  _audioList: []

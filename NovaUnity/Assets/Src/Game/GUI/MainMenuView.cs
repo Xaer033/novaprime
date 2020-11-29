@@ -19,8 +19,8 @@ public class MainMenuView : UIView
     {
         if(_startButton)
         {
-            // EventSystem.current.SetSelectedGameObject(null);
-            // EventSystem.current.SetSelectedGameObject(_startButton.gameObject);
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(_startButton.gameObject);
             _startButton.AddListener(UIEvent.TRIGGERED, onButton);
         }
         

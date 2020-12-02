@@ -1321,7 +1321,7 @@ MonoBehaviour:
     m_Bits: 512
   distanceBetweenRays: 0.1
   maxSlopeAngle: 50
-  walkStepRayPercentage: 0
+  walkStepRayPercentage: 0.2
 --- !u!61 &8866287814259327232
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1639,6 +1639,7 @@ SpriteRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:

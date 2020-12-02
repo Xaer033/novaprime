@@ -24,7 +24,11 @@ public class PlayerInput : IInputGenerator
         
         _pAction = new PlayerActions();
         int count = InputSystem.devices.Count;
-        
+        for(int i = 0; i < count; ++i)
+        {
+            InputDevice device = InputSystem.devices[i];
+            Debug.Log("Input: " + device.deviceId + ": " + device.description.ToJson());
+        }
         _pAction.Gameplay.Enable();
     }
     

@@ -133,8 +133,11 @@ public class HealthUISystem : NotificationDispatcher, IGameSystem
 
         if(view != null)
         {
-            float health = (float)c.state.health / (float)c.unit.stats.maxHealth;
-            view.SetHealthFill(health, ()=> recycleView(c));
+            float maxHealth = (float) c.unit.stats.maxHealth;
+            maxHealth = maxHealth == 0 ? 1 : maxHealth;
+            
+            float healthPercentage = (float)c.state.health / maxHealth;
+            view.SetHealthFill(healthPercentage, ()=> recycleView(c));
         }
     }
 

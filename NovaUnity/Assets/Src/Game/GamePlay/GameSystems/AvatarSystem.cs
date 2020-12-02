@@ -121,12 +121,12 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         return controller;
     }
     
-    public T Spawn<T>(string unitId, Vector3 position) where T : IAvatarController
+    public T Spawn<T>(string unitId, Vector3 position, SpawnPointData spawnPointData = default) where T : IAvatarController
     {
         UnitMap.Unit unit = _unitMap.GetUnit(unitId);
         string uuid = _generateUUID(unit);
         
-        IAvatarController controller = _spawnAvatar(uuid, unit, position);
+        IAvatarController controller = _spawnAvatar(uuid, unit, position, spawnPointData);
 
         if (controller != null)
         {
@@ -139,18 +139,18 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         return (T)controller;
     }
 
-    private IAvatarController _spawnAvatar(string uuid, UnitMap.Unit unit, Vector3 position)
+    private IAvatarController _spawnAvatar(string uuid, UnitMap.Unit unit, Vector3 position, SpawnPointData spawnPointData)
     {
         switch (unit.type)
         {
-            case UnitType.PLAYER:    return _spawnPlayer(uuid, unit, position);
-            case UnitType.ENEMY:     return _spawnEnemy(uuid, unit, position);
+            case UnitType.PLAYER:    return _spawnPlayer(uuid, unit, position, spawnPointData);
+            case UnitType.ENEMY:     return _spawnEnemy(uuid, unit, position, spawnPointData);
         }
         Debug.LogError("Can't spawn type: " + unit.type);
         return null;
     }
 
-    private PlayerController _spawnPlayer(string uuid, UnitMap.Unit unit, Vector3 position)
+    private PlayerController _spawnPlayer(string uuid, UnitMap.Unit unit, Vector3 position, SpawnPointData spawnPointData)
     {
         AvatarView view = GameObject.Instantiate<AvatarView>(unit.view as AvatarView, position, Quaternion.identity, _playerParent.transform);
 
@@ -166,7 +166,8 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         
         PlayerState state = PlayerState.Create(uuid, unit.stats, position);
 
-        PlayerInput input = new PlayerInput(0, cam.gameCamera);
+        int playerIndex = spawnPointData.customInt;
+        PlayerInput input = new PlayerInput(playerIndex, cam.gameCamera);
         PlayerController controller = new PlayerController(unit, state, view, input);
         controller.Start(_gameSystems);
 
@@ -174,13 +175,13 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         return controller;
     }
 
-    private IAvatarController _spawnEnemy(string uuid, UnitMap.Unit unit, Vector3 position)
+    private IAvatarController _spawnEnemy(string uuid, UnitMap.Unit unit, Vector3 position, SpawnPointData spawnPointData)
     {
         AvatarView view = GameObject.Instantiate<AvatarView>(unit.view as AvatarView, position, Quaternion.identity,  _enemyParent.transform);
         
         EnemyState state = EnemyState.Create(uuid, unit.stats, position);
 
-        IInputGenerator input = _createEnemyGenerator(unit, state);// new GruntBrain(_gameSystems, unit.stats, state);
+        IInputGenerator input = _createEnemyGenerator(unit, state);
         IAvatarController controller = _createAvatarController(unit, state, view, input);
         controller.Start(_gameSystems);
 
@@ -241,7 +242,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         {
             string unitId = spawnData.subtypeId;
             Vector3 position = spawnData.position;
-            Spawn<IAvatarController>(unitId, position);
+            Spawn<IAvatarController>(unitId, position, spawnData);
         }
     }
 

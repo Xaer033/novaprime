@@ -450,7 +450,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         {
             _view.deadRoot.SetParent(_view.transform.parent);
             _view.animator.SetTrigger("deathTrigger");
-            _view._viewRoot.gameObject.SetActive(false);
+            _view.viewRoot.gameObject.SetActive(false);
             _view.deadRoot.gameObject.SetActive(true);
             
             _view.cameraTargetGroup.m_Targets[0].weight = 0;

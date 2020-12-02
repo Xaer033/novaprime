@@ -67,7 +67,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
             // This is kinda cool, cuz now we can swap input generators or save/store them for replays
             _avatarControllerList[i].FixedStep(fixedDeltaTime, input);
         }
-
+        
         if (Keyboard.current.f10Key.wasPressedThisFrame)
         {
             SaveToFile();

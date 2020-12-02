@@ -45,10 +45,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ae6d8aca2908ba438106f686444e525, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  data:
+    type: 0
+    triggerTag: 
+    cycleMode: 0
+    waitTime: 0
+    easeAmount: 1
+    speed: 0
+    startPosition: {x: 0, y: 0, z: 0}
+  platformType: 0
+  triggerTag: 
   cycleMode: 0
   waitTime: 0
   easeAmount: 0
   speed: 4
+  startPosition: {x: 0, y: 0, z: 0}
   localWaypoints:
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 4.25, z: 0}
@@ -57,7 +68,7 @@ MonoBehaviour:
     m_Bits: 5120
   distanceBetweenRays: 0.08
   collisionCollider: {fileID: 1778964061353866868}
-  _viewRoot: {fileID: 9090767566816123831}
+  viewRoot: {fileID: 9090767566816123831}
 --- !u!61 &1778964061353866868
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -140,6 +151,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -164,6 +176,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &977623894586052405
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -171,7 +184,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5144771163787422137}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7db70e0ea77f5ac47a8f4565a9406397, type: 3}
   m_Name: 
@@ -189,4 +202,4 @@ MonoBehaviour:
   - {x: -0.51502615, y: 0.5046372, z: -0.0000009760411}
   m_ShapePathHash: -826165486
   m_Mesh: {fileID: 0}
-  m_InstanceId: 97564
+  m_InstanceId: -2384

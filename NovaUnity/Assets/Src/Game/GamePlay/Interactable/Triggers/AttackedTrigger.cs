@@ -22,7 +22,7 @@ public class AttackedTrigger : Trigger, IAttackTarget
         return result;
     }
 
-    public int     health
+    public float     health
     {
         get { return 1; }
     }

@@ -23,12 +23,14 @@ public class GruntController : NotificationDispatcher, IAvatarController
         _unitStats = unit.stats;
         _state = state as EnemyState;
         
-        _view = view as AvatarView;
-        _view.controller = this;
-
         _input = input;
         
-        view.AddListener("onAnimDeathComplete", onAnimDeathComplete);
+        _view = view as AvatarView;
+        if(_view != null)
+        {
+            _view.controller = this;
+            _view.AddListener("onAnimDeathComplete", onAnimDeathComplete);
+        }
     }
 
     public IInputGenerator input
@@ -88,7 +90,7 @@ public class GruntController : NotificationDispatcher, IAvatarController
         return new AttackResult(attackData, this, attackData.potentialDamage, _state.health);
     }
     
-    public int health
+    public float health
     {
         get { return _state.health; }
     }

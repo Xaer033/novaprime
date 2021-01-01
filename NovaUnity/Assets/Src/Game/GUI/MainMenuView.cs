@@ -1,10 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using GhostGen;
 using UnityEngine;
-using GhostGen;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
-
 
 public class MainMenuView : UIView
 {
@@ -46,9 +42,9 @@ public class MainMenuView : UIView
 
     private string getEventForEvent(GeneralEvent e)
     {
-        if(e.data == _startButton) return MenuUIEventType.PLAY;
-        if(e.data == _creditsButton) return MenuUIEventType.CREDITS;
-        if(e.data == _quitButton) return MenuUIEventType.QUIT;
+        if((Object)e.data == _startButton) return MenuUIEventType.PLAY;
+        if((Object)e.data == _creditsButton) return MenuUIEventType.CREDITS;
+        if((Object)e.data == _quitButton) return MenuUIEventType.QUIT;
 
         return "";
     }

@@ -147,7 +147,7 @@ public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPasseng
         return default(AttackResult);
     }
     
-    public int     health
+    public float     health
     {
         get { return controller != null ? controller.health : 0; }
     }

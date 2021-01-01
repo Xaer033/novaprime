@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[System.Serializable]
+[Serializable]
 public enum AudioType
 {
     NONE = 0,
@@ -49,7 +49,7 @@ public class AudioDictionary : ScriptableObject
         return store;
     }
     
-    [System.Serializable]
+    [Serializable]
     public class AudioPair
     {
         public AudioType type;

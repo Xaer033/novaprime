@@ -65,6 +65,7 @@
                 <e p="AttackResult.cs" t="Include" />
                 <e p="AttackType.cs" t="Include" />
                 <e p="DamageType.cs" t="Include" />
+                <e p="HitModifier.cs" t="Include" />
                 <e p="IAttacker.cs" t="Include" />
                 <e p="IAttackTarget.cs" t="Include" />
               </e>

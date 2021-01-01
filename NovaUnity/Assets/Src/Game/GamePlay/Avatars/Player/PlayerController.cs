@@ -95,7 +95,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
                                 _state.health);
     }
     
-    public int health
+    public float health
     {
         get { return _state.health; }
     }

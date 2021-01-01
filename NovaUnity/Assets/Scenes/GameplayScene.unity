@@ -149,8 +149,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 38525994}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.010001183, y: 7.5499997, z: 10}
-  m_LocalScale: {x: 16.841549, y: 12.991671, z: 1.2312509}
+  m_LocalPosition: {x: -11.2, y: 12.53, z: 10}
+  m_LocalScale: {x: 1.3033863, y: 1.3242337, z: 0.14036663}
   m_Children: []
   m_Father: {fileID: 762805871}
   m_RootOrder: 0
@@ -195,7 +195,7 @@ SpriteRenderer:
   m_SortingLayerID: 1133647299
   m_SortingLayer: -2
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 5ae0e719cfb9a8b448e6a43a476a1e92, type: 3}
+  m_Sprite: {fileID: 21300000, guid: de6054dccd20bd5448d55407ffefaea6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -4205,7 +4205,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1379861491
 Transform:
   m_ObjectHideFlags: 0
@@ -4480,7 +4480,7 @@ GameObject:
   - component: {fileID: 1503316255}
   - component: {fileID: 1503316256}
   m_Layer: 15
-  m_Name: bg_0
+  m_Name: fg_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6254,7 +6254,7 @@ PrefabInstance:
     - target: {fileID: 750901081596856261, guid: 57845569f40ecc84f89fd329f71426f5,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -25.059996
+      value: -10
       objectReference: {fileID: 0}
     - target: {fileID: 750901081596856261, guid: 57845569f40ecc84f89fd329f71426f5,
         type: 3}

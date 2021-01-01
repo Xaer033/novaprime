@@ -118,12 +118,18 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
                 if(hitCount > 0)
                 {
                     RaycastHit2D hit = _raycastHitList[0];
+                    
+                    // TODO: Cache these GetComponents so they can be turned into a look up table
                     IAttackTarget target = hit.collider.GetComponentInParent<IAttackTarget>();
+                    
                     var impactList = _projectileImpactViewList;
                     
                     //Do damage
                     if (target != null)
                     {
+                        HitModifier hitModifier = hit.collider.GetComponent<HitModifier>();
+                        float damageModAmount = (hitModifier != null) ? hitModifier.modifier : 1.0f;
+                        
                         int layer = hit.transform.gameObject.layer;
                         
                         if(layer == LayerMask.NameToLayer("playerHurtbox") ||
@@ -131,11 +137,13 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
                         {
                             impactList = _bloodImpactViewList;
                         }
+
+                        float damageAmount = state.damage * damageModAmount;
                         
                         AttackData damageData = new AttackData(state.ownerUUID, 
                                                                view.gameObject.layer, 
                                                                state.data.damageType, 
-                                                               state.damage, 
+                                                               damageAmount, 
                                                                state.velocity.normalized,
                                                                hit);
                         

@@ -59,7 +59,7 @@ public class BruiserController : NotificationDispatcher, IAvatarController
         return new AttackResult(attackData, this, attackData.potentialDamage, _state.health);
     }
     
-    public int health
+    public float health
     {
         get { return _state.health; }
     }

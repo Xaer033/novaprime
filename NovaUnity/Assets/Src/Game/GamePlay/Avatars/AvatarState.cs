@@ -6,7 +6,7 @@ public class AvatarState
     public Vector3 previousPosition;
     public Vector3 velocity;
     public string uuid;
-    public int health;
+    public float health;
     public float timeScale;
     
     public int jumpCount;

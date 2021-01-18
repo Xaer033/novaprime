@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using GhostGen;
+﻿using GhostGen;
 using UnityEngine;
-using UnityEngine.Assertions;
-using UnityEngine.EventSystems;
 
 public class MainMenuController : BaseController 
 {
@@ -22,8 +17,10 @@ public class MainMenuController : BaseController
         {
             view = v;
             view.AddListener(MenuUIEventType.PLAY, onPlay);
+            view.AddListener(MenuUIEventType.PLAY_MULTIPLAYER, onMultiplayerPlay);
             view.AddListener(MenuUIEventType.CREDITS, onCredits);
             view.AddListener(MenuUIEventType.QUIT, onQuit);
+            
             Singleton.instance.gui.screenFader.FadeIn();
         });
     }
@@ -35,7 +32,13 @@ public class MainMenuController : BaseController
     
     private void onPlay(GeneralEvent e)
     {
-        _gameStateMachine.ChangeState(NovaGameState.SINGLEPLAYER_GAMEPLAY);
+        // _gameStateMachine.ChangeState(NovaGameState.SINGLEPLAYER_GAMEPLAY);
+        DispatchEvent(MenuUIEventType.CHANGE_STATE, false, NovaGameState.SINGLEPLAYER_GAMEPLAY);
+    }
+
+    private void onMultiplayerPlay(GeneralEvent e)
+    {
+        DispatchEvent(MenuUIEventType.PLAY_MULTIPLAYER);
     }
     
     private void onCredits(GeneralEvent e)

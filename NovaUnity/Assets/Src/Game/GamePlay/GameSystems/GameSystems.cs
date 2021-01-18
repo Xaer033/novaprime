@@ -59,11 +59,14 @@ public class GameSystems : NotificationDispatcher
     
     public void FixedStep(float fixedDeltaTime)
     {
+        // Physics2D.SyncTransforms();
+        
         if(onFixedStep != null)
         {
             onFixedStep(fixedDeltaTime);
         }
-        
+
+        // Physics2D.Simulate(fixedDeltaTime);
         // for(int i = 0; i < _sortedSystemList.Count; ++i)
         // {
         //     _sortedSystemList[i].FixedStep(fixedDeltaTime);

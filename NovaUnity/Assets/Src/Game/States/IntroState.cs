@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using GhostGen;
 using DG.Tweening;
+using UnityEngine.InputSystem;
 
 public class IntroState : IGameState
 {
@@ -16,11 +17,13 @@ public class IntroState : IGameState
 
         _gotoSplash = true;
         _stateMachine = stateMachine;
+        
+        InputSystem.pollingFrequency = 120.0f;
         // Singleton.instance.networkManager.onNetworkStart += onNetworkStart;
         // Singleton.instance.networkManager.CreateSession("Help", null);
         // Singleton.instance.networkManager.StartSinglePlayer();
-        
-    }
+
+	}
 
     public void FixedStep(float fixedDeltaTime)
     {

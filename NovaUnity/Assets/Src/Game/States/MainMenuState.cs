@@ -2,15 +2,20 @@
 
 public class MainMenuState : IGameState
 {
+	private GameStateMachine _stateMachine;
     private MainMenuController _mainMenuController;
+    private MultiplayerLobbyController _multiplayerLobbyController;
 
 	public void Init( GameStateMachine stateMachine, object changeStateData )
 	{
+		_stateMachine = stateMachine;
+		
 		PlayerActions pAction = new PlayerActions();
 		pAction.Menu.Enable();
 		
 		_mainMenuController = new MainMenuController();
-        _mainMenuController.Start(stateMachine);
+		_mainMenuController.AddListener(MenuUIEventType.CHANGE_STATE, onChangeState);
+		_mainMenuController.Start(stateMachine);
 	}
 	
 	public void FixedStep(float fixedDeltaTime)
@@ -32,6 +37,13 @@ public class MainMenuState : IGameState
 	{
 	//	_controller.getUI().rem
 		_mainMenuController.RemoveView();
+		_mainMenuController = null;
+		
 	}
-    
+
+    private void onChangeState(GhostGen.GeneralEvent e)
+    {
+	    string newState = e.data as string; 
+	    _stateMachine.ChangeState(newState);
+    }
 }

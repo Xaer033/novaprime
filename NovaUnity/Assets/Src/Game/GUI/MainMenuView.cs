@@ -1,6 +1,7 @@
 ﻿using GhostGen;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 public class MainMenuView : UIView
 {
@@ -15,8 +16,13 @@ public class MainMenuView : UIView
     {
         if(_startButton)
         {
-            EventSystem.current.SetSelectedGameObject(null);
-            EventSystem.current.SetSelectedGameObject(_startButton.gameObject);
+            bool hasGamepad = Gamepad.all.Count > 0;
+            if(hasGamepad)
+            {
+                EventSystem.current.SetSelectedGameObject(null);
+                EventSystem.current.SetSelectedGameObject(_startButton.gameObject);
+            }
+            
             _startButton.AddListener(UIEvent.TRIGGERED, onButton);
         }
         

@@ -6,9 +6,6 @@ using ExitGames.Client.Photon;
 using UdpKit;
 using UnityEngine;
 
-//using Photon.Pun;
-//using Photon.Realtime;
-
 public class NetworkManager  : GlobalEventListener//, IInitializable, ILateDisposable, IOnEventCallback
 {
 
@@ -25,7 +22,7 @@ public class NetworkManager  : GlobalEventListener//, IInitializable, ILateDispo
     public event Action onNetworkStart;
     public event Action<UdpSession, IProtocolToken> onSessionJoined;
     public event Action<BoltConnection> onConnection;
-    
+    public event Action<Map<Guid, UdpSession>> onSessionListUpdated;
     
     // public event Action<List<RoomInfo>> onReceivedRoomListUpdate;
     // public event Action<Player> onPlayerConnected;
@@ -49,9 +46,7 @@ public class NetworkManager  : GlobalEventListener//, IInitializable, ILateDispo
         onNetworkStart = null;
         onConnection = null;
         onSessionJoined = null;
-        // onReceivedRoomListUpdate = null;
-        // onPlayerConnected = null;
-        // onPlayerDisconnected = null;
+        onSessionListUpdated = null;
 
         if (BoltNetwork.IsConnected)
         {
@@ -64,6 +59,14 @@ public class NetworkManager  : GlobalEventListener//, IInitializable, ILateDispo
         BoltMatchmaking.CreateSession(sessionId, token);
     }
     
+    public override void SessionListUpdated(Map<Guid, UdpSession> sessionList)
+    {
+        if(onSessionListUpdated != null)
+        {
+            onSessionListUpdated(sessionList);
+        }
+    }
+
     public void StartServer(UdpEndPoint endPoint)
     {
         if (BoltNetwork.IsConnected)

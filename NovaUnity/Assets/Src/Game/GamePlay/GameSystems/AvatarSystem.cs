@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO.Compression;
 using GhostGen;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -16,7 +17,8 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     private List<IAvatarController> _avatarControllerList;
     private Dictionary<string, IAvatarController> _avatarLookUpMap;
     private Dictionary<string, FrameInput> _lastInputMap;
-
+    private Dictionary<int, GameplayCamera> _cameraMap;
+    
     private List<FrameInput> _frameInputList;
 
     private int _spawnCount;
@@ -36,6 +38,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         _avatarLookUpMap             = new Dictionary<string, IAvatarController>();
         _frameInputList              = new List<FrameInput>();
         _lastInputMap                = new Dictionary<string, FrameInput>();
+        _cameraMap = new Dictionary<int, GameplayCamera>();
         
         _playerParent    = new GameObject("PlayerParent");
         _enemyParent     = new GameObject("EnemyParent");
@@ -45,7 +48,6 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     {
         _gameSystems = gameSystems;
         _gameState = gameState;
-
         _gameSystems.onStep += Step;
         _gameSystems.onFixedStep += FixedStep;
         _gameSystems.AddListener(GamePlayEventType.SPAWN_POINT_TRIGGERED, onSpawnPointTriggered);
@@ -89,8 +91,10 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
 
     public void CleanUp()
     {
-        GameplayCamera cam = _getGameplayCamera();
-        cam.ClearTargets();
+        foreach(var pair in _cameraMap)
+        {
+            pair.Value.ClearTargets();
+        }
         
         for (int i = 0; i < _avatarControllerList.Count; ++i)
         {
@@ -154,19 +158,20 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     {
         AvatarView view = GameObject.Instantiate<AvatarView>(unit.view as AvatarView, position, Quaternion.identity, _playerParent.transform);
 
-        GameplayCamera cam = _getGameplayCamera();
+        int playerIndex = spawnPointData.customInt;
+        
+        GameplayCamera cam = _getOrCreatePlayerCamera(playerIndex);
         if (cam != null)
         {
             cam.AddTarget(view.cameraTargetGroup.transform);
         }
         else
         {
-            Debug.LogError("Could not find or create gameplay camera! Aborting player creation");
+            Debug.LogError("Could not find or create gameplay camera!");
         }
         
         PlayerState state = PlayerState.Create(uuid, unit.stats, position);
 
-        int playerIndex = spawnPointData.customInt;
         PlayerInput input = new PlayerInput(playerIndex, cam.gameCamera);
         PlayerController controller = new PlayerController(unit, state, view, input);
         controller.Start(_gameSystems);
@@ -220,7 +225,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         return null;
     }
     
-    private GameplayCamera _getGameplayCamera()
+    private GameplayCamera _getOrCreatePlayerCamera(int playerNumber)
     {
         if (_camera != null)
         {
@@ -248,6 +253,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
 
     private void SaveToFile()
     {
+            
 //        StreamWriter writer = new StreamWriter("Assets/Resources/inputList.txt", false, Encoding.UTF8);
         // BinaryWriter writer = new BinaryWriter(File.Open("Assets/Resources/inputList.dat", FileMode.Create));
         //

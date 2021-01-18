@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using GhostGen;
+﻿using GhostGen;
 
 public class SinglePlayerCampaignMode : NotificationDispatcher, IGameModeController
 {   

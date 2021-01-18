@@ -160,6 +160,7 @@ public class Singleton : MonoBehaviour
 
     public void OnDestroy()
     {
+        networkManager.LateDispose();
         applicationIsQuitting = true;
     }
 }

@@ -44,7 +44,10 @@ namespace GhostGen
             if (_eventDictionary.TryGetValue(eventKey, out callbackList))
             {
                 int index = callbackList.FindIndex((x) => x == callback);
-                callbackList.RemoveAt(index);
+                if(index >= 0 && index < callbackList.Count)
+                {
+                    callbackList.RemoveAt(index);
+                }
             }
         }
 

@@ -3,11 +3,8 @@ using UnityEngine;
 
 public class MainMenuController : BaseController 
 {
-    private GameStateMachine _gameStateMachine;
-    
-	public void Start (GameStateMachine stateMachine)
+    public void Start ()
     {
-        _gameStateMachine = stateMachine;
         _setupView();
 	}
     
@@ -32,7 +29,6 @@ public class MainMenuController : BaseController
     
     private void onPlay(GeneralEvent e)
     {
-        // _gameStateMachine.ChangeState(NovaGameState.SINGLEPLAYER_GAMEPLAY);
         DispatchEvent(MenuUIEventType.CHANGE_STATE, false, NovaGameState.SINGLEPLAYER_GAMEPLAY);
     }
 

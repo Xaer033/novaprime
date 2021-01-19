@@ -9,6 +9,7 @@ public class MainMenuView : UIView
     // public ButtonGroupTwo buttonGroupTwo;
 
     public GButton _startButton;
+    public GButton _multiplayerButton;
     public GButton _creditsButton;
     public GButton _quitButton;
     
@@ -24,6 +25,11 @@ public class MainMenuView : UIView
             }
             
             _startButton.AddListener(UIEvent.TRIGGERED, onButton);
+        }
+
+        if(_multiplayerButton)
+        {
+            _multiplayerButton.AddListener(UIEvent.TRIGGERED, onButton);
         }
         
         if(_creditsButton)
@@ -49,6 +55,7 @@ public class MainMenuView : UIView
     private string getEventForEvent(GeneralEvent e)
     {
         if((Object)e.data == _startButton) return MenuUIEventType.PLAY;
+        if((Object)e.data == _multiplayerButton) return MenuUIEventType.PLAY_MULTIPLAYER;
         if((Object)e.data == _creditsButton) return MenuUIEventType.CREDITS;
         if((Object)e.data == _quitButton) return MenuUIEventType.QUIT;
 

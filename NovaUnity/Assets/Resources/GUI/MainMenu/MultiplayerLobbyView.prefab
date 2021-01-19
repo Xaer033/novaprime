@@ -1138,6 +1138,7 @@ GameObject:
   m_Component:
   - component: {fileID: 224198559972003720}
   - component: {fileID: 222059417189493502}
+  - component: {fileID: 5038468448396640715}
   - component: {fileID: 114887190873860580}
   - component: {fileID: 114446409779748228}
   m_Layer: 0
@@ -1175,6 +1176,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1585797736616706}
   m_CullTransparentMesh: 0
+--- !u!114 &5038468448396640715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1585797736616706}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7d81d73173447f4db7c9e71005cb87d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _image: {fileID: 114887190873860580}
+  _button: {fileID: 114446409779748228}
+  _text: {fileID: 114882735662891754}
 --- !u!114 &114887190873860580
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1257,6 +1273,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 224466064982182136}
+  - component: {fileID: 6357131877235333903}
   - component: {fileID: 222841900634593484}
   - component: {fileID: 114532125649122366}
   - component: {fileID: 114737696139123316}
@@ -1287,6 +1304,21 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 448.5, y: 76}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &6357131877235333903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1662560687447536}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7d81d73173447f4db7c9e71005cb87d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _image: {fileID: 114532125649122366}
+  _button: {fileID: 114737696139123316}
+  _text: {fileID: 114057596946312268}
 --- !u!222 &222841900634593484
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1378,6 +1410,7 @@ GameObject:
   m_Component:
   - component: {fileID: 224248022518464530}
   - component: {fileID: 222590998921094632}
+  - component: {fileID: 1049972887713170937}
   - component: {fileID: 114983058826838348}
   - component: {fileID: 114076538549246780}
   m_Layer: 0
@@ -1415,6 +1448,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1667722580799526}
   m_CullTransparentMesh: 0
+--- !u!114 &1049972887713170937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1667722580799526}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7d81d73173447f4db7c9e71005cb87d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _image: {fileID: 114983058826838348}
+  _button: {fileID: 114076538549246780}
+  _text: {fileID: 114650580896320668}
 --- !u!114 &114983058826838348
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1497,6 +1545,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 224319973772917090}
+  - component: {fileID: 7652269751128508715}
   m_Layer: 0
   m_Name: MultiplayerLobbyView
   m_TagString: Untagged
@@ -1527,6 +1576,25 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &7652269751128508715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1864349720318540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da12186a816f4634f98516b61445dd62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _listScrollRect: {fileID: 114580314824589984}
+  _listItemPrefab: {fileID: 114108910502708512, guid: 450b474e262e84c41ab9f046e2d29001,
+    type: 3}
+  _toggleGroup: {fileID: 0}
+  _joinButton: {fileID: 5038468448396640715}
+  _backButton: {fileID: 1049972887713170937}
+  _createButton: {fileID: 6357131877235333903}
 --- !u!1 &1874470392724672
 GameObject:
   m_ObjectHideFlags: 0

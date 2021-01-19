@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Photon.Pun;
-using Photon.Realtime;
+using Bolt;
+using Bolt.Matchmaking;
+using Bolt.Photon;
+using GhostGen;
 using UdpKit;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -19,15 +21,16 @@ public class MultiplayerLobbyController : BaseController
 
     private NetworkManager _networkManager;
 
+    public MultiplayerLobbyController()
+    {
+        _networkManager = Singleton.instance.networkManager;
+    }
+    
     public void Start()
     {
         _selectedRoomIndex = -1;
-        _networkManager = Singleton.instance.networkManager;
 
-        UdpEndPoint endpoint = UdpEndPoint.Parse(kServerIp);
-        _networkManager.StartServer(endpoint);
-        
-        viewFactory.CreateAsync<MultiplayerLobbyView>("GUI/MultiplayerSetup/MultiplayerLobbyView", (popup)=>
+        viewFactory.CreateAsync<MultiplayerLobbyView>("GUI/MainMenu/MultiplayerLobbyView", (popup)=>
         {
             view = popup;
             
@@ -39,7 +42,9 @@ public class MultiplayerLobbyController : BaseController
             popup.SetLobbyDataProvider(_getRoomDataProvider());
 
             _networkManager.onSessionListUpdated += onSessionListUpdate;
-            _networkManager.onJoinedRoom += onJoinedRoom;
+            _networkManager.onSessionJoined += onSessionJoined;
+            _networkManager.onConnection += onConnected;
+            _networkManager.onNetworkStart += onNetworkStart;
 
         });
     }
@@ -51,14 +56,33 @@ public class MultiplayerLobbyController : BaseController
             view.RemoveListener(MenuUIEventType.JOIN_SERVER, onJoinButton);
             view.RemoveListener(MenuUIEventType.CREATE_SERVER, onCreateButton);
             view.RemoveListener(MenuUIEventType.BACK, onBackButton);
-        }
 
-        _networkManager.onSessionListUpdated -= onSessionListUpdate;
-        _networkManager.onJoinedRoom -= onJoinedRoom;
+            _networkManager.onSessionListUpdated -= onSessionListUpdate;
+            _networkManager.onSessionJoined -= onSessionJoined;
+            _networkManager.onConnection -= onConnected;
+            _networkManager.onNetworkStart -= onNetworkStart;
+        }
 
         base.RemoveView();
     }
 
+    private void onSessionJoined(UdpSession session, IProtocolToken token)
+    {
+        Debug.Log("Connected to server: " + session.Id);
+    }
+
+    private void onNetworkStart()
+    {
+        if(BoltNetwork.IsServer)
+        { 
+            _networkManager.StartSession(string.Format("test-{0}", Random.Range(0, 1000)));
+        }
+    }
+    
+    private void onConnected(BoltConnection connection)
+    {
+        Debug.Log("Client connected: " + connection.ConnectionId);
+    }
     private void onSessionListUpdate(Map<Guid, UdpSession> sessionMap)
     {
         List<Hashtable> roomList = new List<Hashtable>();
@@ -104,7 +128,7 @@ public class MultiplayerLobbyController : BaseController
         }
     }
     
-    private void onJoinButton(GhostGen.GeneralEvent e)
+    private void onJoinButton(GeneralEvent e)
     {
         if(_selectedRoomIndex < 0)
         {
@@ -114,25 +138,26 @@ public class MultiplayerLobbyController : BaseController
         view.RemoveListener(MenuUIEventType.JOIN_SERVER, onJoinButton);
 
         string roomName = _roomLobbyData[_selectedRoomIndex]["roomName"] as string;
-        bool result = PhotonNetwork.JoinRoom(roomName);
+        // bool result = PhotonNetwork.JoinRoom(roomName);
+        _networkManager.JoinSession(roomName);
 
-        Debug.Log(string.Format("Joining room: {0} with result: {1}", roomName, result));  
+        // Debug.Log(string.Format("Joining room: {0} with result: {1}", roomName, result));  
     }
 
-    private void onCreateButton(GhostGen.GeneralEvent e)
+    private void onCreateButton(GeneralEvent e)
     {
         view.RemoveListener(MenuUIEventType.BACK, onBackButton);
         Debug.Log("Create a room");
 
-        RoomOptions options = new RoomOptions();
-        options.MaxPlayers = 4;//(byte)PlayerGroup.kMaxPlayerCount;
+        var customToken = new PhotonRoomProperties();
+        customToken.AddRoomProperty("maxPlayers", NetworkManager.kMaxPlayers);
+        customToken.AddRoomProperty("currentPlayers", 1);
 
-        string roomName = "Room_" + Random.Range(0, 10000);
-        bool result = PhotonNetwork.CreateRoom(roomName, options, null);
-        Debug.Log("Create Room Result: " + result);
+        UdpEndPoint endpoint = new UdpEndPoint(UdpIPv4Address.Localhost, 11666);
+        _networkManager.StartServer(endpoint);
     }
 
-    private void onBackButton(GhostGen.GeneralEvent e)
+    private void onBackButton(GeneralEvent e)
     {
         view.RemoveListener(MenuUIEventType.BACK, onBackButton);
         DispatchEvent(MenuUIEventType.BACK);
@@ -144,11 +169,6 @@ public class MultiplayerLobbyController : BaseController
     // {
     //     BoltLauncher.LocalPlayer.NickName = string.Format("PL-{0}", Random.Range(0, 1000));//SystemInfo.deviceName + "_" + UnityEngine.Random.Range(0, 2000);
     // }
-
-    private void onJoinedRoom()
-    {
-        DispatchEvent(MenuUIEventType.JOIN_SERVER);
-    }
 
     private List<Hashtable> _getRoomDataProvider()
     {

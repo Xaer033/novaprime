@@ -75,10 +75,20 @@ public class NetworkManager  : GlobalEventListener//, IInitializable, ILateDispo
             return;
         }
 
-        //PhotonNetwork.autoJoinLobby = true;
         BoltLauncher.StartServer(endPoint);
     }
 
+    public void StartSession(string sessionId)
+    {
+        if (BoltMatchmaking.CurrentSession != null)
+        {
+            Debug.Log("Network: Already in Session: " + BoltMatchmaking.CurrentSession.Id);
+            return;
+        }
+
+        BoltMatchmaking.CreateSession(sessionId);
+    }
+    
     public void StartSinglePlayer()
     {
         BoltLauncher.StartSinglePlayer();
@@ -89,9 +99,14 @@ public class NetworkManager  : GlobalEventListener//, IInitializable, ILateDispo
         BoltLauncher.StartClient(endPoint);
     }
     
+    public void JoinSession(string sessionId)
+    {
+        BoltMatchmaking.JoinSession(sessionId);
+    }
+    
     public override void BoltStartFailed(UdpConnectionDisconnectReason disconnectReason)
     {
-        BoltLog.Error("Failed to Start");
+        BoltLog.Error("Failed to Start, reason: " + disconnectReason.ToString());
     }
 
     public override void BoltStartDone()
@@ -154,10 +169,6 @@ public class NetworkManager  : GlobalEventListener//, IInitializable, ILateDispo
         return connection;
     }
 
-    public void OnNetworkStartDone()
-    {
-        
-    }
     /// PUN Callbacks
     public void OnCreatedRoom()
     {

@@ -13,6 +13,7 @@ public class MultiplayerLobbyController : BaseController
     // private MultiplayerLobbyView _lobbyView;
     private List<Hashtable> _roomLobbyData = new List<Hashtable>();
 
+
     // private ListScrollRect _roomListView;
     private int _selectedRoomIndex;
 
@@ -36,7 +37,7 @@ public class MultiplayerLobbyController : BaseController
             view.AddListener(MenuUIEventType.BACK, onBackButton);
 
             popup.SetSelectedItemCallback(onRoomClicked);
-            popup.SetLobbyDataProvider(_getRoomDataProvider(_networkManager.GetRoomList()));
+            popup.SetLobbyDataProvider(_generateRoomDataProvider(_networkManager.GetRoomList()));
 
             _networkManager.onJoinedRoom += onJoinedRoom;
             _networkManager.onCreatedRoom += onCreatedRoom;
@@ -82,7 +83,7 @@ public class MultiplayerLobbyController : BaseController
     {
         if(lobbyView != null)
         {
-            List<Hashtable> roomHash = _getRoomDataProvider(roomList);
+            List<Hashtable> roomHash = _generateRoomDataProvider(roomList);
             lobbyView.SetLobbyDataProvider(roomHash);
         }
     }
@@ -154,29 +155,20 @@ public class MultiplayerLobbyController : BaseController
     //     BoltLauncher.LocalPlayer.NickName = string.Format("PL-{0}", Random.Range(0, 1000));//SystemInfo.deviceName + "_" + UnityEngine.Random.Range(0, 2000);
     // }
 
-    private List<Hashtable> _getRoomDataProvider(List<RoomInfo> roomInfoList)
+    private List<Hashtable> _generateRoomDataProvider(List<RoomInfo> roomInfoList)
     {
+        
         _roomLobbyData.Clear();
 
-        if(PhotonNetwork.InLobby || PhotonNetwork.InRoom)
+        for (int i = 0; i < roomInfoList.Count; ++i)
         {
-            Debug.Log("Is inside Lobby: " + PhotonNetwork.CurrentLobby.Name) ;
-            List<RoomInfo> roomList = roomInfoList; 
+            RoomInfo info = roomInfoList[i];
+            Hashtable roomData = new Hashtable();
             
-            int roomCount = roomList.Count;
-            for(int i = 0; i < roomCount; ++i)
-            {
-                Hashtable roomData = new Hashtable();
-            
-                RoomInfo info = roomList[i];
-                if(!info.IsVisible) { continue; }
-            
-                roomData.Add("roomName", info.Name);
-                roomData.Add("playerCount", string.Format("{0}/{1}", info.PlayerCount, info.MaxPlayers));
-                _roomLobbyData.Add(roomData);
-            }
+            roomData.Add("roomName", info.Name);
+            roomData.Add("playerCount", string.Format("{0}/{1}", info.PlayerCount, info.MaxPlayers));
+            _roomLobbyData.Add(roomData);
         }
-
         return _roomLobbyData;
     }
 }

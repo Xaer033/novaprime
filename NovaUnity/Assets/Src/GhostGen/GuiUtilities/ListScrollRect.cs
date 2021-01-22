@@ -867,7 +867,7 @@ public class ListScrollRect : UnityEngine.UI.ScrollRect
         Assert.IsTrue(index >= 0 && index < dataProvider.Count, "DataProvider index is out of range!");
         
         view.isSelected     = (index == _isSelectedIndex);
-        view.viewData       = dataProvider[index];
+        view.viewData       = dataProvider != null ? dataProvider[index] : null;
         listItemInfo.view   = view;
 		
 

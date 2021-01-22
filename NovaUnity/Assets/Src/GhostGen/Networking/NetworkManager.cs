@@ -24,11 +24,13 @@ public class NetworkManager  : MonoBehaviourPunCallbacks, IOnEventCallback
     public event Action<Player> onPlayerDisconnected;
 
     private List<RoomInfo> _roomList = new List<RoomInfo>();
+    private Dictionary<string, RoomInfo> _cachedRoomList = new Dictionary<string, RoomInfo>();
     
     
     public bool Initialize()
     {
         return PhotonNetwork.ConnectUsingSettings();
+        _roomList.Clear();
     }
     
     public void LateDispose()
@@ -137,11 +139,33 @@ public class NetworkManager  : MonoBehaviourPunCallbacks, IOnEventCallback
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
         Debug.Log("-OnRoomListUpdate, room count: "  + roomList.Count);
-        _roomList = roomList;
+            
+        
+        int roomCount = roomList.Count;
+        for(int i = 0; i < roomCount; ++i)
+        {
+            RoomInfo info = roomList[i];
+            if(!info.IsVisible) { continue; }
+            if (info.RemovedFromList)
+            {
+                _cachedRoomList.Remove(info.Name);
+            }
+            else
+            {
+                _cachedRoomList[info.Name] = info;
+            }
+        }
+        
+        
+        _roomList.Clear();
+        foreach(var pair in _cachedRoomList)
+        {
+            _roomList.Add(pair.Value);
+        }
         
         if (onReceivedRoomListUpdate != null)
         {
-            onReceivedRoomListUpdate(roomList);
+            onReceivedRoomListUpdate(_roomList);
         }
     }
     
@@ -158,6 +182,7 @@ public class NetworkManager  : MonoBehaviourPunCallbacks, IOnEventCallback
     public override void OnDisconnected(DisconnectCause cause)
     {
         // throw new NotImplementedException();
+        Debug.Log("Disconnection: " + cause.ToString());
     }
     
     public override void OnRegionListReceived(RegionHandler regionHandler)
@@ -173,6 +198,7 @@ public class NetworkManager  : MonoBehaviourPunCallbacks, IOnEventCallback
     public override void OnCustomAuthenticationFailed(string debugMessage)
     {
         // throw new NotImplementedException();
+        Debug.LogErrorFormat("Network Error:{0}", debugMessage);
     }
     
     public override void OnJoinedLobby()
@@ -189,11 +215,13 @@ public class NetworkManager  : MonoBehaviourPunCallbacks, IOnEventCallback
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
         // throw new NotImplementedException();
+        Debug.LogErrorFormat("Network Error:{0} : {1}", returnCode, message);
     }
     
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
         // throw new NotImplementedException();
+        Debug.LogErrorFormat("Network Error:{0} : {1}", returnCode, message);
     }
     
     public override void OnPlayerEnteredRoom(Player newPlayer)

@@ -1127,7 +1127,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fafe2cfe61f6974895a912c3755e8f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_AllowSwitchOff: 1
+  m_AllowSwitchOff: 0
 --- !u!1 &1585797736616706
 GameObject:
   m_ObjectHideFlags: 0
@@ -1591,7 +1591,7 @@ MonoBehaviour:
   _listScrollRect: {fileID: 114580314824589984}
   _listItemPrefab: {fileID: 114108910502708512, guid: 450b474e262e84c41ab9f046e2d29001,
     type: 3}
-  _toggleGroup: {fileID: 0}
+  _toggleGroup: {fileID: 114032403424289760}
   _joinButton: {fileID: 5038468448396640715}
   _backButton: {fileID: 1049972887713170937}
   _createButton: {fileID: 6357131877235333903}

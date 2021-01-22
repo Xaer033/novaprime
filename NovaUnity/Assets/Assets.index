@@ -1,5 +1,5 @@
 {
-    "name": "",
+    "name": "Assets",
     "type": "asset",
     "roots": [],
     "includes": [],
@@ -13,7 +13,7 @@
         "files": true,
         "directories": false,
         "types": true,
-        "properties": false,
-        "dependencies": false
+        "properties": true,
+        "dependencies": true
     }
 }

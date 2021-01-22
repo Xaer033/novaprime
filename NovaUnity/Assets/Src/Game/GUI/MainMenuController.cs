@@ -1,11 +1,20 @@
 ﻿using GhostGen;
 using UnityEngine;
 
-public class MainMenuController : BaseController 
+public class MainMenuController : BaseController
 {
+    private NetworkManager _networkManager;
+
+    public MainMenuController()
+    {
+        _networkManager = Singleton.instance.networkManager;
+    }
+    
     public void Start ()
     {
         _setupView();
+        
+        _networkManager.onJoinedLobby += onJoinedLobby;
 	}
     
     private void _setupView()
@@ -17,7 +26,7 @@ public class MainMenuController : BaseController
             view.AddListener(MenuUIEventType.PLAY_MULTIPLAYER, onMultiplayerPlay);
             view.AddListener(MenuUIEventType.CREDITS, onCredits);
             view.AddListener(MenuUIEventType.QUIT, onQuit);
-            
+
             Singleton.instance.gui.screenFader.FadeIn();
         });
     }
@@ -34,7 +43,11 @@ public class MainMenuController : BaseController
 
     private void onMultiplayerPlay(GeneralEvent e)
     {
-        DispatchEvent(MenuUIEventType.PLAY_MULTIPLAYER);
+        bool result = _networkManager.Initialize();
+        if(result)
+        {
+            mainMenuView._canvasGroup.interactable = false;
+        }
     }
     
     private void onCredits(GeneralEvent e)
@@ -46,5 +59,18 @@ public class MainMenuController : BaseController
     {
         Application.Quit();
 //        viewFactory.RemoveView(_mainMenuView);
+    }
+
+    private void onJoinedLobby()
+    {
+        mainMenuView._canvasGroup.interactable = true;
+        DispatchEvent(MenuUIEventType.PLAY_MULTIPLAYER);
+    }
+
+    public override void RemoveView()
+    {
+        _networkManager.onJoinedLobby -= onJoinedLobby;
+        base.RemoveView();
+        
     }
 }

@@ -8,6 +8,7 @@ public class MainMenuView : UIView
     // public ButtonGroupOne buttonGroupOne;
     // public ButtonGroupTwo buttonGroupTwo;
 
+    public CanvasGroup _canvasGroup;
     public GButton _startButton;
     public GButton _multiplayerButton;
     public GButton _creditsButton;

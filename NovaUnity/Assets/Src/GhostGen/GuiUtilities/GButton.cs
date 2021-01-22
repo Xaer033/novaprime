@@ -1,5 +1,4 @@
-﻿using Bolt;
-using GhostGen;
+﻿using GhostGen;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

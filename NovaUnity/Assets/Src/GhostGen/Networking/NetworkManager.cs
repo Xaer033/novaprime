@@ -1,183 +1,125 @@
 ﻿using System;
-using System.Linq;
-using Bolt;
-using Bolt.Matchmaking;
+using System.Collections.Generic;
 using ExitGames.Client.Photon;
-using UdpKit;
+using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine;
 
-public class NetworkManager  : GlobalEventListener//, IInitializable, ILateDisposable, IOnEventCallback
+public class NetworkManager  : MonoBehaviourPunCallbacks, IOnEventCallback
 {
 
     public const string kGameVersion = "0.1.0";
     public const int kMaxPlayers = 4;
 
     public event Action<byte , object , int > onCustomEvent;
-
+    
     public event Action onCreatedRoom;
     public event Action onJoinedLobby;
     public event Action onJoinedRoom;
     public event Action onLeftLobby;
     public event Action onLeftRoom;
     public event Action onNetworkStart;
-    public event Action<UdpSession, IProtocolToken> onSessionJoined;
-    public event Action<BoltConnection> onConnection;
-    public event Action<Map<Guid, UdpSession>> onSessionListUpdated;
+    public event Action<List<RoomInfo>> onReceivedRoomListUpdate;
+    public event Action<Player> onPlayerConnected;
+    public event Action<Player> onPlayerDisconnected;
+
+    private List<RoomInfo> _roomList = new List<RoomInfo>();
     
-    // public event Action<List<RoomInfo>> onReceivedRoomListUpdate;
-    // public event Action<Player> onPlayerConnected;
-    // public event Action<Player> onPlayerDisconnected;
-
-    public void Initialize()
+    
+    public bool Initialize()
     {
-        
-//        PhotonNetwork.OnEventCall += onCustomEventCallback;
+        return PhotonNetwork.ConnectUsingSettings();
     }
-
+    
     public void LateDispose()
     {
-//        PhotonNetwork.OnEventCall -= onCustomEventCallback;
-
+    
         onCreatedRoom = null;
         onJoinedLobby = null;
         onJoinedRoom = null;
         onLeftLobby = null;
         onLeftRoom = null;
         onNetworkStart = null;
-        onConnection = null;
-        onSessionJoined = null;
-        onSessionListUpdated = null;
-
-        if (BoltNetwork.IsConnected)
+    
+        if (PhotonNetwork.IsConnected)
         {
             Disconnect();
         }
     }
 
-    public void CreateSession(string sessionId, IProtocolToken token)
+    public List<RoomInfo> GetRoomList()
     {
-        BoltMatchmaking.CreateSession(sessionId, token);
+        return _roomList;
     }
     
-    public override void SessionListUpdated(Map<Guid, UdpSession> sessionList)
+    
+    public void StartRoom(string roomId, RoomOptions options)
     {
-        if(onSessionListUpdated != null)
+        if (PhotonNetwork.InRoom)
         {
-            onSessionListUpdated(sessionList);
-        }
-    }
-
-    public void StartServer(UdpEndPoint endPoint)
-    {
-        if (BoltNetwork.IsConnected)
-        {
-            Debug.Log("Network: Already Connected!");
+            Debug.Log("Network: Already in Session: " + PhotonNetwork.CurrentRoom.Name);
             return;
         }
-
-        BoltLauncher.StartServer(endPoint);
-    }
-
-    public void StartSession(string sessionId)
-    {
-        if (BoltMatchmaking.CurrentSession != null)
-        {
-            Debug.Log("Network: Already in Session: " + BoltMatchmaking.CurrentSession.Id);
-            return;
-        }
-
-        BoltMatchmaking.CreateSession(sessionId);
-    }
     
-    public void StartSinglePlayer()
-    {
-        BoltLauncher.StartSinglePlayer();
+        PhotonNetwork.CreateRoom(roomId, options);
     }
+    //
     
-    public void JoinServer(UdpEndPoint endPoint)
-    {
-        BoltLauncher.StartClient(endPoint);
-    }
+    // public void OnConnectedToServer()
+    // {
+    //     if (onConnection != null)
+    //     {
+    //         onConnection()
+    //     }
+    // }
     
-    public void JoinSession(string sessionId)
-    {
-        BoltMatchmaking.JoinSession(sessionId);
-    }
-    
-    public override void BoltStartFailed(UdpConnectionDisconnectReason disconnectReason)
-    {
-        BoltLog.Error("Failed to Start, reason: " + disconnectReason.ToString());
-    }
-
-    public override void BoltStartDone()
-    {
-        if(onNetworkStart != null)
-        {
-            onNetworkStart();
-        }
-    }
-
-    public override void Connected(BoltConnection connection)
-    {
-        if(onConnection != null)
-        {
-            onConnection(connection);
-        }
-    }
-
-    public override void SessionConnected(UdpSession session, IProtocolToken token)
-    {
-        if (onSessionJoined != null)
-        {
-            onSessionJoined(session, token);
-        }
-    }
-    
-    public void OnConnectedToServer()
-    {
-        // if (onConnection != null)
-        // {
-        //     onConnection()
-        // }
-    }
-
     public void Disconnect()
     {
-        BoltLauncher.Shutdown();
+        PhotonNetwork.Disconnect();
     }
-
+    
     public bool isConnected
     {
-        get { return BoltNetwork.IsConnected; }
+        get { return PhotonNetwork.IsConnected; }
     }
-
-    public BoltConnection GetPlayerById(uint playerId)
-    {
-        BoltConnection connection = default;
-        
-        BoltConnection[] playerList = BoltNetwork.Connections.ToList().ToArray();
     
-        int count = playerList.Length;
-        for(int i = 0; i < count; ++i)
-        {
-            if(playerId == playerList[i].ConnectionId)
-            {
-                connection = playerList[i];
-                break;
-            }
-        }
-        return connection;
+    // public BoltConnection GetPlayerById(uint playerId)
+    // {
+    //     BoltConnection connection = default;
+    //     
+    //     BoltConnection[] playerList = BoltNetwork.Connections.ToList().ToArray();
+    //
+    //     int count = playerList.Length;
+    //     for(int i = 0; i < count; ++i)
+    //     {
+    //         if(playerId == playerList[i].ConnectionId)
+    //         {
+    //             connection = playerList[i];
+    //             break;
+    //         }
+    //     }
+    //     return connection;
+    // }
+    
+    public override void OnFriendListUpdate(List<FriendInfo> friendList)
+    {
+        throw new NotImplementedException();
     }
-
+    
     /// PUN Callbacks
-    public void OnCreatedRoom()
+    public override void OnCreatedRoom()
     {
         if(onCreatedRoom != null)
         {
             onCreatedRoom();
         }
     }
-
+    
+    public override void OnCreateRoomFailed(short returnCode, string message)
+    {
+        throw new NotImplementedException();
+    }
+    
     public void OnEvent(EventData photonEvent)
     {
         if (onCustomEvent != null)
@@ -185,74 +127,101 @@ public class NetworkManager  : GlobalEventListener//, IInitializable, ILateDispo
             onCustomEvent(photonEvent.Code, photonEvent.CustomData, photonEvent.Sender );
         }
     }
-
-
-    public virtual void OnError(object[] codeAndMsg)
+    
+    
+    public override void OnErrorInfo(ErrorInfo errorInfo)
     {
-        Debug.Log(string.Format("Error:{0}, {1}", codeAndMsg[0], codeAndMsg[1]));
+        Debug.LogError(string.Format("Net Error:{0}", errorInfo.Info));
     }
-
-    // public void OnRoomListUpdate(List<RoomInfo> roomList)
-    // {
-    //     Debug.Log("-On Received Room list update: "  + roomList.Count);
-    //     if (onReceivedRoomListUpdate != null)
-    //     {
-    //         onReceivedRoomListUpdate(roomList);
-    //     }
-    // }
-
-    public void OnConnectedToMaster()
+    
+    public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
-        //Debug.Log("-Joining Lobby-");
-        //PhotonNetwork.JoinLobby();
+        Debug.Log("-OnRoomListUpdate, room count: "  + roomList.Count);
+        _roomList = roomList;
+        
+        if (onReceivedRoomListUpdate != null)
+        {
+            onReceivedRoomListUpdate(roomList);
+        }
     }
-
-    public void OnJoinedLobby(UdpEvent updEvent)
+    
+    public override void OnConnected()
     {
-        Debug.Log("Joined Lobby: " + updEvent.ToString());
+        // throw new NotImplementedException();
+    }
+    
+    public override void OnConnectedToMaster()
+    {
+        PhotonNetwork.JoinLobby();
+    }
+    
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        // throw new NotImplementedException();
+    }
+    
+    public override void OnRegionListReceived(RegionHandler regionHandler)
+    {
+        // throw new NotImplementedException();
+    }
+    
+    public override void OnCustomAuthenticationResponse(Dictionary<string, object> data)
+    {
+        // throw new NotImplementedException();
+    }
+    
+    public override void OnCustomAuthenticationFailed(string debugMessage)
+    {
+        // throw new NotImplementedException();
+    }
+    
+    public override void OnJoinedLobby()
+    {
+        Debug.Log("Joined Lobby");
         safeCall(onJoinedLobby);
     }
-
-    public void OnJoinedRoom()
+    
+    public override void OnJoinedRoom()
     {
         safeCall(onJoinedRoom);
     }
-
-    // public override void OnPlayerEnteredRoom(Player newPlayer)
-    // {
-    //     if(onPlayerConnected != null)
-    //     {
-    //         onPlayerConnected(newPlayer);
-    //     }
-    // }
-    //
-    // public override void OnPlayerLeftRoom(Player otherPlayer)
-    // {
-    //     if (onPlayerDisconnected != null)
-    //     {
-    //         onPlayerDisconnected(otherPlayer);
-    //     }
-    // }
-
-    public void OnLeftRoom()
-    {
-        safeCall(onLeftRoom);
-    }
-
-    public void OnLeftLobby()
-    {
-        safeCall(onLeftLobby);
-    }
-
     
-    private void onCustomEventCallback(byte eventCode, object content, int senderId)
+    public override void OnJoinRoomFailed(short returnCode, string message)
     {
-        if(onCustomEvent != null)
+        // throw new NotImplementedException();
+    }
+    
+    public override void OnJoinRandomFailed(short returnCode, string message)
+    {
+        // throw new NotImplementedException();
+    }
+    
+    public override void OnPlayerEnteredRoom(Player newPlayer)
+    {
+        if(onPlayerConnected != null)
         {
-//            onCustomEvent(eventCode, content, senderId);
+            onPlayerConnected(newPlayer);
+        }
+    }
+    
+    public override void OnPlayerLeftRoom(Player otherPlayer)
+    {
+        if (onPlayerDisconnected != null)
+        {
+            onPlayerDisconnected(otherPlayer);
         }
     }
 
+    public override void OnLeftRoom()
+    {
+        safeCall(onLeftRoom);
+    }
+    
+    public override void OnLeftLobby()
+    {
+        safeCall(onLeftLobby);
+    }
+    
     private void safeCall(Action callback)
     {
         if(callback != null)

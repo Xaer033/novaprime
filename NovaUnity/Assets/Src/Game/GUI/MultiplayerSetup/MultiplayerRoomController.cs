@@ -127,7 +127,7 @@ public class MultiplayerRoomController : BaseController
 
     private void _onCustomEvent(byte eventCode, object content, int senderId)
     {
-        if(eventCode == NetworkOpCodes.READY_TOGGLE)
+        if(eventCode == NetworkOpCode.READY_TOGGLE)
         {
             int index = _roomView.GetIndexForPlayerId(senderId);
             if(index >= 0)

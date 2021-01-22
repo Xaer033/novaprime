@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Bolt;
-using Bolt.Matchmaking;
-using Bolt.Photon;
 using GhostGen;
-using UdpKit;
+using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class MultiplayerLobbyController : BaseController
 {
-    public static string kServerIp = "127.0.0.1";
     
     // private MultiplayerLobbyView _lobbyView;
     private List<Hashtable> _roomLobbyData = new List<Hashtable>();
@@ -39,12 +36,12 @@ public class MultiplayerLobbyController : BaseController
             view.AddListener(MenuUIEventType.BACK, onBackButton);
 
             popup.SetSelectedItemCallback(onRoomClicked);
-            popup.SetLobbyDataProvider(_getRoomDataProvider());
+            popup.SetLobbyDataProvider(_getRoomDataProvider(_networkManager.GetRoomList()));
 
-            _networkManager.onSessionListUpdated += onSessionListUpdate;
-            _networkManager.onSessionJoined += onSessionJoined;
-            _networkManager.onConnection += onConnected;
+            _networkManager.onJoinedRoom += onJoinedRoom;
+            _networkManager.onCreatedRoom += onCreatedRoom;
             _networkManager.onNetworkStart += onNetworkStart;
+            _networkManager.onReceivedRoomListUpdate += onRoomListUpdate;
 
         });
     }
@@ -57,55 +54,36 @@ public class MultiplayerLobbyController : BaseController
             view.RemoveListener(MenuUIEventType.CREATE_SERVER, onCreateButton);
             view.RemoveListener(MenuUIEventType.BACK, onBackButton);
 
-            _networkManager.onSessionListUpdated -= onSessionListUpdate;
-            _networkManager.onSessionJoined -= onSessionJoined;
-            _networkManager.onConnection -= onConnected;
+            _networkManager.onJoinedRoom -= onJoinedRoom;
+            _networkManager.onCreatedRoom -= onCreatedRoom;
             _networkManager.onNetworkStart -= onNetworkStart;
+            _networkManager.onReceivedRoomListUpdate -= onRoomListUpdate;
         }
 
         base.RemoveView();
     }
 
-    private void onSessionJoined(UdpSession session, IProtocolToken token)
+    private void onJoinedRoom()
     {
-        Debug.Log("Connected to server: " + session.Id);
+        Debug.Log("Room Joined: " + PhotonNetwork.CurrentRoom.Name);
+        //Switch to room view
     }
-
-    private void onNetworkStart()
+    private void onCreatedRoom()
     {
-        if(BoltNetwork.IsServer)
-        { 
-            _networkManager.StartSession(string.Format("test-{0}", Random.Range(0, 1000)));
-        }
+        Debug.Log("Room Created");
     }
     
-    private void onConnected(BoltConnection connection)
+    private void onNetworkStart()
     {
-        Debug.Log("Client connected: " + connection.ConnectionId);
-    }
-    private void onSessionListUpdate(Map<Guid, UdpSession> sessionMap)
-    {
-        List<Hashtable> roomList = new List<Hashtable>();
         
-        Debug.Log("Session List Count: " + sessionMap.Count);
-        foreach(var pair in sessionMap)
-        {
-            Hashtable roomData = new Hashtable();
-            
-            Debug.Log("Session: " + pair.Key);
-            UdpSession session = pair.Value;
-            
-            string hostName = session.HostName;
-            string playerCount =  string.Format("{0}/{1}", session.ConnectionsCurrent, session.ConnectionsMax);
-            roomData.Add("roomName", hostName);
-            roomData.Add("playerCount", playerCount);
-            
-            roomList.Add(roomData);
-        }
-
+    }
+  
+    private void onRoomListUpdate(List<RoomInfo> roomList)
+    {
         if(lobbyView != null)
         {
-            lobbyView.SetLobbyDataProvider(roomList);
+            List<Hashtable> roomHash = _getRoomDataProvider(roomList);
+            lobbyView.SetLobbyDataProvider(roomHash);
         }
     }
 
@@ -119,8 +97,11 @@ public class MultiplayerLobbyController : BaseController
         (view as MultiplayerLobbyView)._joinButton._button.interactable =  (view as MultiplayerLobbyView)._listScrollRect.selectedIndex >= 0;
         if(isSelected)
         {
-            Debug.Log("Item: " + _roomLobbyData[index]["roomName"]);
-            _selectedRoomIndex = index;
+            if(index >= 0 && index < _roomLobbyData.Count)
+            {
+                Debug.Log("Item: " + _roomLobbyData[index]["roomName"]);
+                _selectedRoomIndex = index;
+            }
         }
         else
         {
@@ -135,30 +116,33 @@ public class MultiplayerLobbyController : BaseController
             return;
         }
 
-        view.RemoveListener(MenuUIEventType.JOIN_SERVER, onJoinButton);
+        // view.RemoveListener(MenuUIEventType.JOIN_SERVER, onJoinButton);
 
         string roomName = _roomLobbyData[_selectedRoomIndex]["roomName"] as string;
-        // bool result = PhotonNetwork.JoinRoom(roomName);
-        _networkManager.JoinSession(roomName);
+        bool result = PhotonNetwork.JoinRoom(roomName);
+        // PhotonNetwork.JoinRoom(roomName);
 
-        // Debug.Log(string.Format("Joining room: {0} with result: {1}", roomName, result));  
+        Debug.Log(string.Format("Joining room: {0} with result: {1}", roomName, result));  
     }
 
     private void onCreateButton(GeneralEvent e)
     {
-        view.RemoveListener(MenuUIEventType.BACK, onBackButton);
+        // view.RemoveListener(MenuUIEventType.BACK, onBackButton);
         Debug.Log("Create a room");
 
-        var customToken = new PhotonRoomProperties();
-        customToken.AddRoomProperty("maxPlayers", NetworkManager.kMaxPlayers);
-        customToken.AddRoomProperty("currentPlayers", 1);
+        // UdpEndPoint endpoint = new UdpEndPoint(UdpIPv4Address.Localhost, 11666);
+        // _networkManager.StartServer(endpoint);
+        
+        RoomOptions options = new RoomOptions();
+        options.MaxPlayers = 4;
 
-        UdpEndPoint endpoint = new UdpEndPoint(UdpIPv4Address.Localhost, 11666);
-        _networkManager.StartServer(endpoint);
+        string roomName = "Room_" + UnityEngine.Random.Range(0, 10000);
+        PhotonNetwork.CreateRoom(roomName, options);
     }
 
     private void onBackButton(GeneralEvent e)
     {
+        PhotonNetwork.Disconnect();
         view.RemoveListener(MenuUIEventType.BACK, onBackButton);
         DispatchEvent(MenuUIEventType.BACK);
     }
@@ -170,26 +154,30 @@ public class MultiplayerLobbyController : BaseController
     //     BoltLauncher.LocalPlayer.NickName = string.Format("PL-{0}", Random.Range(0, 1000));//SystemInfo.deviceName + "_" + UnityEngine.Random.Range(0, 2000);
     // }
 
-    private List<Hashtable> _getRoomDataProvider()
+    private List<Hashtable> _getRoomDataProvider(List<RoomInfo> roomInfoList)
     {
         _roomLobbyData.Clear();
 
-        // Debug.Log("Is inside Lobby: " + PhotonNetwork.CurrentLobby.Name) ;
-        // RoomInfo[] roomList = null;// PhotonNetwork.GetRoomList();
-        //
-        // int roomCount = roomList.Length;
-        // for(int i = 0; i < roomCount; ++i)
-        // {
-        //     Hashtable roomData = new Hashtable();
-        //
-        //     RoomInfo info = roomList[i];
-        //     if(!info.IsVisible) { continue; }
-        //
-        //     roomData.Add("roomName", info.Name);
-        //     roomData.Add("playerCount", string.Format("{0}/{1}", info.PlayerCount, info.MaxPlayers));
-        //     _roomLobbyData.Add(roomData);
-        // }
+        if(PhotonNetwork.InLobby || PhotonNetwork.InRoom)
+        {
+            Debug.Log("Is inside Lobby: " + PhotonNetwork.CurrentLobby.Name) ;
+            List<RoomInfo> roomList = roomInfoList; 
+            
+            int roomCount = roomList.Count;
+            for(int i = 0; i < roomCount; ++i)
+            {
+                Hashtable roomData = new Hashtable();
+            
+                RoomInfo info = roomList[i];
+                if(!info.IsVisible) { continue; }
+            
+                roomData.Add("roomName", info.Name);
+                roomData.Add("playerCount", string.Format("{0}/{1}", info.PlayerCount, info.MaxPlayers));
+                _roomLobbyData.Add(roomData);
+            }
+        }
 
         return _roomLobbyData;
     }
 }
+

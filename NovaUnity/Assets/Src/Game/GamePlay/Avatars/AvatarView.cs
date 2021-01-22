@@ -28,7 +28,7 @@ public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPasseng
     public ParentConstraint _rightHandConstraint;
     
     public AvatarConstrainer constrainer;
-    public NetworkEntity _networkEntity;
+    // public NetworkEntity _networkEntity;
     public Animator _animator;
 
 
@@ -87,11 +87,11 @@ public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPasseng
         get { return cameraTargetGroup.transform; }
     }
     
-    public NetworkEntity netEntity
-    {
-        get => _networkEntity;
-        set => _networkEntity = value;
-    }
+    // public NetworkEntity netEntity
+    // {
+    //     get => _networkEntity;
+    //     set => _networkEntity = value;
+    // }
 
     public Animator animator
     {

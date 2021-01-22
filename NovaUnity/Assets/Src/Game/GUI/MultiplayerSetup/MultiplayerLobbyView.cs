@@ -50,7 +50,7 @@ public class MultiplayerLobbyView : UIView
     
     public void SetLobbyDataProvider(List<Hashtable> dataProvider)
     {
-        
+        _listScrollRect.dataProvider = dataProvider;
     }
     private GameObject itemRendererFactory(int itemType, Transform parent)
     {

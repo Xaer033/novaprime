@@ -1,9 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿
 
-public class NetworkOpCodes
+public class NetworkOpCode
 {
+    public const byte NONE                      = 1;
     public const byte READY_TOGGLE              = 1;
     public const byte INITIAL_GAME_STATE        = 2;
     public const byte PLAYER_TURN_COMPLETED     = 3;
@@ -13,3 +12,10 @@ public class NetworkOpCodes
     public const byte TIMER_UPDATE              = 7;
     public const byte FORCE_TURN_END            = 8;
 }
+
+// public enum NetworkOpCode : byte
+// {
+//     NONE = 0,
+//     READY_TOGGLE,
+//     TIMER_UPDATE
+// }

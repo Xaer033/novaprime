@@ -1,4 +1,5 @@
 ﻿using GhostGen;
+using Photon.Pun;
 
 public class MainMenuState : IGameState
 {

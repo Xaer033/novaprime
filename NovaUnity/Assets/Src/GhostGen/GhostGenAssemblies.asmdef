@@ -3,7 +3,16 @@
     "references": [
         "DOTween.Modules",
         "UnityEngine.UI",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "PhotonChat",
+        "PhotonRealtime",
+        "PhotonUnityNetworking",
+        "PhotonUnityNetworking.Editor",
+        "PhotonUnityNetworking.Utilities",
+        "PhotonUnityNetworking.Utilities.Culling.Editor",
+        "PhotonUnityNetworking.Utilities.PhotonPlayer.Editor",
+        "PhotonWebSocket",
+        ""
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

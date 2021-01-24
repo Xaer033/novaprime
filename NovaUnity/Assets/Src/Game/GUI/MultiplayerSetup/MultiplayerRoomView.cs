@@ -6,11 +6,13 @@ using GhostGen;
 using UnityEngine.Assertions;
 using System;
 using ExitGames.Client.Photon;
+using Photon.Realtime;
 using TMPro;
 
 public class MultiplayerRoomView : UIView
 {
     public TextMeshProUGUI roomTitle;
+    
     public Button startButton;
     public Button leaveButton;
     public Toggle readyToggle;
@@ -25,7 +27,23 @@ public class MultiplayerRoomView : UIView
 
     void Awake()
     {
-        for (int i = 0; i < 4; ++i)
+
+        if(startButton != null)
+        {
+            startButton.onClick.AddListener(onStartButton);
+        }
+        
+        if(leaveButton != null)
+        {
+            leaveButton.onClick.AddListener(onBackButton);
+        }
+
+        if(readyToggle != null)
+        {
+            readyToggle.onValueChanged.AddListener(onToggle);
+        }
+        
+        for (int i = 0; i < NetworkManager.kMaxPlayers; ++i)
         {
             RoomPlayerItemView pView = GameObject.Instantiate<RoomPlayerItemView>(playerItemViewPrefab, playerGroup, false);
             pView.gameObject.SetActive(false);
@@ -52,23 +70,23 @@ public class MultiplayerRoomView : UIView
         }
     }
 
-    // public void SetPlayer(int index, Photon.Pun. player)
-    // {
-    //     Assert.IsTrue(index < _playerItemViewList.Count);
-    //
-    //     RoomPlayerItemView pView = _playerItemViewList[index];
-    //     if(player != null)
-    //     {
-    //         pView.playerId = player.ID;
-    //         pView.gameObject.SetActive(true);
-    //         pView.playerName.text = player.NickName;
-    //         pView.checkmark.gameObject.SetActive(false);
-    //     }
-    //     else
-    //     {
-    //         pView.gameObject.SetActive(false);
-    //     }
-    // }
+    public void SetPlayer(int index, Player player)
+    {
+        Assert.IsTrue(index < _playerItemViewList.Count);
+    
+        RoomPlayerItemView pView = _playerItemViewList[index];
+        if(player != null)
+        {
+            pView.gameObject.SetActive(true);
+            pView.playerId = player.ActorNumber;
+            pView.playerName.text = player.NickName;
+            pView.checkmark.gameObject.SetActive(false);
+        }
+        else
+        {
+            pView.gameObject.SetActive(false);
+        }
+    }
 
     public int GetIndexForPlayerId(int playerId)
     {
@@ -98,7 +116,21 @@ public class MultiplayerRoomView : UIView
         }
     }
 
+    private void onBackButton()
+    {
+        DispatchEvent(MenuUIEventType.BACK);
+    }
 
+    private void onStartButton()
+    {
+        DispatchEvent(MenuUIEventType.CONTINUE);
+    }
+
+    private void onToggle(bool isSelected)
+    {
+        DispatchEvent(MenuUIEventType.TOGGLE, false, isSelected);
+    }
+    
     protected override void OnViewUpdate()
     {
         if(IsInvalid(InvalidationFlag.STATIC_DATA))

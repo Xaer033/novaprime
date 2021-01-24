@@ -105,7 +105,6 @@ namespace GhostGen
             AssetRequest assetRequest = new AssetRequest(viewPath);
             ResourceRequest request = Resources.LoadAsync<T>(assetRequest.path);
             
-                
             if(request == null) { return false; }
 
             AsyncBlock block = AsyncBlock.Create<T>(assetRequest.path, request, callback, assetRequest.parent);

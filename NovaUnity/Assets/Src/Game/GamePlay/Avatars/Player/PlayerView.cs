@@ -1,7 +1,8 @@
-﻿using Sirenix.OdinInspector;
+﻿using Photon.Pun;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
-public class PlayerView : AvatarView
+public class PlayerView : AvatarView, Photon.Pun.IPunObservable
 {
     [BoxGroup("Hooks")]
     public Transform deadRoot;
@@ -47,5 +48,10 @@ public class PlayerView : AvatarView
             _rightFootPuffFx.Clear();
             _rightFootPuffFx.Play();
         }
+    }
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        
     }
 }

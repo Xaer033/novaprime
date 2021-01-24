@@ -17,7 +17,7 @@ public enum AudioType
 public class AudioDictionary : ScriptableObject
 {
     [SerializeField]
-    private List<AudioPair> _audioList;
+    private List<AudioPair> _audioList = new List<AudioPair>();
     private Dictionary<AudioType, IAudioStore> _audioDictionary = new Dictionary<AudioType, IAudioStore>();
     
     public void OnEnable()

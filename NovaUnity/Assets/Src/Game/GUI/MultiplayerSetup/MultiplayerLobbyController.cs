@@ -5,6 +5,7 @@ using GhostGen;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using Random = UnityEngine.Random;
 
 public class MultiplayerLobbyController : BaseController
@@ -41,7 +42,8 @@ public class MultiplayerLobbyController : BaseController
 
             _networkManager.onJoinedRoom += onJoinedRoom;
             _networkManager.onCreatedRoom += onCreatedRoom;
-            _networkManager.onNetworkStart += onNetworkStart;
+            _networkManager.onConnectedToMaster += onConnectedToMaster;
+            _networkManager.onNetworkDisconnected += onNetworkDisconnected;
             _networkManager.onReceivedRoomListUpdate += onRoomListUpdate;
 
         });
@@ -57,26 +59,49 @@ public class MultiplayerLobbyController : BaseController
 
             _networkManager.onJoinedRoom -= onJoinedRoom;
             _networkManager.onCreatedRoom -= onCreatedRoom;
-            _networkManager.onNetworkStart -= onNetworkStart;
+            _networkManager.onConnectedToMaster -= onConnectedToMaster;
+            _networkManager.onNetworkDisconnected -= onNetworkDisconnected;
             _networkManager.onReceivedRoomListUpdate -= onRoomListUpdate;
         }
 
         base.RemoveView();
     }
 
+    private MultiplayerLobbyView lobbyView
+    {
+        get { return view as MultiplayerLobbyView;}
+    }
+    
     private void onJoinedRoom()
     {
         Debug.Log("Room Joined: " + PhotonNetwork.CurrentRoom.Name);
+        
         //Switch to room view
-    }
-    private void onCreatedRoom()
-    {
-        Debug.Log("Room Created");
+        if(!PhotonNetwork.OfflineMode)
+        {
+            DispatchEvent(MenuUIEventType.GOTO_NETWORK_ROOM);
+        }
     }
     
-    private void onNetworkStart()
+    private void onCreatedRoom()
     {
         
+    }
+    
+    private void onConnectedToMaster()
+    {
+        if(!PhotonNetwork.OfflineMode)
+        {
+            PhotonNetwork.JoinLobby();
+        }
+    }
+
+    private void onNetworkDisconnected(DisconnectCause cause)
+    {
+        PhotonNetwork.OfflineMode = true;
+        PhotonNetwork.JoinRoom(NetworkManager.kSingleplayerRoom);
+
+        DispatchEvent(MenuUIEventType.BACK);
     }
   
     private void onRoomListUpdate(List<RoomInfo> roomList)
@@ -88,11 +113,6 @@ public class MultiplayerLobbyController : BaseController
         }
     }
 
-    private MultiplayerLobbyView lobbyView
-    {
-        get { return (view as MultiplayerLobbyView); }
-    }
-    
     private void onRoomClicked(int index, bool isSelected)
     {
         (view as MultiplayerLobbyView)._joinButton._button.interactable =  (view as MultiplayerLobbyView)._listScrollRect.selectedIndex >= 0;
@@ -121,7 +141,6 @@ public class MultiplayerLobbyController : BaseController
 
         string roomName = _roomLobbyData[_selectedRoomIndex]["roomName"] as string;
         bool result = PhotonNetwork.JoinRoom(roomName);
-        // PhotonNetwork.JoinRoom(roomName);
 
         Debug.Log(string.Format("Joining room: {0} with result: {1}", roomName, result));  
     }
@@ -131,9 +150,6 @@ public class MultiplayerLobbyController : BaseController
         // view.RemoveListener(MenuUIEventType.BACK, onBackButton);
         Debug.Log("Create a room");
 
-        // UdpEndPoint endpoint = new UdpEndPoint(UdpIPv4Address.Localhost, 11666);
-        // _networkManager.StartServer(endpoint);
-        
         RoomOptions options = new RoomOptions();
         options.MaxPlayers = 4;
 
@@ -143,9 +159,15 @@ public class MultiplayerLobbyController : BaseController
 
     private void onBackButton(GeneralEvent e)
     {
-        PhotonNetwork.Disconnect();
         view.RemoveListener(MenuUIEventType.BACK, onBackButton);
-        DispatchEvent(MenuUIEventType.BACK);
+        if(PhotonNetwork.IsConnected)
+        {
+            PhotonNetwork.Disconnect();
+        }
+        else
+        {
+            DispatchEvent(MenuUIEventType.BACK);
+        }
     }
 
 

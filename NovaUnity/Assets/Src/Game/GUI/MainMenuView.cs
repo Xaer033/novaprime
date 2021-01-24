@@ -56,7 +56,7 @@ public class MainMenuView : UIView
     private string getEventForEvent(GeneralEvent e)
     {
         if((Object)e.data == _startButton) return MenuUIEventType.PLAY;
-        if((Object)e.data == _multiplayerButton) return MenuUIEventType.PLAY_MULTIPLAYER;
+        if((Object)e.data == _multiplayerButton) return MenuUIEventType.GOTO_MULTIPLAYER_LOBBY;
         if((Object)e.data == _creditsButton) return MenuUIEventType.CREDITS;
         if((Object)e.data == _quitButton) return MenuUIEventType.QUIT;
 

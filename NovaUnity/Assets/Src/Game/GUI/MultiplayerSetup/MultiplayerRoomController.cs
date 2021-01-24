@@ -1,72 +1,82 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using ExitGames.Client.Photon;
+using Photon.Pun;
+using Photon.Realtime;
+using UnityEditor;
 using UnityEngine;
-using System;
-using GhostGen;
 
 public class MultiplayerRoomController : BaseController 
 {
-    private MultiplayerRoomView _roomView;
     private NetworkManager _networkManager;
-    private Action _onBackCallback;
-    private Action _onStartGameCallback;
 
-    // public void Start(Action onStartGame, Action onBack)
-    // {
-    //     _onStartGameCallback = onStartGame;
-    //     _onBackCallback = onBack;
-    //
-    //     _networkManager = Singleton.instance.networkManager;
-    //     viewFactory.CreateAsync<MultiplayerRoomView>("GUI/GameSetup/MultiplayerRoomView", (v) =>
-    //     {
-    //         view = _roomView = v as MultiplayerRoomView;
-    //         _viewInitialization();
-    //
-    //         _networkManager.onPlayerConnected += _onPlayerConnectionStatusChanged;
-    //         _networkManager.onPlayerDisconnected += _onPlayerConnectionStatusChanged;
-    //         _networkManager.onLeftRoom += _onLeftRoom;
-    //         _networkManager.onCustomEvent += _onCustomEvent;
-    //
-    //         _setupPlayers();
-    //     });
-    // }
-    //
-    // public override void RemoveView()
-    // {
-    //     _networkManager.onPlayerConnected -= _onPlayerConnectionStatusChanged;
-    //     _networkManager.onPlayerDisconnected -= _onPlayerConnectionStatusChanged;
-    //     _networkManager.onLeftRoom -= _onLeftRoom;
-    //     _networkManager.onCustomEvent -= _onCustomEvent;
-    //
-    //     base.RemoveView();
-    // }
 
-    //public PlayerState[] GetPlayerList()
-    //{
-    //    if(!PhotonNetwork.isMasterClient)
-    //    {
-    //        Debug.LogError("Trying To call get player List when you are not the master client, thats a paddlin'");
-    //        return null;
-    //    }
+    public MultiplayerRoomController()
+    {
+        _networkManager = Singleton.instance.networkManager;
+    }
+    
+    public void Start()
+    {
+        viewFactory.CreateAsync<MultiplayerRoomView>("GUI/MainMenu/MultiplayerRoomView", (v) =>
+        {
+            view = v;
+    
+            view.AddListener(MenuUIEventType.TOGGLE, onReadyButton);
+            view.AddListener(MenuUIEventType.BACK, onBackButton);
+            
+            _networkManager.onPlayerConnected += onPlayerConnectionStatusChanged;
+            _networkManager.onPlayerDisconnected += onPlayerConnectionStatusChanged;
+            _networkManager.onLeftRoom += onLeftRoom;
+            _networkManager.onCustomEvent += onCustomEvent;
+    
+            _setupPlayers();
+            _viewInitialization();
+        });
+    }
+    
+    public override void RemoveView()
+    {
+        _networkManager.onPlayerConnected -= onPlayerConnectionStatusChanged;
+        _networkManager.onPlayerDisconnected -= onPlayerConnectionStatusChanged;
+        _networkManager.onLeftRoom -= onLeftRoom;
+        _networkManager.onCustomEvent -= onCustomEvent;
+    
+        base.RemoveView();
+    }
 
-    //    PlayerState[] playerStateList = new PlayerState[PlayerGroup.kMaxPlayerCount];
+    public NetworkPlayer[] GetPlayerList()
+    {
+        if(!PhotonNetwork.IsMasterClient)
+        {
+            Debug.LogError("Trying To call get player List when you are not the master client, thats a paddlin'");
+            return null;
+        }
 
-    //    PhotonPlayer[] playerList = PhotonNetwork.playerList;
-    //    for (int i = 0; i < PlayerGroup.kMaxPlayerCount; ++i)
-    //    {
-    //        if(i < playerList.Length)
-    //        {
-    //            playerStateList[i] = PlayerState.Create(i, playerList[i].NickName, playerList[i].ID);
-    //        }
-    //        else
-    //        {
-    //            playerStateList[i] = null;
-    //        }
-    //    }
+        NetworkPlayer[] playerStateList = new NetworkPlayer[NetworkManager.kMaxPlayers];
 
-    //    return playerStateList;
-    //}
+        Player[] playerList = PhotonNetwork.PlayerList;
+        for (int i = 0; i < NetworkManager.kMaxPlayers; ++i)
+        {
+            if(i < playerList.Length)
+            {
+                playerStateList[i] = new NetworkPlayer(playerList[i]);
+            }
+            else
+            {
+                playerStateList[i] = null;
+            }
+        }
 
+        return playerStateList;
+    }
+
+    
+    private MultiplayerRoomView roomView
+    {
+        get { return view as MultiplayerRoomView; }
+    }
+    
+    
     // private void _addButtonCallbacks(bool isMaster)
     // {
     //     _roomView.leaveButton.onClick.AddListener(_onLeaveRoomButton);
@@ -81,92 +91,84 @@ public class MultiplayerRoomController : BaseController
     //     }
     // }
 
-    private void _removeButtonCallbacks()
+    
+    private void onPlayerConnectionStatusChanged(Player newPlayer)
     {
-        _roomView.leaveButton.onClick.RemoveAllListeners();
-        _roomView.startButton.onClick.RemoveAllListeners();
-        _roomView.readyToggle.onValueChanged.RemoveAllListeners();
+        
+        // _removeButtonCallbacks();
+        _setupPlayers();
+        // _addButtonCallbacks(PhotonNetwork.isMasterClient);
     }
-    //
-    // private void _onPlayerConnectionStatusChanged(PhotonPlayer newPlayer)
-    // {
-    //     _removeButtonCallbacks();
-    //     _setupPlayers();
-    //     _addButtonCallbacks(PhotonNetwork.isMasterClient);
-    // }
-    //
-    // private void _onLeaveRoomButton()
-    // {
-    //     _roomView.leaveButton.onClick.RemoveListener(_onLeaveRoomButton);
-    //     // Maybe throw up a modal dialog to ask if they are sure?
-    //     PhotonNetwork.LeaveRoom();
-    // }
-    //
-    // private void _onReadyButton(bool isSelected)
-    // {
-    //     RaiseEventOptions options = new RaiseEventOptions();
-    //     options.Receivers = ReceiverGroup.All;
-    //     PhotonNetwork.RaiseEvent(NetworkOpCodes.READY_TOGGLE, isSelected, true, options);
-    // }
-
-    private void _onLeftRoom()
+    
+    
+    private void onBackButton(GhostGen.GeneralEvent e)
     {
-        if (_onBackCallback != null)
-        {
-            _onBackCallback();
-        }
+        view.RemoveListener(MenuUIEventType.BACK, onBackButton);
+        // Maybe throw up a modal dialog to ask if they are sure?
+        PhotonNetwork.LeaveRoom();
+    }
+    
+    private void onReadyButton(GhostGen.GeneralEvent e)
+    {
+        bool isSelected = (bool)e.data;
+        RaiseEventOptions options = new RaiseEventOptions();
+        options.Receivers = ReceiverGroup.All;
+        
+        PhotonNetwork.RaiseEvent(NetworkOpCode.READY_TOGGLE, isSelected, options, SendOptions.SendReliable);
     }
 
-    private void _onStartGameButton()
+    private void onLeftRoom()
     {
-        if(_onStartGameCallback != null)
-        {
-            _onStartGameCallback();
-        }
+        DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);
     }
 
-    private void _onCustomEvent(byte eventCode, object content, int senderId)
+    private void onCustomEvent(byte eventCode, object content, int senderId)
     {
         if(eventCode == NetworkOpCode.READY_TOGGLE)
         {
-            int index = _roomView.GetIndexForPlayerId(senderId);
+            int index = roomView.GetIndexForPlayerId(senderId);
             if(index >= 0)
             {
-                _roomView.SetIsReady(index, (bool)content);
+                roomView.SetIsReady(index, (bool)content);
             }
         }
     }
 
-    // private void _viewInitialization()
-    // {
-    //     _roomView.SetTitle(PhotonNetwork.room.Name);
-    //     bool isMaster = PhotonNetwork.isMasterClient;
-    //     _roomView.IsMasterClient(isMaster);
-    //     
-    //     _addButtonCallbacks(isMaster);
-    // }
+    private void _viewInitialization()
+    {
+        roomView.SetTitle(PhotonNetwork.CurrentRoom.Name);
+        bool isMaster = PhotonNetwork.IsMasterClient;
+        roomView.IsMasterClient(isMaster);
+        
+        // _addButtonCallbacks(isMaster);
+    }
     //
-    // private void _setupPlayers()
-    // {
-    //     List<PhotonPlayer> playerList = new List<PhotonPlayer>(PhotonNetwork.playerList);
-    //     playerList.Sort((a, b) =>
-    //     {
-    //         return a.ID.CompareTo(b.ID);
-    //     });
-    //
-    //     int count = playerList.Count;
-    //     for(int i = 0; i < 4; ++i)
-    //     {
-    //         if(i < count)
-    //         {
-    //             _roomView.SetPlayer(i, playerList[i]);
-    //         }
-    //         else
-    //         {
-    //             _roomView.SetPlayer(i, null);
-    //         }
-    //     }
-    //
-    //     _roomView.IsMasterClient(PhotonNetwork.isMasterClient);
-    // }
+    private void _setupPlayers()
+    {
+        List<Player> playerList = new List<Player>(PhotonNetwork.PlayerList);
+        playerList.Sort((a, b) =>
+        {
+            if(a == null || b == null)
+            {
+                return 0;
+            }
+            
+            return a.ActorNumber.CompareTo(b.ActorNumber);
+        });
+    
+        int count = playerList.Count;
+        for(int i = 0; i < NetworkManager.kMaxPlayers; ++i)
+        {
+            if(i < count)
+            {
+                roomView.SetPlayer(i, playerList[i]);
+            }
+            else
+            {
+                roomView.SetPlayer(i, null);
+            }
+        }
+    
+        roomView.IsMasterClient(PhotonNetwork.IsMasterClient);
+    }
 }

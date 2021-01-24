@@ -10,7 +10,8 @@ public class NetworkManager  : MonoBehaviourPunCallbacks, IOnEventCallback
 
     public const string kGameVersion = "0.1.0";
     public const int kMaxPlayers = 4;
-
+    public const string kSingleplayerRoom = "Singleplayer";
+    
     public event Action<byte , object , int > onCustomEvent;
     
     public event Action onCreatedRoom;
@@ -18,7 +19,8 @@ public class NetworkManager  : MonoBehaviourPunCallbacks, IOnEventCallback
     public event Action onJoinedRoom;
     public event Action onLeftLobby;
     public event Action onLeftRoom;
-    public event Action onNetworkStart;
+    public event Action onConnectedToMaster;
+    public event Action<DisconnectCause> onNetworkDisconnected;
     public event Action<List<RoomInfo>> onReceivedRoomListUpdate;
     public event Action<Player> onPlayerConnected;
     public event Action<Player> onPlayerDisconnected;
@@ -29,19 +31,22 @@ public class NetworkManager  : MonoBehaviourPunCallbacks, IOnEventCallback
     
     public bool Initialize()
     {
-        return PhotonNetwork.ConnectUsingSettings();
         _roomList.Clear();
+        return PhotonNetwork.ConnectUsingSettings();
     }
     
     public void LateDispose()
     {
-    
         onCreatedRoom = null;
         onJoinedLobby = null;
         onJoinedRoom = null;
         onLeftLobby = null;
         onLeftRoom = null;
-        onNetworkStart = null;
+        onConnectedToMaster = null;
+        onNetworkDisconnected = null;
+        onReceivedRoomListUpdate = null;
+        onPlayerConnected = null;
+        onPlayerDisconnected = null;
     
         if (PhotonNetwork.IsConnected)
         {
@@ -59,22 +64,13 @@ public class NetworkManager  : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         if (PhotonNetwork.InRoom)
         {
-            Debug.Log("Network: Already in Session: " + PhotonNetwork.CurrentRoom.Name);
+            Debug.LogError("Network: Already in Session: " + PhotonNetwork.CurrentRoom.Name);
             return;
         }
     
         PhotonNetwork.CreateRoom(roomId, options);
     }
-    //
-    
-    // public void OnConnectedToServer()
-    // {
-    //     if (onConnection != null)
-    //     {
-    //         onConnection()
-    //     }
-    // }
-    
+
     public void Disconnect()
     {
         PhotonNetwork.Disconnect();
@@ -105,12 +101,13 @@ public class NetworkManager  : MonoBehaviourPunCallbacks, IOnEventCallback
     
     public override void OnFriendListUpdate(List<FriendInfo> friendList)
     {
-        throw new NotImplementedException();
+        Debug.LogFormat("OnFriendListUpdate: {0}", friendList.Count);
     }
     
     /// PUN Callbacks
     public override void OnCreatedRoom()
     {
+        Debug.Log("OnCreatedRoom");
         if(onCreatedRoom != null)
         {
             onCreatedRoom();
@@ -119,11 +116,12 @@ public class NetworkManager  : MonoBehaviourPunCallbacks, IOnEventCallback
     
     public override void OnCreateRoomFailed(short returnCode, string message)
     {
-        throw new NotImplementedException();
+        Debug.LogErrorFormat("OnCreateRoomFailed: {0}, {1}", returnCode, message);
     }
     
     public void OnEvent(EventData photonEvent)
     {
+        Debug.LogFormat("OnEvent: {0}, {1} ", photonEvent.Code, photonEvent.Sender);
         if (onCustomEvent != null)
         {
             onCustomEvent(photonEvent.Code, photonEvent.CustomData, photonEvent.Sender );
@@ -171,23 +169,33 @@ public class NetworkManager  : MonoBehaviourPunCallbacks, IOnEventCallback
     
     public override void OnConnected()
     {
+        Debug.Log("OnConnected");
         // throw new NotImplementedException();
     }
     
     public override void OnConnectedToMaster()
     {
-        PhotonNetwork.JoinLobby();
+        Debug.Log("OnConnectedToMaster");
+
+        if(onConnectedToMaster != null)
+        {
+            onConnectedToMaster();
+        }
     }
     
     public override void OnDisconnected(DisconnectCause cause)
     {
         // throw new NotImplementedException();
         Debug.Log("Disconnection: " + cause.ToString());
+        if(onNetworkDisconnected != null)
+        {
+            onNetworkDisconnected(cause);
+        }
     }
     
     public override void OnRegionListReceived(RegionHandler regionHandler)
     {
-        // throw new NotImplementedException();
+        Debug.LogFormat("OnRegionListReceived:{0}\n{1}\n", regionHandler.BestRegion.ToString(), regionHandler.GetResults());
     }
     
     public override void OnCustomAuthenticationResponse(Dictionary<string, object> data)
@@ -215,17 +223,18 @@ public class NetworkManager  : MonoBehaviourPunCallbacks, IOnEventCallback
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
         // throw new NotImplementedException();
-        Debug.LogErrorFormat("Network Error:{0} : {1}", returnCode, message);
+        Debug.LogErrorFormat("OnJoinRoomFailed:{0} : {1}", returnCode, message);
     }
     
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
         // throw new NotImplementedException();
-        Debug.LogErrorFormat("Network Error:{0} : {1}", returnCode, message);
+        Debug.LogErrorFormat("OnJoinRandomFailed:{0} : {1}", returnCode, message);
     }
     
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
+        Debug.LogFormat("OnPlayerEnteredRoom:{0}", newPlayer.ToStringFull());
         if(onPlayerConnected != null)
         {
             onPlayerConnected(newPlayer);
@@ -234,6 +243,7 @@ public class NetworkManager  : MonoBehaviourPunCallbacks, IOnEventCallback
     
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
+        Debug.LogFormat("OnPlayerLeftRoom:{0}", otherPlayer.ToStringFull());
         if (onPlayerDisconnected != null)
         {
             onPlayerDisconnected(otherPlayer);
@@ -242,11 +252,13 @@ public class NetworkManager  : MonoBehaviourPunCallbacks, IOnEventCallback
 
     public override void OnLeftRoom()
     {
+        Debug.Log("OnLeftRoom");
         safeCall(onLeftRoom);
     }
     
     public override void OnLeftLobby()
     {
+        Debug.Log("OnLeftLobby");
         safeCall(onLeftLobby);
     }
     

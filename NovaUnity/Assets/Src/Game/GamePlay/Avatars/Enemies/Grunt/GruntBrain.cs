@@ -154,7 +154,7 @@ public class GruntBrain : IInputGenerator
             input.horizontalMovement = -dirToTarget.normalized.x;
         }
 
-        RaycastHit2D hit;
+        // RaycastHit2D hit;
         Vector3 movementDir = new Vector3(input.horizontalMovement, 0, 0);
 
         Vector3 fellowGruntCheckDir = (Vector3.left *  movementDir.x).normalized * 0.1f;

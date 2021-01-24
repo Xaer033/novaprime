@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO.Compression;
 using GhostGen;
+using Photon.Pun;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -26,6 +27,9 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     private GameplayCamera _camera;
     private GameObject _playerParent;
     private GameObject _enemyParent;
+
+    private IPunPrefabPool _oldPool;
+    private IPunPrefabPool _prefabPool;
     
     
     public int priority { get; set; }
@@ -42,6 +46,10 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         
         _playerParent    = new GameObject("PlayerParent");
         _enemyParent     = new GameObject("EnemyParent");
+
+        _oldPool = PhotonNetwork.PrefabPool;
+        _prefabPool = new AvatarPrefabPool(_gameplayResources);
+
     }
     
     public void Start(GameSystems gameSystems, GameState gameState)
@@ -54,6 +62,8 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         
         _gameState.playerStateList.Clear();
         _gameState.enemyStateList.Clear();
+
+        PhotonNetwork.PrefabPool = _prefabPool;
     }
 
     public void FixedStep(float fixedDeltaTime)
@@ -99,7 +109,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         for (int i = 0; i < _avatarControllerList.Count; ++i)
         {
             IAvatarView view = _avatarControllerList[i].view;
-            GameObject.Destroy(view.gameObject);
+            PhotonNetwork.Destroy(view.gameObject);
         }
         
         GameObject.Destroy(_playerParent);
@@ -112,6 +122,8 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         _gameSystems.onStep -= Step;
         _gameSystems.onFixedStep -= FixedStep;
         _gameSystems.RemoveListener(GamePlayEventType.SPAWN_POINT_TRIGGERED, onSpawnPointTriggered);
+
+        PhotonNetwork.PrefabPool = _oldPool;
     }
 
     public IAvatarController GetController(string uuid)
@@ -156,7 +168,15 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
 
     private PlayerController _spawnPlayer(string uuid, UnitMap.Unit unit, Vector3 position, SpawnPointData spawnPointData)
     {
-        AvatarView view = GameObject.Instantiate<AvatarView>(unit.view as AvatarView, position, Quaternion.identity, _playerParent.transform);
+        GameObject avatarGameObject = PhotonNetwork.Instantiate(unit.id, position, Quaternion.identity);
+        if(avatarGameObject == null)
+        {
+            Debug.LogError("Avatar Gameobject could not be created");
+            return null;
+        }
+        
+        avatarGameObject.transform.SetParent(_playerParent.transform);
+        AvatarView view = avatarGameObject.GetComponent<AvatarView>();
 
         int playerIndex = spawnPointData.customInt;
         
@@ -274,4 +294,33 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
 //        string jsonCommand = JsonUtility.ToJson(command);
 //        return System.Text.Encoding.UTF8.GetBytes(jsonCommand);
 //    }
+
+
+    public class AvatarPrefabPool : IPunPrefabPool
+    {
+        private GameplayResources _gameplayResources;
+        private UnitMap _unitMap;
+        
+        public AvatarPrefabPool(GameplayResources gameplayResources)
+        {
+            _gameplayResources = gameplayResources;
+            _unitMap = _gameplayResources.unitMap;
+        }
+        public GameObject Instantiate(string prefabId, Vector3 position, Quaternion rotation)
+        {
+            // TODO: Later we can do real pooling, right now, just use the unit map to get the right prefab and boop it to the seen
+            UnitMap.Unit unit = _unitMap.GetUnit(prefabId);
+            GameObject gObject = GameObject.Instantiate(unit.view.gameObject, position, rotation);
+            return gObject;
+        }
+
+        public void Destroy(GameObject gameObject)
+        {
+            // TODO: Actually Recycle this bitch instead of destroying it
+            GameObject.Destroy(gameObject);
+        }
+        
+    }
 }
+
+

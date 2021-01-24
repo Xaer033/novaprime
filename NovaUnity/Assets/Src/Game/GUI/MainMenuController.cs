@@ -1,4 +1,5 @@
 ﻿using GhostGen;
+using Photon.Pun;
 using UnityEngine;
 
 public class MainMenuController : BaseController
@@ -12,9 +13,10 @@ public class MainMenuController : BaseController
     
     public void Start ()
     {
-        _setupView();
-        
+        _networkManager.onConnectedToMaster += onConnectedToMaster;
         _networkManager.onJoinedLobby += onJoinedLobby;
+        
+        _setupView();
 	}
     
     private void _setupView()
@@ -23,12 +25,20 @@ public class MainMenuController : BaseController
         {
             view = v;
             view.AddListener(MenuUIEventType.PLAY, onPlay);
-            view.AddListener(MenuUIEventType.PLAY_MULTIPLAYER, onMultiplayerPlay);
+            view.AddListener(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY, onMultiplayerPlay);
             view.AddListener(MenuUIEventType.CREDITS, onCredits);
             view.AddListener(MenuUIEventType.QUIT, onQuit);
 
             Singleton.instance.gui.screenFader.FadeIn();
         });
+    }
+    
+    private void onConnectedToMaster()
+    {
+        if(!PhotonNetwork.OfflineMode)
+        {
+            PhotonNetwork.JoinLobby();
+        }
     }
     
     private MainMenuView mainMenuView
@@ -38,7 +48,7 @@ public class MainMenuController : BaseController
     
     private void onPlay(GeneralEvent e)
     {
-        DispatchEvent(MenuUIEventType.CHANGE_STATE, false, NovaGameState.SINGLEPLAYER_GAMEPLAY);
+        DispatchEvent(MenuUIEventType.START_SINGLEPLAYER_GAME);
     }
 
     private void onMultiplayerPlay(GeneralEvent e)
@@ -64,12 +74,13 @@ public class MainMenuController : BaseController
     private void onJoinedLobby()
     {
         mainMenuView._canvasGroup.interactable = true;
-        DispatchEvent(MenuUIEventType.PLAY_MULTIPLAYER);
+        DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);
     }
 
     public override void RemoveView()
     {
         _networkManager.onJoinedLobby -= onJoinedLobby;
+        _networkManager.onConnectedToMaster -= onConnectedToMaster;
         base.RemoveView();
         
     }

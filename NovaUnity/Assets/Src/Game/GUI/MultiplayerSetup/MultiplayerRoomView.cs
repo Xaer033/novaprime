@@ -6,22 +6,32 @@ using GhostGen;
 using UnityEngine.Assertions;
 using System;
 using ExitGames.Client.Photon;
+using Photon.Pun;
 using Photon.Realtime;
 using TMPro;
 
 public class MultiplayerRoomView : UIView
 {
+    public class PlayerData
+    {
+        public bool isReady;
+        public string nickName;
+        public int actorNumber = -1;
+    }
+    
     public TextMeshProUGUI roomTitle;
     
-    public Button startButton;
-    public Button leaveButton;
-    public Toggle readyToggle;
+    public GButton startButton;
+    public GButton leaveButton;
+    public GButton readyButton;
 
     public RoomPlayerItemView playerItemViewPrefab;
     public Transform playerGroup;
 
     private List<RoomPlayerItemView> _playerItemViewList = new List<RoomPlayerItemView>(4);
     private List<bool> _playerIsReady = new List<bool>(4);
+    private Dictionary<int, PlayerData> _playerDataMap = new Dictionary<int, PlayerData>(4);
+    
     private string _roomTitle;
     private bool _isMaster;
 
@@ -30,17 +40,17 @@ public class MultiplayerRoomView : UIView
 
         if(startButton != null)
         {
-            startButton.onClick.AddListener(onStartButton);
+            startButton.AddListener(UIEvent.TRIGGERED, onButton);
         }
         
         if(leaveButton != null)
         {
-            leaveButton.onClick.AddListener(onBackButton);
+            leaveButton.AddListener(UIEvent.TRIGGERED, onButton);
         }
 
-        if(readyToggle != null)
+        if(readyButton != null)
         {
-            readyToggle.onValueChanged.AddListener(onToggle);
+            readyButton.AddListener(UIEvent.TRIGGERED, onButton);
         }
         
         for (int i = 0; i < NetworkManager.kMaxPlayers; ++i)
@@ -49,6 +59,7 @@ public class MultiplayerRoomView : UIView
             pView.gameObject.SetActive(false);
             _playerItemViewList.Add(pView);
             _playerIsReady.Add(false);
+            
         }
     }
 
@@ -70,22 +81,31 @@ public class MultiplayerRoomView : UIView
         }
     }
 
-    public void SetPlayer(int index, Player player)
+    public void SetPlayer(int index, Player player, bool isReady)
     {
         Assert.IsTrue(index < _playerItemViewList.Count);
     
         RoomPlayerItemView pView = _playerItemViewList[index];
         if(player != null)
         {
-            pView.gameObject.SetActive(true);
-            pView.playerId = player.ActorNumber;
-            pView.playerName.text = player.NickName;
-            pView.checkmark.gameObject.SetActive(false);
+            // pView.gameObject.SetActive(true);
+            // pView.actorNumber = player.ActorNumber;
+            // pView.playerName.text = player.NickName;
+            // pView.checkmark.gameObject.SetActive(false);
+
+            PlayerData pData = new PlayerData();
+            pData.actorNumber = player.ActorNumber;
+            pData.isReady = isReady;
+            pData.nickName = player.NickName;
+            _playerDataMap[index] = pData;
         }
         else
         {
-            pView.gameObject.SetActive(false);
+            // pView.gameObject.SetActive(false);
+            _playerDataMap[index] = null;
         }
+
+        invalidateFlag = InvalidationFlag.DYNAMIC_DATA;
     }
 
     public int GetIndexForPlayerId(int playerId)
@@ -97,7 +117,7 @@ public class MultiplayerRoomView : UIView
             {
                 continue;
             }
-            if(playerId == _playerItemViewList[i].playerId)
+            if(playerId == _playerItemViewList[i].actorNumber)
             {
                 return i;
             }
@@ -105,37 +125,46 @@ public class MultiplayerRoomView : UIView
         return -1;
     }
 
-    public void SetIsReady(int index, bool isActive)
+    public void SetIsReady(int index, bool isReady)
     {
         Assert.IsTrue(index < _playerIsReady.Count);
+        Assert.IsTrue(index >= 0);
 
-        if (_playerIsReady[index] != isActive)
+        if(index < 0 || index >= _playerIsReady.Count)
         {
-            _playerIsReady[index] = isActive;
+            return;
+        }
+        
+        if (_playerIsReady[index] != isReady)
+        {
+            _playerIsReady[index] = isReady;
+            _playerDataMap[index].isReady = isReady;
             invalidateFlag = InvalidationFlag.DYNAMIC_DATA;
         }
     }
 
-    private void onBackButton()
+    private void onButton(GeneralEvent e)
     {
-        DispatchEvent(MenuUIEventType.BACK);
+        string eventName = getEventForEvent(e);
+        if(!string.IsNullOrEmpty(eventName))
+        {
+            DispatchEvent(eventName);
+        }
     }
 
-    private void onStartButton()
-    {
-        DispatchEvent(MenuUIEventType.CONTINUE);
-    }
+    private string getEventForEvent(GeneralEvent e)
+    {   
+        if((GButton)e.data == startButton) return MenuUIEventType.CONTINUE;
+        if((GButton)e.data == leaveButton) return MenuUIEventType.BACK;
+        if((GButton)e.data == readyButton) return MenuUIEventType.TOGGLE;
 
-    private void onToggle(bool isSelected)
-    {
-        DispatchEvent(MenuUIEventType.TOGGLE, false, isSelected);
+        return "";
     }
-    
     protected override void OnViewUpdate()
     {
         if(IsInvalid(InvalidationFlag.STATIC_DATA))
         {
-            readyToggle.gameObject.SetActive(!_isMaster);
+            readyButton.gameObject.SetActive(!_isMaster);
             startButton.gameObject.SetActive(_isMaster);
             
             roomTitle.text = _roomTitle;
@@ -143,10 +172,27 @@ public class MultiplayerRoomView : UIView
 
         if (IsInvalid(InvalidationFlag.DYNAMIC_DATA))
         {
-            int count = _playerIsReady.Count;
+            int localPlayerIndex = GetIndexForPlayerId(PhotonNetwork.LocalPlayer.ActorNumber);
+            int count = NetworkManager.kMaxPlayers;
             for (int i = 0; i < count; ++i)
             {
-                _playerItemViewList[i].checkmark.gameObject.SetActive(_playerIsReady[i]);
+                PlayerData pData = _playerDataMap[i];
+                RoomPlayerItemView playerView = _playerItemViewList[i];
+                
+                playerView.gameObject.SetActive(pData != null);
+
+                if(pData != null)
+                {
+                    bool isReady = pData.isReady;
+                    playerView.checkmark.gameObject.SetActive(isReady);
+                    playerView.playerName.text = pData.nickName;
+                    playerView.actorNumber = pData.actorNumber;
+                    
+                    if(i == localPlayerIndex)
+                    {
+                        readyButton.text = isReady ? "Unready" : "Ready";
+                    }
+                }
             }
         }
     }

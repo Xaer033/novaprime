@@ -75,10 +75,11 @@ public class MultiplayerLobbyController : BaseController
     private void onJoinedRoom()
     {
         Debug.Log("Room Joined: " + PhotonNetwork.CurrentRoom.Name);
-        
+
         //Switch to room view
         if(!PhotonNetwork.OfflineMode)
         {
+            PhotonNetwork.LocalPlayer.NickName = string.Format("P{0}", PhotonNetwork.LocalPlayer.ActorNumber);
             DispatchEvent(MenuUIEventType.GOTO_NETWORK_ROOM);
         }
     }

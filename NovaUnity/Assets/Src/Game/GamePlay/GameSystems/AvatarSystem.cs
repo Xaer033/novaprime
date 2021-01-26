@@ -2,6 +2,7 @@
 using System.IO.Compression;
 using GhostGen;
 using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -33,7 +34,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     
     
     public int priority { get; set; }
-    
+
     public AvatarSystem(GameplayResources gameplayResources)
     {
         _gameplayResources = gameplayResources;
@@ -137,7 +138,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         return controller;
     }
     
-    public T Spawn<T>(string unitId, Vector3 position, SpawnPointData spawnPointData = default) where T : IAvatarController
+    public T Spawn<T>(string unitId, Vector3 position, SpawnPointData spawnPointData = default) //where T : IAvatarController
     {
         UnitMap.Unit unit = _unitMap.GetUnit(unitId);
         string uuid = _generateUUID(unit);
@@ -168,35 +169,63 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
 
     private PlayerController _spawnPlayer(string uuid, UnitMap.Unit unit, Vector3 position, SpawnPointData spawnPointData)
     {
-        GameObject avatarGameObject = PhotonNetwork.Instantiate(unit.id, position, Quaternion.identity);
-        if(avatarGameObject == null)
+        NetworkPlayer netPlayer = null;
+        Player photonPlayer = null;
+        
+        int playerIndex = spawnPointData.customInt;
+        bool isOwnerOfPlayer = true;
+        if(playerIndex < _gameState.netPlayerList.Count)
         {
-            Debug.LogError("Avatar Gameobject could not be created");
+            netPlayer = _gameState.netPlayerList[playerIndex];
+            photonPlayer = PhotonNetwork.CurrentRoom.GetPlayer(netPlayer.number);
+            if(photonPlayer == null || !photonPlayer.IsLocal)
+            {
+                isOwnerOfPlayer = false;
+            }
+        }
+        else
+        {
             return null;
         }
-        
-        avatarGameObject.transform.SetParent(_playerParent.transform);
-        AvatarView view = avatarGameObject.GetComponent<AvatarView>();
 
-        int playerIndex = spawnPointData.customInt;
+        GameObject avatarGameObject = null;
+        AvatarView view = null;
         
+        if(isOwnerOfPlayer)
+        {
+            avatarGameObject = PhotonNetwork.Instantiate(unit.id, position, Quaternion.identity);
+        }
+
+        if(avatarGameObject != null)
+        {
+            avatarGameObject.transform.SetParent(_playerParent.transform);
+            view = avatarGameObject.GetComponent<AvatarView>();
+        }
+
+
         GameplayCamera cam = _getOrCreatePlayerCamera(playerIndex);
         if (cam != null)
         {
-            cam.AddTarget(view.cameraTargetGroup.transform);
+            if(photonPlayer.IsLocal)
+            {
+                cam.AddTarget(view.cameraTargetGroup.transform);
+            }
         }
         else
         {
             Debug.LogError("Could not find or create gameplay camera!");
         }
-        
-        PlayerState state = PlayerState.Create(uuid, unit.stats, position);
 
+        PlayerState state = PlayerState.Create(uuid, unit.stats, position);
+        state.playerNumber = netPlayer.number;
         PlayerInput input = new PlayerInput(playerIndex, cam.gameCamera);
         PlayerController controller = new PlayerController(unit, state, view, input);
-        controller.Start(_gameSystems);
-
+        controller.isSimulating = true;
+        
         _gameState.playerStateList.Add(state); 
+        
+        controller.Start(_gameSystems);
+        
         return controller;
     }
 

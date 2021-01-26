@@ -1375,6 +1375,7 @@ MonoBehaviour:
   deadRoot: {fileID: 1078098296706410919}
   _leftFootHook: {fileID: 9039541226417265090}
   _rightFootHook: {fileID: 2803354647866210517}
+  netView: {fileID: 8607383896381092974}
 --- !u!114 &9125514036299057097
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1455,7 +1456,7 @@ MonoBehaviour:
   Group: 0
   prefixField: -1
   Synchronization: 2
-  OwnershipTransfer: 0
+  OwnershipTransfer: 1
   ObservedComponents:
   - {fileID: 3134929727233853592}
   viewIdField: 0

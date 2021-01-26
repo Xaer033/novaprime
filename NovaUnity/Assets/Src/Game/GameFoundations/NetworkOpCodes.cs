@@ -2,15 +2,12 @@
 
 public class NetworkOpCode
 {
-    public const byte NONE                      = 1;
+    public const byte NONE                      = 0;
     public const byte READY_TOGGLE              = 1;
-    public const byte INITIAL_GAME_STATE        = 2;
-    public const byte PLAYER_TURN_COMPLETED     = 3;
-    public const byte BEGIN_NEXT_PLAYER_TURN    = 4;
-    public const byte MATCH_OVER                = 5;
-    public const byte PLAYBACK_CONFIRMED        = 6;
-    public const byte TIMER_UPDATE              = 7;
-    public const byte FORCE_TURN_END            = 8;
+    public const byte START_GAMEPLAY_LOAD       = 2;
+    public const byte ALL_PLAYERS_LOADED   = 3;
+    public const byte GAMEPLAY_LOADED      = 4;
+    // public const byte SPAWN_
 }
 
 // public enum NetworkOpCode : byte

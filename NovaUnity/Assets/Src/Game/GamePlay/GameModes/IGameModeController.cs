@@ -1,6 +1,6 @@
-﻿using System;
+﻿using GhostGen;
 
-public interface IGameModeController : GhostGen.IEventDispatcher
+public interface IGameModeController : IEventDispatcher
 {
     void Start(object context);
     void Step(float deltaTime);

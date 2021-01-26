@@ -8,6 +8,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     private float _gravity;
 
     private FrameInput _lastInput;
+    // private bool _isSimulating;
     private IInputGenerator _inputGen;
     
     private float _resetPlatformTime;
@@ -47,11 +48,9 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         set { _inputGen = value; }
     }
     
-    public Vector3 GetPosition()
-    {
-        return _state.position;
-    }
-
+    
+    public bool isSimulating { get; set; }
+    
     public int playerNumber
     {
         set
@@ -150,14 +149,19 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     public void Step(float deltaTime)
     {
         float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
-        if(_view && _view._viewRoot && _state != null)
+        if(view != null && view.viewRoot != null && _state != null)
         {
-            _view._viewRoot.position = Vector3.Lerp(_state.previousPosition, _state.position, alpha);
+             view.viewRoot.position = Vector3.Lerp(_state.previousPosition, _state.position, alpha);
         }
     }
 
     public void FixedStep(float deltaTime, FrameInput input)
     {
+        if(!isSimulating)
+        {
+            return;
+        }
+        
         _lastInput = input;
         AnimationInfo animationInfo = new AnimationInfo();
         

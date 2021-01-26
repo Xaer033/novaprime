@@ -1,5 +1,6 @@
 ﻿using System;
 using GhostGen;
+using Photon.Pun;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;

@@ -565,9 +565,10 @@ GameObject:
   - component: {fileID: 224073874601242298}
   - component: {fileID: 222335222431789780}
   - component: {fileID: 114101225665027506}
-  - component: {fileID: 114744404019769436}
+  - component: {fileID: 3843406765181230960}
+  - component: {fileID: 209284398877444311}
   m_Layer: 0
-  m_Name: ReadyToggle
+  m_Name: ReadyButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -632,7 +633,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &114744404019769436
+--- !u!114 &3843406765181230960
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -641,7 +642,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1530414071131538}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9085046f02f69544eb97fd06b6048fe2, type: 3}
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -668,17 +669,28 @@ MonoBehaviour:
     m_NormalTrigger: Normal
     m_HighlightedTrigger: Highlighted
     m_PressedTrigger: Pressed
-    m_SelectedTrigger: Highlighted
+    m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
   m_TargetGraphic: {fileID: 114101225665027506}
-  toggleTransition: 1
-  graphic: {fileID: 114412736927945652}
-  m_Group: {fileID: 0}
-  onValueChanged:
+  m_OnClick:
     m_PersistentCalls:
       m_Calls: []
-  m_IsOn: 0
+--- !u!114 &209284398877444311
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1530414071131538}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7d81d73173447f4db7c9e71005cb87d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _image: {fileID: 114101225665027506}
+  _button: {fileID: 3843406765181230960}
+  _text: {fileID: 114816711461560404}
 --- !u!1 &1553058145885984
 GameObject:
   m_ObjectHideFlags: 0
@@ -809,9 +821,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   roomTitle: {fileID: 114023002370062688}
-  startButton: {fileID: 114245871113722438}
-  leaveButton: {fileID: 114654392326671184}
-  readyToggle: {fileID: 114744404019769436}
+  startButton: {fileID: 6070685462826903562}
+  leaveButton: {fileID: 6177459597812523214}
+  readyButton: {fileID: 209284398877444311}
   playerItemViewPrefab: {fileID: 114429048436237400, guid: c471425db27050d46a7e37c1a752278e,
     type: 3}
   playerGroup: {fileID: 224811742283530072}

@@ -16,11 +16,6 @@ public class MainMenuController : BaseController
         _networkManager.onConnectedToMaster += onConnectedToMaster;
         _networkManager.onJoinedLobby += onJoinedLobby;
         
-        _setupView();
-	}
-    
-    private void _setupView()
-    {
         viewFactory.CreateAsync<MainMenuView>("GUI/MainMenu/MainMenuView", v =>
         {
             view = v;
@@ -31,8 +26,18 @@ public class MainMenuController : BaseController
 
             Singleton.instance.gui.screenFader.FadeIn();
         });
-    }
+	}
     
+    
+    public override void RemoveView()
+    {
+        _networkManager.onConnectedToMaster -= onConnectedToMaster;
+        _networkManager.onJoinedLobby -= onJoinedLobby;
+        
+        base.RemoveView();
+        
+    }
+
     private void onConnectedToMaster()
     {
         if(!PhotonNetwork.OfflineMode)
@@ -48,12 +53,12 @@ public class MainMenuController : BaseController
     
     private void onPlay(GeneralEvent e)
     {
-        DispatchEvent(MenuUIEventType.START_SINGLEPLAYER_GAME);
+        DispatchEvent(MenuUIEventType.GOTO_SINGLEPLAYER_GAME);
     }
 
     private void onMultiplayerPlay(GeneralEvent e)
     {
-        bool result = _networkManager.Initialize();
+        bool result = _networkManager.Connect();
         if(result)
         {
             mainMenuView._canvasGroup.interactable = false;
@@ -77,11 +82,4 @@ public class MainMenuController : BaseController
         DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);
     }
 
-    public override void RemoveView()
-    {
-        _networkManager.onJoinedLobby -= onJoinedLobby;
-        _networkManager.onConnectedToMaster -= onConnectedToMaster;
-        base.RemoveView();
-        
-    }
 }

@@ -12,6 +12,8 @@ public interface IAvatarController : ITimeWarpTarget, IAttackTarget
     AvatarState state { get; }
     UnitMap.Unit unit { get; }
     
+    bool isSimulating { get; set; }
+    
     void Move(Vector3 moveDelta, bool isOnPlatform);
 
     void SetVelocity(Vector3 velocity);

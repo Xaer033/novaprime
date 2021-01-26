@@ -27,11 +27,12 @@ public class MainMenuState : IGameState
 
 		_multiplayerRoomController = new MultiplayerRoomController();
 		_multiplayerRoomController.AddListener(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY, onMultiplayerLobbyMenu);
-		_multiplayerRoomController.AddListener(MenuUIEventType.START_MULTIPLAYER_GAME, onStartMultiplayerGame);
-
+		_multiplayerRoomController.AddListener(MenuUIEventType.GOTO_MULTIPLAYER_GAME, onStartMultiplayerGame);
+		_multiplayerRoomController.AddListener(MenuUIEventType.GOTO_MAIN_MENU, onMainMenu);
+		
 		_mainMenuController = new MainMenuController();
 		_mainMenuController.AddListener(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY, onMultiplayerLobbyMenu);
-		_mainMenuController.AddListener(MenuUIEventType.START_SINGLEPLAYER_GAME, onStartSingleplayer);
+		_mainMenuController.AddListener(MenuUIEventType.GOTO_SINGLEPLAYER_GAME, onStartSingleplayer);
 		_mainMenuController.Start();
 	}
 	
@@ -93,6 +94,13 @@ public class MainMenuState : IGameState
 	    _mainMenuController.RemoveView();
 	    _multiplayerLobbyController.RemoveView();
 	    _multiplayerRoomController.Start();
+    }
+
+    private void onMainMenu(GhostGen.GeneralEvent e)
+    {
+	    _multiplayerLobbyController.RemoveView();
+	    _multiplayerRoomController.RemoveView();
+	    _mainMenuController.Start();
     }
     
     private void onStartSingleplayer(GhostGen.GeneralEvent e)

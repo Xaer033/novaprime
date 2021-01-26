@@ -27,6 +27,7 @@ public class BruiserController : NotificationDispatcher, IAvatarController
         _inputGen = inputGen;
     }
     
+    public bool isSimulating { get; set; }
     
     public IInputGenerator input
     {

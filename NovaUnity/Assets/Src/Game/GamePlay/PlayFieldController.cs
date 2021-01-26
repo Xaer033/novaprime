@@ -1,4 +1,6 @@
-﻿using GhostGen;
+﻿using System.Collections.Generic;
+using GhostGen;
+using Photon.Realtime;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -17,15 +19,18 @@ public class PlayFieldController : NotificationDispatcher
 
     private GameplayCamera _cam;
 
-    public PlayFieldController(GameplayResources gameplayResources)
+    private List<NetworkPlayer> _playerList;
+    
+    public PlayFieldController(List<NetworkPlayer> playerList, GameplayResources gameplayResources)
     {
         _gameplayResources = gameplayResources;
+        _playerList = playerList;
     }
     public void Start()
     {
         Random.InitState(666);
 
-        _gameState = new GameState();
+        _gameState = new GameState(_playerList);
         _gameSystems = new GameSystems(_gameState, _gameplayResources);
         _gameSystems.Start();
         
@@ -47,12 +52,16 @@ public class PlayFieldController : NotificationDispatcher
 
     public void Restart()
     {
+        _pAction.Gameplay.Disable();
         ScreenFader fader = Singleton.instance.gui.screenFader;
         fader.FadeInOut(0.35f, 0.35f, () =>
         {
             CleanUp();
             Start();
-        }, null);
+        },  ()=>
+        {
+            _pAction.Gameplay.Enable();
+        });
     }
     
     public void Step(float deltaTime)

@@ -1,4 +1,6 @@
-﻿using GhostGen;
+﻿using System.Collections.Generic;
+using GhostGen;
+using Photon.Realtime;
 
 public class MultiplayerCampaignMode : NotificationDispatcher, IGameModeController
 {
@@ -6,14 +8,15 @@ public class MultiplayerCampaignMode : NotificationDispatcher, IGameModeControll
     //private GameOverPopupController     _gameOverPopupController    = new GameOverPopupController();
 //    private TuckMatchCore _tuckMatchCore;
 //    private PlayFieldController _playFieldController = new PlayFieldController();
-//    private List<PlayerState> _playerList = new List<PlayerState>(PlayerGroup.kMaxPlayerCount);
+    private List<NetworkPlayer> _playerList = new List<NetworkPlayer>(4);
     private PlayFieldController _playFieldController;
     
     public void Start(object context)
     {
         GameplayResources gameplayResources = Singleton.instance.gameplayResources;
+        _playerList = context as List<NetworkPlayer>;
         
-        _playFieldController = new PlayFieldController(gameplayResources);
+        _playFieldController = new PlayFieldController(_playerList, gameplayResources);
         _playFieldController.Start();
     }
 

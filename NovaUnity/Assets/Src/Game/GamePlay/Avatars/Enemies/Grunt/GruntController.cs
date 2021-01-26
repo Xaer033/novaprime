@@ -32,6 +32,8 @@ public class GruntController : NotificationDispatcher, IAvatarController
             _view.AddListener("onAnimDeathComplete", onAnimDeathComplete);
         }
     }
+    
+    public bool isSimulating { get; set; }
 
     public IInputGenerator input
     {

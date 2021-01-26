@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
@@ -12,7 +13,7 @@ public class NetworkManager  : MonoBehaviourPunCallbacks, IOnEventCallback
     public const int kMaxPlayers = 4;
     public const string kSingleplayerRoom = "Singleplayer";
     
-    public event Action<byte , object , int > onCustomEvent;
+    public event Action<byte, object, int> onCustomEvent;
     
     public event Action onCreatedRoom;
     public event Action onJoinedLobby;
@@ -20,6 +21,8 @@ public class NetworkManager  : MonoBehaviourPunCallbacks, IOnEventCallback
     public event Action onLeftLobby;
     public event Action onLeftRoom;
     public event Action onConnectedToMaster;
+    public event Action<Hashtable> onRoomPropertiesUpdate;
+    public event Action<Player, Hashtable> onPlayerPropertiesUpdate;
     public event Action<DisconnectCause> onNetworkDisconnected;
     public event Action<List<RoomInfo>> onReceivedRoomListUpdate;
     public event Action<Player> onPlayerConnected;
@@ -29,7 +32,7 @@ public class NetworkManager  : MonoBehaviourPunCallbacks, IOnEventCallback
     private Dictionary<string, RoomInfo> _cachedRoomList = new Dictionary<string, RoomInfo>();
     
     
-    public bool Initialize()
+    public bool Connect()
     {
         _roomList.Clear();
         return PhotonNetwork.ConnectUsingSettings();
@@ -47,6 +50,8 @@ public class NetworkManager  : MonoBehaviourPunCallbacks, IOnEventCallback
         onReceivedRoomListUpdate = null;
         onPlayerConnected = null;
         onPlayerDisconnected = null;
+        onRoomPropertiesUpdate = null;
+        onPlayerPropertiesUpdate = null;
     
         if (PhotonNetwork.IsConnected)
         {
@@ -81,24 +86,40 @@ public class NetworkManager  : MonoBehaviourPunCallbacks, IOnEventCallback
         get { return PhotonNetwork.IsConnected; }
     }
     
-    // public BoltConnection GetPlayerById(uint playerId)
-    // {
-    //     BoltConnection connection = default;
-    //     
-    //     BoltConnection[] playerList = BoltNetwork.Connections.ToList().ToArray();
-    //
-    //     int count = playerList.Length;
-    //     for(int i = 0; i < count; ++i)
-    //     {
-    //         if(playerId == playerList[i].ConnectionId)
-    //         {
-    //             connection = playerList[i];
-    //             break;
-    //         }
-    //     }
-    //     return connection;
-    // }
+    public Player GetPlayerById(int actorNumber)
+    {
+        Player connection = default;
+
+        Player[] playerList = PhotonNetwork.PlayerList;
     
+        int count = playerList.Length;
+        for(int i = 0; i < count; ++i)
+        {
+            if(actorNumber == playerList[i].ActorNumber)
+            {
+                connection = playerList[i];
+                break;
+            }
+        }
+        return connection;
+    }
+
+    public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+    {
+        if(onPlayerPropertiesUpdate != null)
+        {
+            onPlayerPropertiesUpdate(targetPlayer, changedProps);
+        }
+    }
+
+    public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+    {
+        if(onRoomPropertiesUpdate != null)
+        {
+            onRoomPropertiesUpdate(propertiesThatChanged);
+        }
+    }
+
     public override void OnFriendListUpdate(List<FriendInfo> friendList)
     {
         Debug.LogFormat("OnFriendListUpdate: {0}", friendList.Count);

@@ -7,6 +7,7 @@ public class PlayerState : AvatarState
         PlayerState state = new PlayerState();
         state.playerNumber = 0;
         state.position = position;
+        state.previousPosition = position;
         state.health = stats.maxHealth;
         state.velocity = Vector3.zero;
         state.timeScale = 1.0f;

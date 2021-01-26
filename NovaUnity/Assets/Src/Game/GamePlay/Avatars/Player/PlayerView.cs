@@ -15,6 +15,8 @@ public class PlayerView : AvatarView, Photon.Pun.IPunObservable
     private ParticleSystem _leftFootPuffFx;
     private ParticleSystem _rightFootPuffFx;
     
+    public PhotonView netView;
+    
     private void Awake()
     {
         ParticleSystem jumpPrefab = Singleton.instance.gameplayResources.jumpLandFX;
@@ -52,6 +54,22 @@ public class PlayerView : AvatarView, Photon.Pun.IPunObservable
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-        
+        if(stream.IsWriting)
+        {
+            stream.SendNext(controller.state.position);
+            stream.SendNext(controller.state.velocity);
+        }
+        else
+        {
+            Vector3 receivedPos = (Vector3)stream.ReceiveNext();
+            Vector3 receivedVel = (Vector3)stream.ReceiveNext();
+            
+            float lag = Mathf.Abs((float)(PhotonNetwork.Time - info.SentServerTime));
+            controller.state.previousPosition = controller.state.position;
+            controller.state.position = receivedPos + (receivedVel * lag);
+            
+            transform.position = controller.state.position;
+            viewRoot.position = controller.state.previousPosition;
+        }
     }
 }

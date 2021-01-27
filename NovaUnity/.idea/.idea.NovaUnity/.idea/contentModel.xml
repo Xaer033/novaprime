@@ -124,6 +124,7 @@
                 <e p="GameSystems.cs" t="Include" />
                 <e p="HealthUISystem.cs" t="Include" />
                 <e p="IGameSystem.cs" t="Include" />
+                <e p="NetworkSystem.cs" t="Include" />
                 <e p="PlatformSystem.cs" t="Include" />
                 <e p="ProjectileSystem.cs" t="Include" />
                 <e p="SpawnPointSystem.cs" t="Include" />

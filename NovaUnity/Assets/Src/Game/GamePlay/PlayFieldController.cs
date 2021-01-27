@@ -20,18 +20,20 @@ public class PlayFieldController : NotificationDispatcher
     private GameplayCamera _cam;
 
     private List<NetworkPlayer> _playerList;
+    private bool _isServer;
     
-    public PlayFieldController(List<NetworkPlayer> playerList, GameplayResources gameplayResources)
+    public PlayFieldController(List<NetworkPlayer> playerList, bool isServer, GameplayResources gameplayResources)
     {
         _gameplayResources = gameplayResources;
         _playerList = playerList;
+        _isServer = isServer;
     }
     public void Start()
     {
         Random.InitState(666);
 
         _gameState = new GameState(_playerList);
-        _gameSystems = new GameSystems(_gameState, _gameplayResources);
+        _gameSystems = new GameSystems(_isServer, _gameState, _gameplayResources);
         _gameSystems.Start();
         
 //        AvatarSystem aSystem = _gameSystems.GetSystem<AvatarSystem>();

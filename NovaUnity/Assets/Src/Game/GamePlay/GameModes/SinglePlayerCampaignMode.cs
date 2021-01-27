@@ -18,7 +18,7 @@ public class SinglePlayerCampaignMode : NotificationDispatcher, IGameModeControl
         List<NetworkPlayer> playerList = new List<NetworkPlayer>(4);
         playerList.Add(mockNetPlayer);
 
-        _playFieldController = new PlayFieldController(playerList, gameplayResources);
+        _playFieldController = new PlayFieldController(playerList, true, gameplayResources);
         _playFieldController.Start();
     }
 

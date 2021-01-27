@@ -1,5 +1,4 @@
 ﻿using GhostGen;
-using Photon.Pun;
 using UnityEngine;
 
 public class MainMenuController : BaseController
@@ -40,10 +39,10 @@ public class MainMenuController : BaseController
 
     private void onConnectedToMaster()
     {
-        if(!PhotonNetwork.OfflineMode)
-        {
-            PhotonNetwork.JoinLobby();
-        }
+        // if(!PhotonNetwork.OfflineMode)
+        // {
+        //     PhotonNetwork.JoinLobby();
+        // }
     }
     
     private MainMenuView mainMenuView
@@ -58,11 +57,13 @@ public class MainMenuController : BaseController
 
     private void onMultiplayerPlay(GeneralEvent e)
     {
-        bool result = _networkManager.Connect();
-        if(result)
-        {
-            mainMenuView._canvasGroup.interactable = false;
-        }
+        // bool result = _networkManager.StartHost()
+        // if(result)
+        // {
+        //     mainMenuView._canvasGroup.interactable = false;
+        // }
+        
+        // GOTO "Host" or "join" option
     }
     
     private void onCredits(GeneralEvent e)

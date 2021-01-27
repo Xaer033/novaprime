@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using GhostGen;
-using Photon.Pun;
 
 public class SinglePlayerCampaignMode : NotificationDispatcher, IGameModeController
 {   
@@ -14,8 +13,8 @@ public class SinglePlayerCampaignMode : NotificationDispatcher, IGameModeControl
     public void Start(object context)
     {
         GameplayResources gameplayResources = Singleton.instance.gameplayResources;
-        NetworkPlayer mockNetPlayer = new NetworkPlayer(PhotonNetwork.LocalPlayer);
-        List<NetworkPlayer> playerList = new List<NetworkPlayer>(4);
+        NetPlayer mockNetPlayer = new NetPlayer();//PhotonNetwork.LocalPlayer);
+        List<NetPlayer> playerList = new List<NetPlayer>(4);
         playerList.Add(mockNetPlayer);
 
         _playFieldController = new PlayFieldController(playerList, true, gameplayResources);

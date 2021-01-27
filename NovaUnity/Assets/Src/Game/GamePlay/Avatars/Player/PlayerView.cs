@@ -1,8 +1,7 @@
-﻿using Photon.Pun;
-using Sirenix.OdinInspector;
+﻿using Sirenix.OdinInspector;
 using UnityEngine;
 
-public class PlayerView : AvatarView, Photon.Pun.IPunObservable
+public class PlayerView : AvatarView
 {
     [BoxGroup("Hooks")]
     public Transform deadRoot;
@@ -15,7 +14,7 @@ public class PlayerView : AvatarView, Photon.Pun.IPunObservable
     private ParticleSystem _leftFootPuffFx;
     private ParticleSystem _rightFootPuffFx;
     
-    public PhotonView netView;
+    // public PhotonView netView;
     
     private void Awake()
     {
@@ -52,24 +51,24 @@ public class PlayerView : AvatarView, Photon.Pun.IPunObservable
         }
     }
 
-    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-    {
-        if(stream.IsWriting)
-        {
-            stream.SendNext(controller.state.position);
-            stream.SendNext(controller.state.velocity);
-        }
-        else
-        {
-            Vector3 receivedPos = (Vector3)stream.ReceiveNext();
-            Vector3 receivedVel = (Vector3)stream.ReceiveNext();
-            
-            float lag = Mathf.Abs((float)(PhotonNetwork.Time - info.SentServerTime));
-            controller.state.previousPosition = controller.state.position;
-            controller.state.position = receivedPos + (receivedVel * lag);
-            
-            transform.position = controller.state.position;
-            viewRoot.position = controller.state.previousPosition;
-        }
-    }
+    // public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    // {
+    //     if(stream.IsWriting)
+    //     {
+    //         stream.SendNext(controller.state.position);
+    //         stream.SendNext(controller.state.velocity);
+    //     }
+    //     else
+    //     {
+    //         Vector3 receivedPos = (Vector3)stream.ReceiveNext();
+    //         Vector3 receivedVel = (Vector3)stream.ReceiveNext();
+    //         
+    //         float lag = Mathf.Abs((float)(PhotonNetwork.Time - info.SentServerTime));
+    //         controller.state.previousPosition = controller.state.position;
+    //         controller.state.position = receivedPos + (receivedVel * lag);
+    //         
+    //         transform.position = controller.state.position;
+    //         viewRoot.position = controller.state.previousPosition;
+    //     }
+    // }
 }

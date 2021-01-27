@@ -1,9 +1,5 @@
-﻿using System;
-using GhostGen;
-using Photon.Pun;
-using UnityEditor;
+﻿using GhostGen;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class Singleton : MonoBehaviour
 {
@@ -124,7 +120,9 @@ public class Singleton : MonoBehaviour
         sessionFlags = new SessionFlags();
         notificationDispatcher = new NotificationDispatcher();
 
-        networkManager = gameObject.AddComponent<NetworkManager>();
+        NetworkManager networkPrefab = Resources.Load<NetworkManager>("NetworkManager");
+        networkManager = Instantiate<NetworkManager>(networkPrefab, gameObject.transform);
+        
         gameConfig = Resources.Load<GameConfig>("GameConfig");
         Input.multiTouchEnabled = false; //TODO: This needs to go elsewere 
 
@@ -161,7 +159,7 @@ public class Singleton : MonoBehaviour
 
     public void OnDestroy()
     {
-        networkManager.LateDispose();
+        // networkManager.LateDispose();
         applicationIsQuitting = true;
     }
 }

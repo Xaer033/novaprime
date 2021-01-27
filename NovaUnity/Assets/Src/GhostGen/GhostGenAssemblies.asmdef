@@ -1,18 +1,15 @@
 {
     "name": "GhostGenAssemblies",
     "references": [
-        "DOTween.Modules",
-        "UnityEngine.UI",
-        "Unity.TextMeshPro",
-        "PhotonChat",
-        "PhotonRealtime",
-        "PhotonUnityNetworking",
-        "PhotonUnityNetworking.Editor",
-        "PhotonUnityNetworking.Utilities",
-        "PhotonUnityNetworking.Utilities.Culling.Editor",
-        "PhotonUnityNetworking.Utilities.PhotonPlayer.Editor",
-        "PhotonWebSocket",
-        ""
+        "GUID:22b19dea671993745a958229522eb30a",
+        "GUID:2bafac87e7f4b9b418d9448d219b01ab",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:30817c1a0e6d646d99c048fc403f5979",
+        "GUID:e720aa64e3f58fb4880566a322584340",
+        "GUID:c21ba7b8c3183cb47b7fe3b3799d49c4",
+        "GUID:325984b52e4128546bc7558552f8b1d2",
+        "GUID:72872094b21c16e48b631b2224833d49",
+        "GUID:0da6d172d18a54e4389d0dce1e1ffdf2"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

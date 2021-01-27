@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using GhostGen;
-using Photon.Realtime;
 
 public class MultiplayerCampaignMode : NotificationDispatcher, IGameModeController
 {
@@ -8,13 +7,13 @@ public class MultiplayerCampaignMode : NotificationDispatcher, IGameModeControll
     //private GameOverPopupController     _gameOverPopupController    = new GameOverPopupController();
 //    private TuckMatchCore _tuckMatchCore;
 //    private PlayFieldController _playFieldController = new PlayFieldController();
-    private List<NetworkPlayer> _playerList = new List<NetworkPlayer>(4);
+    private List<NetPlayer> _playerList = new List<NetPlayer>(4);
     private PlayFieldController _playFieldController;
     
     public void Start(object context)
     {
         GameplayResources gameplayResources = Singleton.instance.gameplayResources;
-        _playerList = context as List<NetworkPlayer>;
+        _playerList = context as List<NetPlayer>;
         bool isServer = true; // TODO: Put real value here
         
         _playFieldController = new PlayFieldController(_playerList, isServer, gameplayResources);

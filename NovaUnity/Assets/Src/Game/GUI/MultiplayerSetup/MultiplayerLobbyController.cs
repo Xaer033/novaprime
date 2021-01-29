@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class MultiplayerLobbyController : BaseController
 {
-    
+
     // private MultiplayerLobbyView _lobbyView;
     private List<Hashtable> _roomLobbyData = new List<Hashtable>();
 
@@ -21,7 +21,7 @@ public class MultiplayerLobbyController : BaseController
         _networkManager = Singleton.instance.networkManager;
     }
     
-    public void Start()
+    public override void Start()
     {
         _selectedRoomIndex = -1;
 
@@ -36,9 +36,6 @@ public class MultiplayerLobbyController : BaseController
             popup.SetSelectedItemCallback(onRoomClicked);
             // popup.SetLobbyDataProvider(_generateRoomDataProvider(_networkManager.GetRoomList()));
 
-            _networkManager.onJoinedRoom += onJoinedRoom;
-            _networkManager.onCreatedRoom += onCreatedRoom;
-            _networkManager.onConnectedToMaster += onConnectedToMaster;
             // _networkManager.onNetworkDisconnected += onNetworkDisconnected;
             // _networkManager.onReceivedRoomListUpdate += onRoomListUpdate;
 
@@ -53,9 +50,6 @@ public class MultiplayerLobbyController : BaseController
             view.RemoveListener(MenuUIEventType.CREATE_SERVER, onCreateButton);
             view.RemoveListener(MenuUIEventType.BACK, onBackButton);
 
-            _networkManager.onJoinedRoom -= onJoinedRoom;
-            _networkManager.onCreatedRoom -= onCreatedRoom;
-            _networkManager.onConnectedToMaster -= onConnectedToMaster;
             // _networkManager.onNetworkDisconnected -= onNetworkDisconnected;
             // _networkManager.onReceivedRoomListUpdate -= onRoomListUpdate;
         }

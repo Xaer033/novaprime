@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using GhostGen;
+using Mirror;
 using UnityEngine;
 
 public class ServerMultiplayerRoomController : BaseController 
@@ -12,9 +13,9 @@ public class ServerMultiplayerRoomController : BaseController
         _networkManager = Singleton.instance.networkManager;
     }
     
-    public void Start()
+    public override void Start()
     {
-        viewFactory.CreateAsync<ClientMultiplayerRoomView>("GUI/MainMenu/ClientMultiplayerRoomView", (v) =>
+        viewFactory.CreateAsync<ServerMultiplayerRoomView>("GUI/MainMenu/ServerMultiplayerRoomView", (v) =>
         {
             view = v;
     
@@ -27,10 +28,7 @@ public class ServerMultiplayerRoomController : BaseController
             // _networkManager.onPlayerDisconnected += onPlayerConnectionStatusChanged;
             // _networkManager.onNetworkDisconnected += onNetworkDisconnected;
             
-            _networkManager.onCustomEvent += onCustomEvent;
-    
             _setupPlayers();
-            _viewInitialization();
         });
     }
     
@@ -41,7 +39,6 @@ public class ServerMultiplayerRoomController : BaseController
         // _networkManager.onPlayerDisconnected -= onPlayerConnectionStatusChanged;
         // _networkManager.onNetworkDisconnected -= onNetworkDisconnected;
         
-        _networkManager.onCustomEvent -= onCustomEvent;
     
         base.RemoveView();
     }
@@ -73,9 +70,9 @@ public class ServerMultiplayerRoomController : BaseController
     // }
 
     
-    private ClientMultiplayerRoomView roomView
+    private ServerMultiplayerRoomView roomView
     {
-        get { return view as ClientMultiplayerRoomView; }
+        get { return view as ServerMultiplayerRoomView; }
     }
     
     
@@ -124,8 +121,10 @@ public class ServerMultiplayerRoomController : BaseController
     {
         view.RemoveListener(MenuUIEventType.BACK, onBackButton);
         // Maybe throw up a modal dialog to ask if they are sure?
-        _networkManager.onLeftRoom += onLeftRoom;
         // PhotonNetwork.LeaveRoom();
+        
+        _networkManager.Disconnect();
+        DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);
     }
 
     private void onStartMultiplayer(GeneralEvent e)
@@ -159,7 +158,6 @@ public class ServerMultiplayerRoomController : BaseController
 
     private void onLeftRoom()
     {
-        _networkManager.onLeftRoom -= onLeftRoom;
         DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);
     }
 
@@ -171,13 +169,6 @@ public class ServerMultiplayerRoomController : BaseController
         }
     }
 
-    private void _viewInitialization()
-    {
-        // roomView.SetTitle(PhotonNetwork.CurrentRoom.Name);
-        // bool isMaster = PhotonNetwork.IsMasterClient;
-        // roomView.IsMasterClient(isMaster);
-    }
-    
     private void _setupPlayers()
     {
         List<NetPlayer> playerList = new List<NetPlayer>();//PhotonNetwork.PlayerList);
@@ -186,8 +177,6 @@ public class ServerMultiplayerRoomController : BaseController
             if(a == null || b == null) { return 0; }
             return a.id.CompareTo(b.id);
         });
-
-        const string key = "isReady";
         
         int count = playerList.Count;
         for(int i = 0; i < NetworkManager.kMaxPlayers; ++i)

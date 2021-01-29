@@ -44,6 +44,18 @@ public class GButton : UIView
         }
     }
 
+    protected override void OnViewUpdate()
+    {
+        base.OnViewUpdate();
+        if(IsInvalid(InvalidationFlag.DYNAMIC_DATA))
+        {
+            if(_image != null)
+            {
+                _image.sprite = _spriteValue;            
+            }
+        }
+    }
+    
     public override void OnViewDispose()
     {
         if(_button)

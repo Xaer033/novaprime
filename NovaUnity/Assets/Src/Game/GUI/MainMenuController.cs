@@ -12,9 +12,6 @@ public class MainMenuController : BaseController
     
     public void Start ()
     {
-        _networkManager.onConnectedToMaster += onConnectedToMaster;
-        _networkManager.onJoinedLobby += onJoinedLobby;
-        
         viewFactory.CreateAsync<MainMenuView>("GUI/MainMenu/MainMenuView", v =>
         {
             view = v;
@@ -30,8 +27,7 @@ public class MainMenuController : BaseController
     
     public override void RemoveView()
     {
-        _networkManager.onConnectedToMaster -= onConnectedToMaster;
-        _networkManager.onJoinedLobby -= onJoinedLobby;
+        
         
         base.RemoveView();
         
@@ -64,6 +60,7 @@ public class MainMenuController : BaseController
         // }
         
         // GOTO "Host" or "join" option
+        DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);
     }
     
     private void onCredits(GeneralEvent e)

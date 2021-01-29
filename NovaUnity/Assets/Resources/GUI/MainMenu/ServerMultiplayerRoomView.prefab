@@ -775,9 +775,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 224072321451105294}
-  - component: {fileID: 114260181604833112}
+  - component: {fileID: 1868117912911924719}
   m_Layer: 0
-  m_Name: MultiplayerRoomView
+  m_Name: ServerMultiplayerRoomView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -808,7 +808,7 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &114260181604833112
+--- !u!114 &1868117912911924719
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -817,7 +817,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1649237697962612}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 559eff04014f8c04d9bab209cd7652ef, type: 3}
+  m_Script: {fileID: 11500000, guid: e72d2281c86a2ff4da6af3b73a31cfc2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   roomTitle: {fileID: 114023002370062688}
@@ -826,7 +826,7 @@ MonoBehaviour:
   readyButton: {fileID: 209284398877444311}
   playerItemViewPrefab: {fileID: 114429048436237400, guid: c471425db27050d46a7e37c1a752278e,
     type: 3}
-  playerGroup: {fileID: 224811742283530072}
+  playerGroup: {fileID: 0}
 --- !u!1 &1809844131583490
 GameObject:
   m_ObjectHideFlags: 0

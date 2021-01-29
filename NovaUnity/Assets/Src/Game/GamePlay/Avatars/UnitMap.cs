@@ -28,6 +28,7 @@ public class UnitMap : SerializedScriptableObject
         return _unitMap[id];
     }
     
+    
     [Serializable]
     public class Unit
     {

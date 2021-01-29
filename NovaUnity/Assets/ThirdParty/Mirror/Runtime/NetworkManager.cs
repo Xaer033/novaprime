@@ -278,6 +278,12 @@ namespace Mirror
 
         #region Start & Stop
 
+
+        public virtual void OnError(string reason)
+        {
+            logger.LogError(reason);
+        }
+        
         // keep the online scene change check in a separate function
         bool IsServerOnlineSceneChangeNeeded()
         {
@@ -339,6 +345,7 @@ namespace Mirror
             if (NetworkServer.active)
             {
                 logger.LogWarning("Server already started.");
+                OnError("Server Already started!");
                 return;
             }
 
@@ -383,6 +390,7 @@ namespace Mirror
             if (NetworkClient.active)
             {
                 logger.LogWarning("Client already started.");
+                OnError("Client already started!");
                 return;
             }
 
@@ -464,6 +472,7 @@ namespace Mirror
             if (NetworkServer.active || NetworkClient.active)
             {
                 logger.LogWarning("Server or Client already started.");
+                OnError("Server or Client already started.");
                 return;
             }
 

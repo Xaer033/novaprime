@@ -43,6 +43,7 @@ namespace Mirror
         public delegate void LocalplayerChanged(NetworkIdentity oldPlayer, NetworkIdentity newPlayer);
         public static event LocalplayerChanged onLocalPlayerChanged;
 
+        public static event Action<NetworkIdentity> onClientEntitySpawned;
         /// <summary>
         /// Returns true when a client's connection has been set to ready.
         /// <para>A client that is ready recieves state updates from the server, while a client that is not ready does not. This useful when the state of the game is not normal, such as a scene change or end-of-game.</para>
@@ -76,6 +77,7 @@ namespace Mirror
         internal static void Shutdown()
         {
             ClearSpawners();
+            onClientEntitySpawned = null;
             spawnableObjects.Clear();
             readyConnection = null;
             ready = false;
@@ -769,6 +771,8 @@ namespace Mirror
                 identity.NotifyAuthority();
                 identity.OnStartClient();
                 CheckForLocalPlayer(identity);
+                
+                onClientEntitySpawned?.Invoke(identity);
             }
         }
 
@@ -1010,6 +1014,8 @@ namespace Mirror
                 localObject.OnStartClient();
                 localObject.OnSetHostVisibility(true);
                 CheckForLocalPlayer(localObject);
+                
+                onClientEntitySpawned?.Invoke(localObject);
             }
         }
 

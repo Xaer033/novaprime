@@ -23,8 +23,6 @@ public class MultiplayerGameplayState : IGameState
         // *TEMP*
         Singleton.instance.gui.screenFader.alpha = 0.0f;
         _networkManager = Singleton.instance.networkManager;
-        _networkManager.onCustomEvent += onCustomEvent;
-        // _networkManager.onPlayerPropertiesUpdate += onPlayerPropertiesUpdate;
         
         // PhotonNetwork.IsMessageQueueRunning = false;
         AsyncOperation async = SceneManager.LoadSceneAsync("GameplayScene", LoadSceneMode.Single);
@@ -70,9 +68,6 @@ public class MultiplayerGameplayState : IGameState
     
     public void Exit()
 	{
-        _networkManager.onCustomEvent -= onCustomEvent;
-        // _networkManager.onPlayerPropertiesUpdate -= onPlayerPropertiesUpdate;
-        
         _gameModeController.RemoveListener(GameEventType.GAME_OVER, onGameOver);
         _gameModeController.CleanUp();   
     }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using GhostGen;
+using Mirror;
 using UnityEngine;
 
 public class ClientMultiplayerRoomController : BaseController 
@@ -12,7 +13,7 @@ public class ClientMultiplayerRoomController : BaseController
         _networkManager = Singleton.instance.networkManager;
     }
     
-    public void Start()
+    public override void Start()
     {
         viewFactory.CreateAsync<ClientMultiplayerRoomView>("GUI/MainMenu/ClientMultiplayerRoomView", (v) =>
         {
@@ -22,12 +23,8 @@ public class ClientMultiplayerRoomController : BaseController
             view.AddListener(MenuUIEventType.TOGGLE, onReadyButton);
             view.AddListener(MenuUIEventType.BACK, onBackButton);
 
-            // _networkManager.onPlayerPropertiesUpdate += onPlayerPropertiesUpdate;
-            // _networkManager.onPlayerConnected += onPlayerConnectionStatusChanged;
-            // _networkManager.onPlayerDisconnected += onPlayerConnectionStatusChanged;
-            // _networkManager.onNetworkDisconnected += onNetworkDisconnected;
+            _networkManager.onServerDisconnect += onServerDisconnect;
             
-            _networkManager.onCustomEvent += onCustomEvent;
     
             _setupPlayers();
             _viewInitialization();
@@ -36,13 +33,7 @@ public class ClientMultiplayerRoomController : BaseController
     
     public override void RemoveView()
     {
-        // _networkManager.onPlayerPropertiesUpdate -= onPlayerPropertiesUpdate;
-        // _networkManager.onPlayerConnected -= onPlayerConnectionStatusChanged;
-        // _networkManager.onPlayerDisconnected -= onPlayerConnectionStatusChanged;
-        // _networkManager.onNetworkDisconnected -= onNetworkDisconnected;
-        
-        _networkManager.onCustomEvent -= onCustomEvent;
-    
+        _networkManager.onServerDisconnect -= onServerDisconnect;
         base.RemoveView();
     }
 
@@ -118,14 +109,20 @@ public class ClientMultiplayerRoomController : BaseController
     //     _setupPlayers();
     //     // onRoomPropertiesUpdate(PhotonNetwork.CurrentRoom.CustomProperties);
     // }
-    
+    private void onServerDisconnect(NetworkConnection conn)
+    {
+        _networkManager.Disconnect();
+        DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);
+    }
     
     private void onBackButton(GeneralEvent e)
     {
         view.RemoveListener(MenuUIEventType.BACK, onBackButton);
         // Maybe throw up a modal dialog to ask if they are sure?
-        _networkManager.onLeftRoom += onLeftRoom;
         // PhotonNetwork.LeaveRoom();
+        
+        _networkManager.Disconnect();
+        DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);
     }
 
     private void onStartMultiplayer(GeneralEvent e)
@@ -159,7 +156,6 @@ public class ClientMultiplayerRoomController : BaseController
 
     private void onLeftRoom()
     {
-        _networkManager.onLeftRoom -= onLeftRoom;
         DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);
     }
 

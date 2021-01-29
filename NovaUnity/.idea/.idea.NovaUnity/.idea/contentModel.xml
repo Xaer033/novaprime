@@ -187,6 +187,8 @@
                 <e p="ClientMultiplayerRoomView.cs" t="Include" />
                 <e p="MultiplayerLobbyController.cs" t="Include" />
                 <e p="MultiplayerLobbyView.cs" t="Include" />
+                <e p="MultiplayerSetupController.cs" t="Include" />
+                <e p="MultiplayerSetupView.cs" t="Include" />
                 <e p="PlayerRoomData.cs" t="Include" />
                 <e p="RoomItemView.cs" t="Include" />
                 <e p="RoomPlayerItemView.cs" t="Include" />

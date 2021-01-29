@@ -23,7 +23,7 @@ public class ClientMultiplayerRoomController : BaseController
             view.AddListener(MenuUIEventType.TOGGLE, onReadyButton);
             view.AddListener(MenuUIEventType.BACK, onBackButton);
 
-            _networkManager.onServerDisconnect += onServerDisconnect;
+            _networkManager.onClientDisconnect += onClientDisconnect;
             
     
             _setupPlayers();
@@ -33,7 +33,7 @@ public class ClientMultiplayerRoomController : BaseController
     
     public override void RemoveView()
     {
-        _networkManager.onServerDisconnect -= onServerDisconnect;
+        _networkManager.onClientDisconnect -= onClientDisconnect;
         base.RemoveView();
     }
 
@@ -109,7 +109,7 @@ public class ClientMultiplayerRoomController : BaseController
     //     _setupPlayers();
     //     // onRoomPropertiesUpdate(PhotonNetwork.CurrentRoom.CustomProperties);
     // }
-    private void onServerDisconnect(NetworkConnection conn)
+    private void onClientDisconnect(NetworkConnection conn)
     {
         _networkManager.Disconnect();
         DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);

@@ -13,7 +13,7 @@ public class SinglePlayerCampaignMode : NotificationDispatcher, IGameModeControl
     public void Start(object context)
     {
         GameplayResources gameplayResources = Singleton.instance.gameplayResources;
-        NetPlayer mockNetPlayer = new NetPlayer();//PhotonNetwork.LocalPlayer);
+        NetPlayer mockNetPlayer = new NetPlayer(-1, PlayerSlot.P1, PlayerSlot.P1.ToString());//PhotonNetwork.LocalPlayer);
         List<NetPlayer> playerList = new List<NetPlayer>(4);
         playerList.Add(mockNetPlayer);
 

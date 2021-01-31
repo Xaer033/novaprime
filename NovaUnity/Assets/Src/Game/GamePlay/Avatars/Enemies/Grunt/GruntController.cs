@@ -130,7 +130,7 @@ public class GruntController : NotificationDispatcher, IAvatarController
             _state.previousPosition = _state.position;
             _state.position = _state.position + constrainedMoveDelta;
 
-            _view._viewRoot.position = _state.previousPosition;
+            _view.viewRoot.position = _state.previousPosition;
             _view.transform.position = _state.position;
         }
     }
@@ -139,7 +139,7 @@ public class GruntController : NotificationDispatcher, IAvatarController
     public void Step(float deltaTime)
     {
         float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
-        _view._viewRoot.position = Vector3.Lerp(_state.previousPosition, _state.position, alpha);
+        _view.viewRoot.position = Vector3.Lerp(_state.previousPosition, _state.position, alpha);
     }
 
     public void FixedStep(float deltaTime, FrameInput input)

@@ -10,7 +10,7 @@ public class MainMenuController : BaseController
         _networkManager = Singleton.instance.networkManager;
     }
     
-    public void Start ()
+    public override void Start ()
     {
         viewFactory.CreateAsync<MainMenuView>("GUI/MainMenu/MainMenuView", v =>
         {

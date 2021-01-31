@@ -1,5 +1,6 @@
 ﻿using GhostGen;
 using Mirror;
+using UnityEngine.SceneManagement;
 
 public class MainMenuState : IGameState
 {
@@ -8,7 +9,7 @@ public class MainMenuState : IGameState
     private MainMenuController _mainMenuController;
     private MultiplayerLobbyController _multiplayerLobbyController;
     private MultiplayerSetupController _multiplayerSetupController;
-    private BaseController _multiplayerRoomController;
+    private MultiplayerRoomController _multiplayerRoomController;
 
 
 	public void Init( GameStateMachine stateMachine, object changeStateData )
@@ -18,25 +19,16 @@ public class MainMenuState : IGameState
 		PlayerActions pAction = new PlayerActions();
 		pAction.Menu.Enable();
 
-		// _multiplayerLobbyController = new MultiplayerLobbyController();
-		// _multiplayerLobbyController.AddListener(MenuUIEventType.CREATE_SERVER, onCreateServer);
-		// _multiplayerLobbyController.AddListener(MenuUIEventType.JOIN_SERVER, onJoinServer);
-		// _multiplayerLobbyController.AddListener(MenuUIEventType.GOTO_NETWORK_ROOM, onMultiplayerRoomMenu);
-		// _multiplayerLobbyController.AddListener(MenuUIEventType.BACK, onMultiplayerBack);
 		_multiplayerSetupController = new MultiplayerSetupController();
-		// _multiplayerSetupController.AddListener(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY, onMultiplayerLobbyMenu);
 		_multiplayerSetupController.AddListener(MenuUIEventType.GOTO_NETWORK_ROOM, onMultiplayerRoomMenu);
 		_multiplayerSetupController.AddListener(MenuUIEventType.GOTO_MAIN_MENU, onMainMenu);
-		
-		// _multiplayerRoomController = new ClientMultiplayerRoomController();
-		// _multiplayerRoomController.AddListener(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY, onMultiplayerLobbyMenu);
-		// _multiplayerRoomController.AddListener(MenuUIEventType.GOTO_MULTIPLAYER_GAME, onStartMultiplayerGame);
-		// _multiplayerRoomController.AddListener(MenuUIEventType.GOTO_MAIN_MENU, onMainMenu);
 		
 		_mainMenuController = new MainMenuController();
 		_mainMenuController.AddListener(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY, onMultiplayerSetupMenu);
 		_mainMenuController.AddListener(MenuUIEventType.GOTO_SINGLEPLAYER_GAME, onStartSingleplayer);
 		_mainMenuController.Start();
+
+		SceneManager.LoadScene("MenuScene");
 	}
 	
 	public void FixedStep(float fixedDeltaTime)
@@ -100,16 +92,8 @@ public class MainMenuState : IGameState
 	    _mainMenuController?.RemoveView();
 		_multiplayerSetupController?.RemoveView();
 
-		if(NetworkServer.active)
-		{
-			_multiplayerRoomController = new ServerMultiplayerRoomController();
-			
-		}
-		else
-		{
-			_multiplayerRoomController = new ClientMultiplayerRoomController();
-		}
-
+		
+		_multiplayerRoomController = new MultiplayerRoomController(NetworkServer.active);
 		_multiplayerRoomController.AddListener(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY, onMultiplayerSetupMenu);
 		_multiplayerRoomController.AddListener(MenuUIEventType.GOTO_MULTIPLAYER_GAME, onStartMultiplayerGame);
 		_multiplayerRoomController.AddListener(MenuUIEventType.GOTO_MAIN_MENU, onMainMenu);

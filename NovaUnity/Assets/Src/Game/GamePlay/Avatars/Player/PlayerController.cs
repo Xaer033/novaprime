@@ -394,12 +394,10 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         for(int i= 0; i < hitCount; ++i)
         {
             Collider2D col = _interactColliderList[i];
-            // Optimize
+            
+            // TODO: Optimize
             InteractTrigger trigger = col.GetComponent<InteractTrigger>();
-            if(trigger != null)
-            {
-                trigger.Interact(this);
-            }
+            trigger?.Interact(this);            
         }
     }
     
@@ -433,7 +431,6 @@ public class PlayerController : NotificationDispatcher, IAvatarController
                     _view.PlayFootPuffFx();
                 }
                 _view.animator.SetTrigger("idleTrigger");
-                
             }
         }
         else if(!animInfo.isGrounded)

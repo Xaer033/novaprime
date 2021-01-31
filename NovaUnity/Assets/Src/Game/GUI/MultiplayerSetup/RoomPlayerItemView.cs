@@ -7,7 +7,7 @@ using TMPro;
 
 public class RoomPlayerItemView : UIView 
 {
-    public int actorNumber { get; set; }
+    public int playerSlot { get; set; }
 
     public Image checkmark;
     public TextMeshProUGUI playerName;

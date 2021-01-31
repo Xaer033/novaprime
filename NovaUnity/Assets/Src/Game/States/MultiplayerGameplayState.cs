@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using GhostGen;
+using Mirror;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -22,7 +23,9 @@ public class MultiplayerGameplayState : IGameState
 
         // *TEMP*
         Singleton.instance.gui.screenFader.alpha = 0.0f;
+        
         _networkManager = Singleton.instance.networkManager;
+        _networkManager.onClientMatchBegin += onClientMatchBegin;
         
         // PhotonNetwork.IsMessageQueueRunning = false;
         AsyncOperation async = SceneManager.LoadSceneAsync("GameplayScene", LoadSceneMode.Single);
@@ -31,15 +34,8 @@ public class MultiplayerGameplayState : IGameState
 
     private void onSceneLoaded(AsyncOperation asyncOp)
     {
-        // PhotonNetwork.IsMessageQueueRunning = true;
-        //
-        // RaiseEventOptions options = new RaiseEventOptions();
-        // options.Receivers = ReceiverGroup.MasterClient;
-        //
-        // Hashtable currentProperties = PhotonNetwork.LocalPlayer.CustomProperties;
-        // Hashtable newProperties = currentProperties;
-        // newProperties[kIsLoadedKey] = true;
-        // PhotonNetwork.LocalPlayer.SetCustomProperties(newProperties);
+        Debug.Log("SceneLoader: " + _networkManager.localPlayerSlot);
+        NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
     }
     
     public void FixedStep(float fixedDeltaTime)
@@ -73,51 +69,29 @@ public class MultiplayerGameplayState : IGameState
     }
 
 
-    private void onCustomEvent(byte netOpCode, object eventContent, int sender)
+    private void onClientMatchBegin(NetworkConnection conn, MatchBegin msg)
     {
-        switch(netOpCode)
-        {
-            case NetworkOpCode.ALL_PLAYERS_LOADED:    handleAllPlayersLoaded();   break; 
-        }
+        _networkManager.onClientMatchBegin -= onClientMatchBegin;
+        handleAllPlayersLoaded();
     }
-
-    // private void onPlayerPropertiesUpdate(Player targetPlayer, Hashtable updatedProperties)
-    // {
-    //     if(!PhotonNetwork.IsMasterClient) { return; }
-    //     
-    //     bool isFinishedLoading = (bool)updatedProperties[kIsLoadedKey];
-    //     if(isFinishedLoading)
-    //     {
-    //         _playersFinishedLoading.Add(targetPlayer.ActorNumber);
-    //         if(_playersFinishedLoading.Count >= PhotonNetwork.CurrentRoom.PlayerCount)
-    //         {
-    //             RaiseEventOptions options = new RaiseEventOptions();
-    //             options.Receivers = ReceiverGroup.All;
-    //             PhotonNetwork.RaiseEvent(NetworkOpCode.ALL_PLAYERS_LOADED, null, options, SendOptions.SendReliable);
-    //         }
-    //     }
-    // }
 
     private void handleAllPlayersLoaded()
     {
         List<NetPlayer> playerList = new List<NetPlayer>(4);
-        // for(int i = 0; i < PhotonNetwork.CurrentRoom.PlayerCount; ++i)
-        // {
-        //     Player photonPlayer = PhotonNetwork.PlayerList[i];
-        //     NetPlayer netPlayer = new NetPlayer(photonPlayer);
-        //     
-        //     playerList.Add(netPlayer);
-        // }
-        //
+        var netPlayerMap = _networkManager.GetClientPlayerMap();
+        playerList.AddRange(netPlayerMap.Values);
+        
         playerList.Sort((a, b) =>
         {
-            if(a == null || b == null) { return 0; }
-            return a.id.CompareTo(b.id);
+            return a.playerSlot.CompareTo(b.playerSlot);
         });
         
         _gameModeController = new MultiplayerCampaignMode();
         _gameModeController.AddListener(GameEventType.GAME_OVER, onGameOver);
         _gameModeController.Start(playerList);
+        
+        
+        ClientScene.Ready(NetworkClient.connection);
     }
     
     private void onGameOver(GeneralEvent e)

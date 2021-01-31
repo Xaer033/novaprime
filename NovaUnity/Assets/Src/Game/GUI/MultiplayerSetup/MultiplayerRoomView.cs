@@ -4,10 +4,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-public class ServerMultiplayerRoomView : UIView
+public class MultiplayerRoomView : UIView
 {
-    
-    
     public TextMeshProUGUI roomTitle;
     
     public GButton startButton;
@@ -18,7 +16,7 @@ public class ServerMultiplayerRoomView : UIView
     public Transform playerGroup;
 
     private List<RoomPlayerItemView> _playerItemViewList = new List<RoomPlayerItemView>(4);
-    private List<bool> _playerIsReady = new List<bool>(4);
+    // private List<bool> _playerIsReady = new List<bool>(4);
     private Dictionary<int, PlayerRoomData> _playerDataMap = new Dictionary<int, PlayerRoomData>(4);
     
     private string _roomTitle;
@@ -26,10 +24,10 @@ public class ServerMultiplayerRoomView : UIView
 
     void Awake()
     {
-
         if(startButton != null)
         {
             startButton.AddListener(UIEvent.TRIGGERED, onButton);
+            startButton.gameObject.SetActive(false);
         }
         
         if(leaveButton != null)
@@ -42,16 +40,19 @@ public class ServerMultiplayerRoomView : UIView
             readyButton.AddListener(UIEvent.TRIGGERED, onButton);
         }
         
-        for (int i = 0; i < NetworkManager.kMaxPlayers; ++i)
+        for (int i = 0; i < (int)PlayerSlot.MAX_PLAYERS; ++i)
         {
             RoomPlayerItemView pView = Instantiate<RoomPlayerItemView>(playerItemViewPrefab, playerGroup, false);
             pView.gameObject.SetActive(false);
             _playerItemViewList.Add(pView);
-            _playerIsReady.Add(false);
-            
         }
     }
 
+    public void ClearPlayerViews()
+    {
+        _playerDataMap.Clear();
+    }
+    
     public void IsMasterClient(bool isMaster)
     {
         if (_isMaster != isMaster)
@@ -70,21 +71,16 @@ public class ServerMultiplayerRoomView : UIView
         }
     }
 
-    public void SetPlayer(int index, NetPlayer player, bool isReady)
+    public void SetPlayer(int index, NetPlayer player)
     {
         Assert.IsTrue(index < _playerItemViewList.Count);
     
         RoomPlayerItemView pView = _playerItemViewList[index];
-        if(player != null)
+        if(player.connectionId >= 0)
         {
-            // pView.gameObject.SetActive(true);
-            // pView.actorNumber = player.ActorNumber;
-            // pView.playerName.text = player.NickName;
-            // pView.checkmark.gameObject.SetActive(false);
-
             PlayerRoomData pData = new PlayerRoomData();
-            pData.actorNumber = player.id;
-            pData.isReady = isReady;
+            pData.playerSlot = player.playerSlot;
+            pData.isReady = player.isReadyUp;
             pData.nickName = player.nickName;
             _playerDataMap[index] = pData;
         }
@@ -95,41 +91,6 @@ public class ServerMultiplayerRoomView : UIView
         }
 
         invalidateFlag = InvalidationFlag.DYNAMIC_DATA;
-    }
-
-    public int GetIndexForPlayerId(int playerId)
-    {
-        int count = _playerItemViewList.Count;
-        for(int i = 0; i < count; ++i)
-        {
-            if(_playerItemViewList[i] == null)
-            {
-                continue;
-            }
-            if(playerId == _playerItemViewList[i].actorNumber)
-            {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    public void SetIsReady(int index, bool isReady)
-    {
-        Assert.IsTrue(index < _playerIsReady.Count);
-        Assert.IsTrue(index >= 0);
-
-        if(index < 0 || index >= _playerIsReady.Count)
-        {
-            return;
-        }
-        
-        if (_playerIsReady[index] != isReady)
-        {
-            _playerIsReady[index] = isReady;
-            _playerDataMap[index].isReady = isReady;
-            invalidateFlag = InvalidationFlag.DYNAMIC_DATA;
-        }
     }
 
     private void onButton(GeneralEvent e)
@@ -153,8 +114,8 @@ public class ServerMultiplayerRoomView : UIView
     {
         if(IsInvalid(InvalidationFlag.STATIC_DATA))
         {
-            readyButton.gameObject.SetActive(!_isMaster);
-            startButton.gameObject.SetActive(_isMaster);
+            // readyButton.gameObject.SetActive(!_isMaster);
+            // startButton.gameObject.SetActive(_isMaster);
             
             roomTitle.text = _roomTitle;
         }
@@ -162,7 +123,7 @@ public class ServerMultiplayerRoomView : UIView
         if (IsInvalid(InvalidationFlag.DYNAMIC_DATA))
         {
             int localPlayerIndex = 0;//GetIndexForPlayerId(PhotonNetwork.LocalPlayer.ActorNumber);
-            int count = NetworkManager.kMaxPlayers;
+            int count = (int)PlayerSlot.MAX_PLAYERS;
             for (int i = 0; i < count; ++i)
             {
                 PlayerRoomData pData = _playerDataMap[i];
@@ -175,7 +136,7 @@ public class ServerMultiplayerRoomView : UIView
                     bool isReady = pData.isReady;
                     playerView.checkmark.gameObject.SetActive(isReady);
                     playerView.playerName.text = pData.nickName;
-                    playerView.actorNumber = pData.actorNumber;
+                    playerView.playerSlot = (int)pData.playerSlot;
                     
                     if(i == localPlayerIndex)
                     {

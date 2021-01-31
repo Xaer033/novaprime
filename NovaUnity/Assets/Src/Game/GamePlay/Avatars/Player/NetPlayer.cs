@@ -1,16 +1,32 @@
-﻿public class NetPlayer
+﻿public struct NetPlayer
 {
-    // public readonly Player player;
-    public readonly int id = 1;
-    public readonly string nickName;
-    public readonly string userId;
+    public int connectionId;
+    public PlayerSlot playerSlot;
+    public string nickName;
+    public bool isReadyUp;
+    public bool isMatchReady;
     
-    
-    public NetPlayer()
+    public NetPlayer(
+                int connId, 
+                PlayerSlot pSlot = PlayerSlot.NONE, 
+                string name = "", 
+                bool ready = false, 
+                bool matchReady = false)
     {
-        // player = nPlayer;
-        // number = nPlayer.ActorNumber;
-        // nickName = nPlayer.NickName;
-        // userId = nPlayer.UserId;
+        connectionId = connId;
+        playerSlot = pSlot;
+        nickName = name;
+        isReadyUp = ready;
+        isMatchReady = matchReady;
     }
+}
+
+public enum PlayerSlot 
+{
+    NONE = -1,
+    P1,
+    P2,
+    P3,
+    P4, 
+    MAX_PLAYERS
 }

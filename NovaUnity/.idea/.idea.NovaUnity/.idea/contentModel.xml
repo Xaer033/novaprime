@@ -55,9 +55,20 @@
               <e p="GameplayResources.cs" t="Include" />
               <e p="GuiManager.cs" t="Include" />
               <e p="Networking" t="Include">
+                <e p="Messages" t="Include">
+                  <e p="AssignPlayerSlot.cs" t="Include" />
+                  <e p="ConfirmReadyUp.cs" t="Include" />
+                  <e p="MatchBegin.cs" t="Include" />
+                  <e p="PlayerMatchLoadComplete.cs" t="Include" />
+                  <e p="RequestMatchStart.cs" t="Include" />
+                  <e p="RequestReadyUp.cs" t="Include" />
+                  <e p="StartMatchLoad.cs" t="Include" />
+                  <e p="SyncLobbyPlayers.cs" t="Include" />
+                </e>
                 <e p="NetworkManager.cs" t="Include" />
+                <e p="NetworkOpCodes.cs" t="Include" />
+                <e p="NewBehaviourScript.cs" t="Include" />
               </e>
-              <e p="NetworkOpCodes.cs" t="Include" />
               <e p="SessionFlags.cs" t="Include" />
               <e p="Singleton.cs" t="Include" />
               <e p="StringUtil.cs" t="Include" />
@@ -183,17 +194,15 @@
               <e p="MainMenuView.cs" t="Include" />
               <e p="MenuUIEventType.cs" t="Include" />
               <e p="MultiplayerSetup" t="Include">
-                <e p="ClientMultiplayerRoomController.cs" t="Include" />
-                <e p="ClientMultiplayerRoomView.cs" t="Include" />
                 <e p="MultiplayerLobbyController.cs" t="Include" />
                 <e p="MultiplayerLobbyView.cs" t="Include" />
+                <e p="MultiplayerRoomController.cs" t="Include" />
+                <e p="MultiplayerRoomView.cs" t="Include" />
                 <e p="MultiplayerSetupController.cs" t="Include" />
                 <e p="MultiplayerSetupView.cs" t="Include" />
                 <e p="PlayerRoomData.cs" t="Include" />
                 <e p="RoomItemView.cs" t="Include" />
                 <e p="RoomPlayerItemView.cs" t="Include" />
-                <e p="ServerMultiplayerRoomController.cs" t="Include" />
-                <e p="ServerMultiplayerRoomView.cs" t="Include" />
               </e>
               <e p="Rotater.cs" t="Include" />
               <e p="StarScapeView.cs" t="Include" />

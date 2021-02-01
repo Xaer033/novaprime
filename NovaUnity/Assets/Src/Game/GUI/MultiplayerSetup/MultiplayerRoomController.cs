@@ -7,7 +7,8 @@ public class MultiplayerRoomController : BaseController
 {
     private NetworkManager _networkManager;
     private bool _isServer;
-
+    private bool _wasDisconnected;
+    
     public MultiplayerRoomController(bool isServer)
     {
         _isServer = isServer;
@@ -24,14 +25,25 @@ public class MultiplayerRoomController : BaseController
             view.AddListener(MenuUIEventType.TOGGLE, onReadyButton);
             view.AddListener(MenuUIEventType.BACK, onBackButton);
 
+            _wasDisconnected = false;
+            
             if(!_isServer)
             {
                 _networkManager.onLocalClientDisconnect += onLocalClientDisconnect;
             }
 
-            _networkManager.onClientConfirmReadyUp += onClientConfirmReadyUp;
-            _networkManager.onClientSyncLobbyPlayers += onClientSyncLobbyPlayers;
-            _networkManager.onClientStartMatchLoad += onClientStartMatchLoad;
+
+            if(NetworkClient.active)
+            {
+                _networkManager.onClientConfirmReadyUp += onClientConfirmReadyUp;
+                _networkManager.onClientSyncLobbyPlayers += onClientSyncLobbyPlayers;
+                _networkManager.onClientStartMatchLoad += onClientStartMatchLoad;
+            }
+
+            if(_networkManager.isPureServer)
+            {
+                _networkManager.onServerConnect += onServerConnect;
+            }
             
             _setupPlayers();
         });
@@ -43,11 +55,18 @@ public class MultiplayerRoomController : BaseController
         {
             _networkManager.onLocalClientDisconnect -= onLocalClientDisconnect;
         }
-    
-        _networkManager.onClientConfirmReadyUp -= onClientConfirmReadyUp;
-        _networkManager.onClientSyncLobbyPlayers -= onClientSyncLobbyPlayers;
-        _networkManager.onClientStartMatchLoad -= onClientStartMatchLoad;
-        
+
+        if(NetworkClient.active || _wasDisconnected)
+        {
+            _networkManager.onClientConfirmReadyUp -= onClientConfirmReadyUp;
+            _networkManager.onClientSyncLobbyPlayers -= onClientSyncLobbyPlayers;
+            _networkManager.onClientStartMatchLoad -= onClientStartMatchLoad;
+        }
+
+        if(_networkManager.isPureServer)
+            {
+                _networkManager.onServerConnect += onServerConnect;
+            }
         base.RemoveView();
     }
 
@@ -78,6 +97,7 @@ public class MultiplayerRoomController : BaseController
     
     private void onLocalClientDisconnect(NetworkConnection conn)
     {
+        _wasDisconnected = true;
         _networkManager.Disconnect();
         DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);
     }

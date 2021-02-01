@@ -90,7 +90,6 @@ public class MultiplayerGameplayState : IGameState
         _gameModeController.AddListener(GameEventType.GAME_OVER, onGameOver);
         _gameModeController.Start(playerList);
         
-        
         ClientScene.Ready(NetworkClient.connection);
     }
     

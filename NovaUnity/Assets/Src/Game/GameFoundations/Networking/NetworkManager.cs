@@ -59,11 +59,47 @@ public class NetworkManager : Mirror.NetworkManager
 
 
     public PlayerSlot localPlayerSlot { get; private set; }
-    
+
+    public bool isPureServer
+    {
+        get
+        {
+            return NetworkServer.active && !NetworkClient.active;
+        }
+    }
+
+    public bool isPureClient
+    {
+        get
+        {
+            return !NetworkServer.active && NetworkClient.active;
+        }
+    }
+
+    public bool isHostClient // Server & client 
+    {
+        get
+        {
+            return NetworkServer.active && NetworkClient.active;
+        }
+    }
+
     public Dictionary<PlayerSlot, NetPlayer> GetClientPlayerMap()
     {
         return _clientNetPlayerMap;
     }
+    
+    public Dictionary<PlayerSlot, NetPlayer> GetServerPlayerMap()
+    {
+        var playerMap = new Dictionary<PlayerSlot, NetPlayer>();
+        foreach(var pair in _serverNetPlayerMap)
+        {
+            NetPlayer player = pair.Value;
+            playerMap[player.playerSlot] = player;
+        }
+
+        return playerMap;
+    } 
 
     public override void Start()
     {

@@ -1,4 +1,6 @@
 using GhostGen;
+using Mirror;
+using Unity.Collections;
 using UnityEngine;
 
 public class PlayerController : NotificationDispatcher, IAvatarController
@@ -30,16 +32,15 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     {
         _unit = unit;
         _unitStats = unit.stats;
+        
         _state = state as PlayerState;
         _state.stateType = PlayerActivityType.ACTIVE;
         
         _view = view as PlayerView;
         _view.controller = this;
-
+        
         _inputGen = inputGen;
         _interactColliderList = new Collider2D[5];
-        
-        _view.AddListener("onIdleEnter", onIdleEnter);
     }
 
     public IInputGenerator input
@@ -51,13 +52,6 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     
     public bool isSimulating { get; set; }
     
-    public int playerNumber
-    {
-        set
-        {
-            _state.playerNumber = value;
-        }
-    }
     
     public UnitType GetUnitType()
     {
@@ -109,15 +103,26 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     {
         _gameSystems = gameSystems;
         
+        setupNetCallbacks(_view.netEntity);
+        
         float timeToJumpApex = _unitStats.timeToJumpApex;
         _gravity = -(2 * _unitStats.maxJumpHeight) / (timeToJumpApex * timeToJumpApex);
 
-        
+        _view.AddListener("onIdleEnter", onIdleEnter);
+                
         ProjectileSystem projectileSystem = gameSystems.Get<ProjectileSystem>();
         _machineGunController = new MachineGunController(projectileSystem, _state.machineGunState, _unitStats.machineGunData);
         _view.SetWeapon(uuid, _machineGunController);
         
         _state.stateType = PlayerActivityType.ACTIVE;
+    }
+
+    public void CleanUp()
+    {
+        if(view != null)
+        {
+            cleanupNetCallbacks(view.netEntity);
+        }
     }
 
     public IAvatarView view
@@ -148,6 +153,11 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     // Update is called once per frame
     public void Step(float deltaTime)
     {
+        // if(!isSimulating)
+        // {
+        //     return;
+        // }
+        
         float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
         if(view != null && view.viewRoot != null && _state != null)
         {
@@ -157,10 +167,10 @@ public class PlayerController : NotificationDispatcher, IAvatarController
 
     public void FixedStep(float deltaTime, FrameInput input)
     {
-        if(!isSimulating)
-        {
-            return;
-        }
+        // if(!isSimulating)
+        // {
+        //     return;
+        // }
         
         _lastInput = input;
         AnimationInfo animationInfo = new AnimationInfo();
@@ -212,8 +222,8 @@ public class PlayerController : NotificationDispatcher, IAvatarController
             _state.previousPosition = _state.position;
             _state.position = _state.position + constrainedMoveDelta;
 
-            _view.transform.position = _state.position;
-            _view._viewRoot.position = _state.previousPosition;
+            _view.transform.position    = _state.position;
+            _view.viewRoot.position     = _state.previousPosition;
         }
     }
     
@@ -394,12 +404,10 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         for(int i= 0; i < hitCount; ++i)
         {
             Collider2D col = _interactColliderList[i];
-            // Optimize
+            
+            // TODO: Optimize
             InteractTrigger trigger = col.GetComponent<InteractTrigger>();
-            if(trigger != null)
-            {
-                trigger.Interact(this);
-            }
+            trigger?.Interact(this);            
         }
     }
     
@@ -409,12 +417,14 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         {
             return;
         }
+
+        Animator animator = _view.animator;
         
         AnimatorStateInfo animState = _view.animator.GetCurrentAnimatorStateInfo(0);
         if (animInfo.canJump)
         {
             _view.PlayFootPuffFx();
-            _view.animator.SetTrigger("jumpTrigger");
+            animator.SetTrigger("jumpTrigger");
         }
         else if (animInfo.isGrounded)
         {
@@ -424,7 +434,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
                 {
                     _view.PlayFootPuffFx();
                 }
-                _view.animator.SetTrigger("runTrigger");
+                animator.SetTrigger("runTrigger");
             }
             else if(!animInfo.isRunning && !animState.IsName("Idle"))
             {
@@ -432,22 +442,21 @@ public class PlayerController : NotificationDispatcher, IAvatarController
                 {
                     _view.PlayFootPuffFx();
                 }
-                _view.animator.SetTrigger("idleTrigger");
-                
+                animator.SetTrigger("idleTrigger");
             }
         }
         else if(!animInfo.isGrounded)
         {
             if (animInfo.isFalling && !animState.IsName("Falling"))
             {
-                _view.animator.SetTrigger("fallingTrigger");  
+                animator.SetTrigger("fallingTrigger");  
             }
         }
 
         float abs = Mathf.Abs(animInfo.runSpeed);
         float sign = Mathf.Sign(animInfo.runSpeed);
         float runSpeed = abs < 0.12f ? 0.12f * sign : animInfo.runSpeed;
-        _view.animator.SetFloat("runSpeedScale", runSpeed);
+        animator.SetFloat("runSpeedScale", runSpeed);
 
         // We died
         if(_state.stateType == PlayerActivityType.DEAD && _state.stateType != _oldActivityType)
@@ -484,8 +493,13 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     
     private void handleBeingAlive(float deltaTime, FrameInput input, ref AnimationInfo animationInfo)
     {
-        _handleInteract(input);
+        // if(!isSimulating)
+        // {
+        //     return;
+        // }
         
+        _handleInteract(input);
+
         int wallDirX = _view.constrainer.collisionInfo.left ? -1 : 1;
         int inputDirX = Mathf.Abs(input.horizontalMovement) < 0.5f ? 0 : input.horizontalMovement < 0 ? -1 : 1;
         
@@ -553,6 +567,8 @@ public class PlayerController : NotificationDispatcher, IAvatarController
                 aimStartPosition + (cursorDir * kDistance) : 
                 aimStartPosition + (aimDirection * kDistance);
 
+            state.aimPosition = aimPosition;
+            
             Debug.DrawRay(aimStartPosition, aimDirection, Color.cyan, 0.2f);
 
             const float kDebugLineSize = 0.2f;
@@ -588,6 +604,58 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         
         return attack;
     }
+
+    private void setupNetCallbacks(NetworkEntity netEntity)
+    {
+        if(netEntity)
+        {
+            netEntity.onSerialize += onNetworkSerialize;
+            netEntity.onDeserialize += onNetworkDeserialize;            
+        }
+        else
+        {
+            Debug.LogErrorFormat("Net Entity for Player: {0} is null!", _state.playerSlot);        
+        }
+    }
+
+    private void cleanupNetCallbacks(NetworkEntity netEntity)
+    {
+        if(netEntity)
+        {
+            netEntity.onSerialize -= onNetworkSerialize;
+            netEntity.onDeserialize -= onNetworkDeserialize;
+        }
+    }
+    
+    private bool onNetworkSerialize(IAvatarView view, NetworkWriter writer, bool isInitialState)
+    {
+        Vector2 prevPos = new Vector2(_state.previousPosition.x, _state.previousPosition.y);
+        Vector2 pos = new Vector2(_state.position.x, _state.position.y);
+        Vector2 aimPos = new Vector2(_state.aimPosition.x, _state.aimPosition.y);
+        
+        
+        writer.WriteVector2(prevPos);
+        writer.WriteVector2(pos);
+        writer.WriteVector2(aimPos);
+        
+        return true;
+    }
+
+    private void onNetworkDeserialize(IAvatarView view, NetworkReader reader, bool isInitialState)
+    {
+        Vector2 prevPos = reader.ReadVector2();
+        Vector2 pos = reader.ReadVector2();
+        Vector2 aimPos = reader.ReadVector2();
+
+
+        _state.position = pos;
+        _state.previousPosition = prevPos; // Maybe experiment using the current viewRoot position
+        _state.aimPosition = pos;
+        
+        view.transform.position    = _state.position;
+        view.viewRoot.position     = _state.previousPosition;
+    }
+    
     
     private struct AnimationInfo
     {

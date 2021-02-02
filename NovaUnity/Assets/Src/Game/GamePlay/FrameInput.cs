@@ -20,6 +20,7 @@ public struct FrameInput
     
     public Vector3 cursorPosition;
     public Vector3 cursorDirection;
+    
     //
     // public void Write(UdpPacket packet)
     // {

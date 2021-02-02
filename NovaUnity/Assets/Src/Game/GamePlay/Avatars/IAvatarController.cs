@@ -22,4 +22,6 @@ public interface IAvatarController : ITimeWarpTarget, IAttackTarget
     void FixedStep(float deltaTime, FrameInput input);
     void Step(float deltaTime);
 
+    void CleanUp();
+
 }

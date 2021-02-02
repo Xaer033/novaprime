@@ -15,7 +15,7 @@ public class GameSystems : NotificationDispatcher
     public event Action<float> onFixedStep;
     public event Action<float> onLateStep;
     
-    public T Get<T>() where T : IGameSystem
+    public T Get<T>() 
     {
         IGameSystem system;
         if (!_gameSystemMap.TryGetValue(typeof(T), out system))
@@ -34,15 +34,17 @@ public class GameSystems : NotificationDispatcher
         IGameSystem projectileSystem     = new ProjectileSystem(gameplayResources, 125);
         IGameSystem avatarSystem         = new AvatarSystem(gameplayResources);
         IGameSystem healthUiSystem       = new HealthUISystem(gameplayResources);
+        IGameSystem networkSystem        = new NetworkSystem(gameplayResources.unitMap);
         IGameSystem spawnPointSystem     = new SpawnPointSystem();
-        IGameSystem platformSystems      = new PlatformSystem();
-        IGameSystem triggerSystems       = new TriggerSystem(); 
+        IGameSystem platformSystem       = new PlatformSystem();
+        IGameSystem triggerSystem        = new TriggerSystem(); 
  
         // Higher priority value goes first
-        _addSystem(50, triggerSystems);
+        _addSystem(60, networkSystem);
+        _addSystem(50, triggerSystem);
         _addSystem(40, avatarSystem);
         _addSystem(30, spawnPointSystem);
-        _addSystem(20, platformSystems);
+        _addSystem(20, platformSystem);
         _addSystem(10, projectileSystem);
         _addSystem( 0, healthUiSystem);
         

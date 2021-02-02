@@ -14,6 +14,8 @@ public class UnitMap : SerializedScriptableObject
     [OdinSerialize, NonSerialized]
     public List<Unit> _unitList;
 
+    public List<Unit> unitList { get { return _unitList; }}
+    
     public void OnEnable()
     {
         for (int i = 0; i < _unitList.Count; ++i)
@@ -27,6 +29,7 @@ public class UnitMap : SerializedScriptableObject
     {
         return _unitMap[id];
     }
+    
     
     [Serializable]
     public class Unit

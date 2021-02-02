@@ -1,5 +1,4 @@
 ﻿using GhostGen;
-using Photon.Pun;
 using UnityEngine;
 
 public class MainMenuController : BaseController
@@ -11,11 +10,8 @@ public class MainMenuController : BaseController
         _networkManager = Singleton.instance.networkManager;
     }
     
-    public void Start ()
+    public override void Start ()
     {
-        _networkManager.onConnectedToMaster += onConnectedToMaster;
-        _networkManager.onJoinedLobby += onJoinedLobby;
-        
         viewFactory.CreateAsync<MainMenuView>("GUI/MainMenu/MainMenuView", v =>
         {
             view = v;
@@ -31,8 +27,7 @@ public class MainMenuController : BaseController
     
     public override void RemoveView()
     {
-        _networkManager.onConnectedToMaster -= onConnectedToMaster;
-        _networkManager.onJoinedLobby -= onJoinedLobby;
+        
         
         base.RemoveView();
         
@@ -40,10 +35,10 @@ public class MainMenuController : BaseController
 
     private void onConnectedToMaster()
     {
-        if(!PhotonNetwork.OfflineMode)
-        {
-            PhotonNetwork.JoinLobby();
-        }
+        // if(!PhotonNetwork.OfflineMode)
+        // {
+        //     PhotonNetwork.JoinLobby();
+        // }
     }
     
     private MainMenuView mainMenuView
@@ -58,11 +53,14 @@ public class MainMenuController : BaseController
 
     private void onMultiplayerPlay(GeneralEvent e)
     {
-        bool result = _networkManager.Connect();
-        if(result)
-        {
-            mainMenuView._canvasGroup.interactable = false;
-        }
+        // bool result = _networkManager.StartHost()
+        // if(result)
+        // {
+        //     mainMenuView._canvasGroup.interactable = false;
+        // }
+        
+        // GOTO "Host" or "join" option
+        DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);
     }
     
     private void onCredits(GeneralEvent e)

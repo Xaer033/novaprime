@@ -15,4 +15,5 @@
     public const string GOTO_MAIN_MENU = "event_goto_main_menu";
     public const string JOIN_SERVER = "event_join_server";
     public const string CREATE_SERVER = "event_create_server";
+    public const string CREAT_SERVER_AS_HOST = "event_create_server_as_host";
 }

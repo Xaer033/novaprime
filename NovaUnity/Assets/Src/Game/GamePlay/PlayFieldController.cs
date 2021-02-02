@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using GhostGen;
-using Photon.Realtime;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -19,19 +18,19 @@ public class PlayFieldController : NotificationDispatcher
 
     private GameplayCamera _cam;
 
-    private List<NetworkPlayer> _playerList;
+    private List<NetPlayer> _playerList;
+    private bool _isServer;
     
-    public PlayFieldController(List<NetworkPlayer> playerList, GameplayResources gameplayResources)
+    public PlayFieldController( GameplayResources gameplayResources)
     {
         _gameplayResources = gameplayResources;
-        _playerList = playerList;
     }
     public void Start()
     {
         Random.InitState(666);
 
-        _gameState = new GameState(_playerList);
-        _gameSystems = new GameSystems(_gameState, _gameplayResources);
+        _gameState = new GameState();
+        _gameSystems = new GameSystems( _gameState, _gameplayResources);
         _gameSystems.Start();
         
 //        AvatarSystem aSystem = _gameSystems.GetSystem<AvatarSystem>();

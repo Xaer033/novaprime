@@ -1265,8 +1265,8 @@ GameObject:
   - component: {fileID: 9125514036299057097}
   - component: {fileID: 8866287814259327232}
   - component: {fileID: 3253615202563350316}
-  - component: {fileID: 4782951062848739999}
-  - component: {fileID: 2104888615342328262}
+  - component: {fileID: 3803357089272214685}
+  - component: {fileID: 4748388422400085004}
   m_Layer: 12
   m_Name: GruntAvatar2
   m_TagString: Untagged
@@ -1311,7 +1311,7 @@ MonoBehaviour:
   _leftHandConstraint: {fileID: 3464980382878468571}
   _rightHandConstraint: {fileID: 6861646974207764685}
   constrainer: {fileID: 9125514036299057097}
-  _networkEntity: {fileID: 2104888615342328262}
+  _netEntity: {fileID: 4748388422400085004}
   _animator: {fileID: 3253615202563350316}
   deadRoot: {fileID: 1078098296706410919}
   _leftFootHook: {fileID: 9039541226417265090}
@@ -1380,7 +1380,7 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
---- !u!114 &4782951062848739999
+--- !u!114 &3803357089272214685
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1389,27 +1389,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 5789754299105121112}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -36112512, guid: 5b00bf8b25851d440940a40ec23344f4, type: 3}
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _sceneGuid: 
-  _serializerGuid: d9c5e788-3119-431f-a329-d0cf9b074721
-  _prefabId: 1
-  _updateRate: 1
-  _autoFreezeProxyFrames: 0
-  _clientPredicted: 1
-  _allowInstantiateOnClient: 1
-  _persistThroughSceneLoads: 0
-  _sceneObjectDestroyOnDetach: 1
-  _sceneObjectAutoAttach: 1
-  _alwaysProxy: 0
-  _detachOnDisable: 1
-  _allowFirstReplicationWhenFrozen: 0
-  _autoRemoveChildEntities: 0
-  _entityBehaviourQueryOption: 0
-  _entityPriorityCalculatorQueryOption: 0
-  _entityReplicationFilterQueryOption: 0
---- !u!114 &2104888615342328262
+  sceneId: 0
+  serverOnly: 0
+  m_AssetId: 
+  hasSpawned: 0
+--- !u!114 &4748388422400085004
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1421,6 +1408,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 360002fb2d77236448873149c1dc0725, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
 --- !u!114 &2642211197282049033
 MonoBehaviour:
   m_ObjectHideFlags: 0

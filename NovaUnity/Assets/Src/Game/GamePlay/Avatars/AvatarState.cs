@@ -8,6 +8,7 @@ public class AvatarState
     public string uuid;
     public float health;
     public float timeScale;
+    public Vector3 aimPosition;
     
     public int jumpCount;
     public float timeToWallUnstick;

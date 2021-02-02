@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 
 public class PlayerInput : IInputGenerator
 {
-    public int playerNumber { get; set; }
+    public PlayerSlot playerSlot { get; set; }
 
     private Camera _camera;
     private bool _jumpPressed;
@@ -17,9 +17,9 @@ public class PlayerInput : IInputGenerator
     private PlayerActions _pAction;
     private bool _useGamePad;
     
-    public PlayerInput(int pNumber, Camera playerCamera)
+    public PlayerInput(PlayerSlot pSlot, Camera playerCamera)
     {
-        playerNumber = pNumber;
+        playerSlot = pSlot;
         _camera = playerCamera;
         
         _pAction = new PlayerActions();

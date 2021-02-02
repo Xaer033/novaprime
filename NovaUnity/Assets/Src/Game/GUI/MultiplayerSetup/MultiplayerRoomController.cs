@@ -1,22 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using ExitGames.Client.Photon;
-using Photon.Pun;
-using Photon.Realtime;
-using UnityEditor;
+﻿using System.Collections.Generic;
+using GhostGen;
+using Mirror;
 using UnityEngine;
 
 public class MultiplayerRoomController : BaseController 
 {
     private NetworkManager _networkManager;
-
-
-    public MultiplayerRoomController()
+    private bool _isServer;
+    private bool _wasDisconnected;
+    
+    public MultiplayerRoomController(bool isServer)
     {
+        _isServer = isServer;
         _networkManager = Singleton.instance.networkManager;
     }
     
-    public void Start()
+    public override void Start()
     {
         viewFactory.CreateAsync<MultiplayerRoomView>("GUI/MainMenu/MultiplayerRoomView", (v) =>
         {
@@ -26,144 +25,153 @@ public class MultiplayerRoomController : BaseController
             view.AddListener(MenuUIEventType.TOGGLE, onReadyButton);
             view.AddListener(MenuUIEventType.BACK, onBackButton);
 
-            _networkManager.onPlayerPropertiesUpdate += onPlayerPropertiesUpdate;
-            _networkManager.onPlayerConnected += onPlayerConnectionStatusChanged;
-            _networkManager.onPlayerDisconnected += onPlayerConnectionStatusChanged;
-            _networkManager.onNetworkDisconnected += onNetworkDisconnected;
+            _wasDisconnected = false;
             
-            _networkManager.onCustomEvent += onCustomEvent;
-    
-            _setupPlayers();
-            _viewInitialization();
+            if(!_isServer)
+            {
+                _networkManager.onLocalClientDisconnect += onLocalClientDisconnect;
+            }
+
+
+            if(NetworkClient.active)
+            {
+                _networkManager.onClientConfirmReadyUp += onClientConfirmReadyUp;
+                _networkManager.onClientSyncLobbyPlayers += onClientSyncLobbyPlayers;
+                _networkManager.onClientStartMatchLoad += onClientStartMatchLoad;
+            }
+
+            if(_networkManager.isPureServer)
+            {
+                _networkManager.onServerConnect += onServerConnect;
+                _networkManager.onServerDisconnect += onServerDisconnect;
+                _networkManager.onServerConfirmReadyUp += onServerConfirmReadyUp;
+                
+                roomView.readyButton.gameObject.SetActive(false);
+            }
+
+            var netPlayerMap = _networkManager.isPureServer
+                ? _networkManager.GetServerPlayerMap()
+                : _networkManager.GetClientPlayerMap();
+                
+            _setupPlayers(netPlayerMap);
         });
     }
     
     public override void RemoveView()
     {
-        _networkManager.onPlayerPropertiesUpdate -= onPlayerPropertiesUpdate;
-        _networkManager.onPlayerConnected -= onPlayerConnectionStatusChanged;
-        _networkManager.onPlayerDisconnected -= onPlayerConnectionStatusChanged;
-        _networkManager.onNetworkDisconnected -= onNetworkDisconnected;
-        
-        _networkManager.onCustomEvent -= onCustomEvent;
-    
+        if(!_isServer)
+        {
+            _networkManager.onLocalClientDisconnect -= onLocalClientDisconnect;
+        }
+
+        // if(NetworkClient.active || _wasDisconnected)
+        {
+            _networkManager.onClientConfirmReadyUp -= onClientConfirmReadyUp;
+            _networkManager.onClientSyncLobbyPlayers -= onClientSyncLobbyPlayers;
+            _networkManager.onClientStartMatchLoad -= onClientStartMatchLoad;
+        }
+
+        // if(_networkManager.isPureServer || _wasDisconnected)
+        {
+            _networkManager.onServerConnect -= onServerConnect;
+            _networkManager.onServerDisconnect -= onServerDisconnect;
+            _networkManager.onServerConfirmReadyUp -= onServerConfirmReadyUp;
+        }
         base.RemoveView();
     }
 
-    public NetworkPlayer[] GetPlayerList()
-    {
-        if(!PhotonNetwork.IsMasterClient)
-        {
-            Debug.LogError("Trying To call get player List when you are not the master client, thats a paddlin'");
-            return null;
-        }
-
-        NetworkPlayer[] playerStateList = new NetworkPlayer[NetworkManager.kMaxPlayers];
-
-        Player[] playerList = PhotonNetwork.PlayerList;
-        for (int i = 0; i < NetworkManager.kMaxPlayers; ++i)
-        {
-            if(i < playerList.Length)
-            {
-                playerStateList[i] = new NetworkPlayer(playerList[i]);
-            }
-            else
-            {
-                playerStateList[i] = null;
-            }
-        }
-
-        return playerStateList;
-    }
-
-    
     private MultiplayerRoomView roomView
     {
         get { return view as MultiplayerRoomView; }
     }
-    
-    
 
-    private void onPlayerPropertiesUpdate(Player targetPlayer, Hashtable properties)
+
+    private void onServerConnect(NetworkConnection conn)
     {
-        if(roomView == null)
-        {
-            return;
-        }
-  
-        int index = roomView.GetIndexForPlayerId(targetPlayer.ActorNumber);
-        if(index < 0)
-        {
-            Debug.LogFormat("Index for ActorNumber: {0} not found", targetPlayer.ActorNumber);
-            return;
-        }
-
-       const string key = "isReady";
-        
-        bool isReady = false;
-        if(properties.ContainsKey(key))
-        {
-            isReady = (bool)properties[key];
-        }
-        
-        
-        Debug.LogFormat("OnPropertyUpdate Player: {0} ready: {1}", key, isReady);
-        // roomView.SetIsReady(index, isReady);
-        roomView.SetPlayer(index, targetPlayer, isReady);
+        _setupPlayers(_networkManager.GetServerPlayerMap());    
     }
 
-    private void onNetworkDisconnected(DisconnectCause cause)
+    private void onServerDisconnect(NetworkConnection conn)
     {
-        DispatchEvent(MenuUIEventType.GOTO_MAIN_MENU);
+        _setupPlayers(_networkManager.GetServerPlayerMap());
+    }
+
+    private void onServerConfirmReadyUp(NetworkConnection conn, ConfirmReadyUp msg)
+    {
+        if(NetworkServer.active)
+        {
+            roomView.startButton.gameObject.SetActive(msg.allPlayersReady);    
+        }
+        
+        _setupPlayers(_networkManager.GetServerPlayerMap());
     }
     
-    private void onPlayerConnectionStatusChanged(Player newPlayer)
+    private void onClientConfirmReadyUp(NetworkConnection conn, ConfirmReadyUp msg)
     {
-        _setupPlayers();
-        // onRoomPropertiesUpdate(PhotonNetwork.CurrentRoom.CustomProperties);
+        if(NetworkServer.active)
+        {
+            roomView.startButton.gameObject.SetActive(msg.allPlayersReady);    
+        }
+        
+        _setupPlayers(_networkManager.GetClientPlayerMap());
+    }
+
+    private void onClientSyncLobbyPlayers(NetworkConnection conn, SyncLobbyPlayers msg)
+    {
+        _setupPlayers(_networkManager.GetClientPlayerMap());
+    }
+
+    private void onClientStartMatchLoad(NetworkConnection conn, StartMatchLoad msg)
+    {
+        DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_GAME);
     }
     
+    private void onLocalClientDisconnect(NetworkConnection conn)
+    {
+        _wasDisconnected = true;
+        _networkManager.Disconnect();
+        DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);
+    }
     
-    private void onBackButton(GhostGen.GeneralEvent e)
+    private void onBackButton(GeneralEvent e)
     {
         view.RemoveListener(MenuUIEventType.BACK, onBackButton);
         // Maybe throw up a modal dialog to ask if they are sure?
-        _networkManager.onLeftRoom += onLeftRoom;
-        PhotonNetwork.LeaveRoom();
+        // PhotonNetwork.LeaveRoom();
+        
+        _networkManager.Disconnect();
+        DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);
     }
 
-    private void onStartMultiplayer(GhostGen.GeneralEvent e)
+    private void onStartMultiplayer(GeneralEvent e)
     {
-        RaiseEventOptions options = new RaiseEventOptions();
-        options.Receivers = ReceiverGroup.All;
+        view.RemoveListener(MenuUIEventType.CONTINUE, onStartMultiplayer);
 
-        PhotonNetwork.RaiseEvent(NetworkOpCode.START_GAMEPLAY_LOAD, null, options, SendOptions.SendReliable);
+        // NetworkClient.Send(new RequestMatchStart(), Channels.DefaultReliable);
+        // _networkManager.OnRe
+        
+        DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_GAME);
     }
     
-    private void onReadyButton(GhostGen.GeneralEvent e)
+    private void onReadyButton(GeneralEvent e)
     {
-        const string key = "isReady";
-       
-        Hashtable currentProperties = PhotonNetwork.LocalPlayer.CustomProperties;
-        bool isReady = false;
-        if(currentProperties.ContainsKey(key))
-        {
-            isReady = !(bool)currentProperties[key];
-        }
-        else
-        {
-            isReady = true;
-        }
+        var netPlayerMap = _networkManager.GetClientPlayerMap();
 
-        Hashtable newProperties = currentProperties;//new Hashtable();
-        newProperties[key] = isReady;
-        Debug.LogFormat("Setting Property Player: {0} ready: {1}", key, isReady);
-        PhotonNetwork.LocalPlayer.SetCustomProperties(newProperties);
+        PlayerSlot localSlot = _networkManager.localPlayerSlot;
+        if(_networkManager.localPlayerSlot != PlayerSlot.NONE)
+        {
+            NetPlayer player = netPlayerMap[localSlot];
+            bool requestedReadyState = !player.isReadyUp;
+            
+            Debug.Log("Ready Button State: " + requestedReadyState);
+            RequestReadyUp readyRequest = new RequestReadyUp(requestedReadyState);
+
+            NetworkClient.Send(readyRequest, Channels.DefaultReliable);
+        }
     }
 
     private void onLeftRoom()
     {
-        _networkManager.onLeftRoom -= onLeftRoom;
         DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);
     }
 
@@ -175,42 +183,27 @@ public class MultiplayerRoomController : BaseController
         }
     }
 
-    private void _viewInitialization()
+    private void _setupPlayers(Dictionary<PlayerSlot, NetPlayer> netPlayerMap)
     {
-        roomView.SetTitle(PhotonNetwork.CurrentRoom.Name);
-        bool isMaster = PhotonNetwork.IsMasterClient;
-        roomView.IsMasterClient(isMaster);
-    }
-    
-    private void _setupPlayers()
-    {
-        List<Player> playerList = new List<Player>(PhotonNetwork.PlayerList);
+        roomView.ClearPlayerViews();
+        
+        List<NetPlayer> playerList = new List<NetPlayer>(netPlayerMap.Values);
         playerList.Sort((a, b) =>
         {
-            if(a == null || b == null) { return 0; }
-            return a.ActorNumber.CompareTo(b.ActorNumber);
+            return a.playerSlot.CompareTo(b.playerSlot);
         });
-
-        const string key = "isReady";
         
         int count = playerList.Count;
-        for(int i = 0; i < NetworkManager.kMaxPlayers; ++i)
+        for(int i = 0; i < (int)PlayerSlot.MAX_PLAYERS; ++i)
         {
             if(i < count)
             {
-                bool isReady = false;
-                if(playerList[i].CustomProperties.ContainsKey(key))
-                {
-                    isReady = (bool)playerList[i].CustomProperties[key];
-                }
-                roomView.SetPlayer(i, playerList[i], isReady);
+                roomView.SetPlayer(i, playerList[i]);
             }
             else
             {
-                roomView.SetPlayer(i, null, false);
+                roomView.SetPlayer(i, new NetPlayer(-1));
             }
         }
-    
-        roomView.IsMasterClient(PhotonNetwork.IsMasterClient);
     }
 }

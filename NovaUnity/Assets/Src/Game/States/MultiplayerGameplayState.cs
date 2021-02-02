@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
-using ExitGames.Client.Photon;
 using GhostGen;
-using Photon.Pun;
-using Photon.Realtime;
+using Mirror;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -20,48 +18,34 @@ public class MultiplayerGameplayState : IGameState
     public void Init( GameStateMachine stateMachine, object changeStateData )
 	{       
 		_stateMachine = stateMachine;
+        Singleton.instance.gui.screenFader.alpha = 0.0f;
 
         _playersFinishedLoading.Clear();
 
-        // *TEMP*
-        Singleton.instance.gui.screenFader.alpha = 0.0f;
-        _networkManager = Singleton.instance.networkManager;
-        _networkManager.onCustomEvent += onCustomEvent;
-        _networkManager.onPlayerPropertiesUpdate += onPlayerPropertiesUpdate;
+        if(NetworkServer.active)
+        {
+            StartMatchLoad startMatchMessage = new StartMatchLoad();
+            NetworkServer.SendToAll(startMatchMessage, Channels.DefaultReliable);
+        }
         
-        PhotonNetwork.IsMessageQueueRunning = false;
+        _networkManager = Singleton.instance.networkManager;
+        _networkManager.onClientMatchBegin += onClientMatchBegin;
+        
+        // PhotonNetwork.IsMessageQueueRunning = false;
         AsyncOperation async = SceneManager.LoadSceneAsync("GameplayScene", LoadSceneMode.Single);
         async.completed += onSceneLoaded;
     }
 
-    // private void onSceneUnloaded(AsyncOperation asyncOp)
-    // {
-    //     string name = SceneManager.GetActiveScene().name;
-    //     if (Application.isEditor && name == "GameplayScene")
-    //     {
-    //         onSceneLoaded(null);
-    //     }
-    //     else
-    //     {
-    //         ;
-    //             
-    //         AsyncOperation async = SceneManager.LoadSceneAsync("GameplayScene", LoadSceneMode.Single);
-    //         async.completed += onSceneLoaded;
-    //     }
-    //
-    // }
-
     private void onSceneLoaded(AsyncOperation asyncOp)
     {
-        PhotonNetwork.IsMessageQueueRunning = true;
+        startGameSystems();
 
-        RaiseEventOptions options = new RaiseEventOptions();
-        options.Receivers = ReceiverGroup.MasterClient;
+        if(NetworkClient.active)
+        {
+            Debug.Log("SceneLoader: " + _networkManager.localPlayerSlot);
+            NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
+        }
 
-        Hashtable currentProperties = PhotonNetwork.LocalPlayer.CustomProperties;
-        Hashtable newProperties = currentProperties;
-        newProperties[kIsLoadedKey] = true;
-        PhotonNetwork.LocalPlayer.SetCustomProperties(newProperties);
     }
     
     public void FixedStep(float fixedDeltaTime)
@@ -90,60 +74,23 @@ public class MultiplayerGameplayState : IGameState
     
     public void Exit()
 	{
-        _networkManager.onCustomEvent -= onCustomEvent;
-        _networkManager.onPlayerPropertiesUpdate -= onPlayerPropertiesUpdate;
-        
         _gameModeController.RemoveListener(GameEventType.GAME_OVER, onGameOver);
         _gameModeController.CleanUp();   
     }
 
 
-    private void onCustomEvent(byte netOpCode, object eventContent, int sender)
+    private void onClientMatchBegin(NetworkConnection conn, MatchBegin msg)
     {
-        switch(netOpCode)
-        {
-            case NetworkOpCode.ALL_PLAYERS_LOADED:    handleAllPlayersLoaded();   break; 
-        }
+        _networkManager.onClientMatchBegin -= onClientMatchBegin;
+        // handleAllPlayersLoaded();
+        // Un freeze players here or something
     }
 
-    private void onPlayerPropertiesUpdate(Player targetPlayer, Hashtable updatedProperties)
+    private void startGameSystems()
     {
-        if(!PhotonNetwork.IsMasterClient) { return; }
-        
-        bool isFinishedLoading = (bool)updatedProperties[kIsLoadedKey];
-        if(isFinishedLoading)
-        {
-            _playersFinishedLoading.Add(targetPlayer.ActorNumber);
-            if(_playersFinishedLoading.Count >= PhotonNetwork.CurrentRoom.PlayerCount)
-            {
-                RaiseEventOptions options = new RaiseEventOptions();
-                options.Receivers = ReceiverGroup.All;
-                PhotonNetwork.RaiseEvent(NetworkOpCode.ALL_PLAYERS_LOADED, null, options, SendOptions.SendReliable);
-            }
-        }
-
-    }
-
-    private void handleAllPlayersLoaded()
-    {
-        List<NetworkPlayer> playerList = new List<NetworkPlayer>(4);
-        for(int i = 0; i < PhotonNetwork.CurrentRoom.PlayerCount; ++i)
-        {
-            Player photonPlayer = PhotonNetwork.PlayerList[i];
-            NetworkPlayer netPlayer = new NetworkPlayer(photonPlayer);
-            
-            playerList.Add(netPlayer);
-        }
-        
-        playerList.Sort((a, b) =>
-        {
-            if(a == null || b == null) { return 0; }
-            return a.number.CompareTo(b.number);
-        });
-        
         _gameModeController = new MultiplayerCampaignMode();
         _gameModeController.AddListener(GameEventType.GAME_OVER, onGameOver);
-        _gameModeController.Start(playerList);
+        _gameModeController.Start(null);
     }
     
     private void onGameOver(GeneralEvent e)

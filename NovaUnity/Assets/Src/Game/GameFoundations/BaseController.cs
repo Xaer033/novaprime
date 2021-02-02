@@ -18,6 +18,11 @@ public class BaseController : NotificationDispatcher
         set { _view = value; }
     }
 
+    public virtual void Start()
+    {
+        
+    }
+
     public virtual void RemoveView()
     {
         if(view != null)

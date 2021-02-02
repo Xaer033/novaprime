@@ -13,10 +13,12 @@ public class NetworkManager : Mirror.NetworkManager
 
     public event Action<string> onError;
     public event Action onServerStarted;
+    public event Action onServerMatchBegin;
     public event Action<NetworkConnection> onServerConnect;
     public event Action<NetworkConnection> onServerDisconnect;
     public event Action<NetworkConnection, int> onServerError;
-    public event Action<NetworkConnection, RequestReadyUp> onServerRequestReadyUp;
+    public event Action<NetworkConnection, ConfirmReadyUp> onServerConfirmReadyUp;
+    public event Action<NetworkConnection, SendPlayerInput> onServerSendPlayerInput;
     
     public event Action onClientStarted;
     public event Action<NetworkConnection> onClientConnect;
@@ -27,6 +29,8 @@ public class NetworkManager : Mirror.NetworkManager
     public event Action<NetworkConnection, ConfirmReadyUp> onClientConfirmReadyUp;
     public event Action<NetworkConnection, StartMatchLoad> onClientStartMatchLoad;
     public event Action<NetworkConnection, MatchBegin> onClientMatchBegin;
+    public event SpawnHandlerDelegate onClientSpawnHandler;
+    public event UnSpawnDelegate onClientUnspawnHandler;
 
     public override void OnDestroy()
     {
@@ -35,7 +39,9 @@ public class NetworkManager : Mirror.NetworkManager
         onServerConnect = null;
         onServerDisconnect = null;
         onServerError = null;
-        onServerRequestReadyUp = null;
+        onServerConfirmReadyUp = null;
+        onServerMatchBegin = null;
+        onServerSendPlayerInput = null;
         
         onClientStarted = null;
         onClientConnect = null;
@@ -106,10 +112,37 @@ public class NetworkManager : Mirror.NetworkManager
         base.Start();
 
         UnitMap unitMap = Singleton.instance.gameplayResources.unitMap;
-        UnitMap.Unit unit = unitMap.GetUnit("player");
-        spawnPrefabs.Add(unit.view.gameObject);
+        for(int i = 0; i < unitMap.unitList.Count; ++i)
+        {
+            UnitMap.Unit unit = unitMap.unitList[i];
+            Debug.Log("Unit: " + unit.id);
+            
+            ClientScene.RegisterPrefab(
+                unit.view.gameObject, 
+                unit.view.netIdentity.assetId, 
+                OnClientSpawnHandler, 
+                OnClientUnspawnHandler);
+        }
     }
 
+    private GameObject OnClientSpawnHandler(SpawnMessage msg)
+    {
+        return onClientSpawnHandler?.Invoke(msg);
+        
+    }
+    
+    private void OnClientUnspawnHandler(GameObject obj)
+    {
+        onClientUnspawnHandler?.Invoke(obj);
+    }
+
+    // public void ServerBeginMatch()
+    // {
+    //     // StartMatchLoad startMatchMessage = new StartMatchLoad();
+    //     // NetworkServer.SendToAll(startMatchMessage, Channels.DefaultReliable);
+    //
+    //     
+    // }
     public override void OnStartServer()
     {
         Debug.Log("OnStartServer");
@@ -120,6 +153,7 @@ public class NetworkManager : Mirror.NetworkManager
         NetworkServer.RegisterHandler<RequestMatchStart>(OnServerRequestMatchStart, false);
         NetworkServer.RegisterHandler<RequestReadyUp>(OnServerRequestReadyUp, false);
         NetworkServer.RegisterHandler<PlayerMatchLoadComplete>(OnServerPlayerMatchLoadComplete, false);
+        NetworkServer.RegisterHandler<SendPlayerInput>(OnServerSendPlayerInput, false);
         
         onServerStarted?.Invoke();
     }
@@ -282,6 +316,11 @@ public class NetworkManager : Mirror.NetworkManager
         }
     }
 
+    private void OnServerSendPlayerInput(NetworkConnection conn, SendPlayerInput msg)
+    {
+        onServerSendPlayerInput?.Invoke(conn, msg);
+    }
+    
     private void OnServerPlayerMatchLoadComplete(NetworkConnection conn, PlayerMatchLoadComplete msg)
     {
         NetPlayer player = _serverNetPlayerMap[conn.connectionId];
@@ -294,6 +333,7 @@ public class NetworkManager : Mirror.NetworkManager
         if(allPlayersLoaded)
         {
             Debug.Log("Server Match Start");
+            onServerMatchBegin?.Invoke();
             NetworkServer.SendToAll(new MatchBegin(), Channels.DefaultReliable);
         }
     }
@@ -309,6 +349,8 @@ public class NetworkManager : Mirror.NetworkManager
             player.isReadyUp = msg.isReady;
             _serverNetPlayerMap[conn.connectionId] = player;
 
+            NetworkServer.SetClientReady(conn);
+            
             bool allPlayersReady = canStartGame();
             ConfirmReadyUp readyMessage = new ConfirmReadyUp(
                                                 player.playerSlot, 
@@ -317,7 +359,7 @@ public class NetworkManager : Mirror.NetworkManager
                                                 
             NetworkServer.SendToAll(readyMessage, Channels.DefaultReliable);
 
-            onServerRequestReadyUp?.Invoke(conn, msg);
+            onServerConfirmReadyUp?.Invoke(conn, readyMessage);
         }
     }
 
@@ -332,6 +374,9 @@ public class NetworkManager : Mirror.NetworkManager
         {
             StopClient();
         }
+        
+        _serverNetPlayerMap.Clear();
+        _clientNetPlayerMap.Clear();
     }
 
     public bool isConnected

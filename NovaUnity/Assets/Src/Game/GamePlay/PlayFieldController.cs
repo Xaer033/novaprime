@@ -21,18 +21,16 @@ public class PlayFieldController : NotificationDispatcher
     private List<NetPlayer> _playerList;
     private bool _isServer;
     
-    public PlayFieldController(List<NetPlayer> playerList, bool isServer, GameplayResources gameplayResources)
+    public PlayFieldController( GameplayResources gameplayResources)
     {
         _gameplayResources = gameplayResources;
-        _playerList = playerList;
-        _isServer = isServer;
     }
     public void Start()
     {
         Random.InitState(666);
 
-        _gameState = new GameState(_playerList);
-        _gameSystems = new GameSystems(_isServer, _gameState, _gameplayResources);
+        _gameState = new GameState();
+        _gameSystems = new GameSystems( _gameState, _gameplayResources);
         _gameSystems.Start();
         
 //        AvatarSystem aSystem = _gameSystems.GetSystem<AvatarSystem>();

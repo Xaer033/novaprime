@@ -18,11 +18,15 @@ public class MultiplayerGameplayState : IGameState
     public void Init( GameStateMachine stateMachine, object changeStateData )
 	{       
 		_stateMachine = stateMachine;
+        Singleton.instance.gui.screenFader.alpha = 0.0f;
 
         _playersFinishedLoading.Clear();
 
-        // *TEMP*
-        Singleton.instance.gui.screenFader.alpha = 0.0f;
+        if(NetworkServer.active)
+        {
+            StartMatchLoad startMatchMessage = new StartMatchLoad();
+            NetworkServer.SendToAll(startMatchMessage, Channels.DefaultReliable);
+        }
         
         _networkManager = Singleton.instance.networkManager;
         _networkManager.onClientMatchBegin += onClientMatchBegin;
@@ -34,8 +38,14 @@ public class MultiplayerGameplayState : IGameState
 
     private void onSceneLoaded(AsyncOperation asyncOp)
     {
-        Debug.Log("SceneLoader: " + _networkManager.localPlayerSlot);
-        NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
+        startGameSystems();
+
+        if(NetworkClient.active)
+        {
+            Debug.Log("SceneLoader: " + _networkManager.localPlayerSlot);
+            NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
+        }
+
     }
     
     public void FixedStep(float fixedDeltaTime)
@@ -72,25 +82,15 @@ public class MultiplayerGameplayState : IGameState
     private void onClientMatchBegin(NetworkConnection conn, MatchBegin msg)
     {
         _networkManager.onClientMatchBegin -= onClientMatchBegin;
-        handleAllPlayersLoaded();
+        // handleAllPlayersLoaded();
+        // Un freeze players here or something
     }
 
-    private void handleAllPlayersLoaded()
+    private void startGameSystems()
     {
-        List<NetPlayer> playerList = new List<NetPlayer>(4);
-        var netPlayerMap = _networkManager.GetClientPlayerMap();
-        playerList.AddRange(netPlayerMap.Values);
-        
-        playerList.Sort((a, b) =>
-        {
-            return a.playerSlot.CompareTo(b.playerSlot);
-        });
-        
         _gameModeController = new MultiplayerCampaignMode();
         _gameModeController.AddListener(GameEventType.GAME_OVER, onGameOver);
-        _gameModeController.Start(playerList);
-        
-        ClientScene.Ready(NetworkClient.connection);
+        _gameModeController.Start(null);
     }
     
     private void onGameOver(GeneralEvent e)

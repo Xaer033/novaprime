@@ -27,14 +27,14 @@ public class GameSystems : NotificationDispatcher
         return (T)system;
     }
     
-    public GameSystems(bool isServer, GameState gameState, GameplayResources gameplayResources)
+    public GameSystems(GameState gameState, GameplayResources gameplayResources)
     {
         _gameState = gameState;
         
         IGameSystem projectileSystem     = new ProjectileSystem(gameplayResources, 125);
         IGameSystem avatarSystem         = new AvatarSystem(gameplayResources);
         IGameSystem healthUiSystem       = new HealthUISystem(gameplayResources);
-        IGameSystem networkSystem        = new NetworkSystem(isServer);
+        IGameSystem networkSystem        = new NetworkSystem(gameplayResources.unitMap);
         IGameSystem spawnPointSystem     = new SpawnPointSystem();
         IGameSystem platformSystem       = new PlatformSystem();
         IGameSystem triggerSystem        = new TriggerSystem(); 

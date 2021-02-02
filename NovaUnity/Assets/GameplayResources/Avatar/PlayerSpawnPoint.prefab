@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5754230677145072333}
   - component: {fileID: 7428116273637970731}
-  - component: {fileID: 3936775915799057813}
+  - component: {fileID: 5465273738875020249}
   m_Layer: 0
   m_Name: PlayerSpawnPoint
   m_TagString: Untagged
@@ -45,7 +45,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &3936775915799057813
+--- !u!114 &5465273738875020249
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -54,18 +54,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 5628506590160005156}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4d32ee573ec212246a4d4e51c13cd670, type: 3}
+  m_Script: {fileID: 11500000, guid: bf83fbf758a1d794294557f8548da98f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnMode: 0
-  spawnInterval: 0
-  maxSpawnCount: 1
   triggerCollider: {fileID: 7428116273637970731}
-  spawnPointData:
-    spawnType: 1
-    subtypeId: player
-    position: {x: 0, y: 0, z: 0}
-    customString: 
-    customInt: 0
-    customFloat: 0
-    customVector3: {x: 0, y: 0, z: 0}
+  slot: 0

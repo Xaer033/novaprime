@@ -1,121 +1,77 @@
 ﻿using System;
-using UnityEngine;
-//
-// [RequireComponent(typeof(BoltEntity))]
-// public class NetworkEntity : Bolt.EntityBehaviour<IState>
-// {                   
-//     public event Action<NetworkEntity> onAttached;                  
-//     public event Action<NetworkEntity> onDetached;                  
-//     public event Action<NetworkEntity> onSimulateOwner;                 
-//     public event Action<NetworkEntity> onSimulateController;
-//     public event Action<NetworkEntity> onControlGained;
-//     public event Action<NetworkEntity> onControlLost;
-//     public event Action<NetworkEntity, Command> onMissingCommand;
-//     public event Action<NetworkEntity, Command, bool> onExecuteCommand;
-//     public event Func<NetworkEntity, Command, bool> onLocalAndRemoteResultEqual;
-//
-//     private BoltEntity _boltEntity;
-//     
-//     void Awake()
-//     {
-//         _boltEntity = GetComponent<BoltEntity>();
-//     }
-//     
-//     public T GetState<T>() where T : IState
-//     {
-//         return (T)state;
-//     }
-//     
-//     public override void Attached()
-//     {
-//         base.Attached();
-//         
-//         if(onAttached != null)
-//         {
-//             onAttached(this);
-//         }
-//     }
-//
-//     public override void Detached()
-//     {
-//         base.Detached();
-//         
-//         if(onDetached != null)
-//         {
-//             onDetached(this);
-//         }
-//     }
-//
-//     public override void SimulateOwner()
-//     {
-//         base.SimulateOwner();
-//
-//         if(onSimulateOwner != null)
-//         {
-//             onSimulateOwner(this);
-//         }
-//     }
-//
-//     public override void SimulateController()
-//     {
-//         base.SimulateController();
-//
-//         if(onSimulateController != null)
-//         {
-//             onSimulateController(this);
-//         }
-//     }
-//
-//     public override void ControlGained()
-//     {
-//         base.ControlGained();
-//         
-//         if(onControlGained != null)
-//         {
-//             onControlGained(this);
-//         }
-//     }
-//
-//     public override void ControlLost()
-//     {
-//         base.ControlLost();
-//         
-//         if(onControlLost != null)
-//         {
-//             onControlLost(this);
-//         }
-//     }
-//
-//     public override void MissingCommand(Command previous)
-//     {
-//         base.MissingCommand(previous);
-//
-//         if(onMissingCommand != null)
-//         {
-//             onMissingCommand(this, previous);
-//         }
-//     }
-//
-//     public override void ExecuteCommand(Command command, bool resetState)
-//     {
-//         base.ExecuteCommand(command, resetState);
-//
-//         if(onExecuteCommand != null)
-//         {
-//             onExecuteCommand(this, command, resetState);
-//         }
-//     }
-//     
-//     
-//     public override bool LocalAndRemoteResultEqual(Command command)
-//     {
-//         bool result = false;
-//         
-//         if(onLocalAndRemoteResultEqual != null)
-//         {
-//             result = onLocalAndRemoteResultEqual(this, command);
-//         }
-//         
-//         return result;
-//     }
-// }
+using Mirror;
+
+public class NetworkEntity : NetworkBehaviour
+{
+    public event Func<IAvatarView, NetworkWriter, bool, bool>    onSerialize;
+    public event Action<IAvatarView, NetworkReader, bool>        onDeserialize;
+    public event Action<IAvatarView> onStartAuthority;
+    public event Action<IAvatarView> onStopAuthority;
+    public event Action<IAvatarView> onStartClient;
+    public event Action<IAvatarView> onStopClient;
+    public event Action<IAvatarView> onStartServer;
+    public event Action<IAvatarView> onStopServer;
+    public event Action<IAvatarView> onStartLocalPlayer;
+
+    private IAvatarView _view;
+    
+    protected virtual void Awake()
+    {
+        _view = GetComponent<IAvatarView>();
+    }
+    
+    public override bool OnSerialize(NetworkWriter writer, bool initialState)
+    {
+        bool wasBaseChanged =  base.OnSerialize(writer, initialState);
+        bool overrideChanged = false;
+        if(onSerialize != null)
+        {
+        // TODO: This is kind of weird, and would be problematic if we have multiple onSerialize events registered, 
+        // I believe it returns the last one called...but that isn't ideal...
+            overrideChanged = onSerialize(_view, writer, initialState); 
+        }
+        
+        return wasBaseChanged || overrideChanged;
+    }
+    
+    public override void OnDeserialize(NetworkReader reader, bool initialState)
+    {
+        base.OnDeserialize(reader, initialState);
+        onDeserialize?.Invoke(_view, reader, initialState);
+    }
+
+    public override void OnStartAuthority()
+    {
+        onStartAuthority?.Invoke(_view);
+    }
+
+    public override void OnStopAuthority()
+    {
+        onStopAuthority?.Invoke(_view);
+    }
+
+    public override void OnStartClient()
+    {
+        onStartClient?.Invoke(_view);
+    }
+
+    public override void OnStartServer()
+    {
+        onStartServer?.Invoke(_view);
+    }
+
+    public override void OnStartLocalPlayer()
+    {
+        onStartLocalPlayer?.Invoke(_view);
+    }
+
+    public override void OnStopClient()
+    {
+        onStopClient?.Invoke(_view);
+    }
+
+    public override void OnStopServer()
+    {
+        onStopServer?.Invoke(_view);
+    }  
+}

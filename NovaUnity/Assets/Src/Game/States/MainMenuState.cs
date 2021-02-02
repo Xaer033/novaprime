@@ -16,6 +16,8 @@ public class MainMenuState : IGameState
 	{
 		_stateMachine = stateMachine;
 
+		Singleton.instance.networkManager.Disconnect();
+		
 		PlayerActions pAction = new PlayerActions();
 		pAction.Menu.Enable();
 
@@ -57,6 +59,9 @@ public class MainMenuState : IGameState
 		
 		_multiplayerRoomController?.RemoveView();
 		_multiplayerRoomController = null;
+		
+		_multiplayerSetupController?.RemoveView();
+		_multiplayerSetupController = null;
 
 	}
 
@@ -72,10 +77,10 @@ public class MainMenuState : IGameState
 
 	private void onMultiplayerSetupMenu(GeneralEvent e)
 	{
-		// _multiplayerLobbyController.RemoveView();
+		_multiplayerLobbyController?.RemoveView();
 		_multiplayerRoomController?.RemoveView();
 		_mainMenuController?.RemoveView();
-		_multiplayerSetupController.Start();
+		_multiplayerSetupController?.Start();
 	}
 	
     private void onMultiplayerLobbyMenu(GeneralEvent e)
@@ -83,12 +88,12 @@ public class MainMenuState : IGameState
 	    _mainMenuController?.RemoveView();
 	    _multiplayerRoomController?.RemoveView();
 		_multiplayerSetupController?.RemoveView();
-	    _multiplayerLobbyController.Start();
+	    _multiplayerLobbyController?.Start();
     }
     
     private void onMultiplayerRoomMenu(GeneralEvent e)
     {
-	    // _multiplayerLobbyController.RemoveView();
+	    _multiplayerLobbyController?.RemoveView();
 	    _mainMenuController?.RemoveView();
 		_multiplayerSetupController?.RemoveView();
 
@@ -102,10 +107,10 @@ public class MainMenuState : IGameState
 
     private void onMainMenu(GeneralEvent e)
     {
-	    // _multiplayerLobbyController.RemoveView();
+	    _multiplayerLobbyController?.RemoveView();
 	    _multiplayerRoomController?.RemoveView();
 		_multiplayerSetupController?.RemoveView();
-	    _mainMenuController.Start();
+	    _mainMenuController?.Start();
     }
     
     private void onStartSingleplayer(GeneralEvent e)

@@ -1,6 +1,7 @@
 using System;
 using Cinemachine;
 using GhostGen;
+using Mirror;
 using Sirenix.OdinInspector;
 using Unity.Mathematics;
 using UnityEngine;
@@ -28,7 +29,7 @@ public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPasseng
     public ParentConstraint _rightHandConstraint;
     
     public AvatarConstrainer constrainer;
-    // public NetworkEntity _networkEntity;
+    public NetworkEntity _netEntity;    
     public Animator _animator;
 
 
@@ -36,11 +37,7 @@ public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPasseng
     private Quaternion _weaponRotation;
     private Quaternion _prevWeaponRotation;
     
-    private void Awake()
-    {
-       
-    }
-
+    
     private void Update()
     {
         float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
@@ -87,12 +84,16 @@ public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPasseng
         get { return cameraTargetGroup.transform; }
     }
     
-    // public NetworkEntity netEntity
-    // {
-    //     get => _networkEntity;
-    //     set => _networkEntity = value;
-    // }
+    public NetworkIdentity netIdentity
+    {
+        get => _netEntity.netIdentity;
+    }
 
+    public NetworkEntity netEntity
+    {
+        get => _netEntity;
+    }
+    
     public Animator animator
     {
         get { return _animator; }
@@ -115,26 +116,17 @@ public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPasseng
 
     public void RequestMovement(PassengerMovement movement)
     {
-        if (controller != null)
-        {
-            controller.Move(movement.velocity, movement.isOnPlatform);
-        }
+        controller?.Move(movement.velocity, movement.isOnPlatform);
     }
 
     public void OnTimeWarpEnter(float timeScale)
     {
-        if (controller != null)
-        {
-            controller.OnTimeWarpEnter(timeScale);
-        }
+        controller?.OnTimeWarpEnter(timeScale);
     }
 
     public void OnTimeWarpExit()
     {
-        if (controller != null)
-        {
-            controller.OnTimeWarpExit();
-        }
+        controller?.OnTimeWarpExit();
     }
 
     public AttackResult TakeDamage(AttackData attackData)
@@ -150,10 +142,6 @@ public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPasseng
     public float     health
     {
         get { return controller != null ? controller.health : 0; }
-    }
-    public bool    isDead 
-    { 
-        get { return controller != null ? controller.health <= 0 : false; } 
     }
     
     public IAvatarController controller { get; set; }

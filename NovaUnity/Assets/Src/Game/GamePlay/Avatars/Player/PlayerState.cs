@@ -5,7 +5,7 @@ public class PlayerState : AvatarState
     public static PlayerState Create(string uuid,  UnitStats stats, Vector3 position)
     {
         PlayerState state = new PlayerState();
-        state.playerNumber = 0;
+        state.playerSlot = PlayerSlot.NONE;
         state.position = position;
         state.previousPosition = position;
         state.health = stats.maxHealth;
@@ -18,7 +18,7 @@ public class PlayerState : AvatarState
         return state;
     }
 
-    public int playerNumber;
+    public PlayerSlot playerSlot;
     public PlayerActivityType stateType;
 
     public UnitStats stats;

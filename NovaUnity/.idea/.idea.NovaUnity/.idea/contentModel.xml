@@ -62,6 +62,7 @@
                   <e p="PlayerMatchLoadComplete.cs" t="Include" />
                   <e p="RequestMatchStart.cs" t="Include" />
                   <e p="RequestReadyUp.cs" t="Include" />
+                  <e p="SendPlayerInput.cs" t="Include" />
                   <e p="StartMatchLoad.cs" t="Include" />
                   <e p="SyncLobbyPlayers.cs" t="Include" />
                 </e>
@@ -109,6 +110,7 @@
                   <e p="PlayerActions.cs" t="Include" />
                   <e p="PlayerController.cs" t="Include" />
                   <e p="PlayerInput.cs" t="Include" />
+                  <e p="PlayerSpawnPoint.cs" t="Include" />
                   <e p="PlayerState.cs" t="Include" />
                   <e p="PlayerView.cs" t="Include" />
                 </e>

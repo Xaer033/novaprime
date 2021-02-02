@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4182655591981612172}
   - component: {fileID: -7363321493532417374}
-  - component: {fileID: -4830744422628329946}
+  - component: {fileID: 3374875636476469244}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -48,10 +48,10 @@ MonoBehaviour:
   runInBackground: 1
   autoStartServerBuild: 1
   showDebugMessages: 0
-  serverTickRate: 30
+  serverTickRate: 60
   offlineScene: 
   onlineScene: 
-  transport: {fileID: -4830744422628329946}
+  transport: {fileID: 3374875636476469244}
   networkAddress: localhost
   maxConnections: 4
   disconnectInactiveConnections: 0
@@ -61,7 +61,7 @@ MonoBehaviour:
   autoCreatePlayer: 0
   playerSpawnMethod: 0
   spawnPrefabs: []
---- !u!114 &-4830744422628329946
+--- !u!114 &3374875636476469244
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -75,7 +75,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Port: 11666
   NoDelay: 1
-  Interval: 10
+  Interval: 1
   FastResend: 2
   CongestionWindow: 0
   SendWindowSize: 128

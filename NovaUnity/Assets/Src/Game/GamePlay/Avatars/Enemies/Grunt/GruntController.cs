@@ -116,6 +116,11 @@ public class GruntController : NotificationDispatcher, IAvatarController
         
     }
 
+    public void CleanUp()
+    {
+    
+    }
+
     public FrameInput lastInput
     {
         get { return _lastInput; }

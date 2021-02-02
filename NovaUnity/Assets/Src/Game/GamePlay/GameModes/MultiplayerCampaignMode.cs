@@ -13,10 +13,8 @@ public class MultiplayerCampaignMode : NotificationDispatcher, IGameModeControll
     public void Start(object context)
     {
         GameplayResources gameplayResources = Singleton.instance.gameplayResources;
-        _playerList = context as List<NetPlayer>;
-        bool isServer = true; // TODO: Put real value here
-        
-        _playFieldController = new PlayFieldController(_playerList, isServer, gameplayResources);
+    
+        _playFieldController = new PlayFieldController(gameplayResources);
         _playFieldController.Start();
     }
 

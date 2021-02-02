@@ -82,6 +82,11 @@ public class BruiserController : NotificationDispatcher, IAvatarController
 
     }
 
+    public void CleanUp()
+    {
+    
+    }
+        
     public IAvatarView view
     {
         get { return _view; }

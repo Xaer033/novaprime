@@ -43,9 +43,17 @@ public class MultiplayerRoomController : BaseController
             if(_networkManager.isPureServer)
             {
                 _networkManager.onServerConnect += onServerConnect;
+                _networkManager.onServerDisconnect += onServerDisconnect;
+                _networkManager.onServerConfirmReadyUp += onServerConfirmReadyUp;
+                
+                roomView.readyButton.gameObject.SetActive(false);
             }
-            
-            _setupPlayers();
+
+            var netPlayerMap = _networkManager.isPureServer
+                ? _networkManager.GetServerPlayerMap()
+                : _networkManager.GetClientPlayerMap();
+                
+            _setupPlayers(netPlayerMap);
         });
     }
     
@@ -56,17 +64,19 @@ public class MultiplayerRoomController : BaseController
             _networkManager.onLocalClientDisconnect -= onLocalClientDisconnect;
         }
 
-        if(NetworkClient.active || _wasDisconnected)
+        // if(NetworkClient.active || _wasDisconnected)
         {
             _networkManager.onClientConfirmReadyUp -= onClientConfirmReadyUp;
             _networkManager.onClientSyncLobbyPlayers -= onClientSyncLobbyPlayers;
             _networkManager.onClientStartMatchLoad -= onClientStartMatchLoad;
         }
 
-        if(_networkManager.isPureServer)
-            {
-                _networkManager.onServerConnect += onServerConnect;
-            }
+        // if(_networkManager.isPureServer || _wasDisconnected)
+        {
+            _networkManager.onServerConnect -= onServerConnect;
+            _networkManager.onServerDisconnect -= onServerDisconnect;
+            _networkManager.onServerConfirmReadyUp -= onServerConfirmReadyUp;
+        }
         base.RemoveView();
     }
 
@@ -75,6 +85,27 @@ public class MultiplayerRoomController : BaseController
         get { return view as MultiplayerRoomView; }
     }
 
+
+    private void onServerConnect(NetworkConnection conn)
+    {
+        _setupPlayers(_networkManager.GetServerPlayerMap());    
+    }
+
+    private void onServerDisconnect(NetworkConnection conn)
+    {
+        _setupPlayers(_networkManager.GetServerPlayerMap());
+    }
+
+    private void onServerConfirmReadyUp(NetworkConnection conn, ConfirmReadyUp msg)
+    {
+        if(NetworkServer.active)
+        {
+            roomView.startButton.gameObject.SetActive(msg.allPlayersReady);    
+        }
+        
+        _setupPlayers(_networkManager.GetServerPlayerMap());
+    }
+    
     private void onClientConfirmReadyUp(NetworkConnection conn, ConfirmReadyUp msg)
     {
         if(NetworkServer.active)
@@ -82,12 +113,12 @@ public class MultiplayerRoomController : BaseController
             roomView.startButton.gameObject.SetActive(msg.allPlayersReady);    
         }
         
-        _setupPlayers();
+        _setupPlayers(_networkManager.GetClientPlayerMap());
     }
 
     private void onClientSyncLobbyPlayers(NetworkConnection conn, SyncLobbyPlayers msg)
     {
-        _setupPlayers();
+        _setupPlayers(_networkManager.GetClientPlayerMap());
     }
 
     private void onClientStartMatchLoad(NetworkConnection conn, StartMatchLoad msg)
@@ -116,7 +147,10 @@ public class MultiplayerRoomController : BaseController
     {
         view.RemoveListener(MenuUIEventType.CONTINUE, onStartMultiplayer);
 
-        NetworkClient.Send(new RequestMatchStart(), Channels.DefaultReliable);
+        // NetworkClient.Send(new RequestMatchStart(), Channels.DefaultReliable);
+        // _networkManager.OnRe
+        
+        DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_GAME);
     }
     
     private void onReadyButton(GeneralEvent e)
@@ -149,9 +183,8 @@ public class MultiplayerRoomController : BaseController
         }
     }
 
-    private void _setupPlayers()
+    private void _setupPlayers(Dictionary<PlayerSlot, NetPlayer> netPlayerMap)
     {
-        var netPlayerMap = _networkManager.GetClientPlayerMap();
         roomView.ClearPlayerViews();
         
         List<NetPlayer> playerList = new List<NetPlayer>(netPlayerMap.Values);

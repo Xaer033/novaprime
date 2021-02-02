@@ -94,7 +94,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
             NetworkServer.AddPlayerForConnection(conn, spawnedGameObject);
             _connToPlayerMap[conn.connectionId] = controller;
             
-            if(netPlayer.connectionId == _networkManager.localPlayer.connectionId)
+            if(_networkManager.localPlayer != null && netPlayer.connectionId == _networkManager.localPlayer.connectionId)
             {
                 setupLocalPlayer(controller);
             }

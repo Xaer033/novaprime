@@ -78,16 +78,20 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
             IAvatarController controller = _avatarControllerList[i];
             FrameInput input = _lastInputMap.ContainsKey(controller.uuid) ? _lastInputMap[controller.uuid] : default(FrameInput);
            
-            _frameInputList.Add(input);            
-            
-            controller.FixedStep(fixedDeltaTime, input);                
+            _frameInputList.Add(input);
+
+            if(NetworkServer.active)
+            {
+                controller.FixedStep(fixedDeltaTime, input);                
+            }
             
             if(controller.isSimulating && NetworkClient.isConnected)
             {
                 SendPlayerInput inputMessage = new SendPlayerInput();
                 inputMessage.input = input;
 
-                NetworkClient.Send(inputMessage, Channels.DefaultUnreliable);
+                NetworkClient.Send(inputMessage, Channels.DefaultReliable);
+                controller.input.Clear();
             }
         }
         

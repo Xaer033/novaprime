@@ -637,7 +637,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         writer.WriteVector2(prevPos);
         writer.WriteVector2(pos);
         writer.WriteVector2(aimPos);
-        
+        Debug.Log("Writing" + state.uuid);
         return true;
     }
 
@@ -649,11 +649,12 @@ public class PlayerController : NotificationDispatcher, IAvatarController
 
 
         _state.position = pos;
-        _state.previousPosition = prevPos; // Maybe experiment using the current viewRoot position
-        _state.aimPosition = pos;
+        _state.previousPosition = view.viewRoot.position; // Maybe experiment using the current viewRoot position
+        _state.aimPosition = aimPos;
         
         view.transform.position    = _state.position;
         view.viewRoot.position     = _state.previousPosition;
+        Debug.Log("Reading" + state.uuid);
     }
     
     

@@ -80,7 +80,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
            
             _frameInputList.Add(input);
 
-            if(NetworkServer.active)
+             if(NetworkServer.active)
             {
                 controller.FixedStep(fixedDeltaTime, input);                
             }
@@ -89,8 +89,8 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
             {
                 SendPlayerInput inputMessage = new SendPlayerInput();
                 inputMessage.input = input;
-
-                NetworkClient.Send(inputMessage, Channels.DefaultReliable);
+            
+                NetworkClient.Send(inputMessage, Channels.DefaultUnreliable);
                 controller.input.Clear();
             }
         }

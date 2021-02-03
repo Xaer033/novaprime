@@ -92,11 +92,6 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     {
         get { return _state.health; }
     }
-
-    public bool isDead
-    {
-        get { return _state.health <= 0.0f; }
-    }
     
     // Start is called before the first frame update
     public void Start(GameSystems gameSystems)
@@ -195,6 +190,23 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         if (_inputGen != null)
         {
             _inputGen.Clear();
+        }
+
+        // if(NetworkClient.active && isSimulating)
+        // {
+        //     playerNetEntity?.CmdClientSendUpdate(
+        //         _state.velocity,
+        //         _state.position,
+        //         _state.aimPosition);
+        // }
+
+        if(NetworkServer.active)// && playerNetEntity.hasAuthority)
+        {
+            playerNetEntity?.RpcClientReceiveUpdate(
+                NetworkTime.time,
+                _state.velocity, 
+                _state.position, 
+                _state.aimPosition);
         }
     }
 
@@ -513,45 +525,48 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         
         _move(_state.velocity * deltaTime, input, false);
 
-        _crushedFrameCount = collisionInfo.crushed ? _crushedFrameCount + 1 : 0;
-        if(collisionInfo.crushed)//if(_crushedFrameCount > 5)
+        if(NetworkServer.active)
         {
-            AttackData attackData = createCrushDamage();
-            TakeDamage(attackData);
-            Debug.LogError("YOU DEAD");
-        }
-        
-        if (collisionInfo.below)
-        {
-            _state.coyoteJumpTimer = _unitStats.coyoteTime;
-            _state.jumpCount = 0;
-            animationInfo.isGrounded = true;
+            _crushedFrameCount = collisionInfo.crushed ? _crushedFrameCount + 1 : 0;
+            if(collisionInfo.crushed)
+            {
+                AttackData attackData = createCrushDamage();
+                TakeDamage(attackData);
+                Debug.LogError("YOU DEAD");
+            }
             
-        }
-        else
-        {
-            if (_state.coyoteJumpTimer <= 0 && _state.jumpCount == 0 && !_state.isWallSliding)
+            if (collisionInfo.below)
             {
-                _state.jumpCount++;
-            }
-
-            if (_state.velocity.y < 0)
-            {
-                animationInfo.isFalling = true;
-                _didJumpRelease = true;
-            }
-        }
-        
-        // *Bop*
-        if (collisionInfo.above || collisionInfo.below)
-        {
-            if (collisionInfo.slidingDownMaxSlope)
-            {
-                _state.velocity.y += collisionInfo.slopeNormal.y * -_gravity * deltaTime;
+                _state.coyoteJumpTimer = _unitStats.coyoteTime;
+                _state.jumpCount = 0;
+                animationInfo.isGrounded = true;
+                
             }
             else
             {
-                _state.velocity.y = 0;
+                if (_state.coyoteJumpTimer <= 0 && _state.jumpCount == 0 && !_state.isWallSliding)
+                {
+                    _state.jumpCount++;
+                }
+
+                if (_state.velocity.y < 0)
+                {
+                    animationInfo.isFalling = true;
+                    _didJumpRelease = true;
+                }
+            }
+            
+            // *Bop*
+            if (collisionInfo.above || collisionInfo.below)
+            {
+                if (collisionInfo.slidingDownMaxSlope)
+                {
+                    _state.velocity.y += collisionInfo.slopeNormal.y * -_gravity * deltaTime;
+                }
+                else
+                {
+                    _state.velocity.y = 0;
+                }
             }
         }
 
@@ -607,10 +622,17 @@ public class PlayerController : NotificationDispatcher, IAvatarController
 
     private void setupNetCallbacks(NetworkEntity netEntity)
     {
-        if(netEntity)
+        if(playerNetEntity)
         {
-            netEntity.onSerialize += onNetworkSerialize;
-            netEntity.onDeserialize += onNetworkDeserialize;            
+            if(NetworkClient.active)
+            {
+                playerNetEntity.onClientReceiveUpdate += onClientReceiveUpdate;                         
+            }
+
+            if(NetworkServer.active)
+            {
+                playerNetEntity.onClientSendUpdate += onClientSendUpdate;
+            }
         }
         else
         {
@@ -620,11 +642,45 @@ public class PlayerController : NotificationDispatcher, IAvatarController
 
     private void cleanupNetCallbacks(NetworkEntity netEntity)
     {
-        if(netEntity)
+        if(playerNetEntity)
         {
-            netEntity.onSerialize -= onNetworkSerialize;
-            netEntity.onDeserialize -= onNetworkDeserialize;
+            if(NetworkClient.active)
+            {
+                playerNetEntity.onClientReceiveUpdate -= onClientReceiveUpdate;                            
+            }
+            
+            if(NetworkServer.active)
+            {
+                playerNetEntity.onClientSendUpdate -= onClientSendUpdate;
+            }
         }
+    }
+
+    private void onClientReceiveUpdate(IAvatarView pView, double sendTimestamp, Vector2 velocity, Vector2 position, Vector2 aimPosition)
+    {
+         float lag = Mathf.Abs((float) (NetworkTime.time - sendTimestamp));
+        _state.position = position + (velocity * lag);
+        _state.velocity = velocity;
+        _state.previousPosition = view.viewRoot.position; // Maybe experiment using the current viewRoot position
+        _state.aimPosition = aimPosition;
+        
+        // view.transform.position    = _state.position;
+        // view.viewRoot.position     = _state.previousPosition;
+        _view.Aim(aimPosition);
+        
+        Debug.Log("Got clientUpdate");
+    }
+
+    private void onClientSendUpdate(IAvatarView pView, Vector2 velocity, Vector2 position, Vector2 aimPosition)
+    {
+        _state.position = position;
+        _state.velocity = velocity;
+        _state.aimPosition = aimPosition;
+    }
+
+    private PlayerNetEntity playerNetEntity
+    {
+        get { return _view.netEntity as PlayerNetEntity;}
     }
     
     private bool onNetworkSerialize(IAvatarView view, NetworkWriter writer, bool isInitialState)
@@ -637,7 +693,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         writer.WriteVector2(prevPos);
         writer.WriteVector2(pos);
         writer.WriteVector2(aimPos);
-        Debug.Log("Writing" + state.uuid);
+        Debug.Log("Writing: " + state.uuid);
         return true;
     }
 
@@ -654,7 +710,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         
         view.transform.position    = _state.position;
         view.viewRoot.position     = _state.previousPosition;
-        Debug.Log("Reading" + state.uuid);
+        Debug.Log("Reading: " + state.uuid);
     }
     
     

@@ -1328,7 +1328,7 @@ GameObject:
   - component: {fileID: 3253615202563350316}
   - component: {fileID: 8607383896381092974}
   - component: {fileID: 629037838653682521}
-  - component: {fileID: 3856818573410663372}
+  - component: {fileID: 478186756361221562}
   m_Layer: 10
   m_Name: PlayerAvatarView
   m_TagString: Untagged
@@ -1373,7 +1373,7 @@ MonoBehaviour:
   _leftHandConstraint: {fileID: 3464980382878468571}
   _rightHandConstraint: {fileID: 6861646974207764685}
   constrainer: {fileID: 9125514036299057097}
-  _netEntity: {fileID: 3856818573410663372}
+  _netEntity: {fileID: 478186756361221562}
   _animator: {fileID: 3253615202563350316}
   deadRoot: {fileID: 1078098296706410919}
   _leftFootHook: {fileID: 9039541226417265090}
@@ -1474,7 +1474,7 @@ MonoBehaviour:
   syncInterval: 0.1
   clientAuthority: 0
   animator: {fileID: 3253615202563350316}
---- !u!114 &3856818573410663372
+--- !u!114 &478186756361221562
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1483,7 +1483,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5789754299105121112}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 360002fb2d77236448873149c1dc0725, type: 3}
+  m_Script: {fileID: 11500000, guid: 4d9a329a6e57bac419f1be566974b6bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   syncMode: 0

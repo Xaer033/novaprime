@@ -13,7 +13,7 @@ public class NetworkEntity : NetworkBehaviour
     public event Action<IAvatarView> onStopServer;
     public event Action<IAvatarView> onStartLocalPlayer;
 
-    private IAvatarView _view;
+    protected  IAvatarView _view;
     
     protected virtual void Awake()
     {

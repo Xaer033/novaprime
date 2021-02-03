@@ -66,9 +66,9 @@
                   <e p="StartMatchLoad.cs" t="Include" />
                   <e p="SyncLobbyPlayers.cs" t="Include" />
                 </e>
+                <e p="NetworkEntity.cs" t="Include" />
                 <e p="NetworkManager.cs" t="Include" />
                 <e p="NetworkOpCodes.cs" t="Include" />
-                <e p="NewBehaviourScript.cs" t="Include" />
               </e>
               <e p="SessionFlags.cs" t="Include" />
               <e p="Singleton.cs" t="Include" />
@@ -106,10 +106,10 @@
                 <e p="IPlatformPassenger.cs" t="Include" />
                 <e p="Player" t="Include">
                   <e p="NetPlayer.cs" t="Include" />
-                  <e p="NetworkEntity.cs" t="Include" />
                   <e p="PlayerActions.cs" t="Include" />
                   <e p="PlayerController.cs" t="Include" />
                   <e p="PlayerInput.cs" t="Include" />
+                  <e p="PlayerNetEntity.cs" t="Include" />
                   <e p="PlayerSpawnPoint.cs" t="Include" />
                   <e p="PlayerState.cs" t="Include" />
                   <e p="PlayerView.cs" t="Include" />

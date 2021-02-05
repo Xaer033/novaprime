@@ -37,9 +37,6 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
             Debug.Log("Unit: " + unit.id);
             Guid guid = unit.view.netIdentity.assetId;
             _netPrefabMap[guid] = unit;
-            // _unitIdToGuidMap[unit.id] = guid;
-            
-            // ClientScene.RegisterPrefab(unit.view.gameObject, netUnitSpawnHandler, netUnitUnspawnHandler );
         }
     }
 
@@ -52,6 +49,10 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         _networkManager.onClientUnspawnHandler += netUnitUnspawnHandler;
         _networkManager.onServerMatchBegin += onServerMatchBegin;
         _networkManager.onServerSendPlayerInput += onServerSendPlayerInput;
+        _networkManager.onServerConnect += onServerConnect;
+        _networkManager.onServerDisconnect += onServerDisconnect;
+        _networkManager.onServerMatchLoadComplete += onServerMatchLoadComplete;
+
     }
 
     public void CleanUp()
@@ -60,8 +61,34 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         _networkManager.onClientUnspawnHandler -= netUnitUnspawnHandler;
         _networkManager.onServerMatchBegin -= onServerMatchBegin;
         _networkManager.onServerSendPlayerInput -= onServerSendPlayerInput;
+        _networkManager.onServerConnect -= onServerConnect;
+        _networkManager.onServerDisconnect -= onServerDisconnect;
+        _networkManager.onServerMatchLoadComplete -= onServerMatchLoadComplete;
     }
 
+    private void onServerMatchLoadComplete(NetworkConnection conn)
+    {
+        if(_networkManager.sessionState == NetworkManager.SessionState.IN_GAME)
+        {
+            var netPlayerMap = _networkManager.GetServerPlayerMap();
+            NetPlayer netPlayer = _networkManager.GetServerPlayerFromConnId(conn.connectionId);
+            serverSpawnPlayer(netPlayer);
+        }
+    }
+    
+    private void onServerConnect(NetworkConnection conn)
+    {
+        if(_networkManager.sessionState == NetworkManager.SessionState.IN_GAME)
+        {
+            conn.Send(new StartMatchLoad(), Channels.DefaultReliable);
+        }
+    }
+
+    private void onServerDisconnect(NetworkConnection conn)
+    {
+        NetworkServer.DestroyPlayerForConnection(conn);
+    }
+    
     private void onServerSendPlayerInput(NetworkConnection conn, SendPlayerInput msg)
     {
         var lastInputMap = _avatarSystem.GetInputMap();
@@ -71,34 +98,16 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     
     private void onServerMatchBegin()
     {
+    
+        NetworkServer.SendToAll(new MatchBegin(), Channels.DefaultReliable);
+                
         NetworkServer.SpawnObjects();
         
         var netPlayerMap = _networkManager.GetServerPlayerMap();
         foreach(var pair in netPlayerMap)
         {
             NetPlayer netPlayer = pair.Value;
-            PlayerSpawnPoint point = _avatarSystem.GetSpawnPointForSlot(netPlayer.playerSlot);
-            if(point == null)
-            {
-                Debug.LogErrorFormat("No spawn point for slot {0}, player {1} cant spawn!", netPlayer.playerSlot.ToString(), netPlayer.nickName );
-                continue;
-            }
-
-            UnitMap.Unit playerUnit = _unitMap.GetUnit("player");
-            IAvatarController controller = _avatarSystem.Spawn<IAvatarController>(playerUnit.id, point.transform.position);
-            GameObject spawnedGameObject = controller.view.gameObject;
-            
-            NetworkConnection conn = NetworkServer.connections[netPlayer.connectionId];
-            
-            NetworkServer.Spawn(spawnedGameObject, conn);
-            NetworkServer.AddPlayerForConnection(conn, spawnedGameObject);
-            _connToPlayerMap[conn.connectionId] = controller;
-            
-            if(_networkManager.localPlayer != null && netPlayer.connectionId == _networkManager.localPlayer.connectionId)
-            {
-                setupLocalPlayer(controller);
-            }
-            // Oh god I hope this works....
+            serverSpawnPlayer(netPlayer);
         }
     }
     
@@ -122,12 +131,37 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
          {
              PlayerView pView = controller.view as PlayerView;
              cam.AddTarget(pView.cameraTargetGroup.transform);
+             
              PlayerInput input = new PlayerInput(_networkManager.localPlayerSlot, cam.gameCamera);
+             
              controller.input = input;
              controller.isSimulating = true;
-
-             // controller.view.networkIdentity.On
          }
+    }
+
+    private void serverSpawnPlayer(NetPlayer netPlayer)
+    {
+        PlayerSpawnPoint point = _avatarSystem.GetSpawnPointForSlot(netPlayer.playerSlot);
+        if(point == null)
+        {
+            Debug.LogErrorFormat("No spawn point for slot {0}, player {1} cant spawn!", netPlayer.playerSlot.ToString(), netPlayer.nickName );
+            return;
+        }
+
+        UnitMap.Unit playerUnit = _unitMap.GetUnit("player");
+        IAvatarController controller = _avatarSystem.Spawn<IAvatarController>(playerUnit.id, point.transform.position);
+        GameObject spawnedGameObject = controller.view.gameObject;
+        
+        NetworkConnection conn = NetworkServer.connections[netPlayer.connectionId];
+        
+        NetworkServer.Spawn(spawnedGameObject, conn);
+        NetworkServer.AddPlayerForConnection(conn, spawnedGameObject);
+        _connToPlayerMap[conn.connectionId] = controller;
+        
+        if(_networkManager.localPlayer != null && netPlayer.connectionId == _networkManager.localPlayer.connectionId)
+        {
+            setupLocalPlayer(controller);
+        }
     }
     
     private void netUnitUnspawnHandler(GameObject obj)

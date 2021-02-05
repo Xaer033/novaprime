@@ -53,7 +53,7 @@ MonoBehaviour:
   onlineScene: 
   transport: {fileID: 3374875636476469244}
   networkAddress: localhost
-  maxConnections: 4
+  maxConnections: 128
   disconnectInactiveConnections: 0
   disconnectInactiveTimeout: 60
   authenticator: {fileID: 0}
@@ -81,4 +81,4 @@ MonoBehaviour:
   SendWindowSize: 128
   ReceiveWindowSize: 128
   debugLog: 0
-  debugGUI: 0
+  debugGUI: 1

@@ -10,7 +10,7 @@ public class NetworkManager : Mirror.NetworkManager
 
     // public const int kMaxPlayers = 4;
     public const string kSingleplayerRoom = "Singleplayer";
-
+    
     public event Action<string> onError;
     public event Action onServerStarted;
     public event Action onServerMatchBegin;
@@ -19,6 +19,7 @@ public class NetworkManager : Mirror.NetworkManager
     public event Action<NetworkConnection, int> onServerError;
     public event Action<NetworkConnection, ConfirmReadyUp> onServerConfirmReadyUp;
     public event Action<NetworkConnection, SendPlayerInput> onServerSendPlayerInput;
+    public event Action<NetworkConnection> onServerMatchLoadComplete;
     
     public event Action onClientStarted;
     public event Action<NetworkConnection> onClientConnect;
@@ -32,6 +33,15 @@ public class NetworkManager : Mirror.NetworkManager
     public event SpawnHandlerDelegate onClientSpawnHandler;
     public event UnSpawnDelegate onClientUnspawnHandler;
 
+    public enum SessionState
+    {
+        NONE = 0,
+        IN_LOBBY,
+        IN_GAME
+    }
+
+    public SessionState sessionState { get; private set; }
+    
     public override void OnDestroy()
     {
         onError = null;
@@ -42,6 +52,8 @@ public class NetworkManager : Mirror.NetworkManager
         onServerConfirmReadyUp = null;
         onServerMatchBegin = null;
         onServerSendPlayerInput = null;
+        onServerMatchLoadComplete = null;
+        
         
         onClientStarted = null;
         onClientConnect = null;
@@ -105,7 +117,12 @@ public class NetworkManager : Mirror.NetworkManager
         }
 
         return playerMap;
-    } 
+    }
+
+    public NetPlayer GetServerPlayerFromConnId(int connId)
+    {
+        return _serverNetPlayerMap[connId];
+    }
 
     public override void Start()
     {
@@ -154,6 +171,8 @@ public class NetworkManager : Mirror.NetworkManager
         NetworkServer.RegisterHandler<RequestReadyUp>(OnServerRequestReadyUp, false);
         NetworkServer.RegisterHandler<PlayerMatchLoadComplete>(OnServerPlayerMatchLoadComplete, false);
         NetworkServer.RegisterHandler<SendPlayerInput>(OnServerSendPlayerInput, false);
+
+        sessionState = SessionState.IN_LOBBY;
         
         onServerStarted?.Invoke();
     }
@@ -329,12 +348,23 @@ public class NetworkManager : Mirror.NetworkManager
         
         Debug.Log("OnServerPlayerMatchLoadComplete: " + player.playerSlot.ToString());
 
-        bool allPlayersLoaded = hasAllPlayersLoaded();
-        if(allPlayersLoaded)
+        onServerMatchLoadComplete?.Invoke(conn);
+        
+        if(sessionState == SessionState.IN_GAME)
         {
-            Debug.Log("Server Match Start");
-            onServerMatchBegin?.Invoke();
-            NetworkServer.SendToAll(new MatchBegin(), Channels.DefaultReliable);
+            // sessionState == SessionState.IN_GAME;
+            // conn.Send
+        }
+        else
+        {
+            bool allPlayersLoaded = hasAllPlayersLoaded();
+            if(allPlayersLoaded)
+            {
+                Debug.Log("Server Match Start");
+                
+                sessionState = SessionState.IN_GAME;
+                onServerMatchBegin?.Invoke();
+            }
         }
     }
     

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using GhostGen;
 using Mirror;
+using Telepathy;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -80,19 +81,19 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
            
             _frameInputList.Add(input);
 
-             if(NetworkServer.active)
+            if(controller.isSimulating)// NetworkServer.active)
             {
                 controller.FixedStep(fixedDeltaTime, input);                
             }
             
-            if(controller.isSimulating && NetworkClient.isConnected)
-            {
-                SendPlayerInput inputMessage = new SendPlayerInput();
-                inputMessage.input = input;
-            
-                NetworkClient.Send(inputMessage, Channels.DefaultUnreliable);
-                controller.input.Clear();
-            }
+            // if(controller.isSimulating && NetworkClient.isConnected)
+            // {
+            //     SendPlayerInput inputMessage = new SendPlayerInput();
+            //     inputMessage.input = input;
+            //
+            //     NetworkClient.Send(inputMessage, Channels.DefaultUnreliable);
+            //     controller.input.Clear();
+            // }
         }
         
         

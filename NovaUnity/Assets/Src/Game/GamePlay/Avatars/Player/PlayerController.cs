@@ -148,25 +148,23 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     // Update is called once per frame
     public void Step(float deltaTime)
     {
-        // if(!isSimulating)
-        // {
-        //     return;
-        // }
         
         float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
         if(view != null && view.viewRoot != null && _state != null)
         {
-             view.viewRoot.position = Vector3.Lerp(_state.previousPosition, _state.position, alpha);
+            if(isSimulating)
+            {
+                view.viewRoot.position = Vector3.Lerp(_state.previousPosition, _state.position, alpha);//Vector3.MoveTowards(_state.previousPosition, _state.position, alpha);                
+            }
+            else
+            {
+                
+            }
         }
     }
 
     public void FixedStep(float deltaTime, FrameInput input)
     {
-        // if(!isSimulating)
-        // {
-        //     return;
-        // }
-        
         _lastInput = input;
         AnimationInfo animationInfo = new AnimationInfo();
         
@@ -192,22 +190,22 @@ public class PlayerController : NotificationDispatcher, IAvatarController
             _inputGen.Clear();
         }
 
-        // if(NetworkClient.active && isSimulating)
+        
+        playerNetEntity?.CmdServerUpdate(
+                _state.velocity,
+                _state.position,
+                _state.aimPosition);
+        
+
+
+        // if(NetworkServer.active )// && playerNetEntity.hasAuthority)
         // {
-        //     playerNetEntity?.CmdClientSendUpdate(
-        //         _state.velocity,
-        //         _state.position,
+        //     playerNetEntity?.RpcClientUpdate(
+        //         NetworkTime.time,
+        //         _state.velocity, 
+        //         _state.position, 
         //         _state.aimPosition);
         // }
-
-        if(NetworkServer.active)// && playerNetEntity.hasAuthority)
-        {
-            playerNetEntity?.RpcClientReceiveUpdate(
-                NetworkTime.time,
-                _state.velocity, 
-                _state.position, 
-                _state.aimPosition);
-        }
     }
 
     public void OnTimeWarpEnter(float timeScale)
@@ -525,51 +523,48 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         
         _move(_state.velocity * deltaTime, input, false);
 
-        if(NetworkServer.active)
+        _crushedFrameCount = collisionInfo.crushed ? _crushedFrameCount + 1 : 0;
+        if(collisionInfo.crushed)
         {
-            _crushedFrameCount = collisionInfo.crushed ? _crushedFrameCount + 1 : 0;
-            if(collisionInfo.crushed)
-            {
-                AttackData attackData = createCrushDamage();
-                TakeDamage(attackData);
-                Debug.LogError("YOU DEAD");
-            }
+            AttackData attackData = createCrushDamage();
+            TakeDamage(attackData);
+            Debug.LogError("YOU DEAD");
+        }
+        
+        if (collisionInfo.below)
+        {
+            _state.coyoteJumpTimer = _unitStats.coyoteTime;
+            _state.jumpCount = 0;
+            animationInfo.isGrounded = true;
             
-            if (collisionInfo.below)
+        }
+        else
+        {
+            if (_state.coyoteJumpTimer <= 0 && _state.jumpCount == 0 && !_state.isWallSliding)
             {
-                _state.coyoteJumpTimer = _unitStats.coyoteTime;
-                _state.jumpCount = 0;
-                animationInfo.isGrounded = true;
-                
+                _state.jumpCount++;
+            }
+
+            if (_state.velocity.y < 0)
+            {
+                animationInfo.isFalling = true;
+                _didJumpRelease = true;
+            }
+        }
+        
+        // *Bop*
+        if (collisionInfo.above || collisionInfo.below)
+        {
+            if (collisionInfo.slidingDownMaxSlope)
+            {
+                _state.velocity.y += collisionInfo.slopeNormal.y * -_gravity * deltaTime;
             }
             else
             {
-                if (_state.coyoteJumpTimer <= 0 && _state.jumpCount == 0 && !_state.isWallSliding)
-                {
-                    _state.jumpCount++;
-                }
-
-                if (_state.velocity.y < 0)
-                {
-                    animationInfo.isFalling = true;
-                    _didJumpRelease = true;
-                }
-            }
-            
-            // *Bop*
-            if (collisionInfo.above || collisionInfo.below)
-            {
-                if (collisionInfo.slidingDownMaxSlope)
-                {
-                    _state.velocity.y += collisionInfo.slopeNormal.y * -_gravity * deltaTime;
-                }
-                else
-                {
-                    _state.velocity.y = 0;
-                }
+                _state.velocity.y = 0;
             }
         }
-
+        
         if (_view)
         { 
             const float kDistance = 5.5f;
@@ -626,12 +621,12 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         {
             if(NetworkClient.active)
             {
-                playerNetEntity.onClientReceiveUpdate += onClientReceiveUpdate;                         
+                playerNetEntity.onClientUpdate += onClientUpdate;                         
             }
 
             if(NetworkServer.active)
             {
-                playerNetEntity.onClientSendUpdate += onClientSendUpdate;
+                playerNetEntity.onServerUpdate += onServerUpdate;
             }
         }
         else
@@ -646,36 +641,51 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         {
             if(NetworkClient.active)
             {
-                playerNetEntity.onClientReceiveUpdate -= onClientReceiveUpdate;                            
+               // playerNetEntity.onClientUpdate -= onClientUpdate;                            
             }
             
             if(NetworkServer.active)
             {
-                playerNetEntity.onClientSendUpdate -= onClientSendUpdate;
+                playerNetEntity.onServerUpdate -= onServerUpdate;
             }
         }
     }
 
-    private void onClientReceiveUpdate(IAvatarView pView, double sendTimestamp, Vector2 velocity, Vector2 position, Vector2 aimPosition)
+    private void onClientUpdate(IAvatarView pView, double sendTimestamp, Vector2 velocity, Vector2 position, Vector2 aimPosition)
     {
-         float lag = Mathf.Abs((float) (NetworkTime.time - sendTimestamp));
-        _state.position = position + (velocity * lag);
+        if(playerNetEntity.hasAuthority)
+        {
+            return;
+        }
+        
+        float lag = Mathf.Abs((float) (NetworkTime.time - sendTimestamp));
+        
+        
         _state.velocity = velocity;
-        _state.previousPosition = view.viewRoot.position; // Maybe experiment using the current viewRoot position
+        _state.previousPosition = _state.position;//view.viewRoot.position; // Maybe experiment using the current viewRoot position
+        _state.position = position + (velocity * lag);
         _state.aimPosition = aimPosition;
         
-        // view.transform.position    = _state.position;
-        // view.viewRoot.position     = _state.previousPosition;
-        _view.Aim(aimPosition);
+        view.transform.position = _state.position;
+        // view.viewRoot.position  = _state.previousPosition;
         
-        Debug.Log("Got clientUpdate");
+        pView.Aim(aimPosition);
+        
+        // Debug.Log("Got clientUpdate");
     }
 
-    private void onClientSendUpdate(IAvatarView pView, Vector2 velocity, Vector2 position, Vector2 aimPosition)
+    private void onServerUpdate(IAvatarView pView, Vector2 velocity, Vector2 position, Vector2 aimPosition)
     {
+        _state.previousPosition = _state.position;
         _state.position = position;
         _state.velocity = velocity;
         _state.aimPosition = aimPosition;
+        
+        playerNetEntity?.RpcClientUpdate(
+                NetworkTime.time,
+                _state.velocity, 
+                _state.position, 
+                _state.aimPosition);
     }
 
     private PlayerNetEntity playerNetEntity

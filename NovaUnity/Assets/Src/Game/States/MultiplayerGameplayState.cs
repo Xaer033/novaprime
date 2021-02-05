@@ -43,9 +43,10 @@ public class MultiplayerGameplayState : IGameState
         if(NetworkClient.active)
         {
             Debug.Log("SceneLoader: " + _networkManager.localPlayerSlot);
+            
+            ClientScene.Ready(NetworkClient.connection);
             NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
         }
-
     }
     
     public void FixedStep(float fixedDeltaTime)

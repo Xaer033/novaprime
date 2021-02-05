@@ -1324,11 +1324,11 @@ GameObject:
   - component: {fileID: 5789754299105121113}
   - component: {fileID: 3134929727233853592}
   - component: {fileID: 9125514036299057097}
+  - component: {fileID: 478186756361221562}
   - component: {fileID: 8866287814259327232}
   - component: {fileID: 3253615202563350316}
   - component: {fileID: 8607383896381092974}
   - component: {fileID: 629037838653682521}
-  - component: {fileID: 478186756361221562}
   m_Layer: 10
   m_Name: PlayerAvatarView
   m_TagString: Untagged
@@ -1397,6 +1397,20 @@ MonoBehaviour:
   distanceBetweenRays: 0.1
   maxSlopeAngle: 50
   walkStepRayPercentage: 0.25
+--- !u!114 &478186756361221562
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5789754299105121112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d9a329a6e57bac419f1be566974b6bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0
 --- !u!61 &8866287814259327232
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1472,22 +1486,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  clientAuthority: 0
+  clientAuthority: 1
   animator: {fileID: 3253615202563350316}
---- !u!114 &478186756361221562
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5789754299105121112}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4d9a329a6e57bac419f1be566974b6bd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0
 --- !u!114 &2642211197282049033
 MonoBehaviour:
   m_ObjectHideFlags: 0

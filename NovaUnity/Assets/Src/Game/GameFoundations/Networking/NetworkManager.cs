@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Mirror;
 using UnityEngine;
+using UnityEngine.Networking;
 
 public class NetworkManager : Mirror.NetworkManager
 {
@@ -10,9 +12,23 @@ public class NetworkManager : Mirror.NetworkManager
 
     // public const int kMaxPlayers = 4;
     public const string kSingleplayerRoom = "Singleplayer";
+
+    private const string kAppId = "23431909-e58c-40e3-94d2-8d90b4f9e11d";
+    private const string kAppIdKey = "serverKey";
+    private const string kServerUuIdKey = "serverUuid";
+    private const string kServerName = "serverName";  
+    private const string kServerPort = "serverPort";    
+    private const string kServerPlayerCount = "serverPlayers";   
+    private const string kServerPlayerCapacity = "serverCapacity";  
+    private const string kServerIp = "ip";
+
+    public string masterServerLocation = "http://novamaster.net";
+    public int masterServerPort = 11667;
+    
     
     public event Action<string> onError;
     public event Action onServerStarted;
+    public event Action onServerStopped;
     public event Action onServerMatchBegin;
     public event Action<NetworkConnection> onServerConnect;
     public event Action<NetworkConnection> onServerDisconnect;
@@ -39,7 +55,11 @@ public class NetworkManager : Mirror.NetworkManager
         IN_LOBBY,
         IN_GAME
     }
-
+    
+    
+    public ServerListEntry serverEntry { get; set; }
+    
+    
     public SessionState sessionState { get; private set; }
     public uint frameTick { get; set; }
     
@@ -47,6 +67,7 @@ public class NetworkManager : Mirror.NetworkManager
     {
         onError = null;
         onServerStarted = null;
+        onServerStopped = null;
         onServerConnect = null;
         onServerDisconnect = null;
         onServerError = null;
@@ -143,6 +164,128 @@ public class NetworkManager : Mirror.NetworkManager
         }
     }
 
+    private string getMasterServerCommand(string command)
+    {
+        return string.Format("{0}:{1}/{2}", masterServerLocation, masterServerPort, command); 
+    }
+    
+    public void fetchMasterServerList(Action<bool, List<ServerListEntry>> onComplete)
+    {
+        StartCoroutine(enumFetchMasterServerList(onComplete));
+    }
+
+    private IEnumerator enumFetchMasterServerList(Action<bool, List<ServerListEntry>> onComplete)
+    {
+        WWWForm form = new WWWForm(); 
+        form.AddField(kAppIdKey, kAppId);
+
+        string masterUri = getMasterServerCommand("list"); 
+        Debug.Log("Rest Command: " + masterUri);
+        using (UnityWebRequest www = UnityWebRequest.Post(masterUri, form))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.isNetworkError || www.isHttpError)
+            {
+                Debug.LogError(www.error);
+                onComplete?.Invoke(false, null);
+            }
+            else
+            {
+                string rawText = www.downloadHandler.text;
+                Debug.Log(rawText);
+                
+                string strippedText = rawText.Replace("::ffff:", "");
+                ServerListResponse response = JsonUtility.FromJson<ServerListResponse>(strippedText);
+                onComplete?.Invoke(true, response.servers);
+            }
+        } 
+    }
+    
+    public void addServerToMasterList(ServerListEntry entry, Action<long> onComplete)
+    {
+        if(entry != null)
+        {
+            StartCoroutine(enumAddServerToMasterList(entry, onComplete));            
+        }
+        else
+        {
+            onComplete?.Invoke(0);
+        }
+    }
+    
+    private IEnumerator enumAddServerToMasterList(ServerListEntry entry, Action<long> onComplete)
+    {
+        WWWForm form = new WWWForm(); 
+        form.AddField(kAppIdKey, kAppId);
+        form.AddField(kServerUuIdKey, entry.serverUuid);
+        form.AddField(kServerName, entry.name);
+        form.AddField(kServerPort, entry.port);
+        form.AddField(kServerPlayerCapacity, entry.capacity);
+        form.AddField(kServerPlayerCount, entry.players);
+
+        string masterUri = getMasterServerCommand("add"); 
+        Debug.Log("Rest Command: " + masterUri);
+        
+        using (UnityWebRequest www = UnityWebRequest.Post(masterUri, form))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.isNetworkError || www.isHttpError)
+            {
+                Debug.LogError(www.error);
+                onComplete?.Invoke(www.responseCode);
+            }
+            else
+            {
+                Debug.Log(www.responseCode);
+                onComplete?.Invoke(www.responseCode);
+            }
+        } 
+    }
+    
+    public void removeServerToMasterList(ServerListEntry entry, Action<long> onComplete)
+    {
+        if(entry != null)
+        {
+            StartCoroutine(enumRemoveServerToMasterList(entry, onComplete));
+        }
+        else
+        {
+            onComplete?.Invoke(0);
+        }
+    }
+    
+    private IEnumerator enumRemoveServerToMasterList(ServerListEntry entry, Action<long> onComplete)
+    {
+        WWWForm form = new WWWForm();
+        form.AddField(kAppIdKey, kAppId);
+        form.AddField(kServerUuIdKey, entry.serverUuid);
+        form.AddField(kServerName, entry.name);
+        form.AddField(kServerPort, entry.port);
+        form.AddField(kServerPlayerCapacity, entry.capacity);
+        form.AddField(kServerPlayerCount, entry.players);
+
+        string masterUri = getMasterServerCommand("add");
+        Debug.Log("Rest Command: " + masterUri);
+
+        using(UnityWebRequest www = UnityWebRequest.Post(masterUri, form))
+        {
+            yield return www.SendWebRequest();
+
+            if(www.isNetworkError || www.isHttpError)
+            {
+                Debug.LogError(www.error);
+                onComplete?.Invoke(www.responseCode);
+            }
+            else
+            {
+                Debug.Log(www.responseCode);
+                onComplete?.Invoke(www.responseCode);
+            }
+        }
+    }
+
     private GameObject OnClientSpawnHandler(SpawnMessage msg)
     {
         return onClientSpawnHandler?.Invoke(msg);
@@ -177,7 +320,13 @@ public class NetworkManager : Mirror.NetworkManager
         
         onServerStarted?.Invoke();
     }
-
+    
+    public override void OnStopServer()
+    {
+        removeServerToMasterList(serverEntry, null);
+        onServerStopped?.Invoke();    
+    }
+    
     public override void OnStartClient()
     {
         Debug.Log("OnStartClient");

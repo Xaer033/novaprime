@@ -122,8 +122,8 @@ public class ListScrollRect : UnityEngine.UI.ScrollRect
     private int _isSelectedIndex = -1;
 
     private Func<int, int> _onGetItemType = (x) => 0;
-    private List<Hashtable> _dataProvider;
-    public List<Hashtable> dataProvider
+    private List<object> _dataProvider;
+    public List<object> dataProvider
     {
         get { return _dataProvider; }
         set
@@ -831,11 +831,9 @@ public class ListScrollRect : UnityEngine.UI.ScrollRect
             _isSelectedIndex = -1;
         }
 
-        if(onSelectedItem != null)
-        {
-            onSelectedItem(_isSelectedIndex, isSelected);
-        }
-
+        
+        onSelectedItem?.Invoke(_isSelectedIndex, isSelected);
+        
     }
 	/// <summary>
 	/// Creates a new list item to be positioned in the list.

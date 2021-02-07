@@ -7,7 +7,7 @@ namespace GhostGen
 {
     public interface IListItemView  
     {
-        Hashtable   viewData    { get; set; }
+        object   viewData    { get; set; }
         bool        isSelected  { get; set; }
 
         int         GetItemType();

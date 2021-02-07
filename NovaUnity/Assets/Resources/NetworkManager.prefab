@@ -61,6 +61,8 @@ MonoBehaviour:
   autoCreatePlayer: 0
   playerSpawnMethod: 0
   spawnPrefabs: []
+  masterServerLocation: http://novamaster.net
+  masterServerPort: 11667
 --- !u!114 &3374875636476469244
 MonoBehaviour:
   m_ObjectHideFlags: 0

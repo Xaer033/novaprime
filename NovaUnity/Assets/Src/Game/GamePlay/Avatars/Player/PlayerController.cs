@@ -151,7 +151,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
         if(view != null && view.viewRoot != null && _state != null)
         {
-            if(isSimulating)
+            // if(isSimulating)
             {
                 view.viewRoot.position = Vector3.Lerp(_state.previousPosition, _state.position, alpha);//Vector3.MoveTowards(_state.previousPosition, _state.position, alpha);                
             }

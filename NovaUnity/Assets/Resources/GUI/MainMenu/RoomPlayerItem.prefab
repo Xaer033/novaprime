@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 224101713219368566}
   - component: {fileID: 222860113256011610}
   - component: {fileID: 114008634729805718}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Name
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -145,7 +145,7 @@ GameObject:
   - component: {fileID: 224500808971990842}
   - component: {fileID: 114429048436237400}
   - component: {fileID: 114577371749356596}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: RoomPlayerItem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -243,7 +243,7 @@ GameObject:
   - component: {fileID: 224661772806513590}
   - component: {fileID: 222413679073016084}
   - component: {fileID: 114136129898106372}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Checkmark
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -318,7 +318,7 @@ GameObject:
   - component: {fileID: 224880238162931078}
   - component: {fileID: 222287519304280734}
   - component: {fileID: 114678574181741404}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: ProfileIcon
   m_TagString: Untagged
   m_Icon: {fileID: 0}

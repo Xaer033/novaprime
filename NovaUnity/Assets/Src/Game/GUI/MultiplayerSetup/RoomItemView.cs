@@ -8,10 +8,11 @@ public class RoomItemView : UIView, IListItemView
 {
     public Toggle toggle;
     public TextMeshProUGUI roomName;
+    public TextMeshProUGUI serverIp;
     public TextMeshProUGUI playerCount;
 
 
-    private Hashtable _data;
+    private ServerListEntry _data;
     private event Action<IListItemView, bool> _onSelected;
 
     private void Start()
@@ -34,14 +35,14 @@ public class RoomItemView : UIView, IListItemView
     
     public bool isSelected { get; set; }
 
-    public Hashtable viewData
+    public object viewData
     {
         get { return _data; }
         set
         {
             if(_data != value)
             {
-                _data = value;
+                _data = value as ServerListEntry;
                 invalidateFlag = InvalidationFlag.DYNAMIC_DATA;
             }
         }
@@ -60,9 +61,11 @@ public class RoomItemView : UIView, IListItemView
         base.OnViewUpdate();
         if(IsInvalid(InvalidationFlag.DYNAMIC_DATA) && _data != null)
         {
-            roomName.text = _data["roomName"] as string;
-            playerCount.text = _data["playerCount"] as string;
+            roomName.text = _data.name;
+            serverIp.text = _data.ip;
+            playerCount.text = string.Format("{0}/{1}", _data.players, _data.capacity);
             
+            // RREEEEEEEEEEEEEH
             toggle.onValueChanged.RemoveListener(OnButtonClick);
             toggle.isOn = isSelected;
             toggle.onValueChanged.AddListener(OnButtonClick);

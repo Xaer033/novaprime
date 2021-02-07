@@ -69,6 +69,8 @@
                 <e p="NetworkEntity.cs" t="Include" />
                 <e p="NetworkManager.cs" t="Include" />
                 <e p="NetworkOpCodes.cs" t="Include" />
+                <e p="ServerListEntry.cs" t="Include" />
+                <e p="ServerListResponse.cs" t="Include" />
               </e>
               <e p="SessionFlags.cs" t="Include" />
               <e p="Singleton.cs" t="Include" />
@@ -802,6 +804,9 @@
           <e p="Plugins" t="Include">
             <e p="Sirenix" t="Include">
               <e p="assemblies" t="Include">
+                <e p="AOT" t="Include">
+                  <e p="link.xml" t="Include" />
+                </e>
                 <e p="link.xml" t="Include" />
                 <e p="Sirenix.OdinInspector.Attributes.xml" t="Include" />
                 <e p="Sirenix.OdinInspector.Editor.xml" t="Include" />

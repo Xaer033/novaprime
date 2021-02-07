@@ -48,7 +48,7 @@ public class MultiplayerLobbyView : UIView
         }
     }
     
-    public void SetLobbyDataProvider(List<Hashtable> dataProvider)
+    public void SetLobbyDataProvider(List<object> dataProvider)
     {
         _listScrollRect.dataProvider = dataProvider;
     }

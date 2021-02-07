@@ -7,7 +7,6 @@ public class MultiplayerRoomController : BaseController
 {
     private NetworkManager _networkManager;
     private bool _isServer;
-    private bool _wasDisconnected;
     
     public MultiplayerRoomController(bool isServer)
     {
@@ -25,7 +24,6 @@ public class MultiplayerRoomController : BaseController
             view.AddListener(MenuUIEventType.TOGGLE, onReadyButton);
             view.AddListener(MenuUIEventType.BACK, onBackButton);
 
-            _wasDisconnected = false;
             
             if(!_isServer)
             {
@@ -128,7 +126,6 @@ public class MultiplayerRoomController : BaseController
     
     private void onLocalClientDisconnect(NetworkConnection conn)
     {
-        _wasDisconnected = true;
         _networkManager.Disconnect();
         DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);
     }

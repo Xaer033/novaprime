@@ -1,14 +1,13 @@
-﻿using Sirenix.OdinInspector;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerView : AvatarView
 {
-    [BoxGroup("Hooks")]
+    // [BoxGroup("Hooks")]
     public Transform deadRoot;
     
-    [BoxGroup("Hooks")]
+    // [BoxGroup("Hooks")]
     public Transform _leftFootHook;
-    [BoxGroup("Hooks")]
+    // [BoxGroup("Hooks")]
     public Transform _rightFootHook;
     
     private ParticleSystem _leftFootPuffFx;

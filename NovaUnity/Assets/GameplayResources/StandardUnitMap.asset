@@ -12,85 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 292990dcc9a5ac94580fa1d10df86866, type: 3}
   m_Name: StandardUnitMap
   m_EditorClassIdentifier: 
-  serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
-    ReferencedUnityObjects:
-    - {fileID: 11400000, guid: 4b92978451178234e91395adbbb8c0da, type: 2}
-    - {fileID: 3134929727233853592, guid: 4d9e1bc12d1bcd24b8367c65543d09b6, type: 3}
-    - {fileID: 11400000, guid: aaaf3723aa622294e87ae4babf1469f9, type: 2}
-    - {fileID: 3134929727233853592, guid: 8c149dba75b26f64aa1c201407da3f89, type: 3}
-    - {fileID: 11400000, guid: a9b11cf147a727b41929be930fed0813, type: 2}
-    - {fileID: -6675867017203905812, guid: f584ac3a4b2aecb4c85d9b23c7bf5155, type: 3}
-    SerializedBytesString: 
-    Prefab: {fileID: 0}
-    PrefabModificationsReferencedUnityObjects: []
-    PrefabModifications: []
-    SerializationNodes:
-    - Name: _unitList
-      Entry: 7
-      Data: 0|System.Collections.Generic.List`1[[UnitMap+Unit, Assembly-CSharp]],
-        mscorlib
-    - Name: 
-      Entry: 12
-      Data: 3
-    - Name: 
-      Entry: 7
-      Data: 1|UnitMap+Unit, Assembly-CSharp
-    - Name: id
-      Entry: 1
-      Data: player
-    - Name: type
-      Entry: 3
-      Data: 1
-    - Name: stats
-      Entry: 10
-      Data: 0
-    - Name: view
-      Entry: 10
-      Data: 1
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 7
-      Data: 2|UnitMap+Unit, Assembly-CSharp
-    - Name: id
-      Entry: 1
-      Data: grunt
-    - Name: type
-      Entry: 3
-      Data: 2
-    - Name: stats
-      Entry: 10
-      Data: 2
-    - Name: view
-      Entry: 10
-      Data: 3
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 7
-      Data: 3|UnitMap+Unit, Assembly-CSharp
-    - Name: id
-      Entry: 1
-      Data: bruiser
-    - Name: type
-      Entry: 3
-      Data: 2
-    - Name: stats
-      Entry: 10
-      Data: 4
-    - Name: view
-      Entry: 10
-      Data: 5
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
+  _unitList:
+  - id: player
+    type: 1
+    stats: {fileID: 11400000, guid: 4b92978451178234e91395adbbb8c0da, type: 2}
+    view: {fileID: 3134929727233853592, guid: 4d9e1bc12d1bcd24b8367c65543d09b6, type: 3}
+  - id: grunt
+    type: 2
+    stats: {fileID: 11400000, guid: aaaf3723aa622294e87ae4babf1469f9, type: 2}
+    view: {fileID: 3134929727233853592, guid: 8c149dba75b26f64aa1c201407da3f89, type: 3}
+  - id: bruiser
+    type: 2
+    stats: {fileID: 11400000, guid: a9b11cf147a727b41929be930fed0813, type: 2}
+    view: {fileID: -6675867017203905812, guid: f584ac3a4b2aecb4c85d9b23c7bf5155, type: 3}

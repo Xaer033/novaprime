@@ -2,30 +2,28 @@ using System;
 using Cinemachine;
 using GhostGen;
 using Mirror;
-using Sirenix.OdinInspector;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Animations;
 
 public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPassenger, ITimeWarpTarget, IAttackTarget
 {
     
-    [BoxGroup("Hooks")]
+    // [BoxGroup("Hooks")]
     public Transform _viewRoot;
     
     
-    [BoxGroup("Hooks")]
+    // [BoxGroup("Hooks")]
     public Transform _cursorTarget;
-    [BoxGroup("Hooks")]
+    // [BoxGroup("Hooks")]
     public Transform _weaponHook;
-    [BoxGroup("Hooks")]
+    // [BoxGroup("Hooks")]
     public Transform _healthPositionHook;
-    [BoxGroup("Hooks")]
+    // [BoxGroup("Hooks")]
     public CinemachineTargetGroup cameraTargetGroup;
     
-    [BoxGroup("Limb Hooks")]
+    // [BoxGroup("Limb Hooks")]
     public ParentConstraint _leftHandConstraint;
-    [BoxGroup("Limb Hooks")]
+    // [BoxGroup("Limb Hooks")]
     public ParentConstraint _rightHandConstraint;
     
     public AvatarConstrainer constrainer;

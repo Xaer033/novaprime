@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using Sirenix.OdinInspector;
-using Sirenix.Serialization;
 using UnityEngine;
 
 [CreateAssetMenu(menuName ="Nova/Unit Map")]
-public class UnitMap : SerializedScriptableObject
+public class UnitMap : ScriptableObject
 {
     // [OdinSerialize, ShowInInspector, NonSerialized]
     private Dictionary<string, Unit> _unitMap = new Dictionary<string, Unit>();
 
-    [OdinSerialize, NonSerialized]
-    public List<Unit> _unitList;
+    [SerializeField]
+    private List<Unit> _unitList;
 
     public List<Unit> unitList { get { return _unitList; }}
     
@@ -37,8 +34,6 @@ public class UnitMap : SerializedScriptableObject
         public string id;
         public UnitType type;
         public UnitStats stats;
-        
-        [OdinSerialize, ShowInInspector]
-        public IAvatarView view;
+        public AvatarView view;
     }
 }

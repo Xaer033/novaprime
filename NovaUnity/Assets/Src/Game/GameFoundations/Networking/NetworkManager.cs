@@ -41,6 +41,7 @@ public class NetworkManager : Mirror.NetworkManager
     }
 
     public SessionState sessionState { get; private set; }
+    public uint frameTick { get; set; }
     
     public override void OnDestroy()
     {

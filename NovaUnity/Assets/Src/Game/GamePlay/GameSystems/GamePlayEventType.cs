@@ -7,4 +7,6 @@
     public const string AVATAR_DESTROYED = "gameplay_avatar_destroyed";
     
     public const string PROJECTILE_SPAWNED = "gameplay_projectile_spawned";
+
+    public const string NET_LOCAL_PLAYER_DISCONNECT = "gameplay_local_player_disconnect";
 }

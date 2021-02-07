@@ -44,26 +44,39 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     {
         _gameSystems = gameSystems;
         _avatarSystem = gameSystems.Get<AvatarSystem>();
-
-        _networkManager.onClientSpawnHandler += netUnitSpawnHandler;
-        _networkManager.onClientUnspawnHandler += netUnitUnspawnHandler;
+        
+        _networkManager.onClientSpawnHandler += onClientUnitSpawnHandler;
+        _networkManager.onClientUnspawnHandler += onClientUnitUnspawnHandler;
+        _networkManager.onLocalClientDisconnect += onLocalClientDisconnect;
+        
         _networkManager.onServerMatchBegin += onServerMatchBegin;
         _networkManager.onServerSendPlayerInput += onServerSendPlayerInput;
         _networkManager.onServerConnect += onServerConnect;
         _networkManager.onServerDisconnect += onServerDisconnect;
         _networkManager.onServerMatchLoadComplete += onServerMatchLoadComplete;
 
+        _networkManager.frameTick = 0;
+        _gameSystems.onFixedStep += onFixedStep;
     }
 
     public void CleanUp()
     {
-        _networkManager.onClientSpawnHandler -= netUnitSpawnHandler;
-        _networkManager.onClientUnspawnHandler -= netUnitUnspawnHandler;
+        _networkManager.onClientSpawnHandler -= onClientUnitSpawnHandler;
+        _networkManager.onClientUnspawnHandler -= onClientUnitUnspawnHandler;
+        _networkManager.onLocalClientDisconnect -= onLocalClientDisconnect;
+        
         _networkManager.onServerMatchBegin -= onServerMatchBegin;
         _networkManager.onServerSendPlayerInput -= onServerSendPlayerInput;
         _networkManager.onServerConnect -= onServerConnect;
         _networkManager.onServerDisconnect -= onServerDisconnect;
         _networkManager.onServerMatchLoadComplete -= onServerMatchLoadComplete;
+        
+        _gameSystems.onFixedStep -= onFixedStep;
+    }
+
+    private void onFixedStep(float fixedDeltaTime)
+    {
+        _networkManager.frameTick++;
     }
 
     private void onServerMatchLoadComplete(NetworkConnection conn)
@@ -111,7 +124,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         }
     }
     
-    private GameObject netUnitSpawnHandler(SpawnMessage msg)
+    private GameObject onClientUnitSpawnHandler(SpawnMessage msg)
     {
         UnitMap.Unit unit = _netPrefabMap[msg.assetId];
         IAvatarController controller = _avatarSystem.Spawn<IAvatarController>(unit.id, msg.position);
@@ -164,9 +177,14 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         }
     }
     
-    private void netUnitUnspawnHandler(GameObject obj)
+    private void onClientUnitUnspawnHandler(GameObject obj)
     {
         _avatarSystem.UnSpawn(obj);
+    }
+
+    private void onLocalClientDisconnect(NetworkConnection conn)
+    {
+        DispatchEvent(GamePlayEventType.NET_LOCAL_PLAYER_DISCONNECT, false, conn);
     }
     
      private GameplayCamera _getOrCreatePlayerCamera()

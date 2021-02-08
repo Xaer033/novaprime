@@ -8,7 +8,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
 {
     private const int kMaxPlayers = 16;
     
-    private const int kTicksAhead = 2;
+    private const int kTicksAhead = 3;
     
     private GameSystems _gameSystems;
     private GameState _gameState;
@@ -60,7 +60,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
 
     public void Start(GameSystems gameSystems, GameState gameState)
     {
-        Application.targetFrameRate = 60;
+        Application.targetFrameRate = 60; // TODO: Definitely temporary! 
         
         _gameSystems = gameSystems;
         _avatarSystem = gameSystems.Get<AvatarSystem>();
@@ -97,17 +97,18 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         _gameSystems.onFixedStep -= onFixedStep;
     }
 
-    public FrameInput GetInputForTick(uint tick, string uuid)
+    public bool GetInputForTick(uint tick, string uuid, out FrameInput input)
     {
-        FrameInput input = default(FrameInput);
-
+        bool result = false;
+        input = default(FrameInput);
+        
         Dictionary<string, FrameInput> playerInputMap;
         if(_serverTickInputs.TryGetValue(tick, out playerInputMap))
         {
-            playerInputMap.TryGetValue(uuid, out input);
+            result = playerInputMap.TryGetValue(uuid, out input);
         }
         
-        return input;
+        return result;
     }
     
     private void onFixedStep(float fixedDeltaTime)
@@ -132,10 +133,10 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
                 _serverPlayerStateList[i] = netPlayerState;
             }
 
-            NetFrameSnapshot snapshot = new NetFrameSnapshot()
+            NetFrameSnapshot snapshot = new NetFrameSnapshot
             {
                 frameTick = NetworkManager.frameTick,
-                timestamp = NetworkTime.time,
+                sendTime = NetworkTime.time,
                 playerCount = currentPlayerCount,
                 playerStateList = _serverPlayerStateList
             };
@@ -311,7 +312,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
             return;
         }
         
-        float lag = Mathf.Abs((float) (NetworkTime.time - msg.timestamp));
+        float lag = Mathf.Abs((float) (NetworkTime.time - msg.sendTime));
         
         // msg.
         for(int i = 0; i < msg.playerCount; ++i)

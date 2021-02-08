@@ -84,14 +84,19 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         for(int i = 0; i < _avatarControllerList.Count; ++i)
         {
             IAvatarController controller = _avatarControllerList[i];
-            FrameInput input = _networkSystem.GetInputForTick(NetworkManager.frameTick, controller.uuid);
+            FrameInput newInput;
+            bool hasInput = _networkSystem.GetInputForTick(NetworkManager.frameTick, controller.uuid, out newInput);
             // _lastInputMap.ContainsKey(controller.uuid) ? _lastInputMap[controller.uuid] : default(FrameInput);
+            if(!hasInput && _lastInputMap.ContainsKey(controller.uuid))
+            {
+                newInput = _lastInputMap[controller.uuid];
+            }
 
             if(NetworkServer.active)// || controller.isSimulating)
             {
-                _frameInputList.Add(input);
+                _frameInputList.Add(newInput);
 
-                controller.FixedStep(fixedDeltaTime, input);
+                controller.FixedStep(fixedDeltaTime, newInput);
             }
 
 

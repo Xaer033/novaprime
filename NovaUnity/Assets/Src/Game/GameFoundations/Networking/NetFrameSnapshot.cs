@@ -5,7 +5,7 @@ using Mirror;
 public struct NetFrameSnapshot : NetworkMessage
 {
     public uint frameTick;
-    public double timestamp;
+    public double sendTime;
     public int playerCount;
     public NetPlayerState[] playerStateList;
 }

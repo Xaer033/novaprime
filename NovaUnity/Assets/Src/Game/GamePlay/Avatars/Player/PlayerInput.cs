@@ -69,7 +69,7 @@ public class PlayerInput : IInputGenerator
         input.horizontalMovement = horizontalMovement;
         input.verticalMovement = verticalMovement;
         
-        input.interactPressed = interactPressed;
+        input.interactPressed = _interactPressed;
         
         input.jumpPressed = _jumpPressed;
         input.jumpReleased = _jumpRelease;

@@ -1410,7 +1410,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   syncMode: 0
-  syncInterval: 0
+  syncInterval: 0.1
 --- !u!61 &8866287814259327232
 BoxCollider2D:
   m_ObjectHideFlags: 0

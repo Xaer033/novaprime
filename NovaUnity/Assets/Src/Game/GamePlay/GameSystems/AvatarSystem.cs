@@ -9,13 +9,15 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
 {
     private GameState _gameState;
     private GameSystems _gameSystems;
-
+    private NetworkSystem _networkSystem;
+    
     private GameplayResources _gameplayResources;
     
     private UnitMap _unitMap;
     private List<IAvatarController> _avatarControllerList;
     private Dictionary<string, IAvatarController> _avatarLookUpMap;
     private Dictionary<string, FrameInput> _lastInputMap;
+    private Dictionary<NetPlayer, FrameInput> _lastPlayerInputMap;
     private Dictionary<int, GameplayCamera> _cameraMap;
 
     private List<string> _removalList;
@@ -44,6 +46,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         _avatarLookUpMap                = new Dictionary<string, IAvatarController>();
         _frameInputList                 = new List<FrameInput>();
         _lastInputMap                   = new Dictionary<string, FrameInput>();
+        _lastPlayerInputMap             = new Dictionary<NetPlayer, FrameInput>();
         _cameraMap                      = new Dictionary<int, GameplayCamera>();
         _playerSpawnPointList           = new List<PlayerSpawnPoint>(16);
         _removalList                    = new List<string>();
@@ -61,6 +64,9 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     {
         _gameSystems = gameSystems;
         _gameState = gameState;
+
+        _networkSystem = _gameSystems.Get<NetworkSystem>();
+        
         _gameSystems.onStep += Step;
         _gameSystems.onFixedStep += FixedStep;
         _gameSystems.AddListener(GamePlayEventType.SPAWN_POINT_TRIGGERED, onSpawnPointTriggered);
@@ -74,29 +80,25 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
 
     public void FixedStep(float fixedDeltaTime)
     {
-        for (int i = 0; i < _avatarControllerList.Count; ++i)
+        
+        for(int i = 0; i < _avatarControllerList.Count; ++i)
         {
             IAvatarController controller = _avatarControllerList[i];
-            FrameInput input = _lastInputMap.ContainsKey(controller.uuid) ? _lastInputMap[controller.uuid] : default(FrameInput);
-           
-            _frameInputList.Add(input);
+            FrameInput input = _networkSystem.GetInputForTick(NetworkManager.frameTick, controller.uuid);
+            // _lastInputMap.ContainsKey(controller.uuid) ? _lastInputMap[controller.uuid] : default(FrameInput);
 
-            if(controller.isSimulating)// NetworkServer.active)
+            if(NetworkServer.active)// || controller.isSimulating)
             {
-                controller.FixedStep(fixedDeltaTime, input);                
+                _frameInputList.Add(input);
+
+                controller.FixedStep(fixedDeltaTime, input);
             }
-            
-            // if(controller.isSimulating && NetworkClient.isConnected)
-            // {
-            //     SendPlayerInput inputMessage = new SendPlayerInput();
-            //     inputMessage.input = input;
-            //
-            //     NetworkClient.Send(inputMessage, Channels.DefaultUnreliable);
-            //     controller.input.Clear();
-            // }
+
+
+            controller?.input?.Clear();
         }
-        
-        
+    
+
         // Batch Remove anything that needs to go
         clearRemovedAvatars();
         
@@ -180,6 +182,21 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         }
 
         return controller;
+    }
+
+    public IAvatarController GetPlayer(uint netId)
+    {
+        for(int i = 0; i < _avatarControllerList.Count; ++i)
+        {
+            IAvatarController controller = _avatarControllerList[i];
+            
+            if(controller == null) 
+                continue;
+            
+            if(controller?.view?.netIdentity.netId == netId)
+                return controller;        
+        }
+        return null;
     }
     
     public T Spawn<T>(string unitId, Vector3 position, SpawnPointData spawnPointData = default) //where T : IAvatarController

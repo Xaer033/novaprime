@@ -46,6 +46,7 @@ public class NetworkManager : Mirror.NetworkManager
     public event Action<NetworkConnection, ConfirmReadyUp> onClientConfirmReadyUp;
     public event Action<NetworkConnection, StartMatchLoad> onClientStartMatchLoad;
     public event Action<NetworkConnection, MatchBegin> onClientMatchBegin;
+    public event Action<NetworkConnection, NetFrameSnapshot> onClientFrameSnapshot;
     public event SpawnHandlerDelegate onClientSpawnHandler;
     public event UnSpawnDelegate onClientUnspawnHandler;
 
@@ -61,7 +62,7 @@ public class NetworkManager : Mirror.NetworkManager
     
     
     public SessionState sessionState { get; private set; }
-    public uint frameTick { get; set; }
+    public static uint frameTick { get; set; }
     
     public override void OnDestroy()
     {
@@ -86,6 +87,7 @@ public class NetworkManager : Mirror.NetworkManager
         onClientConfirmReadyUp = null;
         onClientStartMatchLoad = null;
         onClientMatchBegin = null;
+        onClientFrameSnapshot = null;
 
         base.OnDestroy();
     }
@@ -338,6 +340,7 @@ public class NetworkManager : Mirror.NetworkManager
         NetworkClient.RegisterHandler<AssignPlayerSlot>(OnClientAssignPlayerSlot, false);
         NetworkClient.RegisterHandler<StartMatchLoad>(OnClientStartMatchLoad, false);
         NetworkClient.RegisterHandler<MatchBegin>(OnClientMatchBegin, false);
+        NetworkClient.RegisterHandler<NetFrameSnapshot>(OnClientFrameSnapshot, false);
         
         onClientStarted?.Invoke();
     }
@@ -461,6 +464,11 @@ public class NetworkManager : Mirror.NetworkManager
     private void OnClientAssignPlayerSlot(NetworkConnection conn, AssignPlayerSlot msg)
     {
         localPlayerSlot = msg.playerSlot;
+    }
+
+    private void OnClientFrameSnapshot(NetworkConnection conn, NetFrameSnapshot msg)
+    {
+        onClientFrameSnapshot?.Invoke(conn, msg);
     }
     
     private void OnClientConfirmReadyUp(NetworkConnection conn, ConfirmReadyUp msg)

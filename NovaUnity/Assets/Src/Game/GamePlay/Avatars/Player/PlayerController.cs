@@ -186,10 +186,10 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         }
 
         
-        playerNetEntity?.CmdServerUpdate(
-                _state.velocity,
-                _state.position,
-                _state.aimPosition);
+        // playerNetEntity?.CmdServerUpdate(
+        //         _state.velocity,
+        //         _state.position,
+        //         _state.aimPosition);
         
 
 
@@ -671,10 +671,13 @@ public class PlayerController : NotificationDispatcher, IAvatarController
 
     private void onServerUpdate(IAvatarView pView, Vector2 velocity, Vector2 position, Vector2 aimPosition)
     {
-        _state.previousPosition = _state.position;
-        _state.position = position;
-        _state.velocity = velocity;
-        _state.aimPosition = aimPosition;
+        if(!pView.netIdentity.isLocalPlayer)
+        {
+            _state.previousPosition = _state.position;
+            _state.position = position;
+            _state.velocity = velocity;
+            _state.aimPosition = aimPosition;            
+        }
         
         playerNetEntity?.RpcClientUpdate(
                 NetworkTime.time,

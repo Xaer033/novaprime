@@ -264,7 +264,7 @@ namespace Mirror
         /// <summary>
         /// virtual so that inheriting classes' LateUpdate() can call base.LateUpdate() too
         /// </summary>
-        public virtual void LateUpdate()
+        public virtual void FixedUpdate()
         {
             // call it while the NetworkManager exists.
             // -> we don't only call while Client/Server.Connected, because then we would stop if disconnected and the

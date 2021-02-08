@@ -55,6 +55,11 @@
               <e p="GameplayResources.cs" t="Include" />
               <e p="GuiManager.cs" t="Include" />
               <e p="Networking" t="Include">
+                <e p="LocalPlayerState.cs" t="Include" />
+                <e p="MasterServer" t="Include">
+                  <e p="ServerListEntry.cs" t="Include" />
+                  <e p="ServerListResponse.cs" t="Include" />
+                </e>
                 <e p="Messages" t="Include">
                   <e p="AssignPlayerSlot.cs" t="Include" />
                   <e p="ConfirmReadyUp.cs" t="Include" />
@@ -66,11 +71,11 @@
                   <e p="StartMatchLoad.cs" t="Include" />
                   <e p="SyncLobbyPlayers.cs" t="Include" />
                 </e>
+                <e p="NetFrameSnapshot.cs" t="Include" />
+                <e p="NetPlayerState.cs" t="Include" />
                 <e p="NetworkEntity.cs" t="Include" />
                 <e p="NetworkManager.cs" t="Include" />
                 <e p="NetworkOpCodes.cs" t="Include" />
-                <e p="ServerListEntry.cs" t="Include" />
-                <e p="ServerListResponse.cs" t="Include" />
               </e>
               <e p="SessionFlags.cs" t="Include" />
               <e p="Singleton.cs" t="Include" />

@@ -40,7 +40,7 @@ public class NetworkManager : Mirror.NetworkManager
     public event Action onClientStarted;
     public event Action<NetworkConnection> onClientConnect;
     public event Action<NetworkConnection> onClientDisconnect;
-    public event Action<NetworkConnection> onLocalClientDisconnect;
+    public event Action<NetworkConnection> onClientLocalDisconnect;
     public event Action<NetworkConnection, int> onClientError;
     public event Action<NetworkConnection, SyncLobbyPlayers> onClientSyncLobbyPlayers;
     public event Action<NetworkConnection, ConfirmReadyUp> onClientConfirmReadyUp;
@@ -60,8 +60,8 @@ public class NetworkManager : Mirror.NetworkManager
     
     public ServerListEntry serverEntry { get; set; }
     
-    
     public SessionState sessionState { get; private set; }
+    
     public static uint frameTick { get; set; }
     
     public override void OnDestroy()
@@ -81,7 +81,7 @@ public class NetworkManager : Mirror.NetworkManager
         onClientStarted = null;
         onClientConnect = null;
         onClientDisconnect = null;
-        onLocalClientDisconnect = null;
+        onClientLocalDisconnect = null;
         onClientError = null;
         onClientSyncLobbyPlayers = null;
         onClientConfirmReadyUp = null;
@@ -311,6 +311,7 @@ public class NetworkManager : Mirror.NetworkManager
         Debug.Log("OnStartServer");
         
         _serverNetPlayerMap.Clear();
+        
         setupPlayerSlotGenerator();
         
         NetworkServer.RegisterHandler<RequestMatchStart>(OnServerRequestMatchStart, false);
@@ -431,7 +432,7 @@ public class NetworkManager : Mirror.NetworkManager
         NetworkConnection localConnection = NetworkClient.connection;
         if(localConnection != null && localConnection.connectionId == conn.connectionId)
         {
-            onLocalClientDisconnect?.Invoke(conn);
+            onClientLocalDisconnect?.Invoke(conn);
         }
 
         // _netPlayerMap.Remove(conn.connectionId);

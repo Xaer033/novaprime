@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using CircularBuffer;
+using UnityEngine;
 
 public class AvatarState 
 {

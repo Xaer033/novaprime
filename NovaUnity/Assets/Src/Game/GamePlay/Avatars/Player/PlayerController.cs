@@ -518,13 +518,17 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         
         _move(_state.velocity * deltaTime, input, false);
 
-        _crushedFrameCount = collisionInfo.crushed ? _crushedFrameCount + 1 : 0;
-        if(collisionInfo.crushed)
+        if(NetworkServer.active)
         {
-            AttackData attackData = createCrushDamage();
-            TakeDamage(attackData);
-            Debug.LogError("YOU DEAD");
+            _crushedFrameCount = collisionInfo.crushed ? _crushedFrameCount + 1 : 0;
+            if(collisionInfo.crushed)
+            {
+                AttackData attackData = createCrushDamage();
+                TakeDamage(attackData);
+                Debug.LogError("YOU DEAD");
+            }
         }
+        
         
         if (collisionInfo.below)
         {

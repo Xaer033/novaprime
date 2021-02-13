@@ -129,27 +129,11 @@ namespace CircularBuffer
         {
             get
             {
-                if (IsEmpty)
-                {
-                    throw new IndexOutOfRangeException(string.Format("Cannot access index {0}. Buffer is empty", index));
-                }
-                if (index >= _size)
-                {
-                    throw new IndexOutOfRangeException(string.Format("Cannot access index {0}. Buffer size is {1}", index, _size));
-                }
                 int actualIndex = InternalIndex(index);
                 return _buffer[actualIndex];
             }
             set
             {
-                if (IsEmpty)
-                {
-                    throw new IndexOutOfRangeException(string.Format("Cannot access index {0}. Buffer is empty", index));
-                }
-                if (index >= _size)
-                {
-                    throw new IndexOutOfRangeException(string.Format("Cannot access index {0}. Buffer size is {1}", index, _size));
-                }
                 int actualIndex = InternalIndex(index);
                 _buffer[actualIndex] = value;
             }
@@ -207,24 +191,32 @@ namespace CircularBuffer
         /// Removes the element at the back of the buffer. Decreasing the 
         /// Buffer size by 1.
         /// </summary>
-        public void PopBack()
+        public T PopBack()
         {
             ThrowIfEmpty("Cannot take elements from an empty buffer.");
+            T result = Back();
+            
             Decrement(ref _end);
             _buffer[_end] = default(T);
             --_size;
+
+            return result;
         }
 
         /// <summary>
         /// Removes the element at the front of the buffer. Decreasing the 
         /// Buffer size by 1.
         /// </summary>
-        public void PopFront()
+        public T PopFront()
         {
             ThrowIfEmpty("Cannot take elements from an empty buffer.");
+            T result = Front();
+            
             _buffer[_start] = default(T);
             Increment(ref _start);
             --_size;
+
+            return result;
         }
 
         /// <summary>
@@ -268,10 +260,10 @@ namespace CircularBuffer
 
         private void ThrowIfEmpty(string message = "Cannot access an empty buffer.")
         {
-            if (IsEmpty)
-            {
-                throw new InvalidOperationException(message);
-            }
+            // if (IsEmpty)
+            // {
+            //     throw new InvalidOperationException(message);
+            // }
         }
 
         /// <summary>

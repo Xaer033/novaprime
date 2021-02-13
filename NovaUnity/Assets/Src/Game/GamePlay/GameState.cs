@@ -2,7 +2,6 @@
 
 public class GameState
 {
-
     // public List<NetPlayer> netPlayerList = new List<NetPlayer>(4);
     public List<PlayerState> playerStateList = new List<PlayerState>(4);
     public List<EnemyState> enemyStateList = new List<EnemyState>(200);

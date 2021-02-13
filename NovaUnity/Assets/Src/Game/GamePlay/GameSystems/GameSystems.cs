@@ -40,13 +40,13 @@ public class GameSystems : NotificationDispatcher
         IGameSystem triggerSystem        = new TriggerSystem(); 
  
         // Higher priority value goes first
-        _addSystem(60, networkSystem);
-        _addSystem(50, triggerSystem);
-        _addSystem(40, avatarSystem);
-        _addSystem(30, spawnPointSystem);
-        _addSystem(20, platformSystem);
-        _addSystem(10, projectileSystem);
-        _addSystem( 0, healthUiSystem);
+        _addSystem(500,     triggerSystem);
+        _addSystem(400,     avatarSystem);
+        _addSystem(300,     spawnPointSystem);
+        _addSystem(200,     platformSystem);
+        _addSystem(100,     projectileSystem);
+        _addSystem(100,     healthUiSystem);
+        _addSystem( 50,     networkSystem);
         
         _sortedSystemList.Sort(_sortSystems);
     }
@@ -63,10 +63,7 @@ public class GameSystems : NotificationDispatcher
     {
         // Physics2D.SyncTransforms();
         
-        if(onFixedStep != null)
-        {
-            onFixedStep(fixedDeltaTime);
-        }
+        onFixedStep?.Invoke(fixedDeltaTime);
 
         // Physics2D.Simulate(fixedDeltaTime);
         // for(int i = 0; i < _sortedSystemList.Count; ++i)
@@ -77,28 +74,12 @@ public class GameSystems : NotificationDispatcher
 
     public void Step(float deltaTime)
     {
-        if(onStep != null)
-        {
-            onStep(deltaTime);
-        }
-        
-        // for(int i = 0; i < _sortedSystemList.Count; ++i)
-        // {
-        //     _sortedSystemList[i].Step(deltaTime);
-        // }
+        onStep?.Invoke(deltaTime);
     }
 
     public void LateStep(float deltaTime)
     {
-        if(onLateStep != null)
-        {
-            onLateStep(deltaTime);
-        }
-        
-        // for(int i = 0; i < _sortedSystemList.Count; ++i)
-        // {
-        //     _sortedSystemList[i].LateStep(deltaTime);
-        // }
+        onLateStep?.Invoke(deltaTime);
     }
     
     public void CleanUp()

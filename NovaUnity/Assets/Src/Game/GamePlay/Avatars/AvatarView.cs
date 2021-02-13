@@ -146,6 +146,6 @@ public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPasseng
 
     public Vector3 GetHealthPosition()
     {
-        return _healthPositionHook.position;
-    }
+        return _healthPositionHook != null ? _healthPositionHook.position : Vector3.zero;
+    } 
 }

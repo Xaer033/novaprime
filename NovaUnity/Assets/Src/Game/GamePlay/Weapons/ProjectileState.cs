@@ -9,7 +9,7 @@ public class ProjectileState
     public float speed;
     public float timeScale;
     public int damage;
-    public float deathTimer;
+    public double deathTime;
     public string ownerUUID;
 
     public ProjectileData data;

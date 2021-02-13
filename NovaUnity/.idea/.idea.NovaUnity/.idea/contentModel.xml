@@ -71,15 +71,22 @@
                   <e p="StartMatchLoad.cs" t="Include" />
                   <e p="SyncLobbyPlayers.cs" t="Include" />
                 </e>
+                <e p="NetChannel.cs" t="Include" />
+                <e p="NetChannelHeader.cs" t="Include" />
                 <e p="NetFrameSnapshot.cs" t="Include" />
                 <e p="NetPlayerState.cs" t="Include" />
                 <e p="NetworkEntity.cs" t="Include" />
                 <e p="NetworkManager.cs" t="Include" />
                 <e p="NetworkOpCodes.cs" t="Include" />
+                <e p="PlayerInputTickPair.cs" t="Include" />
+                <e p="ServerPlayerInputBuffer.cs" t="Include" />
               </e>
               <e p="SessionFlags.cs" t="Include" />
               <e p="Singleton.cs" t="Include" />
               <e p="StringUtil.cs" t="Include" />
+              <e p="Time" t="Include">
+                <e p="TimeUtil.cs" t="Include" />
+              </e>
             </e>
             <e p="GamePlay" t="Include">
               <e p="Attacking" t="Include">
@@ -237,6 +244,7 @@
               <e p="IPostInit.cs" t="Include" />
               <e p="MathUtil.cs" t="Include" />
               <e p="MultiMap.cs" t="Include" />
+              <e p="RingBuffer.cs" t="Include" />
             </e>
             <e p="GhostGenAssemblies.asmdef" t="Include" />
             <e p="GuiUtilities" t="Include">

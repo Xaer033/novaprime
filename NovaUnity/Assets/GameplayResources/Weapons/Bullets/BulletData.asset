@@ -19,4 +19,4 @@ MonoBehaviour:
   attackType: 2
   speed: 80
   damage: 25
-  deathTimer: 20
+  deathTimer: 7

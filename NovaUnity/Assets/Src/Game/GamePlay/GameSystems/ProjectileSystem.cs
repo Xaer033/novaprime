@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using GhostGen;
-using UnityEditor;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 public class ProjectileSystem : NotificationDispatcher, IGameSystem
 {
@@ -96,6 +93,8 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
 
         _projectileImpactViewList.Sort(_impactFXSort);
         _bloodImpactViewList.Sort(_impactFXSort);
+
+        double now = TimeUtil.timestamp();
         
         for (int i = 0; i < _poolSize; ++i)
         {
@@ -106,8 +105,6 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
             {
                 float scaledDeltaTime = state.timeScale * deltaTime;
                 
-                state.deathTimer -= deltaTime;
-
                 float lookAhead = state.velocity.magnitude * scaledDeltaTime;
                 Vector3 bulletDir = state.velocity.normalized;
                 Vector3 rayStart = state.position;
@@ -166,7 +163,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
                 // view.transform.position = state.position;
                 
 
-                if (state.deathTimer <= 0.0f)
+                if (state.deathTime < now)
                 {
                     state.isActive = false;
                 }
@@ -209,6 +206,8 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
 
     public ProjectileState Spawn(string ownerUUID, ProjectileData data, Vector3 position, Vector3 direction)
     {
+        double now = TimeUtil.timestamp();
+        
         for (int i = 0; i < _poolSize; ++i)
         {
             ProjectileState state = _gameState.projectileStateList[i];
@@ -221,7 +220,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
                 state.data = data;
                 state.speed = data.speed;
                 state.damage = data.damage;
-                state.deathTimer = data.deathTimer;
+                state.deathTime = now + data.deathTimer;
                 state.timeScale = 1.0f;
                 state.position = position;
                 state.prevPosition = position;

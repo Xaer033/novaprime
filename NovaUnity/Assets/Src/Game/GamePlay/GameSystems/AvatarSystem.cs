@@ -80,23 +80,44 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
 
     public void FixedStep(float fixedDeltaTime)
     {
-        
         for(int i = 0; i < _avatarControllerList.Count; ++i)
         {
             IAvatarController controller = _avatarControllerList[i];
+            
             FrameInput newInput;
-            bool hasInput = _networkSystem.GetInputForTick(NetworkManager.frameTick, controller.uuid, out newInput);
-            // _lastInputMap.ContainsKey(controller.uuid) ? _lastInputMap[controller.uuid] : default(FrameInput);
+            
+            bool hasInput = _networkSystem.GetInputForTick(
+                (controller.state as PlayerState).playerSlot, 
+                out newInput);
+            
             if(!hasInput && _lastInputMap.ContainsKey(controller.uuid))
             {
-                newInput = _lastInputMap[controller.uuid];
+                newInput = _lastInputMap[controller.uuid];     
             }
 
-            if(NetworkServer.active)// || controller.isSimulating)
+            if(NetworkServer.active || controller.isSimulating)
             {
                 _frameInputList.Add(newInput);
 
                 controller.FixedStep(fixedDeltaTime, newInput);
+
+                PlayerState pState = controller.state as PlayerState;
+                if(pState != null) // Check again to make sure only the client does this part
+                {
+                    NetPlayerState newNetPlayerState = NetPlayerState.Create(
+                        pState, 
+                        NetworkManager.frameTick, 
+                        controller.view.netIdentity.netId);
+
+                    PlayerInputTickPair tickPair = new PlayerInputTickPair
+                    {
+                        input = newInput,
+                        tick = NetworkManager.frameTick
+                    };
+                    
+                    pState.nonAckInputBuffer.PushBack(tickPair);
+                    pState.nonAckStateBuffer.PushBack(newNetPlayerState);   
+                }
             }
 
 
@@ -189,7 +210,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         return controller;
     }
 
-    public IAvatarController GetPlayer(uint netId)
+    public IAvatarController GetPlayerByNetId(uint netId)
     {
         for(int i = 0; i < _avatarControllerList.Count; ++i)
         {
@@ -249,7 +270,6 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
  
 
         PlayerState state = PlayerState.Create(uuid, unit.stats, position);
-        state.playerSlot = (PlayerSlot)spawnPointData.customInt;
         PlayerController controller = new PlayerController(unit, state, view, null);
       
         _gameState.playerStateList.Add(state); 

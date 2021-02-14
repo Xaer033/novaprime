@@ -25,6 +25,7 @@ public class MultiplayerSetupView : UIView
     public ListScrollRect   _serverListRect = null;
     public RoomItemView     _serverEntryPrefab = null;
     public ToggleGroup      _serverToggleGroup;
+    public CanvasGroup      _serverListCanvasGroup;
     public Image loadingCircle;
 
     private Tween _spinTween;
@@ -116,10 +117,16 @@ public class MultiplayerSetupView : UIView
 
         if(loadingCircle != null)
         {
-            _spinTween = loadingCircle.rectTransform.DOLocalRotate(new Vector3(0, 0, 360), 0.5f, RotateMode.FastBeyond360);
+            _spinTween = loadingCircle.rectTransform.DOLocalRotate(new Vector3(0, 0, 360), 0.5f, RotateMode.LocalAxisAdd);
             _spinTween.SetLoops(-1);
             
             loadingCircle.gameObject.SetActive(true);    
+            
+        }
+        
+        if(_serverListCanvasGroup != null)
+        {
+            _serverListCanvasGroup.interactable = false;
         }
     }
 
@@ -130,6 +137,11 @@ public class MultiplayerSetupView : UIView
             _spinTween.Kill();
 
             loadingCircle.gameObject.SetActive(false);
+        }
+
+        if(_serverListCanvasGroup != null)
+        {
+            _serverListCanvasGroup.interactable = true;
         }
     }
     

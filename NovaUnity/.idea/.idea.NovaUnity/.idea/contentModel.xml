@@ -78,6 +78,7 @@
                 <e p="NetworkEntity.cs" t="Include" />
                 <e p="NetworkManager.cs" t="Include" />
                 <e p="NetworkOpCodes.cs" t="Include" />
+                <e p="NetworkUtil.cs" t="Include" />
                 <e p="PlayerInputTickPair.cs" t="Include" />
                 <e p="ServerPlayerInputBuffer.cs" t="Include" />
               </e>

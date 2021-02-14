@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 using GhostGen;
 using Mirror;
 using UnityEngine;
@@ -79,22 +80,26 @@ public class MultiplayerSetupController : BaseController
     
     private void onServerStarted()
     {
-        _networkManager.onServerStarted -= onServerStarted; 
-        
-        // Inform the master server
-        ServerListEntry entry = new ServerListEntry
-        {
-            serverUuid = Guid.NewGuid().ToString(),
-            name = _serverName,
-            port = 11666, // for now
-            players = 0,
-            capacity = 10 // FOr now
-        };
+        _networkManager.onServerStarted -= onServerStarted;
 
-        _networkManager.serverEntry = entry;
-        
-        _networkManager.addServerToMasterList(entry, null);
-        DispatchEvent(MenuUIEventType.GOTO_NETWORK_ROOM);
+        _networkManager.fetchExternalIpAddress((wasSuccessfull, ipAddress) =>
+        {
+            // Inform the master server
+            ServerListEntry entry = new ServerListEntry
+            {
+                serverUuid = Guid.NewGuid().ToString(),
+                name = _serverName,
+                ip = ipAddress,
+                port = 11666, // for now
+                players = 0,
+                capacity = 10 // FOr now
+            };
+
+            _networkManager.serverEntry = entry;
+            
+            _networkManager.addServerToMasterList(entry, null);
+            DispatchEvent(MenuUIEventType.GOTO_NETWORK_ROOM);
+        });
     }
 
     private void onRefreshServerList(GeneralEvent e)
@@ -162,6 +167,20 @@ public class MultiplayerSetupController : BaseController
         {
             _uiServerData.Add(serverList[i]);
         }
+
+        // for(int i = 0; i < 100000; ++i)
+        // {
+        //     int capacityUsed = Random.Range(2, 16);
+        //     ServerListEntry entry = new ServerListEntry
+        //     {
+        //         capacity = capacityUsed,
+        //         players =  Random.Range(0, capacityUsed),
+        //         ip = string.Format("{0}.{1}.{2}.{3}", Random.Range(0, 256), Random.Range(0, 256), Random.Range(0, 256), Random.Range(0, 256)),
+        //         port = Random.Range(2000, 60000),
+        //         name = string.Format("Neat Server: {0}", i )
+        //     };
+        //     _uiServerData.Add(entry);
+        // }
         
         setupView.SetLobbyDataProvider(_uiServerData);
     }

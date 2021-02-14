@@ -17,10 +17,10 @@ public class NetworkManager : Mirror.NetworkManager
     private const string kAppIdKey = "serverKey";
     private const string kServerUuIdKey = "serverUuid";
     private const string kServerName = "serverName";  
+    private const string kServerIp = "serverIp";
     private const string kServerPort = "serverPort";    
     private const string kServerPlayerCount = "serverPlayers";   
     private const string kServerPlayerCapacity = "serverCapacity";  
-    private const string kServerIp = "ip";
 
     public string masterServerLocation = "http://novamaster.net";
     public int masterServerPort = 11667;
@@ -170,6 +170,38 @@ public class NetworkManager : Mirror.NetworkManager
     {
         return string.Format("{0}:{1}/{2}", masterServerLocation, masterServerPort, command); 
     }
+
+
+    public void fetchExternalIpAddress(Action<bool, string> onComplete)
+    {
+        StartCoroutine(enumGetExternalIPAddress(onComplete));
+    }
+
+    private IEnumerator enumGetExternalIPAddress(Action<bool, string> onComplete)
+    {
+        UnityWebRequest www = UnityWebRequest.Get("http://ipinfo.io/ip");
+        yield return www.SendWebRequest();
+
+        string result = "";
+        bool didSucceed = false;
+        
+        if (www.isNetworkError || www.isHttpError)
+        {
+            Debug.LogError(www.error);
+        }
+        else
+        {
+            string rawResult = www.downloadHandler.text;
+            string emptyStringRemoved = rawResult.Replace(" ", "");
+            
+            result  = emptyStringRemoved.Replace("\n", "");
+            Debug.Log("External IP Address = " + result);
+
+            didSucceed = true;
+        }
+        
+        onComplete?.Invoke(didSucceed, result);
+    }
     
     public void fetchMasterServerList(Action<bool, List<ServerListEntry>> onComplete)
     {
@@ -178,6 +210,8 @@ public class NetworkManager : Mirror.NetworkManager
 
     private IEnumerator enumFetchMasterServerList(Action<bool, List<ServerListEntry>> onComplete)
     {
+        List<ServerListEntry> serverEntries = new List<ServerListEntry>();
+        
         WWWForm form = new WWWForm(); 
         form.AddField(kAppIdKey, kAppId);
 
@@ -190,7 +224,7 @@ public class NetworkManager : Mirror.NetworkManager
             if (www.isNetworkError || www.isHttpError)
             {
                 Debug.LogError(www.error);
-                onComplete?.Invoke(false, null);
+                onComplete?.Invoke(false, serverEntries);
             }
             else
             {
@@ -199,7 +233,13 @@ public class NetworkManager : Mirror.NetworkManager
                 
                 string strippedText = rawText.Replace("::ffff:", "");
                 ServerListResponse response = JsonUtility.FromJson<ServerListResponse>(strippedText);
-                onComplete?.Invoke(true, response.servers);
+                
+                if(response != null && response.servers != null)
+                {
+                    serverEntries = response.servers;
+                }
+                
+                onComplete?.Invoke(true, serverEntries);
             }
         } 
     }
@@ -222,6 +262,7 @@ public class NetworkManager : Mirror.NetworkManager
         form.AddField(kAppIdKey, kAppId);
         form.AddField(kServerUuIdKey, entry.serverUuid);
         form.AddField(kServerName, entry.name);
+        form.AddField(kServerIp, entry.ip);
         form.AddField(kServerPort, entry.port);
         form.AddField(kServerPlayerCapacity, entry.capacity);
         form.AddField(kServerPlayerCount, entry.players);
@@ -264,6 +305,7 @@ public class NetworkManager : Mirror.NetworkManager
         form.AddField(kAppIdKey, kAppId);
         form.AddField(kServerUuIdKey, entry.serverUuid);
         form.AddField(kServerName, entry.name);
+        form.AddField(kServerIp, entry.ip);
         form.AddField(kServerPort, entry.port);
         form.AddField(kServerPlayerCapacity, entry.capacity);
         form.AddField(kServerPlayerCount, entry.players);

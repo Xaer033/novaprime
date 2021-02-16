@@ -105,7 +105,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
                 if(pState != default(PlayerState)) // Check again to make sure only the client does this part
                 {
                     pState.nonAckInputBuffer.PushBack(newInputPair);
-                    pState.nonAckStateBuffer.PushBack(PlayerState.Clone(pState));   
+                    pState.nonAckStateBuffer.PushBack(pState.Snapshot());   
                 }
             }
 

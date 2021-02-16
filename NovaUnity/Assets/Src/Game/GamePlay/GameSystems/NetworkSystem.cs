@@ -193,10 +193,9 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
             if(state != null)
             {
                 PlayerInputTickPair tickPair = state.nonAckInputBuffer.Back();
-                NetPlayerState netPlayerState = NetPlayerState.Create(
-                    state.nonAckStateBuffer.Back(),
-                    pController.view.netIdentity.netId,
-                    tickPair.tick);
+                NetPlayerState netPlayerState = NetPlayerState.Create(state);
+                netPlayerState.netId = pController.view.netIdentity.netId;
+                netPlayerState.ackSequence = tickPair.tick;
 
                 netPlayerState.sequence = state.sequence;
                 _serverPlayerStateList[i] = netPlayerState;
@@ -406,13 +405,15 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
                 
                 int oldStateIndex = (int)(newState.ackSequence % PlayerState.MAX_INPUTS);
                 
-                PlayerState oldState = state.nonAckStateBuffer[oldStateIndex];
+                PlayerStateSnapshot oldState = state.nonAckStateBuffer[oldStateIndex];
                 Vector2 deltaPosition = (Vector2)oldState.position - newState.position;
                 Vector2 deltaAimPosition = (Vector2)oldState.aimPosition - newState.aimPosition;
              
                 if(deltaPosition.sqrMagnitude > 0.01f)// || deltaAimPosition.sqrMagnitude > 0.01f)
                 {
                     //Miss Predictited / catch up 
+                    state.SetFromSnapshot(oldState);
+                    
                     state.previousPosition = newState.position;
                     state.position = newState.position;
                     state.aimPosition = newState.aimPosition;
@@ -430,12 +431,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
                             PlayerInputTickPair simInput = state.nonAckInputBuffer[index];
                             c.FixedStep(Time.fixedDeltaTime, simInput.input);
 
-                            NetPlayerState newNetPlayerState = NetPlayerState.Create(
-                                state,
-                                c.view.netIdentity.netId,
-                                state.nonAckStateBuffer[index].ackSequence);
-
-                            state.nonAckStateBuffer[index] = PlayerState.Clone(state);
+                            state.nonAckStateBuffer[index] = state.Snapshot();
 
                             index = (int) ((index + 1) % PlayerState.MAX_INPUTS);
                         }

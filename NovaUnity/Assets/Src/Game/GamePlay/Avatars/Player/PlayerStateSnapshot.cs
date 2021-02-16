@@ -1,11 +1,10 @@
 ﻿using UnityEngine;
 
-public class AvatarState 
+public struct PlayerStateSnapshot 
 {
     public Vector3 position;
     public Vector3 previousPosition;
     public Vector3 velocity;
-    public string uuid;
     public float health;
     public float timeScale;
     public Vector3 aimPosition;
@@ -17,4 +16,10 @@ public class AvatarState
     public float midairJumpTimer;
     public float coyoteJumpTimer;
     public float velocityXSmoothing;
+    
+    public uint sequence;
+    public uint ackSequence;
+    
+    public PlayerInputTickPair latestInput;
+    public PlayerActivityType stateType;
 }

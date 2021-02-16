@@ -29,8 +29,9 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     private GameplayCamera _camera;
     private LocalPlayerState _localPlayer;
     private uint _clientSendSequence = 0;
+    private uint _clientAckSequence = 0;
     private List<PlayerInputTickPair> _clientTempInputBuffer;
-    // private Queue<NetFrameSnapshot> _clientSnapshotQueue;
+    private RingBuffer<NetFrameSnapshot> _clientSnapshotBuffer;
     
     
     public int priority { get; set; }
@@ -47,8 +48,9 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         _serverPlayerControllerList = new List<IAvatarController>();
         _serverPlayerStateList = new NetPlayerState[MAX_PLAYERS];
         _serverPlayerInputBuffer = new Dictionary<PlayerSlot, ServerPlayerInputBuffer>(MAX_PLAYERS);
+        
         _clientTempInputBuffer = new List<PlayerInputTickPair>(PlayerState.MAX_INPUTS);
-        // _clientSnapshotQueue = new Queue<NetFrameSnapshot>(3);
+        _clientSnapshotBuffer = new RingBuffer<NetFrameSnapshot>(5);
 
         for(int i = 0; i < _unitMap.unitList.Count; ++i)
         {
@@ -81,9 +83,10 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         
         
         NetworkManager.frameTick = 0;
-        
+
+        _clientAckSequence = 0;
         _clientSendSequence = 0;
-        _serverSendSequence = 0;
+        // _serverSendSequence = 0;
     }
 
     public void CleanUp()
@@ -102,19 +105,17 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         _gameSystems.onFixedStep -= onFixedStep;
     }
 
-    public bool GetInputForTick(PlayerSlot slot, out FrameInput input)
+    public bool GetInputForTick(PlayerSlot slot, out PlayerInputTickPair inputPair)
     {
         bool result = false;
-        input = default(FrameInput);
+        inputPair = default(PlayerInputTickPair);
 
         if(NetworkServer.active)
         {
             ServerPlayerInputBuffer inputBuffer = _serverPlayerInputBuffer[slot];
             if(!inputBuffer.isEmpty)
             {
-                PlayerInputTickPair inputPair  = inputBuffer.Pop();
-                input = inputPair.input;
-                
+                inputPair  = inputBuffer.Pop();
                 result = true;
             }
         }
@@ -126,55 +127,47 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     {
         if(NetworkServer.active)
         {
-            int currentPlayerCount = _serverPlayerControllerList.Count;
-            for(int i = 0; i < currentPlayerCount; ++i)
-            {
-                IAvatarController pController = _serverPlayerControllerList[i];
-                PlayerState state = pController.state as PlayerState;
-
-                if(state != null)
-                {
-                    _serverPlayerStateList[i] = state.nonAckStateBuffer.Front();
-                }
-            }
-
-            NetChannelHeader channelHeader = new NetChannelHeader
-            {
-                sequence = _serverSendSequence
-            };
-            
-            NetFrameSnapshot snapshot = new NetFrameSnapshot
-            {
-                frameTick = NetworkManager.frameTick,
-                sendTime = NetworkTime.time,
-                header = channelHeader,
-                playerCount = currentPlayerCount,
-                playerStateList = _serverPlayerStateList
-            };
-    
-            
-            NetworkServer.SendToAll(snapshot, Channels.DefaultUnreliable);
-            _serverSendSequence++;
+            serverFixedStep(fixedDeltaTime);
         }
         
         if(NetworkClient.active && _localPlayer != null)
         {
-            var inputMap = _avatarSystem.GetInputMap();
-            var inputBuffer = _localPlayer.state.nonAckInputBuffer;
+            clientFixedStep(fixedDeltaTime);
+        }
 
-            PlayerInputTickPair lastInput = !inputBuffer.IsEmpty ? inputBuffer.Back() : default(PlayerInputTickPair);
+        NetworkManager.frameTick++;
+    }
+
+    private void clientFixedStep(float fixedDeltaTime)
+    {
+        // Apply Snapshots
+            if(!_clientSnapshotBuffer.IsEmpty)
+            {
+                NetFrameSnapshot snapshot = _clientSnapshotBuffer.PopBack();
+                clientProcessNetSnapshot(snapshot);
+            }
+            
+            var pState = _localPlayer.state;
+            var inputBuffer = pState.nonAckInputBuffer;
+
+            pState.sequence = _clientSendSequence;
+
+            PlayerInputTickPair lastInput = pState.latestInput;
+            lastInput.tick = _clientSendSequence;
 
             _clientTempInputBuffer.Clear();
-            int latestAckIndex = (int) (_localPlayer.state.lastAck % PlayerState.MAX_INPUTS);
-            for(int i = 0; i < latestAckIndex; ++i)
-            {
-                _clientTempInputBuffer.Add(_localPlayer.state.nonAckInputBuffer[i]);
-            }
+            int latestAckIndex = (int) (pState.ackSequence % PlayerState.MAX_INPUTS);
+            _clientTempInputBuffer.Add(lastInput);
+            // for(int i = 0; i < latestAckIndex; ++i)
+            // {
+            //     _clientTempInputBuffer.Add(pState.nonAckInputBuffer[i]);
+            // }
             
             
             NetChannelHeader channelHeader = new NetChannelHeader
             {
-                sequence = _clientSendSequence
+                sequence = _clientSendSequence,
+                ackSequence = _clientAckSequence
             };
         
             SendPlayerInput sendInputMessage = new SendPlayerInput
@@ -183,16 +176,53 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
                 frameTick = NetworkManager.frameTick,// + kTicksAhead,
                 sentTime = TimeUtil.timestamp(),
                 inputList = _clientTempInputBuffer
-                
             };
 
             NetworkClient.Send(sendInputMessage, Channels.DefaultUnreliable);
             _clientSendSequence++;
+    }
+    
+    private void serverFixedStep(float fixedDeltaTime)
+    {
+        int currentPlayerCount = _serverPlayerControllerList.Count;
+        for(int i = 0; i < currentPlayerCount; ++i)
+        {
+            IAvatarController pController = _serverPlayerControllerList[i];
+            PlayerState state = pController.state as PlayerState;
+
+            if(state != null)
+            {
+                PlayerInputTickPair tickPair = state.nonAckInputBuffer.Back();
+                NetPlayerState netPlayerState = NetPlayerState.Create(
+                    state.nonAckStateBuffer.Back(),
+                    pController.view.netIdentity.netId,
+                    tickPair.tick);
+
+                netPlayerState.sequence = state.sequence;
+                _serverPlayerStateList[i] = netPlayerState;
+
+                state.sequence++;
+            }
         }
 
-        NetworkManager.frameTick++;
+        NetChannelHeader channelHeader = new NetChannelHeader
+        {
+            sequence = NetworkManager.frameTick,
+        };
+        
+        NetFrameSnapshot snapshot = new NetFrameSnapshot
+        {
+            frameTick = NetworkManager.frameTick,
+            sendTime = NetworkTime.time,
+            header = channelHeader,
+            playerCount = currentPlayerCount,
+            playerStateList = _serverPlayerStateList
+        };
+        
+        NetworkServer.SendToAll(snapshot, Channels.DefaultUnreliable);
+        _serverSendSequence++;
     }
-
+    
     private void onServerMatchLoadComplete(NetworkConnection conn)
     {
         if(_networkManager.sessionState == NetworkManager.SessionState.IN_GAME)
@@ -219,11 +249,10 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     private void onServerSendPlayerInput(NetworkConnection conn, SendPlayerInput msg)
     {
         IAvatarController playerController = _serverConnToPlayerMap[conn.connectionId];
-        PlayerState pState = playerController.state as PlayerState;
+        PlayerState pState = (PlayerState)playerController.state;
 
-      
         ServerPlayerInputBuffer playerInputBuffer = _serverPlayerInputBuffer[pState.playerSlot];
-        playerInputBuffer.Push(msg);
+        playerInputBuffer?.Push(msg);
     }
     
     private void onServerMatchBegin()
@@ -254,7 +283,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
 
     private void setupPlayer(NetPlayer nPlayer, NetworkConnection netConnection, IAvatarController playerController, bool isOwner)
     {
-        PlayerState pState = playerController.state as PlayerState;
+        PlayerState pState = (PlayerState)playerController.state;
         pState.playerSlot = nPlayer.playerSlot;
 
         if(isOwner)
@@ -268,10 +297,8 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         PlayerView pView = playerController.view as PlayerView;
         
         GameplayCamera cam = _getOrCreatePlayerCamera();
-        if(cam != null)
-        {
-            cam.AddTarget(pView.cameraTargetGroup.transform);     
-        }
+        cam?.AddTarget(pView.cameraTargetGroup.transform);     
+        
 
         PlayerInput input = new PlayerInput(
                                     _networkManager.localPlayerSlot, 
@@ -336,12 +363,25 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
             return;
         }
 
-        // _localPlayer.state.lastAck = msg.frameTick;
-        
-        float lag = Mathf.Abs((float) (NetworkTime.time - msg.sendTime));
-        for(int i = 0; i < msg.playerCount; ++i)
+        if(_clientSnapshotBuffer.IsEmpty)
         {
-            NetPlayerState newState = msg.playerStateList[i];
+            _clientSnapshotBuffer.PushBack(msg);
+            return;
+        }
+
+        if(msg.header.sequence >= _clientSnapshotBuffer.Back().header.sequence)
+        {
+            _clientSnapshotBuffer.PushBack(msg);
+            _clientSnapshotBuffer.PopFront(); // Remove outdated snapshot
+        }
+    }
+
+    private void clientProcessNetSnapshot(NetFrameSnapshot snapshot)
+    {
+        float lag = Mathf.Abs((float) (NetworkTime.time - snapshot.sendTime));
+        for(int i = 0; i < snapshot.playerCount; ++i)
+        {
+            NetPlayerState newState = snapshot.playerStateList[i];
             IAvatarController c = _avatarSystem.GetPlayerByNetId(newState.netId);
             
             if(c == null || c.state == null)
@@ -361,33 +401,50 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
             else
             {
                 PlayerState state = c.state as PlayerState;
-                state.lastAck = msg.frameTick;
-
-                int oldStateIndex = (int)(msg.frameTick % state.nonAckStateBuffer.Capacity);
+                state.ackSequence = newState.ackSequence;
+                _clientAckSequence = newState.ackSequence;
                 
-                NetPlayerState oldState = state.nonAckStateBuffer[oldStateIndex];
-                Vector2 deltaPosition = oldState.position - newState.position;
-                Vector2 deltaAimPosition = oldState.aimPosition - newState.aimPosition;
-
-                if(deltaPosition.sqrMagnitude > 0.01f || deltaAimPosition.sqrMagnitude > 0.01f)
+                int oldStateIndex = (int)(newState.ackSequence % PlayerState.MAX_INPUTS);
+                
+                PlayerState oldState = state.nonAckStateBuffer[oldStateIndex];
+                Vector2 deltaPosition = (Vector2)oldState.position - newState.position;
+                Vector2 deltaAimPosition = (Vector2)oldState.aimPosition - newState.aimPosition;
+             
+                if(deltaPosition.sqrMagnitude > 0.01f)// || deltaAimPosition.sqrMagnitude > 0.01f)
                 {
-                    //Miss Predictited / catch up
-                    state.position = newState.position;
+                    //Miss Predictited / catch up 
                     state.previousPosition = newState.position;
+                    state.position = newState.position;
                     state.aimPosition = newState.aimPosition;
 
-                    for(int j = oldStateIndex + 1; j < state.nonAckInputBuffer.Size; ++j)
+                    int startingIndex = (int)((oldStateIndex) % PlayerState.MAX_INPUTS);
+                    int currentStateIndex = (int)(state.nonAckInputBuffer.backIndex % PlayerState.MAX_INPUTS);
+                    int index = startingIndex;
+                    
+                    while(index != currentStateIndex)
                     {
-                        PlayerInputTickPair simInput = state.nonAckInputBuffer[j];
-                        c.FixedStep(Time.fixedDeltaTime, simInput.input);
-                        
-                        NetPlayerState newNetPlayerState = NetPlayerState.Create(
-                            state, 
-                            simInput.tick, 
-                            c.view.netIdentity.netId);
+                        try
+                        {
+                            Debug.LogFormat("Index info: {0}, {1}, {2}", startingIndex, currentStateIndex, index);
 
-                        state.nonAckStateBuffer[j] = newNetPlayerState;
-                    }
+                            PlayerInputTickPair simInput = state.nonAckInputBuffer[index];
+                            c.FixedStep(Time.fixedDeltaTime, simInput.input);
+
+                            NetPlayerState newNetPlayerState = NetPlayerState.Create(
+                                state,
+                                c.view.netIdentity.netId,
+                                state.nonAckStateBuffer[index].ackSequence);
+
+                            state.nonAckStateBuffer[index] = PlayerState.Clone(state);
+
+                            index = (int) ((index + 1) % PlayerState.MAX_INPUTS);
+                        }
+                        catch(Exception e)
+                        {
+                            Debug.LogErrorFormat("Error info: {0}, {1}, {2}", startingIndex, currentStateIndex, index);
+                            break;
+                        }
+                    } 
                 }
             }
         }

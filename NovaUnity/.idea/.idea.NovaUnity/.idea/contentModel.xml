@@ -149,6 +149,7 @@
                 <e p="SinglePlayerCampaignMode.cs" t="Include" />
               </e>
               <e p="GameState.cs" t="Include" />
+              <e p="GameStateHandle.cs" t="Include" />
               <e p="GameSystems" t="Include">
                 <e p="AvatarSystem.cs" t="Include" />
                 <e p="GamePlayEventType.cs" t="Include" />

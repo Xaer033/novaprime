@@ -1,5 +1,4 @@
-﻿using CircularBuffer;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ServerPlayerInputBuffer
 {
@@ -25,7 +24,7 @@ public class ServerPlayerInputBuffer
         //     return;
         // }
 
-        for(int i = 0; i < inputMessage.inputCount; ++i)
+        for(int i = inputMessage.inputList.Count - 1; i >= 0; --i)
         {
             PlayerInputTickPair tickPair = inputMessage.inputList[i];
 

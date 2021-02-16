@@ -9,6 +9,5 @@ public struct SendPlayerInput : NetworkMessage
     public double sentTime;
     // public FrameInput input;
 
-    public uint inputCount;
     public List<PlayerInputTickPair> inputList;
 }

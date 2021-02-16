@@ -8,9 +8,10 @@ public struct NetPlayerState
     public Vector2 velocity;
     public Vector2 aimPosition;
     public uint netId;
-    public uint tick;
+    public uint sequence;
+    public uint ackSequence;
 
-    public static NetPlayerState Create(PlayerState pState, uint tick, uint netId)
+    public static NetPlayerState Create(PlayerState pState, uint netId, uint ackSequence)
     {
         NetPlayerState result = new NetPlayerState();
         
@@ -18,7 +19,7 @@ public struct NetPlayerState
         result.velocity = pState.velocity;
         result.aimPosition = pState.aimPosition;
         result.netId = netId;
-        result.tick = tick;
+        result.ackSequence = ackSequence;
 
         return result;
     }

@@ -310,7 +310,7 @@ public class NetworkManager : Mirror.NetworkManager
         form.AddField(kServerPlayerCapacity, entry.capacity);
         form.AddField(kServerPlayerCount, entry.players);
 
-        string masterUri = getMasterServerCommand("add");
+        string masterUri = getMasterServerCommand("remove");
         Debug.Log("Rest Command: " + masterUri);
 
         using(UnityWebRequest www = UnityWebRequest.Post(masterUri, form))

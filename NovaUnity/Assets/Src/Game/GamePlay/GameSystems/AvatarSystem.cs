@@ -84,42 +84,30 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         {
             IAvatarController controller = _avatarControllerList[i];
             
-            FrameInput newInput;
+            PlayerInputTickPair newInputPair;
             
             bool hasInput = _networkSystem.GetInputForTick(
-                (controller.state as PlayerState).playerSlot, 
-                out newInput);
+                ((PlayerState)controller.state).playerSlot, 
+                out newInputPair);
             
             if(!hasInput && _lastInputMap.ContainsKey(controller.uuid))
             {
-                newInput = _lastInputMap[controller.uuid];     
+                newInputPair.input =  _lastInputMap[controller.uuid];     
             }
 
             if(NetworkServer.active || controller.isSimulating)
             {
-                _frameInputList.Add(newInput);
+                _frameInputList.Add(newInputPair.input);
 
-                controller.FixedStep(fixedDeltaTime, newInput);
+                controller.FixedStep(fixedDeltaTime, newInputPair.input);
 
-                PlayerState pState = controller.state as PlayerState;
-                if(pState != null) // Check again to make sure only the client does this part
+                PlayerState pState = (PlayerState)controller.state;
+                if(pState != default(PlayerState)) // Check again to make sure only the client does this part
                 {
-                    NetPlayerState newNetPlayerState = NetPlayerState.Create(
-                        pState, 
-                        NetworkManager.frameTick, 
-                        controller.view.netIdentity.netId);
-
-                    PlayerInputTickPair tickPair = new PlayerInputTickPair
-                    {
-                        input = newInput,
-                        tick = NetworkManager.frameTick
-                    };
-                    
-                    pState.nonAckInputBuffer.PushBack(tickPair);
-                    pState.nonAckStateBuffer.PushBack(newNetPlayerState);   
+                    pState.nonAckInputBuffer.PushBack(newInputPair);
+                    pState.nonAckStateBuffer.PushBack(PlayerState.Clone(pState));   
                 }
             }
-
 
             controller?.input?.Clear();
         }
@@ -146,6 +134,15 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
             if(inputGenerator != null)
             {
                 _lastInputMap[controller.uuid] = inputGenerator.GetInput();
+
+                PlayerState pState = controller.state as PlayerState;
+                if(pState != null)
+                {
+                    pState.latestInput = new PlayerInputTickPair
+                    {
+                        input = _lastInputMap[controller.uuid]
+                    };
+                }
             } 
             controller.Step(deltaTime);
         }

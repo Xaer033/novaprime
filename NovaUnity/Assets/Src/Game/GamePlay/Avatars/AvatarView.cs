@@ -5,7 +5,11 @@ using Mirror;
 using UnityEngine;
 using UnityEngine.Animations;
 
-public class AvatarView : EventDispatcherBehavior, IAvatarView, IPlatformPassenger, ITimeWarpTarget, IAttackTarget
+public class AvatarView : EventDispatcherBehavior, 
+                            IAvatarView, 
+                            IPlatformPassenger, 
+                            ITimeWarpTarget, 
+                            IAttackTarget
 {
     
     // [BoxGroup("Hooks")]

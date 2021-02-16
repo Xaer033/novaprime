@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using GhostGen;
 using Mirror;
-using Telepathy;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -102,10 +101,10 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
                 controller.FixedStep(fixedDeltaTime, newInputPair.input);
 
                 PlayerState pState = (PlayerState)controller.state;
-                if(pState != default(PlayerState)) // Check again to make sure only the client does this part
+                if(pState != null) // Check again to make sure only the client does this part
                 {
-                    pState.nonAckInputBuffer.PushBack(newInputPair);
-                    pState.nonAckStateBuffer.PushBack(pState.Snapshot());   
+                    // pState.nonAckInputBuffer.PushBack(newInputPair);
+                    // pState.nonAckStateBuffer.PushBack(pState.Snapshot());   
                 }
             }
 
@@ -124,7 +123,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
 
     public void Step(float deltaTime)
     {
-        FrameInput defaultInput = default(FrameInput);
+        // FrameInput defaultInput = default(FrameInput);
         
         for (int i = 0; i < _avatarControllerList.Count; ++i)
         {

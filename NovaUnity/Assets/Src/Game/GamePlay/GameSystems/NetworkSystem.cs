@@ -141,45 +141,46 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     private void clientFixedStep(float fixedDeltaTime)
     {
         // Apply Snapshots
-            if(!_clientSnapshotBuffer.IsEmpty)
-            {
-                NetFrameSnapshot snapshot = _clientSnapshotBuffer.PopBack();
-                clientProcessNetSnapshot(snapshot);
-            }
-            
-            var pState = _localPlayer.state;
-            var inputBuffer = pState.nonAckInputBuffer;
-
-            pState.sequence = _clientSendSequence;
-
-            PlayerInputTickPair lastInput = pState.latestInput;
-            lastInput.tick = _clientSendSequence;
-
-            _clientTempInputBuffer.Clear();
-            int latestAckIndex = (int) (pState.ackSequence % PlayerState.MAX_INPUTS);
-            _clientTempInputBuffer.Add(lastInput);
-            // for(int i = 0; i < latestAckIndex; ++i)
-            // {
-            //     _clientTempInputBuffer.Add(pState.nonAckInputBuffer[i]);
-            // }
-            
-            
-            NetChannelHeader channelHeader = new NetChannelHeader
-            {
-                sequence = _clientSendSequence,
-                ackSequence = _clientAckSequence
-            };
+        if(!_clientSnapshotBuffer.IsEmpty)
+        {
+            NetFrameSnapshot snapshot = _clientSnapshotBuffer.PopBack();
+            clientProcessNetSnapshot(snapshot);
+        }
         
-            SendPlayerInput sendInputMessage = new SendPlayerInput
-            {
-                header = channelHeader,
-                frameTick = NetworkManager.frameTick,// + kTicksAhead,
-                sentTime = TimeUtil.timestamp(),
-                inputList = _clientTempInputBuffer
-            };
+        var pState = _localPlayer.state;
+        // var inputBuffer = pState.nonAckInputBuffer;
 
-            NetworkClient.Send(sendInputMessage, Channels.DefaultUnreliable);
-            _clientSendSequence++;
+        pState.sequence = _clientSendSequence;
+
+        PlayerInputTickPair lastInput = pState.latestInput;
+        lastInput.tick = _clientSendSequence;
+
+        _clientTempInputBuffer.Clear();
+        int latestAckIndex = (int) (pState.ackSequence % PlayerState.MAX_INPUTS);
+        _clientTempInputBuffer.Add(lastInput);
+        // for(int i = 0; i < latestAckIndex; ++i)
+        // {
+        //     _clientTempInputBuffer.Add(pState.nonAckInputBuffer[i]);
+        // }
+        
+        
+        NetChannelHeader channelHeader = new NetChannelHeader
+        {
+            sequence = _clientSendSequence,
+            ackSequence = _clientAckSequence
+        };
+    
+        SendPlayerInput sendInputMessage = new SendPlayerInput
+        {
+            header = channelHeader,
+            frameTick = NetworkManager.frameTick,// + kTicksAhead,
+            sentTime = TimeUtil.timestamp(),
+            inputList = _clientTempInputBuffer
+        };
+
+        NetworkClient.Send(sendInputMessage, Channels.DefaultUnreliable);
+        _clientSendSequence++;
+        
     }
     
     private void serverFixedStep(float fixedDeltaTime)
@@ -192,12 +193,13 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
 
             if(state != null)
             {
-                PlayerInputTickPair tickPair = state.nonAckInputBuffer.Back();
+                PlayerInputTickPair tickPair = state.latestInput;
+                
                 NetPlayerState netPlayerState = NetPlayerState.Create(state);
                 netPlayerState.netId = pController.view.netIdentity.netId;
                 netPlayerState.ackSequence = tickPair.tick;
-
                 netPlayerState.sequence = state.sequence;
+                
                 _serverPlayerStateList[i] = netPlayerState;
 
                 state.sequence++;
@@ -405,42 +407,41 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
                 
                 int oldStateIndex = (int)(newState.ackSequence % PlayerState.MAX_INPUTS);
                 
-                PlayerStateSnapshot oldState = state.nonAckStateBuffer[oldStateIndex];
-                Vector2 deltaPosition = (Vector2)oldState.position - newState.position;
-                Vector2 deltaAimPosition = (Vector2)oldState.aimPosition - newState.aimPosition;
+                // PlayerStateSnapshot oldState = state.nonAckStateBuffer[oldStateIndex];
+                // Vector2 deltaPosition = (Vector2)oldState.position - newState.position;
+                // Vector2 deltaAimPosition = (Vector2)oldState.aimPosition - newState.aimPosition;
              
-                if(deltaPosition.sqrMagnitude > 0.01f)// || deltaAimPosition.sqrMagnitude > 0.01f)
+                // if(deltaPosition.sqrMagnitude > 0.01f)// || deltaAimPosition.sqrMagnitude > 0.01f)
                 {
                     //Miss Predictited / catch up 
-                    state.SetFromSnapshot(oldState);
+                    // state.SetFromSnapshot(oldState);
                     
-                    state.previousPosition = newState.position;
-                    state.position = newState.position;
+                    state.previousPosition = state.position  + (newState.velocity * lag);
+                    state.position = newState.position + (newState.velocity * lag);
                     state.aimPosition = newState.aimPosition;
 
                     int startingIndex = (int)((oldStateIndex) % PlayerState.MAX_INPUTS);
-                    int currentStateIndex = (int)(state.nonAckInputBuffer.backIndex % PlayerState.MAX_INPUTS);
+                    // int currentStateIndex = (int)((state.nonAckInputBuffer.backIndex + 1) % PlayerState.MAX_INPUTS);
                     int index = startingIndex;
                     
-                    while(index != currentStateIndex)
-                    {
-                        try
-                        {
-                            Debug.LogFormat("Index info: {0}, {1}, {2}", startingIndex, currentStateIndex, index);
-
-                            PlayerInputTickPair simInput = state.nonAckInputBuffer[index];
-                            c.FixedStep(Time.fixedDeltaTime, simInput.input);
-
-                            state.nonAckStateBuffer[index] = state.Snapshot();
-
-                            index = (int) ((index + 1) % PlayerState.MAX_INPUTS);
-                        }
-                        catch(Exception e)
-                        {
-                            Debug.LogErrorFormat("Error info: {0}, {1}, {2}", startingIndex, currentStateIndex, index);
-                            break;
-                        }
-                    } 
+                    // while(index != currentStateIndex)
+                    // {
+                    //     try
+                    //     {
+                    //         Debug.LogFormat("Index info: {0}, {1}, {2}", startingIndex, currentStateIndex, index);
+                    //
+                    //         PlayerInputTickPair simInput = state.nonAckInputBuffer[index];
+                    //         c.FixedStep(Time.fixedDeltaTime, simInput.input);
+                    //         state.nonAckStateBuffer[index] = state.Snapshot();
+                    //
+                    //         index = (int) ((index + 1) % PlayerState.MAX_INPUTS);
+                    //     }
+                    //     catch(Exception e)
+                    //     {
+                    //         Debug.LogErrorFormat("Error info: {0}, {1}, {2}", startingIndex, currentStateIndex, index);
+                    //         break;
+                    //     }
+                    // } 
                 }
             }
         }

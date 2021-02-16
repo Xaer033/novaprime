@@ -7,7 +7,7 @@ public class BasePlatformController
     public void UpdatePlatform(PlatformState state, PlatformView view, float adjustedDeltaTime, float time)
     {
         view._raycastController.UpdateRaycastOrigins();
-        Vector3 newVelocity = calculatePlatformMovement(state, view, adjustedDeltaTime, time);
+        Vector2 newVelocity = calculatePlatformMovement(state, view, adjustedDeltaTime, time);
         
         calculatePassengerMovement(state, view, state.velocity);
 
@@ -40,12 +40,12 @@ public class BasePlatformController
         }
     }
     
-    protected virtual Vector3 calculatePlatformMovement(PlatformState state, PlatformView view, float adjustedDeltaTime, float time)
+    protected virtual Vector2 calculatePlatformMovement(PlatformState state, PlatformView view, float adjustedDeltaTime, float time)
     {
-        return Vector3.zero;
+        return Vector2.zero;
     }
     
-    private void calculatePassengerMovement(PlatformState state, PlatformView view, Vector3 velocity)
+    private void calculatePassengerMovement(PlatformState state, PlatformView view, Vector2 velocity)
     {
         state.movedPassengersSet.Clear();
         state.passengerMovementList.Clear();
@@ -62,12 +62,12 @@ public class BasePlatformController
             
             for (int i = 0; i < _raycastController.verticalRayCount; ++i)
             {
-                Vector3 rayOrigin = (directionY == -1) ? _raycastController.origins.bottomLeft : _raycastController.origins.topLeft;
-                rayOrigin += Vector3.right * (_raycastController.verticalRaySpacing * i);
+                Vector2 rayOrigin = (directionY == -1) ? _raycastController.origins.bottomLeft : _raycastController.origins.topLeft;
+                rayOrigin += Vector2.right * (_raycastController.verticalRaySpacing * i);
                
-                Debug.DrawRay(rayOrigin, Vector3.up * directionY * rayLength, Color.blue);
+                Debug.DrawRay(rayOrigin, Vector2.up * directionY * rayLength, Color.blue);
 
-                int hitCount = Physics2D.RaycastNonAlloc(rayOrigin, Vector3.up * directionY, state.raycastHits, rayLength, view.passengerMask);
+                int hitCount = Physics2D.RaycastNonAlloc(rayOrigin, Vector2.up * directionY, state.raycastHits, rayLength, view.passengerMask);
                 for (int x = 0; x < hitCount; ++x)
                 {
                     RaycastHit2D hit = state.raycastHits[x];
@@ -83,7 +83,7 @@ public class BasePlatformController
                             state.passengerMovementList.Add( 
                                 new PassengerMovement(
                                     hit.transform, 
-                                    new Vector3(pushX, pushY), 
+                                    new Vector2(pushX, pushY), 
                                     directionY == 1, 
                                     true));
                         }
@@ -98,12 +98,12 @@ public class BasePlatformController
             float rayLength = Mathf.Abs(velocity.x) + _raycastController.skinWidth;
             for (int i = 0; i < _raycastController.horizontalRayCount; ++i)
             {
-                Vector3 rayOrigin = (directionX == -1) ? _raycastController.origins.bottomLeft : _raycastController.origins.bottomRight;
-                rayOrigin += Vector3.up * (_raycastController.horizontalRaySpacing * i);
+                Vector2 rayOrigin = (directionX == -1) ? _raycastController.origins.bottomLeft : _raycastController.origins.bottomRight;
+                rayOrigin += Vector2.up * (_raycastController.horizontalRaySpacing * i);
                 
-                Debug.DrawRay(rayOrigin, Vector3.right * directionX * rayLength, Color.yellow);
+                Debug.DrawRay(rayOrigin, Vector2.right * directionX * rayLength, Color.yellow);
 
-                int hitCount = Physics2D.RaycastNonAlloc(rayOrigin, Vector3.right * directionX, state.raycastHits, rayLength, view.passengerMask);
+                int hitCount = Physics2D.RaycastNonAlloc(rayOrigin, Vector2.right * directionX, state.raycastHits, rayLength, view.passengerMask);
 
                 for (int x = 0; x < hitCount; ++x)
                 {
@@ -119,7 +119,7 @@ public class BasePlatformController
                             state.passengerMovementList.Add( 
                                 new PassengerMovement(
                                     hit.transform, 
-                                    new Vector3(pushX, pushY), 
+                                    new Vector2(pushX, pushY), 
                                     false, 
                                     true));
                         }
@@ -136,11 +136,11 @@ public class BasePlatformController
             
             for (int i = 0; i < _raycastController.verticalRayCount; ++i)
             {
-                Vector3 rayOrigin = _raycastController.origins.topLeft + Vector3.right * (_raycastController.verticalRaySpacing * i);
+                Vector2 rayOrigin = _raycastController.origins.topLeft + Vector2.right * (_raycastController.verticalRaySpacing * i);
                
-                Debug.DrawRay(rayOrigin, Vector3.up * rayLength, Color.green);
+                Debug.DrawRay(rayOrigin, Vector2.up * rayLength, Color.green);
                 
-                int hitCount = Physics2D.RaycastNonAlloc(rayOrigin, Vector3.up, state.raycastHits, rayLength, view.passengerMask);
+                int hitCount = Physics2D.RaycastNonAlloc(rayOrigin, Vector2.up, state.raycastHits, rayLength, view.passengerMask);
                 
                 for (int x = 0; x < hitCount; ++x)
                 {
@@ -156,7 +156,7 @@ public class BasePlatformController
                             state.passengerMovementList.Add( 
                                 new PassengerMovement(
                                     hit.transform, 
-                                    new Vector3(pushX, pushY), 
+                                    new Vector2(pushX, pushY), 
                                     true, 
                                     false));
                         }

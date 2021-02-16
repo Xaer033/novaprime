@@ -66,7 +66,7 @@ public class GruntController : NotificationDispatcher, IAvatarController
         get { return _unit; }
     }
 
-    public void SetVelocity(Vector3 velocity)
+    public void SetVelocity(Vector2 velocity)
     {
         _state.velocity = velocity;
     }
@@ -126,11 +126,11 @@ public class GruntController : NotificationDispatcher, IAvatarController
         get { return _lastInput; }
     }
     
-    public void Move(Vector3 moveDelta, bool isOnPlatform)
+    public void Move(Vector2 moveDelta, bool isOnPlatform)
     {
         if (_view && _view.constrainer != null)
         {
-            Vector3 constrainedMoveDelta = _view.constrainer.Move(moveDelta, isOnPlatform, _lastInput);
+            Vector2 constrainedMoveDelta = _view.constrainer.Move(moveDelta, isOnPlatform, _lastInput);
 
             _state.previousPosition = _state.position;
             _state.position = _state.position + constrainedMoveDelta;
@@ -144,7 +144,7 @@ public class GruntController : NotificationDispatcher, IAvatarController
     public void Step(float deltaTime)
     {
         float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
-        _view.viewRoot.position = Vector3.Lerp(_state.previousPosition, _state.position, alpha);
+        _view.viewRoot.position = Vector2.Lerp(_state.previousPosition, _state.position, alpha);
     }
 
     public void FixedStep(float deltaTime, FrameInput input)
@@ -155,13 +155,13 @@ public class GruntController : NotificationDispatcher, IAvatarController
         deltaTime = deltaTime * _state.timeScale;
 
 
-        Vector3 aimDirection = _lastInput.cursorDirection.normalized;
-        Vector3 aimPosition = _lastInput.useCusorPosition ? _lastInput.cursorPosition : _state.position + (aimDirection * 4.0f);
+        Vector2 aimDirection = _lastInput.cursorDirection.normalized;
+        Vector2 aimPosition = _lastInput.useCusorPosition ? _lastInput.cursorPosition : _state.position + (aimDirection * 4.0f);
         Debug.DrawRay(_state.position, aimDirection, Color.cyan, 0.2f);
 
         const float kDebugLineSize = 0.2f;
-        Debug.DrawLine(aimPosition + Vector3.down * kDebugLineSize, aimPosition + Vector3.up     * kDebugLineSize, Color.cyan, 0.2f);
-        Debug.DrawLine(aimPosition + Vector3.left * kDebugLineSize, aimPosition + Vector3.right  * kDebugLineSize, Color.cyan, 0.2f);
+        Debug.DrawLine(aimPosition + Vector2.down * kDebugLineSize, aimPosition + Vector2.up     * kDebugLineSize, Color.cyan, 0.2f);
+        Debug.DrawLine(aimPosition + Vector2.left * kDebugLineSize, aimPosition + Vector2.right  * kDebugLineSize, Color.cyan, 0.2f);
     
         
         int wallDirX = _view.constrainer.collisionInfo.left ? -1 : 1;
@@ -235,7 +235,7 @@ public class GruntController : NotificationDispatcher, IAvatarController
     }
     
 
-    private void _handleDirectionMovement(ref Vector3 velocity, float deltaTime)
+    private void _handleDirectionMovement(ref Vector2 velocity, float deltaTime)
     {
         float targetVelocityX = _lastInput.horizontalMovement * _unitStats.speed;
         
@@ -249,7 +249,7 @@ public class GruntController : NotificationDispatcher, IAvatarController
         }
     }
     
-    private void _handleJumping(ref Vector3 velocity, float deltaTime, bool isWallSliding, int wallDirX, int inputDirX)
+    private void _handleJumping(ref Vector2 velocity, float deltaTime, bool isWallSliding, int wallDirX, int inputDirX)
     {
         float timeToJumpApex = _unitStats.timeToJumpApex;
         _gravity = -(2 * _unitStats.maxJumpHeight) / (timeToJumpApex * timeToJumpApex);
@@ -296,7 +296,7 @@ public class GruntController : NotificationDispatcher, IAvatarController
                     {
                         if (inputDirX == 0 || inputDirX != -(int) Mathf.Sign(collisionInfo.slopeNormal.x))
                         {
-                            Vector3 jumpDirection = (Vector3.up + collisionInfo.slopeNormal).normalized * maxJumpVelocity;
+                            Vector2 jumpDirection = (Vector2.up + collisionInfo.slopeNormal).normalized * maxJumpVelocity;
                             velocity.x = jumpDirection.x;
                             velocity.y = jumpDirection.y;
                         }
@@ -325,7 +325,7 @@ public class GruntController : NotificationDispatcher, IAvatarController
     }
 
 
-    private bool _handleWallSliding(ref Vector3 velocity, float deltaTime, int wallDirX, int inputDirX)
+    private bool _handleWallSliding(ref Vector2 velocity, float deltaTime, int wallDirX, int inputDirX)
     {
         bool isWallSliding = false;
         

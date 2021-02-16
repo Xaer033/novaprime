@@ -85,10 +85,10 @@ public class GruntBrain : IInputGenerator
 
         const float findRadius = 5.0f;
         
-        Debug.DrawLine(_state.position, _state.position + Vector3.left  * findRadius, Color.blue, 0.5f);
-        Debug.DrawLine(_state.position, _state.position + Vector3.right * findRadius, Color.blue, 0.5f);
-        Debug.DrawLine(_state.position, _state.position + Vector3.up    * findRadius, Color.blue, 0.5f);
-        Debug.DrawLine(_state.position, _state.position + Vector3.down  * findRadius, Color.blue, 0.5f);
+        Debug.DrawLine(_state.position, _state.position + Vector2.left  * findRadius, Color.blue, 0.5f);
+        Debug.DrawLine(_state.position, _state.position + Vector2.right * findRadius, Color.blue, 0.5f);
+        Debug.DrawLine(_state.position, _state.position + Vector2.up    * findRadius, Color.blue, 0.5f);
+        Debug.DrawLine(_state.position, _state.position + Vector2.down  * findRadius, Color.blue, 0.5f);
         
         Collider2D[] colliderList = Physics2D.OverlapCircleAll(_state.position, findRadius, _unitStats.targetLayerMask);
         for (int i = 0; i < colliderList.Length; ++i)
@@ -138,10 +138,10 @@ public class GruntBrain : IInputGenerator
             return;
         }
         
-        Vector3 targetPosition = (_targetController.state.position + Vector3.up * 0.8f) + (_state.velocity * Time.fixedDeltaTime);
-        Vector3 startPosition = _state.position + Vector3.up * 0.85f;
+        Vector2 targetPosition = (_targetController.state.position + Vector2.up * 0.8f) + (_state.velocity * Time.fixedDeltaTime);
+        Vector2 startPosition = _state.position + Vector2.up * 0.85f;
         
-        Vector3 dirToTarget = targetPosition - startPosition;
+        Vector2 dirToTarget = targetPosition - startPosition;
 
         float distance = dirToTarget.magnitude;
         if (distance > Random.Range(4, 7))
@@ -155,9 +155,9 @@ public class GruntBrain : IInputGenerator
         }
 
         // RaycastHit2D hit;
-        Vector3 movementDir = new Vector3(input.horizontalMovement, 0, 0);
+        Vector2 movementDir = new Vector2(input.horizontalMovement, 0);
 
-        Vector3 fellowGruntCheckDir = (Vector3.left *  movementDir.x).normalized * 0.1f;
+        Vector2 fellowGruntCheckDir = (Vector2.left *  movementDir.x).normalized * 0.1f;
         Debug.DrawRay(startPosition, fellowGruntCheckDir, Color.green, 0.4f);
 
         // int enemyHitCount = Physics2D.RaycastNonAlloc(startPosition, fellowGruntCheckDir, _raycastHits, 2.5f, LayerMask.GetMask(new []{"enemies"}) );

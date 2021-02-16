@@ -6,11 +6,11 @@ using UnityEngine;
 
 public class TriggerPlatformController : BasePlatformController
 {
-    protected override Vector3 calculatePlatformMovement(PlatformState state, PlatformView view, float adjustedDeltaTime, float time)
+    protected override Vector2 calculatePlatformMovement(PlatformState state, PlatformView view, float adjustedDeltaTime, float time)
     {
         if (time < state.nextMoveTime)
         {
-            return Vector3.zero;
+            return Vector2.zero;
         }
 
         if(state.globalWayPoints.Length > 0)
@@ -24,7 +24,7 @@ public class TriggerPlatformController : BasePlatformController
         
         if(fromWaypointIndex + 1 >= state.globalWayPoints.Length && view.cycleMode == PlatformCycleMode.ONCE)
         {
-            return Vector3.zero;
+            return Vector2.zero;
         }
             
         if(fromWaypointIndex == 0 && toWaypointIndex == 1 && state.percentBetweenWaypoints < 0.0001f)
@@ -35,7 +35,7 @@ public class TriggerPlatformController : BasePlatformController
             }
             else
             {
-                return Vector3.zero;
+                return Vector2.zero;
             }
         }
         else
@@ -43,9 +43,9 @@ public class TriggerPlatformController : BasePlatformController
             state.wasTriggered = false;
         }
         
-        Vector3 fromWaypoint = state.globalWayPoints[fromWaypointIndex];
-        Vector3 toWaypoint = state.globalWayPoints[toWaypointIndex];
-        float distanceBetweenWaypoint = Vector3.Distance(fromWaypoint, toWaypoint);
+        Vector2 fromWaypoint = state.globalWayPoints[fromWaypointIndex];
+        Vector2 toWaypoint = state.globalWayPoints[toWaypointIndex];
+        float distanceBetweenWaypoint = Vector2.Distance(fromWaypoint, toWaypoint);
         float validDistance = distanceBetweenWaypoint > 0 ? distanceBetweenWaypoint : 0.001f; 
         
         // Delta time has already been mutliplied by state.timeScale
@@ -54,7 +54,7 @@ public class TriggerPlatformController : BasePlatformController
         
         float lerpValue = MathUtil.Ease(state.percentBetweenWaypoints, view.easeAmount);
 
-        Vector3 newPos = Vector3.Lerp(fromWaypoint, toWaypoint, lerpValue);
+        Vector2 newPos = Vector2.Lerp(fromWaypoint, toWaypoint, lerpValue);
         if (state.percentBetweenWaypoints >= 1)
         {
             state.percentBetweenWaypoints = 0;

@@ -57,7 +57,7 @@ public class PlayerInput : IInputGenerator
             _useGamePad = !_useGamePad;
         }
 
-        Vector3 direction = aimStick;// new Vector3(aimStick.x, aimStick.y, 0);
+        Vector2 direction = aimStick;// new Vector3(aimStick.x, aimStick.y, 0);
 
         if (direction.sqrMagnitude >= 0.1f)
         {
@@ -76,9 +76,10 @@ public class PlayerInput : IInputGenerator
         
         input.primaryFire = _pAction.Gameplay.primaryFire.ReadValue<float>() > 0.01f;
         input.secondaryFire = Mouse.current.rightButton.isPressed;
-        
-        input.cursorPosition = _camera != null ? _camera.ScreenToWorldPoint(new Vector3(aimPosition.x, aimPosition.y, Mathf.Abs(_camera.transform.position.z))) : Vector3.zero;
-        input.cursorPosition.z = 0;
+
+        Vector3 worldPosition = new Vector3(aimPosition.x, aimPosition.y, Mathf.Abs(_camera.transform.position.z));
+        input.cursorPosition = _camera != null ? _camera.ScreenToWorldPoint(worldPosition) : Vector3.zero;
+
         input.useCusorPosition =  !_useGamePad;
         input.cursorDirection = _lastAimDirection;
         return input;

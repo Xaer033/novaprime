@@ -14,9 +14,9 @@ public interface IAvatarController : ITimeWarpTarget, IAttackTarget
     
     bool isSimulating { get; set; }
     
-    void Move(Vector3 moveDelta, bool isOnPlatform);
+    void Move(Vector2 moveDelta, bool isOnPlatform);
 
-    void SetVelocity(Vector3 velocity);
+    // void SetVelocity(Vector3 velocity);
     
     void Start(GameSystems gameSystems);
     void FixedStep(float deltaTime, FrameInput input);

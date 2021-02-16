@@ -12,9 +12,9 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
     public float easeAmount = 1;
     public float speed;
     [HideInInspector]
-    public Vector3 startPosition;
+    public Vector2 startPosition;
     
-    public Vector3[] localWaypoints;
+    public Vector2[] localWaypoints;
     public LayerMask passengerMask;
     public float distanceBetweenRays = 0.2f;
 
@@ -52,9 +52,9 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
             for (int i = 0; i < localWaypoints.Length; ++i)
             {
                 Gizmos.color = Color.red;
-                Vector3 globalPos = Application.isPlaying && state != null ? state.globalWayPoints[i] : localWaypoints[i] + transform.position;
-                Gizmos.DrawLine(globalPos - Vector3.up * size, globalPos + Vector3.up * size);
-                Gizmos.DrawLine(globalPos - Vector3.left * size, globalPos + Vector3.left * size);
+                Vector2 globalPos = Application.isPlaying && state != null ? state.globalWayPoints[i] : localWaypoints[i] + new Vector2(transform.position.x, transform.position.y);
+                Gizmos.DrawLine(globalPos - Vector2.up * size, globalPos + Vector2.up * size);
+                Gizmos.DrawLine(globalPos - Vector2.left * size, globalPos + Vector2.left * size);
 
                 
                 Gizmos.color = i == 0 ? new Color(0.42f, 0.75f, 0.4f, 0.8f) : new Color(0.2f, 0.2f, 1.0f, 0.8f);
@@ -68,11 +68,11 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
 public struct PassengerMovement
 {
     public readonly Transform transform;
-    public readonly Vector3 velocity;
+    public readonly Vector2 velocity;
     public readonly bool isOnPlatform;
     public readonly bool moveBeforePlatform;
 
-    public PassengerMovement(Transform t, Vector3 _velocity, bool _isOnPlatform, bool _moveBeforePlatform)
+    public PassengerMovement(Transform t, Vector2 _velocity, bool _isOnPlatform, bool _moveBeforePlatform)
     {
         transform = t;
         velocity = _velocity;

@@ -4,14 +4,14 @@ public class PlayerState : AvatarState
 {
     public const int MAX_INPUTS = 32;
     
-    public static PlayerState Create(string uuid,  UnitStats stats, Vector3 position)
+    public static PlayerState Create(string uuid,  UnitStats stats, Vector2 position)
     {
         PlayerState state = new PlayerState();
         state.playerSlot = PlayerSlot.NONE;
         state.position = position;
         state.previousPosition = position;
         state.health = stats.maxHealth;
-        state.velocity = Vector3.zero;
+        state.velocity = Vector2.zero;
         state.timeScale = 1.0f;
         state.machineGunState = new MachineGunState();
         state.stateType = PlayerActivityType.NONE;
@@ -23,25 +23,25 @@ public class PlayerState : AvatarState
 
     public PlayerStateSnapshot Snapshot()
     {
-        PlayerStateSnapshot result = new PlayerStateSnapshot();
-        
-        result.position             = position;
-        result.previousPosition     = previousPosition;
-        result.velocity             = velocity;
-        result.health               = health;
-        result.timeScale            = timeScale;
-        result.aimPosition          = aimPosition;
-        result.jumpCount            = jumpCount;
-        result.timeToWallUnstick    = timeToWallUnstick;
-        result.wallSlideVelocity    = wallSlideVelocity;
-        result.isWallSliding        = isWallSliding;
-        result.midairJumpTimer      = midairJumpTimer;
-        result.coyoteJumpTimer      = coyoteJumpTimer;
-        result.velocityXSmoothing   = velocityXSmoothing;
-        result.sequence             = sequence;
-        result.ackSequence          = ackSequence;
-        result.latestInput          = latestInput;
-        result.stateType            = stateType;
+        PlayerStateSnapshot result = new PlayerStateSnapshot
+        {
+            position             = this.position,
+            previousPosition     = this.previousPosition,
+            velocity             = this.velocity,
+            health               = this.health,
+            timeScale            = this.timeScale,
+            aimPosition          = this.aimPosition,
+            jumpCount            = this.jumpCount,
+            timeToWallUnstick    = this.timeToWallUnstick,
+            wallSlideVelocity    = this.wallSlideVelocity,
+            isWallSliding        = this.isWallSliding,
+            midairJumpTimer      = this.midairJumpTimer,
+            coyoteJumpTimer      = this.coyoteJumpTimer,
+            velocityXSmoothing   = this.velocityXSmoothing,
+            sequence             = this.sequence,
+            ackSequence          = this.ackSequence,
+            stateType            = this.stateType,
+        };
 
         return result;
     }
@@ -61,9 +61,6 @@ public class PlayerState : AvatarState
         midairJumpTimer      = snapshot.midairJumpTimer;
         coyoteJumpTimer      = snapshot.coyoteJumpTimer;
         velocityXSmoothing   = snapshot.velocityXSmoothing;
-        sequence             = snapshot.sequence;
-        ackSequence          = snapshot.ackSequence;
-        latestInput          = snapshot.latestInput;
         stateType            = snapshot.stateType;
     }
 
@@ -74,8 +71,8 @@ public class PlayerState : AvatarState
     public uint sequence;
     public uint ackSequence;
     public PlayerInputTickPair latestInput;
-    public RingBuffer<PlayerInputTickPair> nonAckInputBuffer = new RingBuffer<PlayerInputTickPair>(MAX_INPUTS);
-    public RingBuffer<PlayerStateSnapshot> nonAckStateBuffer = new RingBuffer<PlayerStateSnapshot>(MAX_INPUTS);
+    // public RingBuffer<PlayerInputTickPair> nonAckInputBuffer = new RingBuffer<PlayerInputTickPair>(MAX_INPUTS);
+    // public RingBuffer<PlayerStateSnapshot> nonAckStateBuffer = new RingBuffer<PlayerStateSnapshot>(MAX_INPUTS);
     
     public UnitStats stats;
     public MachineGunState machineGunState;

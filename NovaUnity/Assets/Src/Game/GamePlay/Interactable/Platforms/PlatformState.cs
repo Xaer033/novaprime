@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class PlatformState
 {
-    public PlatformState(Vector3 startPosition, int raycastArraySize, Vector3[] localWayPoints)
+    public PlatformState(Vector2 startPosition, int raycastArraySize, Vector2[] localWayPoints)
     {
         int raycastSize = raycastArraySize > 0 ? raycastArraySize : 1;
         
@@ -12,7 +12,7 @@ public class PlatformState
         raycastHits = new RaycastHit2D[raycastSize];
 
         int localWayPointSize = localWayPoints != null && localWayPoints.Length > 0 ? localWayPoints.Length : 0;
-        globalWayPoints = new Vector3[localWayPointSize];
+        globalWayPoints = new Vector2[localWayPointSize];
         
         for (int j = 0; j < localWayPointSize; ++j)
         {
@@ -20,9 +20,9 @@ public class PlatformState
         }
     }
     
-    public Vector3 prevPosition;
-    public Vector3 position;
-    public Vector3 velocity;
+    public Vector2 prevPosition;
+    public Vector2 position;
+    public Vector2 velocity;
     
     public int fromWaypointIndex;
     public float percentBetweenWaypoints;
@@ -31,7 +31,7 @@ public class PlatformState
     public float timeScale = 1.0f;
     
     public RaycastHit2D[] raycastHits;
-    public Vector3[] globalWayPoints;
+    public Vector2[] globalWayPoints;
     
     // public RaycastController raycastController;
     public HashSet<Transform> movedPassengersSet = new HashSet<Transform>();

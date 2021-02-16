@@ -18,6 +18,6 @@ public struct FrameInput
     public bool secondaryFire;
     public bool useCusorPosition;
     
-    public Vector3 cursorPosition;
-    public Vector3 cursorDirection;
+    public Vector2 cursorPosition;
+    public Vector2 cursorDirection;
 }

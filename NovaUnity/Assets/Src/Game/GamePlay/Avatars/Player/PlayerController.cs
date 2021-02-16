@@ -1,6 +1,5 @@
 using GhostGen;
 using Mirror;
-using Unity.Collections;
 using UnityEngine;
 
 public class PlayerController : NotificationDispatcher, IAvatarController
@@ -66,9 +65,9 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     public AttackResult TakeDamage(AttackData attackData)
     {
         float vBump = collisionInfo.below ? 2.0f : _state.velocity.y;
-        Vector3 hitBumpForce = new Vector3(attackData.hitDirection.x * 3.0f, vBump, 0.0f);
-        SetVelocity(hitBumpForce);
+        Vector2 hitBumpForce = new Vector2(attackData.hitDirection.x * 3.0f, vBump);
         
+        _state.velocity = (hitBumpForce);
         _state.health = _state.health - attackData.potentialDamage;
         
         if(attackData.damageType == DamageType.INSTANT)
@@ -135,12 +134,12 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         get { return _unit; }
     }
     
-    public void SetVelocity(Vector3 velocity)
-    {
-        _state.velocity = velocity;
-    }
+    // public void SetVelocity(Vector2 velocity)
+    // {
+    //     _state.velocity = velocity;
+    // }
     
-    public void Move(Vector3 moveDelta, bool isOnPlatform)
+    public void Move(Vector2 moveDelta, bool isOnPlatform)
     {
         _move(moveDelta, _lastInput, isOnPlatform);
     }
@@ -153,7 +152,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         {
             // if(isSimulating)
             {
-                view.viewRoot.position = Vector3.Lerp(_state.previousPosition, _state.position, alpha);//Vector3.MoveTowards(_state.previousPosition, _state.position, alpha);                
+                view.viewRoot.position = Vector2.Lerp(_state.previousPosition, _state.position, alpha);//Vector2.MoveTowards(_state.previousPosition, _state.position, alpha);                
             }
         }
     }
@@ -218,11 +217,11 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         get { return _view.constrainer.collisionInfo; }
     }
 
-    private void _move(Vector3 moveDelta, FrameInput input, bool isOnPlatform)
+    private void _move(Vector2 moveDelta, FrameInput input, bool isOnPlatform)
     {
         if (_view && _view.constrainer != null)
         {
-            Vector3 constrainedMoveDelta = _view.constrainer.Move(moveDelta, isOnPlatform, input);
+            Vector2 constrainedMoveDelta = _view.constrainer.Move(moveDelta, isOnPlatform, input);
 
             _state.previousPosition = _state.position;
             _state.position = _state.position + constrainedMoveDelta;
@@ -232,7 +231,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         }
     }
     
-    private void _handleDirectionMovement(ref Vector3 velocity, FrameInput input, float deltaTime)
+    private void _handleDirectionMovement(ref Vector2 velocity, FrameInput input, float deltaTime)
     {
         float targetVelocityX = input.horizontalMovement * _unitStats.speed;
         
@@ -247,7 +246,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         }
     }
     
-    private bool _handleJumping(ref Vector3 velocity, FrameInput input, float deltaTime, bool isWallSliding, int wallDirX, int inputDirX)
+    private bool _handleJumping(ref Vector2 velocity, FrameInput input, float deltaTime, bool isWallSliding, int wallDirX, int inputDirX)
     {
         bool isJumping = false;
         
@@ -304,7 +303,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
                     {
                         if (inputDirX == 0 || inputDirX != -(int) Mathf.Sign(collisionInfo.slopeNormal.x))
                         {
-                            Vector3 jumpDirection = (Vector3.up + collisionInfo.slopeNormal).normalized * maxJumpVelocity;
+                            Vector2 jumpDirection = (Vector2.up + collisionInfo.slopeNormal).normalized * maxJumpVelocity;
                             velocity.x = jumpDirection.x;
                             velocity.y = jumpDirection.y;
                         
@@ -345,7 +344,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     }
 
 
-    private bool _handleWallSliding(ref Vector3 velocity, FrameInput input, float deltaTime, int wallDirX, int inputDirX)
+    private bool _handleWallSliding(ref Vector2 velocity, FrameInput input, float deltaTime, int wallDirX, int inputDirX)
     {
         bool isWallSliding = false;
         
@@ -394,11 +393,11 @@ public class PlayerController : NotificationDispatcher, IAvatarController
             return;
         }
 
-        Vector3 upVector = Vector3.up * 1.0f;
-        Vector3 rightVector = Vector3.right * _view.viewRoot.localScale.x * 1f;
+        Vector2 upVector = Vector2.up * 1.0f;
+        Vector2 rightVector = Vector2.right * _view.viewRoot.localScale.x;
         
-        Vector3 p1 = _state.position;
-        Vector3 p2 = p1 + rightVector + upVector;
+        Vector2 p1 = _state.position;
+        Vector2 p2 = p1 + rightVector + upVector;
         
         Debug.DrawLine(p1, p1 + upVector, Color.yellow, 1.0f);
         Debug.DrawLine(p1, p1 + rightVector, Color.yellow, 1.0f);
@@ -567,12 +566,12 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         if (_view)
         { 
             const float kDistance = 5.5f;
-            Vector3 aimStartPosition = _view._weaponHook.position;
-            Vector3 cursorDir = (input.cursorPosition - aimStartPosition).normalized;
+            Vector2 aimStartPosition = _view._weaponHook.position;
+            Vector2 cursorDir = (input.cursorPosition - aimStartPosition).normalized;
         
             // Aim
-            Vector3 aimDirection = input.cursorDirection.normalized;
-            Vector3 aimPosition = input.useCusorPosition ? 
+            Vector2 aimDirection = input.cursorDirection.normalized;
+            Vector2 aimPosition = input.useCusorPosition ? 
                 aimStartPosition + (cursorDir * kDistance) : 
                 aimStartPosition + (aimDirection * kDistance);
 
@@ -581,8 +580,8 @@ public class PlayerController : NotificationDispatcher, IAvatarController
             Debug.DrawRay(aimStartPosition, aimDirection, Color.cyan, 0.2f);
 
             const float kDebugLineSize = 0.2f;
-            Debug.DrawLine(aimPosition + Vector3.down * kDebugLineSize, aimPosition + Vector3.up     * kDebugLineSize, Color.cyan, 0.2f);
-            Debug.DrawLine(aimPosition + Vector3.left * kDebugLineSize, aimPosition + Vector3.right  * kDebugLineSize, Color.cyan, 0.2f);
+            Debug.DrawLine(aimPosition + Vector2.down * kDebugLineSize, aimPosition + Vector2.up     * kDebugLineSize, Color.cyan, 0.2f);
+            Debug.DrawLine(aimPosition + Vector2.left * kDebugLineSize, aimPosition + Vector2.right  * kDebugLineSize, Color.cyan, 0.2f);
 
             bool isFlipped = aimPosition.x < _view.transform.position.x;
             animationInfo.isBackPedaling = (isFlipped && _state.velocity.x > 0.0f) || (!isFlipped && _state.velocity.x < 0.0f);
@@ -609,7 +608,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
                                            0, 
                                            DamageType.INSTANT, 
                                            -1, 
-                                           Vector3.zero);
+                                           Vector2.zero);
         
         return attack;
     }

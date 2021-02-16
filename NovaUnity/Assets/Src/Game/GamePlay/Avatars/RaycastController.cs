@@ -26,10 +26,10 @@ public class RaycastController
     
     public struct RaycastOrigins
     {
-        public Vector3 topLeft;
-        public Vector3 topRight;
-        public Vector3 bottomLeft;
-        public Vector3 bottomRight;
+        public Vector2 topLeft;
+        public Vector2 topRight;
+        public Vector2 bottomLeft;
+        public Vector2 bottomRight;
     }
     
     public RaycastController(float distBetweenRays, Collider2D boundsCollider, LayerMask collisionLayerMask, float collisionSkinWidth = 0.015f, float collisionSkinHeight = 0.015f)
@@ -65,12 +65,12 @@ public class RaycastController
     private void _updateRaycastOrigins()
     {
         Bounds bounds = collider.bounds;
-        bounds.Expand(new Vector3(skinWidth * -2, skinHeight * -2, 0));
+        bounds.Expand(new Vector2(skinWidth * -2, skinHeight * -2));
         
-       _origins.bottomLeft = new Vector3(bounds.min.x, bounds.min.y);
-       _origins.bottomRight = new Vector3(bounds.max.x, bounds.min.y);
-       _origins.topLeft = new Vector3(bounds.min.x, bounds.max.y);
-       _origins.topRight = new Vector3(bounds.max.x, bounds.max.y);
+       _origins.bottomLeft = new Vector2(bounds.min.x, bounds.min.y);
+       _origins.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
+       _origins.topLeft = new Vector2(bounds.min.x, bounds.max.y);
+       _origins.topRight = new Vector2(bounds.max.x, bounds.max.y);
     }
     
     private void _calculateRaySpacing()

@@ -48,12 +48,12 @@ public class AvatarConstrainer : MonoBehaviour
         _collisionInfo.faceDir = 1;
     }
     
-    public Vector3 Move(Vector3 moveDelta, bool isOnPlatform, FrameInput input = default(FrameInput))
+    public Vector2 Move(Vector2 moveDelta, bool isOnPlatform, FrameInput input = default(FrameInput))
     {
         return _move(moveDelta, isOnPlatform, input);
     }
     
-    private Vector3 _move(Vector3 moveDelta, bool isOnPlatform, FrameInput input)
+    private Vector2 _move(Vector2 moveDelta, bool isOnPlatform, FrameInput input)
     {
         _input = input;
         
@@ -84,13 +84,13 @@ public class AvatarConstrainer : MonoBehaviour
         return moveDelta;
     }
 
-    protected void _horizontalCollisions(ref Vector3 moveDelta)
+    protected void _horizontalCollisions(ref Vector2 moveDelta)
     {
         float directionX = _collisionInfo.faceDir;
         float rayLength = Mathf.Abs(moveDelta.x) + _raycastController.skinWidth;
 
-        Vector3 firstRayOrigin = (directionX == -1) ? _raycastOrigins.bottomLeft : _raycastOrigins.bottomRight;
-        Vector3 antiRayOrigin = (directionX == -1) ? _raycastOrigins.bottomRight : _raycastOrigins.bottomLeft;
+        Vector2 firstRayOrigin = (directionX == -1) ? _raycastOrigins.bottomLeft : _raycastOrigins.bottomRight;
+        Vector2 antiRayOrigin = (directionX == -1) ? _raycastOrigins.bottomRight : _raycastOrigins.bottomLeft;
         
         if (Mathf.Abs(moveDelta.x) < _raycastController.skinWidth)
         {
@@ -101,12 +101,12 @@ public class AvatarConstrainer : MonoBehaviour
         
         for (int i = 0; i < _raycastController.horizontalRayCount; ++i)
         {
-            Vector3 rayOrigin = firstRayOrigin;
-            rayOrigin += Vector3.up * (_raycastController.horizontalRaySpacing * i);
+            Vector2 rayOrigin = firstRayOrigin;
+            rayOrigin += Vector2.up * (_raycastController.horizontalRaySpacing * i);
             
-            Debug.DrawRay(rayOrigin, Vector3.right * directionX, Color.cyan);
+            Debug.DrawRay(rayOrigin, Vector2.right * directionX, Color.cyan);
             
-            int hitCount = Physics2D.RaycastNonAlloc(rayOrigin, Vector3.right * directionX, _raycastHits, rayLength, collisionMask);
+            int hitCount = Physics2D.RaycastNonAlloc(rayOrigin, Vector2.right * directionX, _raycastHits, rayLength, collisionMask);
             // Potential future bug for not looping through all hitCount
             if (hitCount > 0)
             {
@@ -121,7 +121,7 @@ public class AvatarConstrainer : MonoBehaviour
                     continue;
                 }
 
-                float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
+                float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
                 if (i == 0 && slopeAngle <= maxSlopeAngle)
                 {
                     if (_collisionInfo.decendingSlope)
@@ -164,8 +164,8 @@ public class AvatarConstrainer : MonoBehaviour
                         _collisionInfo.left = directionX < 0;
                         _collisionInfo.right = directionX > 0;
                         
-                        Vector3 antiRayPos = antiRayOrigin + (Vector3.up * _raycastController.horizontalRaySpacing * i);
-                        hitCount = Physics2D.RaycastNonAlloc(antiRayPos, Vector3.right * -directionX, _raycastHits, rayLength, collisionMask);
+                        Vector2 antiRayPos = antiRayOrigin + (Vector2.up * _raycastController.horizontalRaySpacing * i);
+                        hitCount = Physics2D.RaycastNonAlloc(antiRayPos, Vector2.right * -directionX, _raycastHits, rayLength, collisionMask);
                         if(hitCount > 0)
                         {
                             _collisionInfo.crushed = true;
@@ -176,7 +176,7 @@ public class AvatarConstrainer : MonoBehaviour
         }
     }
     
-    protected void _verticalCollisions(ref Vector3 moveDelta)
+    protected void _verticalCollisions(ref Vector2 moveDelta)
     {
         float directionY = Mathf.Sign(moveDelta.y);
 
@@ -188,15 +188,15 @@ public class AvatarConstrainer : MonoBehaviour
 
         for (int i = 0; i < _raycastController.verticalRayCount; ++i)
         {
-            Vector3 rayOrigin = (directionY == -1) ? _raycastOrigins.bottomLeft : _raycastOrigins.topLeft;
-            Vector3 antiRayOrigin = (directionY == -1) ? _raycastOrigins.topLeft : _raycastOrigins.bottomLeft;
+            Vector2 rayOrigin = (directionY == -1) ? _raycastOrigins.bottomLeft : _raycastOrigins.topLeft;
+            Vector2 antiRayOrigin = (directionY == -1) ? _raycastOrigins.topLeft : _raycastOrigins.bottomLeft;
             
             rayOrigin.y = rayOrigin.y + walkStepHeight;
-            rayOrigin += Vector3.right * (_raycastController.verticalRaySpacing * i + moveDelta.x);
+            rayOrigin += Vector2.right * (_raycastController.verticalRaySpacing * i + moveDelta.x);
             
-            Debug.DrawRay(rayOrigin, Vector3.up * directionY * rayLength, Color.red);
+            Debug.DrawRay(rayOrigin, Vector2.up * directionY * rayLength, Color.red);
             
-            int hitCount = Physics2D.RaycastNonAlloc(rayOrigin, Vector3.up * directionY, _raycastHits, rayLength, collisionMask);
+            int hitCount = Physics2D.RaycastNonAlloc(rayOrigin, Vector2.up * directionY, _raycastHits, rayLength, collisionMask);
 
             float smallestDist = rayLength;
             RaycastHit2D activeHit = default;
@@ -247,9 +247,9 @@ public class AvatarConstrainer : MonoBehaviour
 
                 if(!activeHit.collider.CompareTag("Platform"))
                 {
-                    Vector3 crushedOrigin = antiRayOrigin +
-                                            (Vector3.right * (_raycastController.verticalRaySpacing * i + moveDelta.x));
-                    hitCount = Physics2D.RaycastNonAlloc(crushedOrigin, Vector3.up * -directionY, _raycastHits,
+                    Vector2 crushedOrigin = antiRayOrigin +
+                                            (Vector2.right * (_raycastController.verticalRaySpacing * i + moveDelta.x));
+                    hitCount = Physics2D.RaycastNonAlloc(crushedOrigin, Vector2.up * -directionY, _raycastHits,
                                                          rayLength, collisionMask);
                     if(hitCount > 0)
                     {
@@ -263,13 +263,13 @@ public class AvatarConstrainer : MonoBehaviour
         {
             float directionX = Mathf.Sign(moveDelta.x);
             rayLength = Mathf.Abs(moveDelta.x) + _raycastController.skinWidth;
-            Vector3 rayOrigin = ((directionX == -1) ? _raycastOrigins.bottomLeft : _raycastOrigins.bottomRight) + Vector3.up * moveDelta.y;
+            Vector2 rayOrigin = ((directionX == -1) ? _raycastOrigins.bottomLeft : _raycastOrigins.bottomRight) + Vector2.up * moveDelta.y;
             
-            int hitCount = Physics2D.RaycastNonAlloc(rayOrigin, Vector3.right * directionX, _raycastHits, rayLength, collisionMask);
+            int hitCount = Physics2D.RaycastNonAlloc(rayOrigin, Vector2.right * directionX, _raycastHits, rayLength, collisionMask);
             if (hitCount > 0)
             {
                 RaycastHit2D hit = _raycastHits[0];
-                float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
+                float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
                 if (slopeAngle != _collisionInfo.slopeAngle)
                 {
                     moveDelta.x = (hit.distance - _raycastController.skinWidth) * directionX;
@@ -280,7 +280,7 @@ public class AvatarConstrainer : MonoBehaviour
         }
     }
 
-    private void _climbSlope(ref Vector3 moveDelta, float slopeAngle, Vector3 slopeNormal)
+    private void _climbSlope(ref Vector2 moveDelta, float slopeAngle, Vector2 slopeNormal)
     {
         float moveDistance = Mathf.Abs(moveDelta.x);
         float climbVelocityY = Mathf.Sin(slopeAngle * Mathf.Deg2Rad) * moveDistance;
@@ -302,7 +302,7 @@ public class AvatarConstrainer : MonoBehaviour
         get { return _raycastController.origins; }
     }
 
-    private void _decsendSlope(ref Vector3 moveDelta)
+    private void _decsendSlope(ref Vector2 moveDelta)
     {
         bool isLeftHit     = Physics2D.RaycastNonAlloc(_raycastOrigins.bottomLeft, Vector2.down, _leftSlopeCastHits, Mathf.Abs(moveDelta.y) + _raycastController.skinHeight, collisionMask) > 0;
         bool isRightHit    = Physics2D.RaycastNonAlloc(_raycastOrigins.bottomRight, Vector2.down, _rightSlopeCastHits, Mathf.Abs(moveDelta.y) + _raycastController.skinHeight, collisionMask) > 0;
@@ -323,14 +323,14 @@ public class AvatarConstrainer : MonoBehaviour
         if (!_collisionInfo.slidingDownMaxSlope)
         {
             float directionX = Mathf.Sign(moveDelta.x);
-            Vector3 rayOrigin = (directionX == -1) ? _raycastOrigins.bottomRight :  _raycastOrigins.bottomLeft;
+            Vector2 rayOrigin = (directionX == -1) ? _raycastOrigins.bottomRight :  _raycastOrigins.bottomLeft;
 
-            int hitCount = Physics2D.RaycastNonAlloc(rayOrigin, Vector3.down, _otherHits, Mathf.Infinity, collisionMask);
+            int hitCount = Physics2D.RaycastNonAlloc(rayOrigin, Vector2.down, _otherHits, Mathf.Infinity, collisionMask);
             if (hitCount > 0)
             {
                 RaycastHit2D hit = _otherHits[0];
                 
-                float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
+                float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
                 if (Mathf.Abs(slopeAngle) > 0 && slopeAngle <= maxSlopeAngle)
                 {
                     if (Mathf.Sign(hit.normal.x) == directionX)
@@ -353,9 +353,9 @@ public class AvatarConstrainer : MonoBehaviour
         }
     }
 
-    private void _slideDownMaxSlope(ref Vector3 moveDelta, RaycastHit2D hit)
+    private void _slideDownMaxSlope(ref Vector2 moveDelta, RaycastHit2D hit)
     {
-        float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
+        float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
         if (slopeAngle > maxSlopeAngle)
         {
             moveDelta.x = hit.normal.x * ((Mathf.Abs(moveDelta.y) - hit.distance) / Mathf.Tan(slopeAngle * Mathf.Deg2Rad));

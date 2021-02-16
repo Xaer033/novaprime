@@ -40,10 +40,10 @@ public class BruiserController : NotificationDispatcher, IAvatarController
         return _unit.type;
     }
     
-    public void SetVelocity(Vector3 velocity)
-    {
-        _state.velocity = velocity;
-    }
+    // public void SetVelocity(Vector3 velocity)
+    // {
+    //     _state.velocity = velocity;
+    // }
 
     public string uuid
     {
@@ -54,7 +54,7 @@ public class BruiserController : NotificationDispatcher, IAvatarController
     {
         float vBump = collisionInfo.below ? 2.0f : _state.velocity.y;
         Vector3 hitBumpForce = new Vector3(attackData.hitDirection.x * 3.0f, vBump, 0.0f);
-        SetVelocity(hitBumpForce);
+        _state.velocity = hitBumpForce;
         
         _state.health = _state.health - attackData.potentialDamage;
         return new AttackResult(attackData, this, attackData.potentialDamage, _state.health);
@@ -103,11 +103,11 @@ public class BruiserController : NotificationDispatcher, IAvatarController
     }
     
     
-    public void Move(Vector3 moveDelta, bool isOnPlatform)
+    public void Move(Vector2 moveDelta, bool isOnPlatform)
     {
         if (_view && _view.constrainer != null)
         {
-            Vector3 constrainedMoveDelta = _view.constrainer.Move(moveDelta, isOnPlatform, _lastInput);
+            Vector2 constrainedMoveDelta = _view.constrainer.Move(moveDelta, isOnPlatform, _lastInput);
 
             _state.previousPosition = _state.position;
             _state.position = _state.position + constrainedMoveDelta;
@@ -121,7 +121,7 @@ public class BruiserController : NotificationDispatcher, IAvatarController
     public void Step(float deltaTime)
     {
         float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
-        _view._viewRoot.position = Vector3.Lerp(_state.previousPosition, _state.position, alpha);
+        _view._viewRoot.position = Vector2.Lerp(_state.previousPosition, _state.position, alpha);
     }
 
     public void FixedStep(float deltaTime, FrameInput input)
@@ -143,21 +143,21 @@ public class BruiserController : NotificationDispatcher, IAvatarController
             _state.velocity.y = 0;
         }
 
-        // Vector3 aimStartPosition = _view._weaponHook.position;
-        // Vector3 cursorDir = (_lastInput.cursorPosition - aimStartPosition).normalized;
+        // Vector2 aimStartPosition = _view._weaponHook.position;
+        // Vector2 cursorDir = (_lastInput.cursorPosition - aimStartPosition).normalized;
         // float distance = 5.5f;
         //
         // // Aim
-        // Vector3 aimDirection = _lastInput.cursorDirection.normalized;
-        // Vector3 aimPosition = _lastInput.useCusorPosition ? aimStartPosition + (cursorDir * distance) : aimStartPosition + (aimDirection * distance);
+        // Vector2 aimDirection = _lastInput.cursorDirection.normalized;
+        // Vector2 aimPosition = _lastInput.useCusorPosition ? aimStartPosition + (cursorDir * distance) : aimStartPosition + (aimDirection * distance);
         //
         // if (_view)
         // {
         //   Debug.DrawRay(aimStartPosition, aimDirection, Color.cyan, 0.2f);
         //
         //     const float kDebugLineSize = 0.2f;
-        //     Debug.DrawLine(aimPosition + Vector3.down * kDebugLineSize, aimPosition + Vector3.up     * kDebugLineSize, Color.cyan, 0.2f);
-        //     Debug.DrawLine(aimPosition + Vector3.left * kDebugLineSize, aimPosition + Vector3.right  * kDebugLineSize, Color.cyan, 0.2f);
+        //     Debug.DrawLine(aimPosition + Vector2.down * kDebugLineSize, aimPosition + Vector2.up     * kDebugLineSize, Color.cyan, 0.2f);
+        //     Debug.DrawLine(aimPosition + Vector2.left * kDebugLineSize, aimPosition + Vector2.right  * kDebugLineSize, Color.cyan, 0.2f);
         //
         //     _view.Aim(aimPosition);
         // }
@@ -186,7 +186,7 @@ public class BruiserController : NotificationDispatcher, IAvatarController
         get { return _view.constrainer.collisionInfo; }
     }
 
-    private void _handleDirectionMovement(ref Vector3 velocity, float deltaTime)
+    private void _handleDirectionMovement(ref Vector2 velocity, float deltaTime)
     {
         float targetVelocityX = _lastInput.horizontalMovement * _unitStats.speed;
         
@@ -202,7 +202,7 @@ public class BruiserController : NotificationDispatcher, IAvatarController
     }
     
     
-    private bool _handleJumping(ref Vector3 velocity, float deltaTime, bool isWallSliding, int wallDirX, int inputDirX)
+    private bool _handleJumping(ref Vector2 velocity, float deltaTime, bool isWallSliding, int wallDirX, int inputDirX)
     {
         bool isJumping = false;
         
@@ -255,7 +255,7 @@ public class BruiserController : NotificationDispatcher, IAvatarController
                     {
                         if (inputDirX == 0 || inputDirX != -(int) Mathf.Sign(collisionInfo.slopeNormal.x))
                         {
-                            Vector3 jumpDirection = (Vector3.up + collisionInfo.slopeNormal).normalized * maxJumpVelocity;
+                            Vector2 jumpDirection = (Vector2.up + collisionInfo.slopeNormal).normalized * maxJumpVelocity;
                             velocity.x = jumpDirection.x;
                             velocity.y = jumpDirection.y;
                         
@@ -295,7 +295,7 @@ public class BruiserController : NotificationDispatcher, IAvatarController
         return isJumping;
     }
 
-    private bool _handleWallSliding(ref Vector3 velocity, float deltaTime, int wallDirX, int inputDirX)
+    private bool _handleWallSliding(ref Vector2 velocity, float deltaTime, int wallDirX, int inputDirX)
     {
         bool isWallSliding = false;
         

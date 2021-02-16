@@ -27,7 +27,7 @@ public class MultiplayerRoomController : BaseController
             
             if(!_isServer)
             {
-                _networkManager.onClientLocalDisconnect += ONClientLocalDisconnect;
+                _networkManager.onClientLocalDisconnect += onClientLocalDisconnect;
             }
 
 
@@ -59,7 +59,7 @@ public class MultiplayerRoomController : BaseController
     {
         if(!_isServer)
         {
-            _networkManager.onClientLocalDisconnect -= ONClientLocalDisconnect;
+            _networkManager.onClientLocalDisconnect -= onClientLocalDisconnect;
         }
 
         // if(NetworkClient.active || _wasDisconnected)
@@ -124,7 +124,7 @@ public class MultiplayerRoomController : BaseController
         DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_GAME);
     }
     
-    private void ONClientLocalDisconnect(NetworkConnection conn)
+    private void onClientLocalDisconnect(NetworkConnection conn)
     {
         _networkManager.Disconnect();
         DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);

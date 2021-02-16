@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.NetworkInformation;
 using GhostGen;
 using Mirror;
 using UnityEngine;
@@ -24,7 +23,7 @@ public class MultiplayerSetupController : BaseController
         {
             view = v;
     
-            view.AddListener(MenuUIEventType.CREAT_SERVER_AS_HOST, onCreateServerAsHost);
+            view.AddListener(MenuUIEventType.CREATE_SERVER_AS_HOST, onCreateServerAsHost);
             view.AddListener(MenuUIEventType.CREATE_SERVER, onCreateServer);
             view.AddListener(MenuUIEventType.JOIN_LISTED_SERVER, onJoinListedServer);
             view.AddListener(MenuUIEventType.REFRESH_SERVER_LIST, onRefreshServerList);
@@ -116,8 +115,7 @@ public class MultiplayerSetupController : BaseController
         
         Debug.Log("Joining Server: " + uri.AbsoluteUri);
         
-        _networkManager.onClientConnect += onClientConnect;
-        _networkManager.StartClient(uri);
+        joinServer(uri);
     }
     
     private void onJoinServer(GeneralEvent e)
@@ -125,9 +123,14 @@ public class MultiplayerSetupController : BaseController
         string serverIpAddress = e.data as string;
         _networkManager.networkAddress = serverIpAddress;
 
+        Uri uri = new Uri(serverIpAddress + ":11666");
+        joinServer(uri);
+    }
+
+    private void joinServer(Uri uri)
+    {
         _networkManager.onClientConnect += onClientConnect;
         
-        Uri uri = new Uri(serverIpAddress + ":11666");
         Debug.Log("Joining Server: " + uri.AbsoluteUri);
         _networkManager.StartClient(uri);
     }
@@ -145,10 +148,22 @@ public class MultiplayerSetupController : BaseController
     private void onClientConnect(NetworkConnection conn)
     {
         Debug.Log("Client Joined Server");
-        if(NetworkClient.connection.connectionId == conn.connectionId)
+        
+        _networkManager.onClientConnect -= onClientConnect;
+        _networkManager.onClientCurrentSession += onClientCurrentSession;
+    }
+
+    private void onClientCurrentSession(NetworkConnection conn, CurrentSessionUpdate msg)
+    {
+        _networkManager.onClientCurrentSession -= onClientCurrentSession;
+
+        if(msg.sessionState == NetworkManager.SessionState.IN_LOBBY)
         {
-            _networkManager.onClientConnect -= onClientConnect;
             DispatchEvent(MenuUIEventType.GOTO_NETWORK_ROOM);
+        }
+        else
+        {
+            DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_GAME);
         }
     }
 

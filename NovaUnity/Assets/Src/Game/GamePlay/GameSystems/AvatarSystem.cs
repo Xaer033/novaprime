@@ -153,13 +153,16 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         {
             pair.Value.ClearTargets();
         }
-        
-        for (int i = 0; i < _avatarControllerList.Count; ++i)
+
+        for(int i = 0; i < _avatarControllerList.Count; ++i)
         {
             IAvatarView view = _avatarControllerList[i].view;
             _avatarControllerList[i].CleanUp();
             
-            GameObject.Destroy(view.gameObject);
+            if(view != null && view.gameObject != null)
+            {
+                GameObject.Destroy(view.gameObject);                
+            }
         }
         
         GameObject.Destroy(_playerParent);

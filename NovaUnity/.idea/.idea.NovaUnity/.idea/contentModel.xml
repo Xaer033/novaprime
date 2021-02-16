@@ -63,6 +63,7 @@
                 <e p="Messages" t="Include">
                   <e p="AssignPlayerSlot.cs" t="Include" />
                   <e p="ConfirmReadyUp.cs" t="Include" />
+                  <e p="CurrentSessionUpdate.cs" t="Include" />
                   <e p="MatchBegin.cs" t="Include" />
                   <e p="PlayerMatchLoadComplete.cs" t="Include" />
                   <e p="RequestMatchStart.cs" t="Include" />

@@ -24,6 +24,7 @@ public class MainMenuState : IGameState
 		_multiplayerSetupController = new MultiplayerSetupController();
 		_multiplayerSetupController.AddListener(MenuUIEventType.GOTO_NETWORK_ROOM, onMultiplayerRoomMenu);
 		_multiplayerSetupController.AddListener(MenuUIEventType.GOTO_MAIN_MENU, onMainMenu);
+		_multiplayerSetupController.AddListener(MenuUIEventType.GOTO_MULTIPLAYER_GAME, onStartMultiplayerGame);
 		
 		_mainMenuController = new MainMenuController();
 		_mainMenuController.AddListener(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY, onMultiplayerSetupMenu);

@@ -47,6 +47,7 @@ public class NetworkManager : Mirror.NetworkManager
     public event Action<NetworkConnection, StartMatchLoad> onClientStartMatchLoad;
     public event Action<NetworkConnection, MatchBegin> onClientMatchBegin;
     public event Action<NetworkConnection, NetFrameSnapshot> onClientFrameSnapshot;
+    public event Action<NetworkConnection, CurrentSessionUpdate> onClientCurrentSession;
     public event SpawnHandlerDelegate onClientSpawnHandler;
     public event UnSpawnDelegate onClientUnspawnHandler;
 
@@ -56,6 +57,7 @@ public class NetworkManager : Mirror.NetworkManager
         IN_LOBBY,
         IN_GAME
     }
+    
     
     
     public ServerListEntry serverEntry { get; set; }
@@ -88,6 +90,7 @@ public class NetworkManager : Mirror.NetworkManager
         onClientStartMatchLoad = null;
         onClientMatchBegin = null;
         onClientFrameSnapshot = null;
+        onClientCurrentSession = null;
 
         base.OnDestroy();
     }
@@ -151,7 +154,10 @@ public class NetworkManager : Mirror.NetworkManager
     public override void Start()
     {
         base.Start();
+    }
 
+    private void registerNetworkPrefabs()
+    {
         UnitMap unitMap = Singleton.instance.gameplayResources.unitMap;
         for(int i = 0; i < unitMap.unitList.Count; ++i)
         {
@@ -160,12 +166,11 @@ public class NetworkManager : Mirror.NetworkManager
             
             ClientScene.RegisterPrefab(
                 unit.view.gameObject, 
-                unit.view.netIdentity.assetId, 
                 OnClientSpawnHandler, 
                 OnClientUnspawnHandler);
         }
     }
-
+    
     private string getMasterServerCommand(string command)
     {
         return string.Format("{0}:{1}/{2}", masterServerLocation, masterServerPort, command); 
@@ -352,6 +357,8 @@ public class NetworkManager : Mirror.NetworkManager
     {
         Debug.Log("OnStartServer");
         
+        registerNetworkPrefabs();
+        
         _serverNetPlayerMap.Clear();
         
         setupPlayerSlotGenerator();
@@ -375,7 +382,8 @@ public class NetworkManager : Mirror.NetworkManager
     public override void OnStartClient()
     {
         Debug.Log("OnStartClient");
-
+        registerNetworkPrefabs();
+        
         _clientNetPlayerMap.Clear();
         
         NetworkClient.RegisterHandler<SyncLobbyPlayers>(OnClientSyncLobbyPlayers, false);
@@ -384,6 +392,7 @@ public class NetworkManager : Mirror.NetworkManager
         NetworkClient.RegisterHandler<StartMatchLoad>(OnClientStartMatchLoad, false);
         NetworkClient.RegisterHandler<MatchBegin>(OnClientMatchBegin, false);
         NetworkClient.RegisterHandler<NetFrameSnapshot>(OnClientFrameSnapshot, false);
+        NetworkClient.RegisterHandler<CurrentSessionUpdate>(OnCurrentSessionUpdate, false);
         
         onClientStarted?.Invoke();
     }
@@ -412,6 +421,9 @@ public class NetworkManager : Mirror.NetworkManager
             // Assign our connected player a number
             AssignPlayerSlot assignMessage = new AssignPlayerSlot(pSlot);
             conn.Send(assignMessage, Channels.DefaultReliable);
+
+            CurrentSessionUpdate sessionMessage = new CurrentSessionUpdate(sessionState);
+            conn.Send(sessionMessage, Channels.DefaultReliable);
             
             // Sync player states with all clients
             SyncLobbyPlayers syncPlayersMessage = new SyncLobbyPlayers();
@@ -426,8 +438,6 @@ public class NetworkManager : Mirror.NetworkManager
             // No more free player slots! Sorry bud :(
             conn.Disconnect();
         }
-        
-
     }
 
     public override void OnServerDisconnect(NetworkConnection conn)
@@ -512,6 +522,12 @@ public class NetworkManager : Mirror.NetworkManager
     private void OnClientFrameSnapshot(NetworkConnection conn, NetFrameSnapshot msg)
     {
         onClientFrameSnapshot?.Invoke(conn, msg);
+    }
+
+    private void OnCurrentSessionUpdate(NetworkConnection conn, CurrentSessionUpdate msg)
+    {
+        sessionState = msg.sessionState;
+        onClientCurrentSession?.Invoke(conn, msg);
     }
     
     private void OnClientConfirmReadyUp(NetworkConnection conn, ConfirmReadyUp msg)

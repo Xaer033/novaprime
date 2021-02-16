@@ -63,7 +63,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
 
     public void Start(GameSystems gameSystems, GameState gameState)
     {
-        Application.targetFrameRate = 60; // TODO: Definitely temporary! 
+        // Application.targetFrameRate = 60; // TODO: Definitely temporary! 
         
         _gameSystems = gameSystems;
         _avatarSystem = gameSystems.Get<AvatarSystem>();
@@ -236,6 +236,8 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     
     private void onServerConnect(NetworkConnection conn)
     {
+        Debug.Log("Session State: " + _networkManager.sessionState);
+        
         if(_networkManager.sessionState == NetworkManager.SessionState.IN_GAME)
         {
             conn.Send(new StartMatchLoad(), Channels.DefaultReliable);
@@ -392,12 +394,14 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
             
             if(!c.isSimulating)
             {
-                c.state.previousPosition = c.state.position;
-                c.state.position = newState.position + (newState.velocity * lag);
+                c.state.previousPosition = c.view.viewRoot.position;
+                c.state.position = newState.position;
                 c.state.aimPosition = newState.aimPosition;
                 c.state.velocity = newState.velocity;
                 
                 c.view.Aim(c.state.aimPosition);
+                
+                c.view.transform.position = c.state.position;
             }
             else
             {
@@ -415,11 +419,14 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
                 {
                     //Miss Predictited / catch up 
                     // state.SetFromSnapshot(oldState);
-                    
-                    state.previousPosition = state.position  + (newState.velocity * lag);
-                    state.position = newState.position + (newState.velocity * lag);
-                    state.aimPosition = newState.aimPosition;
 
+                    state.previousPosition = c.view.viewRoot.position;
+                    state.position = newState.position;
+                    state.aimPosition = newState.aimPosition;
+                    
+                    c.view.transform.position = state.position;
+                    // c.view.viewRoot.position = state.previousPosition;
+                    
                     int startingIndex = (int)((oldStateIndex) % PlayerState.MAX_INPUTS);
                     // int currentStateIndex = (int)((state.nonAckInputBuffer.backIndex + 1) % PlayerState.MAX_INPUTS);
                     int index = startingIndex;

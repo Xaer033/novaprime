@@ -97,7 +97,7 @@ public class MultiplayerSetupView : UIView
 
             if(_serverEntryPrefab != null)
             {
-                if(eventName == MenuUIEventType.CREAT_SERVER_AS_HOST ||
+                if(eventName == MenuUIEventType.CREATE_SERVER_AS_HOST ||
                 eventName == MenuUIEventType.CREATE_SERVER)
                 {
                     serverIPAddress = _serverNameInput.text;
@@ -148,7 +148,7 @@ public class MultiplayerSetupView : UIView
     private string getEventForEvent(GeneralEvent e)
     {   
         if((GButton)e.data == serverButton)     return MenuUIEventType.CREATE_SERVER;
-        if((GButton)e.data == hostButton)       return MenuUIEventType.CREAT_SERVER_AS_HOST;
+        if((GButton)e.data == hostButton)       return MenuUIEventType.CREATE_SERVER_AS_HOST;
         if((GButton)e.data == clientButton)     return MenuUIEventType.JOIN_SERVER;
         if((GButton)e.data == refreshButton)    return MenuUIEventType.REFRESH_SERVER_LIST;
         if((GButton)e.data == joinRoomButton)   return MenuUIEventType.JOIN_LISTED_SERVER;

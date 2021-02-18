@@ -190,7 +190,7 @@ public class NetworkManager : Mirror.NetworkManager
         string result = "";
         bool didSucceed = false;
         
-        if (www.isNetworkError || www.isHttpError)
+        if (www.result == UnityWebRequest.Result.ConnectionError)
         {
             Debug.LogError(www.error);
         }

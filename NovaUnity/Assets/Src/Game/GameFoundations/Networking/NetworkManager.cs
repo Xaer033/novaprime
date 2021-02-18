@@ -450,7 +450,6 @@ public class NetworkManager : Mirror.NetworkManager
             PlayerSlot playerSlot = player.playerSlot;
 
             returnPlayerNumber(playerSlot);
-            _serverNetPlayerMap.Remove(conn.connectionId);
 
             SyncLobbyPlayers syncPlayersMessage = new SyncLobbyPlayers();
             syncPlayersMessage.playerList = _serverNetPlayerMap.Values.ToArray();
@@ -460,6 +459,8 @@ public class NetworkManager : Mirror.NetworkManager
         }
 
         onServerDisconnect?.Invoke(conn);
+        
+        _serverNetPlayerMap.Remove(conn.connectionId);
     }
 
     public override void OnServerError(NetworkConnection conn, int errorCode)

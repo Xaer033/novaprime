@@ -299,5 +299,21 @@ namespace Mirror
             // clear the hashset because we destroyed them all
             clientOwnedObjects.Clear();
         }
+        
+        internal void UnspawnOwnedObjects()
+        {
+            // create a copy because the list might be modified when destroying
+            HashSet<NetworkIdentity> tmp = new HashSet<NetworkIdentity>(clientOwnedObjects);
+            foreach (NetworkIdentity netIdentity in tmp)
+            {
+                if (netIdentity != null)
+                {
+                    NetworkServer.UnSpawn(netIdentity.gameObject);
+                }
+            }
+
+            // clear the hashset because we destroyed them all
+            clientOwnedObjects.Clear();
+        }
     }
 }

@@ -51,32 +51,26 @@ public class MultiplayerGameplayState : IGameState
     
     public void FixedStep(float fixedDeltaTime)
     {
-        if (_gameModeController != null)
-        {
-	        _gameModeController.FixedStep(fixedDeltaTime);
-        }
+        
+	    _gameModeController?.FixedStep(fixedDeltaTime);
     }
     
     public void Step( float deltaTime )
 	{
-        if (_gameModeController != null)
-        {
-            _gameModeController.Step(deltaTime);
-        }
+        
+        _gameModeController?.Step(deltaTime);
+    
     }
 
     public void LateStep(float deltaTime)
     {
-        if (_gameModeController != null)
-        {
-            _gameModeController.LateStep(deltaTime);
-        }
+         _gameModeController?.LateStep(deltaTime);
     }
     
     public void Exit()
 	{
-        _gameModeController.RemoveListener(GameEventType.GAME_OVER, onGameOver);
-        _gameModeController.CleanUp();   
+        _gameModeController?.RemoveListener(GameEventType.GAME_OVER, onGameOver);
+        _gameModeController?.CleanUp();   
     }
 
 
@@ -90,8 +84,8 @@ public class MultiplayerGameplayState : IGameState
     private void startGameSystems()
     {
         _gameModeController = new MultiplayerCampaignMode();
-        _gameModeController.AddListener(GameEventType.GAME_OVER, onGameOver);
-        _gameModeController.Start(null);
+        _gameModeController?.AddListener(GameEventType.GAME_OVER, onGameOver);
+        _gameModeController?.Start(null);
     }
     
     private void onGameOver(GeneralEvent e)

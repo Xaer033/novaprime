@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Mirror;
 
 [Serializable]
@@ -9,6 +10,6 @@ public struct NetFrameSnapshot : NetworkMessage
     
     public uint frameTick;
     public double sendTime;
-    public int playerCount;
-    public NetPlayerState[] playerStateList;
+    
+    public List<NetPlayerState> playerStateList;
 }

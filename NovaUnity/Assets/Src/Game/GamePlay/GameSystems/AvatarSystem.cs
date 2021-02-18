@@ -91,7 +91,11 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
             
             if(!hasInput && _lastInputMap.ContainsKey(controller.uuid))
             {
-                newInputPair.input =  _lastInputMap[controller.uuid];     
+                 newInputPair.input =  _lastInputMap[controller.uuid];  
+                
+                // TODO: TEMP!
+                PlayerState pState = controller.state as PlayerState;
+                newInputPair = pState != null ? pState.latestInput : newInputPair;
             }
 
             if(NetworkServer.active || controller.isSimulating)
@@ -101,10 +105,13 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
                 controller.FixedStep(fixedDeltaTime, newInputPair.input);
 
                 PlayerState pState = (PlayerState)controller.state;
-                if(pState != null) // Check again to make sure only the client does this part
+                if(pState != null && controller.isSimulating) // Check again to make sure only the client does this part
                 {
-                    // pState.nonAckInputBuffer.PushBack(newInputPair);
-                    // pState.nonAckStateBuffer.PushBack(pState.Snapshot());   
+                    // newInputPair.tick = NetworkManager.frameTick;
+                    // pState.latestInput.tick = NetworkManager.frameTick;
+                    
+                    pState.nonAckInputBuffer.PushBack(newInputPair);
+                    pState.nonAckStateBuffer.PushBack(pState.Snapshot());
                 }
             }
 
@@ -139,7 +146,8 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
                 {
                     pState.latestInput = new PlayerInputTickPair
                     {
-                        input = _lastInputMap[controller.uuid]
+                        input = _lastInputMap[controller.uuid],
+                        tick = NetworkManager.frameTick
                     };
                 }
             } 

@@ -9,7 +9,7 @@ public struct NetPlayerState
     public Vector2 aimPosition;
     public uint netId;
     public uint sequence;
-    public uint ackSequence;
+    public uint ackTick;
 
     public static NetPlayerState Create(PlayerState pState)
     {

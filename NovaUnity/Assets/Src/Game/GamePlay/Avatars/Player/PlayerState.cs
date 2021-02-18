@@ -23,27 +23,7 @@ public class PlayerState : AvatarState
 
     public PlayerStateSnapshot Snapshot()
     {
-        PlayerStateSnapshot result = new PlayerStateSnapshot
-        {
-            position             = this.position,
-            previousPosition     = this.previousPosition,
-            velocity             = this.velocity,
-            health               = this.health,
-            timeScale            = this.timeScale,
-            aimPosition          = this.aimPosition,
-            jumpCount            = this.jumpCount,
-            timeToWallUnstick    = this.timeToWallUnstick,
-            wallSlideVelocity    = this.wallSlideVelocity,
-            isWallSliding        = this.isWallSliding,
-            midairJumpTimer      = this.midairJumpTimer,
-            coyoteJumpTimer      = this.coyoteJumpTimer,
-            velocityXSmoothing   = this.velocityXSmoothing,
-            sequence             = this.sequence,
-            ackSequence          = this.ackSequence,
-            stateType            = this.stateType,
-        };
-
-        return result;
+        return new PlayerStateSnapshot(this);
     }
 
     public void SetFromSnapshot(PlayerStateSnapshot snapshot)
@@ -71,8 +51,8 @@ public class PlayerState : AvatarState
     public uint sequence;
     public uint ackSequence;
     public PlayerInputTickPair latestInput;
-    // public RingBuffer<PlayerInputTickPair> nonAckInputBuffer = new RingBuffer<PlayerInputTickPair>(MAX_INPUTS);
-    // public RingBuffer<PlayerStateSnapshot> nonAckStateBuffer = new RingBuffer<PlayerStateSnapshot>(MAX_INPUTS);
+    public RingBuffer<PlayerInputTickPair> nonAckInputBuffer = new RingBuffer<PlayerInputTickPair>(MAX_INPUTS);
+    public RingBuffer<PlayerStateSnapshot> nonAckStateBuffer = new RingBuffer<PlayerStateSnapshot>(MAX_INPUTS);
     
     public UnitStats stats;
     public MachineGunState machineGunState;

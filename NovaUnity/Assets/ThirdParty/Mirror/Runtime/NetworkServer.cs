@@ -1113,6 +1113,12 @@ namespace Mirror
             conn.identity = null;
         }
 
+        public static void UnspawnPlayerForConnection(NetworkConnection conn)
+        {
+            conn.UnspawnOwnedObjects();
+            conn.identity = null;
+        }
+
         /// <summary>
         /// Spawn the given game object on all clients which are ready.
         /// <para>This will cause a new object to be instantiated from the registered prefab, or from a custom spawn function.</para>

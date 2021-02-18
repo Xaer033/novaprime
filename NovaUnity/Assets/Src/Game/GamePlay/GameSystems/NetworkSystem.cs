@@ -21,7 +21,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     /* Server */
     private Dictionary<int, IAvatarController> _serverConnToPlayerMap;
     private List<IAvatarController> _serverPlayerControllerList;
-    private NetPlayerState[] _serverPlayerStateList;
+    private List<NetPlayerState> _serverPlayerStateList;
     private uint _serverSendSequence = 0;
     private Dictionary<PlayerSlot, ServerPlayerInputBuffer> _serverPlayerInputBuffer;
     
@@ -46,7 +46,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         
         _serverConnToPlayerMap = new Dictionary<int, IAvatarController>();
         _serverPlayerControllerList = new List<IAvatarController>();
-        _serverPlayerStateList = new NetPlayerState[MAX_PLAYERS];
+        _serverPlayerStateList = new List<NetPlayerState>(MAX_PLAYERS);
         _serverPlayerInputBuffer = new Dictionary<PlayerSlot, ServerPlayerInputBuffer>(MAX_PLAYERS);
         
         _clientTempInputBuffer = new List<PlayerInputTickPair>(PlayerState.MAX_INPUTS);
@@ -112,10 +112,10 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
 
         if(NetworkServer.active)
         {
-            ServerPlayerInputBuffer inputBuffer = _serverPlayerInputBuffer[slot];
-            if(!inputBuffer.isEmpty)
+            ServerPlayerInputBuffer inputBuffer;
+            if(_serverPlayerInputBuffer.TryGetValue(slot, out inputBuffer) && !inputBuffer.isEmpty)
             {
-                inputPair  = inputBuffer.Pop();
+                inputPair = inputBuffer.Pop();
                 result = true;
             }
         }
@@ -153,7 +153,6 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         pState.sequence = _clientSendSequence;
 
         PlayerInputTickPair lastInput = pState.latestInput;
-        lastInput.tick = _clientSendSequence;
 
         _clientTempInputBuffer.Clear();
         int latestAckIndex = (int) (pState.ackSequence % PlayerState.MAX_INPUTS);
@@ -186,6 +185,8 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     private void serverFixedStep(float fixedDeltaTime)
     {
         int currentPlayerCount = _serverPlayerControllerList.Count;
+        _serverPlayerStateList.Clear();
+        
         for(int i = 0; i < currentPlayerCount; ++i)
         {
             IAvatarController pController = _serverPlayerControllerList[i];
@@ -197,10 +198,10 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
                 
                 NetPlayerState netPlayerState = NetPlayerState.Create(state);
                 netPlayerState.netId = pController.view.netIdentity.netId;
-                netPlayerState.ackSequence = tickPair.tick;
-                netPlayerState.sequence = state.sequence;
+                netPlayerState.ackTick = tickPair.tick;
+                // netPlayerState.sequence = state.sequence;
                 
-                _serverPlayerStateList[i] = netPlayerState;
+                _serverPlayerStateList.Add(netPlayerState);
 
                 state.sequence++;
             }
@@ -208,7 +209,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
 
         NetChannelHeader channelHeader = new NetChannelHeader
         {
-            sequence = NetworkManager.frameTick,
+            sequence = _serverSendSequence,
         };
         
         NetFrameSnapshot snapshot = new NetFrameSnapshot
@@ -216,7 +217,6 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
             frameTick = NetworkManager.frameTick,
             sendTime = NetworkTime.time,
             header = channelHeader,
-            playerCount = currentPlayerCount,
             playerStateList = _serverPlayerStateList
         };
         
@@ -246,7 +246,16 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
 
     private void onServerDisconnect(NetworkConnection conn)
     {
-        NetworkServer.DestroyPlayerForConnection(conn);
+        IAvatarController controller = _serverConnToPlayerMap[conn.connectionId];
+        NetPlayer netPlayer = _networkManager.GetServerPlayerFromConnId(conn.connectionId);
+        
+        _serverConnToPlayerMap?.Remove(conn.connectionId);
+        _serverPlayerInputBuffer?.Remove(netPlayer.playerSlot);
+        _serverPlayerControllerList?.Remove(controller);
+
+        NetworkServer.UnSpawn(controller?.view?.gameObject);
+        _avatarSystem.UnSpawn(controller?.view?.gameObject); // Unspawn locally
+        
     }
     
     private void onServerSendPlayerInput(NetworkConnection conn, SendPlayerInput msg)
@@ -382,7 +391,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     private void clientProcessNetSnapshot(NetFrameSnapshot snapshot)
     {
         float lag = Mathf.Abs((float) (NetworkTime.time - snapshot.sendTime));
-        for(int i = 0; i < snapshot.playerCount; ++i)
+        for(int i = 0; i < snapshot.playerStateList.Count; ++i)
         {
             NetPlayerState newState = snapshot.playerStateList[i];
             IAvatarController c = _avatarSystem.GetPlayerByNetId(newState.netId);
@@ -391,64 +400,79 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
             {
                 continue;    
             }
+
+            PlayerState state = c.state as PlayerState;
+            
+            // if(state.ackSequence >= newState.ackTick)
+            // {
+            //     continue;
+            // }
+            
+            state.ackSequence = newState.ackTick;
             
             if(!c.isSimulating)
             {
-                c.state.previousPosition = c.view.viewRoot.position;
-                c.state.position = newState.position;
-                c.state.aimPosition = newState.aimPosition;
-                c.state.velocity = newState.velocity;
+                c.state.previousPosition    = c.state.position;//c.view.viewRoot.position;
+                c.state.position            = newState.position;
+                c.state.aimPosition         = newState.aimPosition;
+                c.state.velocity            = newState.velocity;
+                
+                c.view.transform.position   = c.state.position;
+                c.view.viewRoot.position    = c.state.previousPosition;
                 
                 c.view.Aim(c.state.aimPosition);
-                
-                c.view.transform.position = c.state.position;
             }
             else
             {
-                PlayerState state = c.state as PlayerState;
-                state.ackSequence = newState.ackSequence;
-                _clientAckSequence = newState.ackSequence;
-                
-                int oldStateIndex = (int)(newState.ackSequence % PlayerState.MAX_INPUTS);
-                
-                // PlayerStateSnapshot oldState = state.nonAckStateBuffer[oldStateIndex];
-                // Vector2 deltaPosition = (Vector2)oldState.position - newState.position;
-                // Vector2 deltaAimPosition = (Vector2)oldState.aimPosition - newState.aimPosition;
-             
-                // if(deltaPosition.sqrMagnitude > 0.01f)// || deltaAimPosition.sqrMagnitude > 0.01f)
+                int oldStateIndex = -1;
+                for(int b = 0; b < state.nonAckInputBuffer.backIndex; ++b)
                 {
-                    //Miss Predictited / catch up 
-                    // state.SetFromSnapshot(oldState);
-
-                    state.previousPosition = c.view.viewRoot.position;
+                    if(state.nonAckInputBuffer[b].tick == newState.ackTick)
+                    {
+                        oldStateIndex = b;
+                        break;
+                    }
+                }
+                
+                // int oldStateIndex = (int)((newState.ackTick - 1) % PlayerState.MAX_INPUTS);
+                if(oldStateIndex < 0)
+                {
+                    state.previousPosition = state.position;//c.view.viewRoot.position;
                     state.position = newState.position;
                     state.aimPosition = newState.aimPosition;
+                }
+                else
+                {
+                    PlayerStateSnapshot oldState = state.nonAckStateBuffer[oldStateIndex];
+                    Vector2 deltaPosition = oldState.position - newState.position;
+                    Vector2 deltaAimPosition = oldState.aimPosition - newState.aimPosition;
+                 
+                    if(deltaPosition.sqrMagnitude > 0.1f)// || deltaAimPosition.sqrMagnitude > 0.01f)
+                    {
+                        //Miss Predictited / catch up 
+                        state.SetFromSnapshot(oldState);
+
+                        state.previousPosition = state.position;//c.view.viewRoot.position;
+                        state.position = newState.position;
+                        state.aimPosition = newState.aimPosition;
+                        
+                        c.view.transform.position = state.position;
+                        c.view.viewRoot.position     = state.previousPosition;
+
+                        int currentStateIndex = (int)((state.nonAckInputBuffer.backIndex + 1) % PlayerState.MAX_INPUTS);
+                        int index = oldStateIndex;
+                        
+                        while(index != currentStateIndex)
+                        {
+                            Debug.LogFormat("Index info: {0}, {1}, {2}", oldStateIndex, currentStateIndex, index);
                     
-                    c.view.transform.position = state.position;
-                    // c.view.viewRoot.position = state.previousPosition;
+                            PlayerInputTickPair simInput = state.nonAckInputBuffer[index];
+                            c.FixedStep(Time.fixedDeltaTime, simInput.input);
+                            state.nonAckStateBuffer[index] = state.Snapshot();
                     
-                    int startingIndex = (int)((oldStateIndex) % PlayerState.MAX_INPUTS);
-                    // int currentStateIndex = (int)((state.nonAckInputBuffer.backIndex + 1) % PlayerState.MAX_INPUTS);
-                    int index = startingIndex;
-                    
-                    // while(index != currentStateIndex)
-                    // {
-                    //     try
-                    //     {
-                    //         Debug.LogFormat("Index info: {0}, {1}, {2}", startingIndex, currentStateIndex, index);
-                    //
-                    //         PlayerInputTickPair simInput = state.nonAckInputBuffer[index];
-                    //         c.FixedStep(Time.fixedDeltaTime, simInput.input);
-                    //         state.nonAckStateBuffer[index] = state.Snapshot();
-                    //
-                    //         index = (int) ((index + 1) % PlayerState.MAX_INPUTS);
-                    //     }
-                    //     catch(Exception e)
-                    //     {
-                    //         Debug.LogErrorFormat("Error info: {0}, {1}, {2}", startingIndex, currentStateIndex, index);
-                    //         break;
-                    //     }
-                    // } 
+                            index = (int) ((index + 1) % PlayerState.MAX_INPUTS); 
+                        } 
+                    }
                 }
             }
         }

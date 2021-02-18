@@ -1,5 +1,4 @@
 using GhostGen;
-using Mirror;
 using UnityEngine;
 
 public class PlayerController : NotificationDispatcher, IAvatarController
@@ -97,7 +96,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     {
         _gameSystems = gameSystems;
         
-        setupNetCallbacks(_view.netEntity);
+        // setupNetCallbacks(_view.netEntity);
         
         float timeToJumpApex = _unitStats.timeToJumpApex;
         _gravity = -(2 * _unitStats.maxJumpHeight) / (timeToJumpApex * timeToJumpApex);
@@ -115,7 +114,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     {
         if(view != null)
         {
-            cleanupNetCallbacks(view.netEntity);
+            // cleanupNetCallbacks(view.netEntity);
         }
     }
 
@@ -517,7 +516,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         
         _move(_state.velocity * deltaTime, input, false);
 
-        if(NetworkServer.active)
+        if(Singleton.instance.networkManager.Server.Active)
         {
             _crushedFrameCount = collisionInfo.crushed ? _crushedFrameCount + 1 : 0;
             if(collisionInfo.crushed)
@@ -613,117 +612,117 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         return attack;
     }
 
-    private void setupNetCallbacks(NetworkEntity netEntity)
-    {
-        if(playerNetEntity)
-        {
-            if(NetworkClient.active)
-            {
-                playerNetEntity.onClientUpdate += onClientUpdate;                         
-            }
-
-            if(NetworkServer.active)
-            {
-                playerNetEntity.onServerUpdate += onServerUpdate;
-            }
-        }
-        else
-        {
-            Debug.LogErrorFormat("Net Entity for Player: {0} is null!", _state.playerSlot);        
-        }
-    }
-
-    private void cleanupNetCallbacks(NetworkEntity netEntity)
-    {
-        if(playerNetEntity)
-        {
-            if(NetworkClient.active)
-            {
-               // playerNetEntity.onClientUpdate -= onClientUpdate;                            
-            }
-            
-            if(NetworkServer.active)
-            {
-                playerNetEntity.onServerUpdate -= onServerUpdate;
-            }
-        }
-    }
-
-    private void onClientUpdate(IAvatarView pView, double sendTimestamp, Vector2 velocity, Vector2 position, Vector2 aimPosition)
-    {
-        if(playerNetEntity.hasAuthority)
-        {
-            return;
-        }
-        
-        float lag = Mathf.Abs((float) (NetworkTime.time - sendTimestamp));
-        
-        
-        _state.velocity = velocity;
-        _state.previousPosition = _state.position;//view.viewRoot.position; // Maybe experiment using the current viewRoot position
-        _state.position = position + (velocity * lag);
-        _state.aimPosition = aimPosition;
-        
-        view.transform.position = _state.position;
-        // view.viewRoot.position  = _state.previousPosition;
-        
-        pView.Aim(aimPosition);
-        
-        // Debug.Log("Got clientUpdate");
-    }
-
-    private void onServerUpdate(IAvatarView pView, Vector2 velocity, Vector2 position, Vector2 aimPosition)
-    {
-        if(!pView.netIdentity.isLocalPlayer)
-        {
-            _state.previousPosition = _state.position;
-            _state.position = position;
-            _state.velocity = velocity;
-            _state.aimPosition = aimPosition;            
-        }
-        
-        playerNetEntity?.RpcClientUpdate(
-                NetworkTime.time,
-                _state.velocity, 
-                _state.position, 
-                _state.aimPosition);
-    }
-
-    private PlayerNetEntity playerNetEntity
-    {
-        get { return _view.netEntity as PlayerNetEntity;}
-    }
-    
-    private bool onNetworkSerialize(IAvatarView view, NetworkWriter writer, bool isInitialState)
-    {
-        Vector2 prevPos = new Vector2(_state.previousPosition.x, _state.previousPosition.y);
-        Vector2 pos = new Vector2(_state.position.x, _state.position.y);
-        Vector2 aimPos = new Vector2(_state.aimPosition.x, _state.aimPosition.y);
-        
-        
-        writer.WriteVector2(prevPos);
-        writer.WriteVector2(pos);
-        writer.WriteVector2(aimPos);
-        Debug.Log("Writing: " + state.uuid);
-        return true;
-    }
-
-    private void onNetworkDeserialize(IAvatarView view, NetworkReader reader, bool isInitialState)
-    {
-        Vector2 prevPos = reader.ReadVector2();
-        Vector2 pos = reader.ReadVector2();
-        Vector2 aimPos = reader.ReadVector2();
-
-
-        _state.position = pos;
-        _state.previousPosition = view.viewRoot.position; // Maybe experiment using the current viewRoot position
-        _state.aimPosition = aimPos;
-        
-        view.transform.position    = _state.position;
-        view.viewRoot.position     = _state.previousPosition;
-        Debug.Log("Reading: " + state.uuid);
-    }
-    
+    // private void setupNetCallbacks(NetworkEntity netEntity)
+    // {
+    //     if(playerNetEntity)
+    //     {
+    //         if(NetworkClient.active)
+    //         {
+    //             playerNetEntity.onClientUpdate += onClientUpdate;                         
+    //         }
+    //
+    //         if(NetworkServer.active)
+    //         {
+    //             playerNetEntity.onServerUpdate += onServerUpdate;
+    //         }
+    //     }
+    //     else
+    //     {
+    //         Debug.LogErrorFormat("Net Entity for Player: {0} is null!", _state.playerSlot);        
+    //     }
+    // }
+    //
+    // private void cleanupNetCallbacks(NetworkEntity netEntity)
+    // {
+    //     if(playerNetEntity)
+    //     {
+    //         if(NetworkClient.active)
+    //         {
+    //            // playerNetEntity.onClientUpdate -= onClientUpdate;                            
+    //         }
+    //         
+    //         if(NetworkServer.active)
+    //         {
+    //             playerNetEntity.onServerUpdate -= onServerUpdate;
+    //         }
+    //     }
+    // }
+    //
+    // private void onClientUpdate(IAvatarView pView, double sendTimestamp, Vector2 velocity, Vector2 position, Vector2 aimPosition)
+    // {
+    //     if(playerNetEntity.hasAuthority)
+    //     {
+    //         return;
+    //     }
+    //     
+    //     float lag = Mathf.Abs((float) (NetworkTime.time - sendTimestamp));
+    //     
+    //     
+    //     _state.velocity = velocity;
+    //     _state.previousPosition = _state.position;//view.viewRoot.position; // Maybe experiment using the current viewRoot position
+    //     _state.position = position + (velocity * lag);
+    //     _state.aimPosition = aimPosition;
+    //     
+    //     view.transform.position = _state.position;
+    //     // view.viewRoot.position  = _state.previousPosition;
+    //     
+    //     pView.Aim(aimPosition);
+    //     
+    //     // Debug.Log("Got clientUpdate");
+    // }
+    //
+    // private void onServerUpdate(IAvatarView pView, Vector2 velocity, Vector2 position, Vector2 aimPosition)
+    // {
+    //     if(!pView.netIdentity.isLocalPlayer)
+    //     {
+    //         _state.previousPosition = _state.position;
+    //         _state.position = position;
+    //         _state.velocity = velocity;
+    //         _state.aimPosition = aimPosition;            
+    //     }
+    //     
+    //     playerNetEntity?.RpcClientUpdate(
+    //             NetworkTime.time,
+    //             _state.velocity, 
+    //             _state.position, 
+    //             _state.aimPosition);
+    // }
+    //
+    // private PlayerNetEntity playerNetEntity
+    // {
+    //     get { return _view.netEntity as PlayerNetEntity;}
+    // }
+    //
+    // private bool onNetworkSerialize(IAvatarView view, NetworkWriter writer, bool isInitialState)
+    // {
+    //     Vector2 prevPos = new Vector2(_state.previousPosition.x, _state.previousPosition.y);
+    //     Vector2 pos = new Vector2(_state.position.x, _state.position.y);
+    //     Vector2 aimPos = new Vector2(_state.aimPosition.x, _state.aimPosition.y);
+    //     
+    //     
+    //     writer.WriteVector2(prevPos);
+    //     writer.WriteVector2(pos);
+    //     writer.WriteVector2(aimPos);
+    //     Debug.Log("Writing: " + state.uuid);
+    //     return true;
+    // }
+    //
+    // private void onNetworkDeserialize(IAvatarView view, NetworkReader reader, bool isInitialState)
+    // {
+    //     Vector2 prevPos = reader.ReadVector2();
+    //     Vector2 pos = reader.ReadVector2();
+    //     Vector2 aimPos = reader.ReadVector2();
+    //
+    //
+    //     _state.position = pos;
+    //     _state.previousPosition = view.viewRoot.position; // Maybe experiment using the current viewRoot position
+    //     _state.aimPosition = aimPos;
+    //     
+    //     view.transform.position    = _state.position;
+    //     view.viewRoot.position     = _state.previousPosition;
+    //     Debug.Log("Reading: " + state.uuid);
+    // }
+    //
     
     private struct AnimationInfo
     {

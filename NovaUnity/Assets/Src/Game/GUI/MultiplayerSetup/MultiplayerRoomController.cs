@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using GhostGen;
-using Mirror;
+using Mirage;
 using UnityEngine;
 
 public class MultiplayerRoomController : BaseController 
@@ -25,17 +25,18 @@ public class MultiplayerRoomController : BaseController
             view.AddListener(MenuUIEventType.BACK, onBackButton);
 
             
-            if(!_isServer)
-            {
-                _networkManager.onClientLocalDisconnect += onClientLocalDisconnect;
-            }
+            // if(!_isServer)
+            // {
+            //     _networkManager.onClientLocalDisconnect += onClientLocalDisconnect;
+            // }
 
 
-            if(NetworkClient.active)
+            if(_networkManager.Client.Active)
             {
                 _networkManager.onClientConfirmReadyUp += onClientConfirmReadyUp;
                 _networkManager.onClientSyncLobbyPlayers += onClientSyncLobbyPlayers;
                 _networkManager.onClientStartMatchLoad += onClientStartMatchLoad;
+                _networkManager.onClientDisconnect += onClientLocalDisconnect;
             }
 
             if(_networkManager.isPureServer)
@@ -59,7 +60,7 @@ public class MultiplayerRoomController : BaseController
     {
         if(!_isServer)
         {
-            _networkManager.onClientLocalDisconnect -= onClientLocalDisconnect;
+            _networkManager.onClientDisconnect -= onClientLocalDisconnect;
         }
 
         // if(NetworkClient.active || _wasDisconnected)
@@ -84,19 +85,19 @@ public class MultiplayerRoomController : BaseController
     }
 
 
-    private void onServerConnect(NetworkConnection conn)
+    private void onServerConnect(INetworkConnection conn)
     {
         _setupPlayers(_networkManager.GetServerPlayerMap());    
     }
 
-    private void onServerDisconnect(NetworkConnection conn)
+    private void onServerDisconnect(INetworkConnection conn)
     {
         _setupPlayers(_networkManager.GetServerPlayerMap());
     }
 
-    private void onServerConfirmReadyUp(NetworkConnection conn, ConfirmReadyUp msg)
+    private void onServerConfirmReadyUp(INetworkConnection conn, ConfirmReadyUp msg)
     {
-        if(NetworkServer.active)
+        if(_networkManager.Server.Active)
         {
             roomView.startButton.gameObject.SetActive(msg.allPlayersReady);    
         }
@@ -104,9 +105,9 @@ public class MultiplayerRoomController : BaseController
         _setupPlayers(_networkManager.GetServerPlayerMap());
     }
     
-    private void onClientConfirmReadyUp(NetworkConnection conn, ConfirmReadyUp msg)
+    private void onClientConfirmReadyUp(INetworkConnection conn, ConfirmReadyUp msg)
     {
-        if(NetworkServer.active)
+        if(_networkManager.Server.Active)
         {
             roomView.startButton.gameObject.SetActive(msg.allPlayersReady);    
         }
@@ -114,17 +115,17 @@ public class MultiplayerRoomController : BaseController
         _setupPlayers(_networkManager.GetClientPlayerMap());
     }
 
-    private void onClientSyncLobbyPlayers(NetworkConnection conn, SyncLobbyPlayers msg)
+    private void onClientSyncLobbyPlayers(INetworkConnection conn, SyncLobbyPlayers msg)
     {
         _setupPlayers(_networkManager.GetClientPlayerMap());
     }
 
-    private void onClientStartMatchLoad(NetworkConnection conn, StartMatchLoad msg)
+    private void onClientStartMatchLoad(INetworkConnection conn, StartMatchLoad msg)
     {
         DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_GAME);
     }
     
-    private void onClientLocalDisconnect(NetworkConnection conn)
+    private void onClientLocalDisconnect()
     {
         _networkManager.Disconnect();
         DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);
@@ -163,7 +164,7 @@ public class MultiplayerRoomController : BaseController
             Debug.Log("Ready Button State: " + requestedReadyState);
             RequestReadyUp readyRequest = new RequestReadyUp(requestedReadyState);
 
-            NetworkClient.Send(readyRequest, Channels.DefaultReliable);
+            _networkManager.Client.Send(readyRequest, Channel.Reliable);
         }
     }
 
@@ -199,7 +200,7 @@ public class MultiplayerRoomController : BaseController
             }
             else
             {
-                roomView.SetPlayer(i, new NetPlayer(-1));
+                roomView.SetPlayer(i, new NetPlayer(null));
             }
         }
     }

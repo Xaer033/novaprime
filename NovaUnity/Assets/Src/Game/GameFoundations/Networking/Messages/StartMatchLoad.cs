@@ -1,6 +1,7 @@
-﻿using Mirror;
+﻿using Mirage;
 
-public struct StartMatchLoad : NetworkMessage
+[NetworkMessage]
+public struct StartMatchLoad
 {
 
 }

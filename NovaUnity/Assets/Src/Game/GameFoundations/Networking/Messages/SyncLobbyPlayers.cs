@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using Mirror;
+﻿using System.Collections.Generic;
+using Mirage;
 
-public struct SyncLobbyPlayers : NetworkMessage
+[NetworkMessage]
+public struct SyncLobbyPlayers
 {
     // public Dictionary<int, NetPlayer> playerMap;
 

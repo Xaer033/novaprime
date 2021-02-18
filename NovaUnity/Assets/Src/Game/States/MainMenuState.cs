@@ -1,5 +1,4 @@
 ﻿using GhostGen;
-using Mirror;
 using UnityEngine.SceneManagement;
 
 public class MainMenuState : IGameState
@@ -99,7 +98,7 @@ public class MainMenuState : IGameState
 		_multiplayerSetupController?.RemoveView();
 
 		
-		_multiplayerRoomController = new MultiplayerRoomController(NetworkServer.active);
+		_multiplayerRoomController = new MultiplayerRoomController(Singleton.instance.networkManager.Server.Active);
 		_multiplayerRoomController.AddListener(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY, onMultiplayerSetupMenu);
 		_multiplayerRoomController.AddListener(MenuUIEventType.GOTO_MULTIPLAYER_GAME, onStartMultiplayerGame);
 		_multiplayerRoomController.AddListener(MenuUIEventType.GOTO_MAIN_MENU, onMainMenu);

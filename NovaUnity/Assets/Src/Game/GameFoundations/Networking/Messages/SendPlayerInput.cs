@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
-using Mirror;
+using Mirage;
 
-public struct SendPlayerInput : NetworkMessage
+[NetworkMessage]
+public struct SendPlayerInput 
 {
     public NetChannelHeader header;
     

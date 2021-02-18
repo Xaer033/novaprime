@@ -1,6 +1,7 @@
-﻿using Mirror;
+﻿using Mirage;
 
-public struct ConfirmReadyUp : NetworkMessage
+[NetworkMessage]
+public struct ConfirmReadyUp
 {
     public PlayerSlot playerSlot;
     public bool isReady;

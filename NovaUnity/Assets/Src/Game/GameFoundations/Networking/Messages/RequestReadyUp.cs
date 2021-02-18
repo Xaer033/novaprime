@@ -1,6 +1,7 @@
-﻿using Mirror;
+﻿using Mirage;
 
-public struct RequestReadyUp : NetworkMessage
+[NetworkMessage]
+public struct RequestReadyUp
 {
     public bool isReady;
     

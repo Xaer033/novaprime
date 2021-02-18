@@ -1,15 +1,15 @@
 using System;
 using Cinemachine;
 using GhostGen;
-using Mirror;
+using Mirage;
 using UnityEngine;
 using UnityEngine.Animations;
 
 public class AvatarView : EventDispatcherBehavior, 
-                            IAvatarView, 
-                            IPlatformPassenger, 
-                            ITimeWarpTarget, 
-                            IAttackTarget
+                          IAvatarView, 
+                          IPlatformPassenger, 
+                          ITimeWarpTarget, 
+                          IAttackTarget
 {
     
     // [BoxGroup("Hooks")]
@@ -31,7 +31,7 @@ public class AvatarView : EventDispatcherBehavior,
     public ParentConstraint _rightHandConstraint;
     
     public AvatarConstrainer constrainer;
-    public NetworkEntity _netEntity;    
+    public NetworkIdentity _identity;   
     public Animator _animator;
 
 
@@ -88,14 +88,9 @@ public class AvatarView : EventDispatcherBehavior,
     
     public NetworkIdentity netIdentity
     {
-        get => _netEntity.netIdentity;
+        get => _identity;
     }
 
-    public NetworkEntity netEntity
-    {
-        get => _netEntity;
-    }
-    
     public Animator animator
     {
         get { return _animator; }

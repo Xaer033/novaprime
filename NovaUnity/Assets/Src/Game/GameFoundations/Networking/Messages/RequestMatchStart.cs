@@ -1,6 +1,7 @@
-﻿using Mirror;
+﻿using Mirage;
 
-public struct RequestMatchStart : NetworkMessage
+[NetworkMessage]
+public struct RequestMatchStart
 {
 
 }

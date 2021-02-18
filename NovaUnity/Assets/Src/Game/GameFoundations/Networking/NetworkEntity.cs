@@ -1,5 +1,6 @@
 ﻿using System;
-using Mirror;
+using Mirage;
+
 
 public class NetworkEntity : NetworkBehaviour
 {
@@ -39,39 +40,39 @@ public class NetworkEntity : NetworkBehaviour
         base.OnDeserialize(reader, initialState);
         onDeserialize?.Invoke(_view, reader, initialState);
     }
-
-    public override void OnStartAuthority()
-    {
-        onStartAuthority?.Invoke(_view);
-    }
-
-    public override void OnStopAuthority()
-    {
-        onStopAuthority?.Invoke(_view);
-    }
-
-    public override void OnStartClient()
-    {
-        onStartClient?.Invoke(_view);
-    }
-
-    public override void OnStartServer()
-    {
-        onStartServer?.Invoke(_view);
-    }
-
-    public override void OnStartLocalPlayer()
-    {
-        onStartLocalPlayer?.Invoke(_view);
-    }
-
-    public override void OnStopClient()
-    {
-        onStopClient?.Invoke(_view);
-    }
-
-    public override void OnStopServer()
-    {
-        onStopServer?.Invoke(_view);
-    }  
+    //
+    // public override void OnStartAuthority()
+    // {
+    //     onStartAuthority?.Invoke(_view);
+    // }
+    //
+    // public override void OnStopAuthority()
+    // {
+    //     onStopAuthority?.Invoke(_view);
+    // }
+    //
+    // public override void OnStartClient()
+    // {
+    //     onStartClient?.Invoke(_view);
+    // }
+    //
+    // public override void OnStartServer()
+    // {
+    //     onStartServer?.Invoke(_view);
+    // }
+    //
+    // public override void OnStartLocalPlayer()
+    // {
+    //     onStartLocalPlayer?.Invoke(_view);
+    // }
+    //
+    // public override void OnStopClient()
+    // {
+    //     onStopClient?.Invoke(_view);
+    // }
+    //
+    // public override void OnStopServer()
+    // {
+    //     onStopServer?.Invoke(_view);
+    // }  
 }

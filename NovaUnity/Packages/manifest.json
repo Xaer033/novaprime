@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.miragenet.mirage": "66.2.1",
     "com.unity.2d.animation": "5.0.3",
     "com.unity.2d.psdimporter": "4.0.2",
     "com.unity.2d.sprite": "1.0.0",
@@ -60,5 +61,16 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
-  }
+  },
+  "scopedRegistries": [
+    {
+      "name": "OpenUPM",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "com.cysharp.unitask",
+        "com.openupm",
+        "com.miragenet"
+      ]
+    }
+  ]
 }

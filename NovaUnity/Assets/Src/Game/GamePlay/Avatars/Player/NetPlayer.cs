@@ -1,19 +1,23 @@
-﻿public struct NetPlayer
+﻿using System;
+using Mirage;
+
+public struct NetPlayer
 {
-    public int connectionId;
+    [NonSerialized]
+    public INetworkConnection connection;
     public PlayerSlot playerSlot;
     public string nickName;
     public bool isReadyUp;
     public bool isMatchReady;
     
     public NetPlayer(
-                int connId, 
+                INetworkConnection conn, 
                 PlayerSlot pSlot = PlayerSlot.NONE, 
                 string name = "", 
                 bool ready = false, 
                 bool matchReady = false)
     {
-        connectionId = connId;
+        connection = conn;
         playerSlot = pSlot;
         nickName = name;
         isReadyUp = ready;

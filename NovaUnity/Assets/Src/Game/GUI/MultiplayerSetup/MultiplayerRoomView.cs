@@ -76,7 +76,7 @@ public class MultiplayerRoomView : UIView
         Assert.IsTrue(index < _playerItemViewList.Count);
     
         RoomPlayerItemView pView = _playerItemViewList[index];
-        if(player.connectionId >= 0)
+        if(player.connection != null)// >= 0)
         {
             PlayerRoomData pData = new PlayerRoomData();
             pData.playerSlot = player.playerSlot;

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using GhostGen;
-using Mirror;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -98,7 +97,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
                 newInputPair = pState != null ? pState.latestInput : newInputPair;
             }
 
-            if(NetworkServer.active || controller.isSimulating)
+            if(Singleton.instance.networkManager.Server.Active || controller.isSimulating)
             {
                 _frameInputList.Add(newInputPair.input);
 
@@ -226,7 +225,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
             if(controller == null) 
                 continue;
             
-            if(controller?.view?.netIdentity.netId == netId)
+            if(controller?.view?.netIdentity.NetId == netId)
                 return controller;        
         }
         return null;

@@ -1,6 +1,7 @@
-﻿using Mirror;
+﻿using Mirage;
 
-public struct PlayerMatchLoadComplete : NetworkMessage
+[NetworkMessage]
+public struct PlayerMatchLoadComplete
 {
 
 }

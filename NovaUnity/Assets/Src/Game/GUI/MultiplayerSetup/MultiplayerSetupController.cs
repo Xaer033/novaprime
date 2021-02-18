@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks.Triggers;
 using GhostGen;
-using Mirror;
+using Mirage;
 using UnityEngine;
 
 public class MultiplayerSetupController : BaseController 
@@ -32,7 +33,7 @@ public class MultiplayerSetupController : BaseController
 
             setupView.SetSelectedItemCallback(onRoomClicked);
 
-            _networkManager.fetchMasterServerList(onFetchComplete);
+            _networkManager.FetchMasterServerList(onFetchComplete);
 
         });
     }
@@ -66,7 +67,7 @@ public class MultiplayerSetupController : BaseController
         _serverName = e.data as string;
         
         _networkManager.onServerStarted += onServerStarted;
-        _networkManager.StartServer();
+        _networkManager.Server.StartAsync(); // StartServer();
     }
 
     private void onCreateServerAsHost(GeneralEvent e)
@@ -74,14 +75,14 @@ public class MultiplayerSetupController : BaseController
         _serverName = e.data as string;
         
         _networkManager.onServerStarted += onServerStarted;
-        _networkManager.StartHost();
+        _networkManager.Server.StartHost(_networkManager.Client);
     }
     
     private void onServerStarted()
     {
         _networkManager.onServerStarted -= onServerStarted;
 
-        _networkManager.fetchExternalIpAddress((wasSuccessfull, ipAddress) =>
+        _networkManager.FetchExternalIpAddress((wasSuccessfull, ipAddress) =>
         {
             // Inform the master server
             ServerListEntry entry = new ServerListEntry
@@ -96,7 +97,7 @@ public class MultiplayerSetupController : BaseController
 
             _networkManager.serverEntry = entry;
             
-            _networkManager.addServerToMasterList(entry, null);
+            _networkManager.AddServerToMasterList(entry, null);
             DispatchEvent(MenuUIEventType.GOTO_NETWORK_ROOM);
         });
     }
@@ -105,7 +106,7 @@ public class MultiplayerSetupController : BaseController
     {
         setupView.StartLoadingTween();
         
-        _networkManager.fetchMasterServerList(onFetchComplete);   
+        _networkManager.FetchMasterServerList(onFetchComplete);   
     }
 
     private void onJoinListedServer(GeneralEvent e)
@@ -121,7 +122,7 @@ public class MultiplayerSetupController : BaseController
     private void onJoinServer(GeneralEvent e)
     {
         string serverIpAddress = e.data as string;
-        _networkManager.networkAddress = serverIpAddress;
+        // _networkManager.networkAddress = serverIpAddress;
 
         Uri uri = new Uri(serverIpAddress + ":11666");
         joinServer(uri);
@@ -132,7 +133,7 @@ public class MultiplayerSetupController : BaseController
         _networkManager.onClientConnect += onClientConnect;
         
         Debug.Log("Joining Server: " + uri.AbsoluteUri);
-        _networkManager.StartClient(uri);
+        _networkManager.Client.StartAsync();
     }
     
     private void onBackButton(GeneralEvent e)
@@ -145,7 +146,7 @@ public class MultiplayerSetupController : BaseController
     }
 
 
-    private void onClientConnect(NetworkConnection conn)
+    private void onClientConnect(INetworkConnection conn)
     {
         Debug.Log("Client Joined Server");
         
@@ -153,15 +154,15 @@ public class MultiplayerSetupController : BaseController
         _networkManager.onClientCurrentSession += onClientCurrentSession;
     }
 
-    private void onClientCurrentSession(NetworkConnection conn, CurrentSessionUpdate msg)
+    private void onClientCurrentSession(INetworkConnection conn, CurrentSessionUpdate msg)
     {
         _networkManager.onClientCurrentSession -= onClientCurrentSession;
 
-        if(msg.sessionState == NetworkManager.SessionState.IN_LOBBY)
-        {
-            DispatchEvent(MenuUIEventType.GOTO_NETWORK_ROOM);
-        }
-        else
+        // if(msg.sessionState == NetworkManager.SessionState.IN_LOBBY)
+        // {
+        //     DispatchEvent(MenuUIEventType.GOTO_NETWORK_ROOM);
+        // }
+        // else
         {
             DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_GAME);
         }

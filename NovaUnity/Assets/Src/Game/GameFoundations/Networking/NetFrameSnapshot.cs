@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using Mirror;
+using Mirage;
 
 [Serializable]
-public struct NetFrameSnapshot : NetworkMessage
+[NetworkMessage]
+public struct NetFrameSnapshot
 {
     public NetChannelHeader header;
     public uint ackBitfield;

@@ -1,6 +1,7 @@
-﻿using Mirror;
+﻿using Mirage;
 
-public struct AssignPlayerSlot : NetworkMessage
+[NetworkMessage]
+public struct AssignPlayerSlot
 {
     public PlayerSlot playerSlot;
 

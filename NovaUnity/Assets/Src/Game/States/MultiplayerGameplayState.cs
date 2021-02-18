@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using GhostGen;
-using Mirror;
+using Mirage;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -18,14 +18,15 @@ public class MultiplayerGameplayState : IGameState
     public void Init( GameStateMachine stateMachine, object changeStateData )
 	{       
 		_stateMachine = stateMachine;
+        _networkManager = Singleton.instance.networkManager;
         Singleton.instance.gui.screenFader.alpha = 0.0f;
 
         _playersFinishedLoading.Clear();
 
-        if(NetworkServer.active)
+        if(_networkManager.Server.Active)
         {
             StartMatchLoad startMatchMessage = new StartMatchLoad();
-            NetworkServer.SendToAll(startMatchMessage, Channels.DefaultReliable);
+            _networkManager.Server.SendToAll(startMatchMessage, Channel.Reliable);
         }
         
         _networkManager = Singleton.instance.networkManager;
@@ -40,12 +41,12 @@ public class MultiplayerGameplayState : IGameState
     {
         startGameSystems();
 
-        if(NetworkClient.active)
+        if(_networkManager.Client.Active)
         {
             Debug.Log("SceneLoader: " + _networkManager.localPlayerSlot);
             
-            ClientScene.Ready(NetworkClient.connection);
-            NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
+            // _networkManager. Ready(NetworkClient.connection);
+            _networkManager.Client.Send(new PlayerMatchLoadComplete(), Channel.Reliable);
         }
     }
     
@@ -74,7 +75,7 @@ public class MultiplayerGameplayState : IGameState
     }
 
 
-    private void onClientMatchBegin(NetworkConnection conn, MatchBegin msg)
+    private void onClientMatchBegin(INetworkConnection conn, MatchBegin msg)
     {
         _networkManager.onClientMatchBegin -= onClientMatchBegin;
         // handleAllPlayersLoaded();

@@ -1,5 +1,5 @@
 ﻿using GhostGen;
-using Mirror;
+using Mirage;
 using UnityEngine;
 
 public interface IAvatarView : IEventDispatcher
@@ -12,7 +12,5 @@ public interface IAvatarView : IEventDispatcher
     GameObject gameObject { get; }
     Transform cameraTarget { get; }
     IAvatarController controller { get; }
-
-    NetworkEntity netEntity { get; }
     NetworkIdentity netIdentity { get; }
 }

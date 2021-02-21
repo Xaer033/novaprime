@@ -93,6 +93,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         _networkManager.onClientSpawnHandler -= onClientUnitSpawnHandler;
         _networkManager.onClientUnspawnHandler -= onClientUnitUnspawnHandler;
         _networkManager.onClientFrameSnapshot -= onClientFrameSnapshot;
+        _networkManager.onClientDisconnect -= onClientLocalDisconnect;
         
         _networkManager.onServerMatchBegin -= onServerMatchBegin;
         _networkManager.onServerSendPlayerInput -= onServerSendPlayerInput;
@@ -244,16 +245,18 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
 
     private void onServerDisconnect(INetworkConnection conn)
     {
-        IAvatarController controller = _serverConnToPlayerMap[conn];
-        NetPlayer netPlayer = _networkManager.GetServerPlayerFromConn(conn);
-        
-        _serverConnToPlayerMap?.Remove(conn);
-        _serverPlayerInputBuffer?.Remove(netPlayer.playerSlot);
-        _serverPlayerControllerList?.Remove(controller);
+        IAvatarController controller = null;
+        if(_serverConnToPlayerMap.TryGetValue(conn, out controller))
+        {
+            NetPlayer netPlayer = _networkManager.GetServerPlayerFromConn(conn);
+            
+            _serverConnToPlayerMap?.Remove(conn);
+            _serverPlayerInputBuffer?.Remove(netPlayer.playerSlot);
+            _serverPlayerControllerList?.Remove(controller);
 
-        _networkManager.ServerObjectManager.UnSpawn(controller?.view?.gameObject);
-        _avatarSystem.UnSpawn(controller?.view?.gameObject); // Unspawn locally
-        
+            _networkManager.ServerObjectManager.UnSpawn(controller?.view?.gameObject);
+            _avatarSystem.UnSpawn(controller?.view?.gameObject); // Unspawn locally
+        }
     }
     
     private void onServerSendPlayerInput(INetworkConnection conn, SendPlayerInput msg)
@@ -350,7 +353,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         _serverPlayerControllerList.Add(controller);
 
         bool isOwner = _networkManager.localPlayer != null &&
-                       conn == _networkManager.localPlayer;
+                       conn.Address.AddressFamily == _networkManager.localPlayer.Address.AddressFamily;
                        
         setupPlayer(netPlayer, conn, controller, isOwner);
     }
@@ -360,9 +363,10 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         _avatarSystem.UnSpawn(obj.gameObject);
     }
 
-    private void onClientLocalDisconnect(INetworkConnection conn)
+    private void onClientLocalDisconnect()
     {
-        DispatchEvent(GamePlayEventType.NET_LOCAL_PLAYER_DISCONNECT, false, conn);
+    
+        _gameSystems.DispatchEvent(GamePlayEventType.NET_LOCAL_PLAYER_DISCONNECT);
     }
 
     private void onClientFrameSnapshot(INetworkConnection conn, NetFrameSnapshot msg)

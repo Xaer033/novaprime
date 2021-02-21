@@ -13,7 +13,7 @@ public class NetworkManager : Mirage.NetworkManager
     // public const int kMaxPlayers = 4;
     public const string kSingleplayerRoom = "Singleplayer";
 
-    private const string kAppId = "23431909-e58c-40e3-94d2-8d90b4f9e11d";
+    private const string kMasterServerAppId = "23431909-e58c-40e3-94d2-8d90b4f9e11d";
     private const string kAppIdKey = "serverKey";
     private const string kServerUuIdKey = "serverUuid";
     private const string kServerName = "serverName";  
@@ -37,10 +37,8 @@ public class NetworkManager : Mirage.NetworkManager
     public event Action<INetworkConnection, SendPlayerInput> onServerSendPlayerInput;
     public event Action<INetworkConnection> onServerMatchLoadComplete;
     
-    public event Action onClientStarted;
-    public event Action onClientDisconnect;
     public event Action<INetworkConnection> onClientConnect;
-    // public event Action<INetworkConnection> onClientLocalDisconnect;
+    public event Action onClientDisconnect;
     public event Action<INetworkConnection, int> onClientError;
     public event Action<INetworkConnection, SyncLobbyPlayers> onClientSyncLobbyPlayers;
     public event Action<INetworkConnection, ConfirmReadyUp> onClientConfirmReadyUp;
@@ -68,31 +66,6 @@ public class NetworkManager : Mirage.NetworkManager
     public static uint frameTick { get; set; }
 
   
-    public virtual void OnDestroy()
-    {
-        onError = null;
-        onServerStarted = null;
-        onServerStopped = null;
-        onServerConnect = null;
-        onServerDisconnect = null;
-        onServerError = null;
-        onServerConfirmReadyUp = null;
-        onServerMatchBegin = null;
-        onServerSendPlayerInput = null;
-        onServerMatchLoadComplete = null;
-        
-        
-        onClientStarted = null;
-        onClientConnect = null;
-        onClientDisconnect = null;
-        onClientError = null;
-        onClientSyncLobbyPlayers = null;
-        onClientConfirmReadyUp = null;
-        onClientStartMatchLoad = null;
-        onClientMatchBegin = null;
-        onClientFrameSnapshot = null;
-        onClientCurrentSession = null;
-    }
 
     private Dictionary<INetworkConnection, NetPlayer> _serverNetPlayerMap = new Dictionary<INetworkConnection, NetPlayer>();
     
@@ -152,16 +125,42 @@ public class NetworkManager : Mirage.NetworkManager
 
     public virtual void Start()
     {
+        registerNetworkPrefabs();
+        
         Server.Started.AddListener(OnStartServer);
+        Server.Stopped.AddListener(OnServerStopped);
         Server.Connected.AddListener(OnServerConnect);
         Server.Disconnected.AddListener(OnServerDisconnect);
-        Server.Stopped.AddListener(OnServerStopped);
         
-        Client.Connected.AddListener(OnStartClient);
+        Client.Connected.AddListener(OnClientConnect);
         Client.Disconnected.AddListener(OnClientDisconnect);
-        
-        
     }
+    
+    
+    public virtual void OnDestroy()
+    {
+        onError = null;
+        onServerStarted = null;
+        onServerStopped = null;
+        onServerConnect = null;
+        onServerDisconnect = null;
+        onServerError = null;
+        onServerConfirmReadyUp = null;
+        onServerMatchBegin = null;
+        onServerSendPlayerInput = null;
+        onServerMatchLoadComplete = null;
+        
+        onClientConnect = null;
+        onClientDisconnect = null;
+        onClientError = null;
+        onClientSyncLobbyPlayers = null;
+        onClientConfirmReadyUp = null;
+        onClientStartMatchLoad = null;
+        onClientMatchBegin = null;
+        onClientFrameSnapshot = null;
+        onClientCurrentSession = null;
+    }
+
 
     private void registerNetworkPrefabs()
     {
@@ -175,6 +174,7 @@ public class NetworkManager : Mirage.NetworkManager
                 unit.view.netIdentity, 
                 OnClientSpawnHandler, 
                 OnClientUnspawnHandler);
+                
         }
     }
     
@@ -225,7 +225,7 @@ public class NetworkManager : Mirage.NetworkManager
         List<ServerListEntry> serverEntries = new List<ServerListEntry>();
         
         WWWForm form = new WWWForm(); 
-        form.AddField(kAppIdKey, kAppId);
+        form.AddField(kAppIdKey, kMasterServerAppId);
 
         string masterUri = getMasterServerCommand("list"); 
         Debug.Log("Rest Command: " + masterUri);
@@ -271,7 +271,7 @@ public class NetworkManager : Mirage.NetworkManager
     private IEnumerator enumAddServerToMasterList(ServerListEntry entry, Action<long> onComplete)
     {
         WWWForm form = new WWWForm(); 
-        form.AddField(kAppIdKey, kAppId);
+        form.AddField(kAppIdKey, kMasterServerAppId);
         form.AddField(kServerUuIdKey, entry.serverUuid);
         form.AddField(kServerName, entry.name);
         form.AddField(kServerIp, entry.ip);
@@ -314,7 +314,7 @@ public class NetworkManager : Mirage.NetworkManager
     private IEnumerator enumRemoveServerToMasterList(ServerListEntry entry, Action<long> onComplete)
     {
         WWWForm form = new WWWForm();
-        form.AddField(kAppIdKey, kAppId);
+        form.AddField(kAppIdKey, kMasterServerAppId);
         form.AddField(kServerUuIdKey, entry.serverUuid);
         form.AddField(kServerName, entry.name);
         form.AddField(kServerIp, entry.ip);
@@ -365,7 +365,6 @@ public class NetworkManager : Mirage.NetworkManager
         Debug.Log("OnStartServer");
         _serverNetPlayerMap.Clear();
         
-        registerNetworkPrefabs();
         setupPlayerSlotGenerator();
         
         sessionState = SessionState.IN_LOBBY;
@@ -381,6 +380,14 @@ public class NetworkManager : Mirage.NetworkManager
         connection.RegisterHandler<SendPlayerInput>(OnServerSendPlayerInput);
     }
 
+    private void unregisterServerEvents(INetworkConnection connection)
+    {
+        connection.UnregisterHandler<RequestMatchStart>();
+        connection.UnregisterHandler<RequestReadyUp>();
+        connection.UnregisterHandler<PlayerMatchLoadComplete>();
+        connection.UnregisterHandler<SendPlayerInput>();
+    }
+
     private void registerClientEvents(INetworkConnection connection)
     {
         connection.RegisterHandler<SyncLobbyPlayers>(OnClientSyncLobbyPlayers);
@@ -392,22 +399,23 @@ public class NetworkManager : Mirage.NetworkManager
         connection.RegisterHandler<CurrentSessionUpdate>(OnCurrentSessionUpdate);
     }
     
-    private void OnServerStopped()
+    private void unregisterClientEvents(INetworkConnection connection)
     {
-        RemoveServerToMasterList(serverEntry, null);
-        onServerStopped?.Invoke();    
+        connection.UnregisterHandler<SyncLobbyPlayers>();
+        connection.UnregisterHandler<ConfirmReadyUp>();
+        connection.UnregisterHandler<AssignPlayerSlot>();
+        connection.UnregisterHandler<StartMatchLoad>();
+        connection.UnregisterHandler<MatchBegin>();
+        connection.UnregisterHandler<NetFrameSnapshot>();
+        connection.UnregisterHandler<CurrentSessionUpdate>();
     }
     
-    private void OnStartClient(INetworkConnection conn)
+    private void OnServerStopped()
     {
-        Debug.Log("OnStartClient");
+        unregisterServerEvents(Server.LocalConnection);
         
-        registerClientEvents(conn);
-        registerNetworkPrefabs();
-        
-        _clientNetPlayerMap.Clear();
-        
-        onClientStarted?.Invoke();
+        RemoveServerToMasterList(serverEntry, null);
+        onServerStopped?.Invoke();    
     }
 
     private void OnError(string reason)
@@ -455,7 +463,7 @@ public class NetworkManager : Mirage.NetworkManager
         }
     }
 
-    public void OnServerDisconnect(INetworkConnection conn)
+    private void OnServerDisconnect(INetworkConnection conn)
     {
         Debug.Log("OnServerDisconnect");
 
@@ -478,35 +486,32 @@ public class NetworkManager : Mirage.NetworkManager
         _serverNetPlayerMap.Remove(conn);
     }
 
-    public void OnServerError(INetworkConnection conn, int errorCode)
+    private void OnServerError(INetworkConnection conn, int errorCode)
     {
         Debug.LogError("OnServerErrorL " + errorCode);
         onServerError?.Invoke(conn, errorCode);
     }
 
-    public void OnClientConnect(INetworkConnection conn)
+    private void OnClientConnect(INetworkConnection conn)
     {
         Debug.Log("OnClientConnect");
-        // _netPlayerMap[conn.connectionId] = new NetPlayer(conn, conn.connectionId, "P" + conn.connectionId);
+        
+        registerClientEvents(conn);
+        
+        _clientNetPlayerMap.Clear();
+        
         onClientConnect?.Invoke(conn);
     }
 
-    public void OnClientDisconnect()
+    private void OnClientDisconnect()
     {
         Debug.Log("OnClientDisconnect");
-
+        unregisterClientEvents(Client.Connection);
+        
         onClientDisconnect?.Invoke();
-
-        // INetworkConnection localConnection = Client.Connection;
-        // if(localConnection != null && localConnection == conn)
-        // {
-        //     onClientLocalDisconnect?.Invoke(conn);
-        // }
-
-        // _netPlayerMap.Remove(conn.connectionId);
     }
 
-    public void OnClientError(INetworkConnection conn, int errorCode)
+    private void OnClientError(INetworkConnection conn, int errorCode)
     {
         Debug.LogError("OnClientError: " + errorCode);
         onClientError?.Invoke(conn, errorCode);
@@ -715,13 +720,5 @@ public class NetworkManager : Mirage.NetworkManager
     public INetworkConnection localPlayer
     {
         get { return Client.Connection != null ? Client.Connection : null; }
-    }
-
-    private void safeCall(Action callback)
-    {
-        if(callback != null)
-        {
-            callback();
-        }
     }
 }

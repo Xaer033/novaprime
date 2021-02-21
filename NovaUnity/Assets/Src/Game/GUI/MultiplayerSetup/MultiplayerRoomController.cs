@@ -24,13 +24,6 @@ public class MultiplayerRoomController : BaseController
             view.AddListener(MenuUIEventType.TOGGLE, onReadyButton);
             view.AddListener(MenuUIEventType.BACK, onBackButton);
 
-            
-            // if(!_isServer)
-            // {
-            //     _networkManager.onClientLocalDisconnect += onClientLocalDisconnect;
-            // }
-
-
             if(_networkManager.Client.Active)
             {
                 _networkManager.onClientConfirmReadyUp += onClientConfirmReadyUp;
@@ -58,24 +51,15 @@ public class MultiplayerRoomController : BaseController
     
     public override void RemoveView()
     {
-        if(!_isServer)
-        {
-            _networkManager.onClientDisconnect -= onClientLocalDisconnect;
-        }
+        _networkManager.onClientDisconnect -= onClientLocalDisconnect;
+        _networkManager.onClientConfirmReadyUp -= onClientConfirmReadyUp;
+        _networkManager.onClientSyncLobbyPlayers -= onClientSyncLobbyPlayers;
+        _networkManager.onClientStartMatchLoad -= onClientStartMatchLoad;
 
-        // if(NetworkClient.active || _wasDisconnected)
-        {
-            _networkManager.onClientConfirmReadyUp -= onClientConfirmReadyUp;
-            _networkManager.onClientSyncLobbyPlayers -= onClientSyncLobbyPlayers;
-            _networkManager.onClientStartMatchLoad -= onClientStartMatchLoad;
-        }
-
-        // if(_networkManager.isPureServer || _wasDisconnected)
-        {
-            _networkManager.onServerConnect -= onServerConnect;
-            _networkManager.onServerDisconnect -= onServerDisconnect;
-            _networkManager.onServerConfirmReadyUp -= onServerConfirmReadyUp;
-        }
+        _networkManager.onServerConnect -= onServerConnect;
+        _networkManager.onServerDisconnect -= onServerDisconnect;
+        _networkManager.onServerConfirmReadyUp -= onServerConfirmReadyUp;
+      
         base.RemoveView();
     }
 
@@ -127,6 +111,8 @@ public class MultiplayerRoomController : BaseController
     
     private void onClientLocalDisconnect()
     {
+        _networkManager.onClientDisconnect -= onClientLocalDisconnect;
+        
         _networkManager.Disconnect();
         DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);
     }

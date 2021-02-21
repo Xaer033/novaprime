@@ -6,13 +6,13 @@ public class NetworkEntity : NetworkBehaviour
 {
     public event Func<IAvatarView, NetworkWriter, bool, bool>    onSerialize;
     public event Action<IAvatarView, NetworkReader, bool>        onDeserialize;
-    public event Action<IAvatarView> onStartAuthority;
-    public event Action<IAvatarView> onStopAuthority;
-    public event Action<IAvatarView> onStartClient;
-    public event Action<IAvatarView> onStopClient;
-    public event Action<IAvatarView> onStartServer;
-    public event Action<IAvatarView> onStopServer;
-    public event Action<IAvatarView> onStartLocalPlayer;
+    // public event Action<IAvatarView> onStartAuthority;
+    // public event Action<IAvatarView> onStopAuthority;
+    // public event Action<IAvatarView> onStartClient;
+    // public event Action<IAvatarView> onStopClient;
+    // public event Action<IAvatarView> onStartServer;
+    // public event Action<IAvatarView> onStopServer;
+    // public event Action<IAvatarView> onStartLocalPlayer;
 
     protected  IAvatarView _view;
     

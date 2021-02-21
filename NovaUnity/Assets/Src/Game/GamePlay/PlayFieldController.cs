@@ -160,13 +160,20 @@ public class PlayFieldController : NotificationDispatcher
     private void   _addCallbacks()
     {
         _gameSystems.AddListener(GamePlayEventType.AVATAR_SPAWNED, onAvatarSpawned);
+        _gameSystems.AddListener(GamePlayEventType.NET_LOCAL_PLAYER_DISCONNECT, onClientDisconnect);
     }
 
     private void _removeCallbacks()
     {
         _gameSystems.RemoveListener(GamePlayEventType.AVATAR_SPAWNED, onAvatarSpawned);
+        _gameSystems.RemoveListener(GamePlayEventType.NET_LOCAL_PLAYER_DISCONNECT, onClientDisconnect);
     }
 
+    private void onClientDisconnect(GeneralEvent e)
+    {
+        Singleton.instance.gameStateMachine.ChangeState(NovaGameState.MAIN_MENU);
+    }
+    
     private void onAvatarSpawned(GeneralEvent e)
     {
         IAvatarController controller = (IAvatarController)e.data;

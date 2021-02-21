@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Cysharp.Threading.Tasks.Triggers;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using GhostGen;
 using Mirage;
 using UnityEngine;
@@ -12,6 +13,7 @@ public class MultiplayerSetupController : BaseController
     private List<object> _uiServerData = new List<object>();
     private int _selectedRoomIndex;
     private string _serverName;
+    private CancellationTokenSource _joinCancel;
 
     public MultiplayerSetupController()
     {
@@ -67,7 +69,7 @@ public class MultiplayerSetupController : BaseController
         _serverName = e.data as string;
         
         _networkManager.onServerStarted += onServerStarted;
-        _networkManager.Server.StartAsync(); // StartServer();
+        _networkManager.Server.ListenAsync(); // StartServer();
     }
 
     private void onCreateServerAsHost(GeneralEvent e)
@@ -130,17 +132,28 @@ public class MultiplayerSetupController : BaseController
 
     private void joinServer(Uri uri)
     {
-        _networkManager.onClientConnect += onClientConnect;
-        
         Debug.Log("Joining Server: " + uri.AbsoluteUri);
-        _networkManager.Client.StartAsync();
+        
+        if(_joinCancel != null)
+        {
+            _joinCancel.Cancel();
+        }
+
+        _joinCancel = new CancellationTokenSource();
+        
+        
+        _networkManager.onClientConnect -= onClientConnect;
+        _networkManager.onClientConnect += onClientConnect;
+                
+        _networkManager.Client.ConnectAsync(uri)
+            .WithCancellation(_joinCancel.Token).Forget();
     }
     
     private void onBackButton(GeneralEvent e)
     {
         view.RemoveListener(MenuUIEventType.BACK, onBackButton);
         // Maybe throw up a modal dialog to ask if they are sure?
-        // PhotonNetwork.LeaveRoom();
+        
         _networkManager.Disconnect();
         DispatchEvent(MenuUIEventType.GOTO_MAIN_MENU);
     }
@@ -158,11 +171,11 @@ public class MultiplayerSetupController : BaseController
     {
         _networkManager.onClientCurrentSession -= onClientCurrentSession;
 
-        // if(msg.sessionState == NetworkManager.SessionState.IN_LOBBY)
-        // {
-        //     DispatchEvent(MenuUIEventType.GOTO_NETWORK_ROOM);
-        // }
-        // else
+        if(msg.sessionState == SessionState.IN_LOBBY)
+        {
+            DispatchEvent(MenuUIEventType.GOTO_NETWORK_ROOM);
+        }
+        else
         {
             DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_GAME);
         }

@@ -412,9 +412,10 @@ public class NetworkManager : Mirage.NetworkManager
     
     private void OnServerStopped()
     {
-        unregisterServerEvents(Server.LocalConnection);
-        
-        RemoveServerToMasterList(serverEntry, null);
+        RemoveServerToMasterList(serverEntry, (response)=>
+        {
+            Debug.Log("Remove Response: " + response);
+        });
         onServerStopped?.Invoke();    
     }
 
@@ -467,6 +468,11 @@ public class NetworkManager : Mirage.NetworkManager
     {
         Debug.Log("OnServerDisconnect");
 
+        if(conn == Server.LocalConnection)
+        {
+            unregisterServerEvents(conn);
+        }
+        
         if(conn != null && _serverNetPlayerMap.ContainsKey(conn))
         {
             NetPlayer player = _serverNetPlayerMap[conn];

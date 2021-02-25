@@ -27,7 +27,7 @@ public class MultiplayerRoomView : UIView
         if(startButton != null)
         {
             startButton.AddListener(UIEvent.TRIGGERED, onButton);
-            startButton.gameObject.SetActive(false);
+            // startButton.gameObject.SetActive(false);
         }
         
         if(leaveButton != null)

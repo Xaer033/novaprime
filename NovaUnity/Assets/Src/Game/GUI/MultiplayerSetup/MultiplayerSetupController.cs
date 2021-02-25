@@ -32,7 +32,7 @@ public class MultiplayerSetupController : BaseController
             view.AddListener(MenuUIEventType.REFRESH_SERVER_LIST, onRefreshServerList);
             view.AddListener(MenuUIEventType.JOIN_SERVER, onJoinServer);
             view.AddListener(MenuUIEventType.BACK, onBackButton);
-
+            
             setupView.SetSelectedItemCallback(onRoomClicked);
 
             _networkManager.FetchMasterServerList(onFetchComplete);
@@ -132,6 +132,10 @@ public class MultiplayerSetupController : BaseController
 
     private void joinServer(Uri uri)
     {
+        setupView.joinRoomButton.interactable = false;
+        setupView.clientButton.interactable = false;
+        setupView.StartLoadingTween();
+        
         Debug.Log("Joining Server: " + uri.AbsoluteUri);
         
         if(_joinCancel != null)
@@ -142,11 +146,16 @@ public class MultiplayerSetupController : BaseController
         _joinCancel = new CancellationTokenSource();
         
         
-        _networkManager.onClientConnect -= onClientConnect;
         _networkManager.onClientConnect += onClientConnect;
-                
         _networkManager.Client.ConnectAsync(uri)
+            .ContinueWith(() =>
+            {
+                setupView.StopLoadingTween();
+                setupView.clientButton.interactable = true;
+                setupView.joinRoomButton.interactable = true;
+            })
             .WithCancellation(_joinCancel.Token).Forget();
+            
     }
     
     private void onBackButton(GeneralEvent e)
@@ -171,6 +180,9 @@ public class MultiplayerSetupController : BaseController
     {
         _networkManager.onClientCurrentSession -= onClientCurrentSession;
 
+
+        setupView.joinRoomButton.interactable = true;
+        
         if(msg.sessionState == SessionState.IN_LOBBY)
         {
             DispatchEvent(MenuUIEventType.GOTO_NETWORK_ROOM);

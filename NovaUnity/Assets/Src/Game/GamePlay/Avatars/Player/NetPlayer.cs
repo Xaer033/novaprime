@@ -3,8 +3,8 @@ using Mirage;
 
 public struct NetPlayer
 {
-    [NonSerialized]
-    public INetworkConnection connection;
+    public INetworkConnection connection { get; private set; }
+    
     public PlayerSlot playerSlot;
     public string nickName;
     public bool isReadyUp;

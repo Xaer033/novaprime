@@ -10,7 +10,6 @@
       <Path>$USER_HOME$/AppData/Local/Unity/cache/packages/packages.unity.com/com.unity.2d.spriteshape@4.1.4</Path>
       <Path>$USER_HOME$/AppData/Local/Unity/cache/packages/packages.unity.com/com.unity.burst@1.3.7</Path>
       <Path>$USER_HOME$/AppData/Local/Unity/cache/packages/packages.unity.com/com.unity.cinemachine@2.6.3</Path>
-      <Path>$USER_HOME$/AppData/Local/Unity/cache/packages/packages.unity.com/com.unity.collab-proxy@1.3.9</Path>
       <Path>$USER_HOME$/AppData/Local/Unity/cache/packages/packages.unity.com/com.unity.collections@0.14.0-preview.16</Path>
       <Path>$USER_HOME$/AppData/Local/Unity/cache/packages/packages.unity.com/com.unity.ide.rider@3.0.3</Path>
       <Path>$USER_HOME$/AppData/Local/Unity/cache/packages/packages.unity.com/com.unity.inputsystem@1.0.1</Path>
@@ -24,7 +23,9 @@
     </attachedFolders>
     <explicitIncludes>
       <Path>Library/PackageCache/com.cysharp.unitask@2.0.36</Path>
-      <Path>Library/PackageCache/com.miragenet.mirage@66.2.1</Path>
+      <Path>Library/PackageCache/com.miragenet.enet@0.0.12</Path>
+      <Path>Library/PackageCache/com.miragenet.libuv2k@0.0.3</Path>
+      <Path>Library/PackageCache/com.miragenet.mirage@68.0.2</Path>
       <Path>Library/PackageCache/com.unity.2d.animation@3.2.4</Path>
       <Path>Library/PackageCache/com.unity.2d.animation@4.2.8</Path>
       <Path>Library/PackageCache/com.unity.2d.animation@5.0.3</Path>
@@ -40,7 +41,7 @@
       <Path>Library/PackageCache/com.unity.2d.psdimporter@4.0.2</Path>
       <Path>Library/PackageCache/com.unity.2d.spriteshape@3.0.12</Path>
       <Path>Library/PackageCache/com.unity.2d.spriteshape@4.1.5</Path>
-      <Path>Library/PackageCache/com.unity.2d.spriteshape@5.1.0</Path>
+      <Path>Library/PackageCache/com.unity.2d.spriteshape@5.1.1</Path>
       <Path>Library/PackageCache/com.unity.addressables@1.16.10</Path>
       <Path>Library/PackageCache/com.unity.addressables@1.8.5</Path>
       <Path>Library/PackageCache/com.unity.ads@2.0.8</Path>
@@ -48,11 +49,11 @@
       <Path>Library/PackageCache/com.unity.analytics@3.3.5</Path>
       <Path>Library/PackageCache/com.unity.analytics@3.5.3</Path>
       <Path>Library/PackageCache/com.unity.burst@1.3.7</Path>
-      <Path>Library/PackageCache/com.unity.burst@1.3.9</Path>
+      <Path>Library/PackageCache/com.unity.burst@1.4.5</Path>
       <Path>Library/PackageCache/com.unity.cinemachine@2.6.3</Path>
       <Path>Library/PackageCache/com.unity.collab-proxy@1.2.16</Path>
       <Path>Library/PackageCache/com.unity.collab-proxy@1.3.9</Path>
-      <Path>Library/PackageCache/com.unity.collections@0.14.0-preview.16</Path>
+      <Path>Library/PackageCache/com.unity.collections@0.15.0-preview.21</Path>
       <Path>Library/PackageCache/com.unity.ext.nunit@1.0.6</Path>
       <Path>Library/PackageCache/com.unity.ide.rider@3.0.3</Path>
       <Path>Library/PackageCache/com.unity.ide.rider@3.0.4</Path>
@@ -64,8 +65,8 @@
       <Path>Library/PackageCache/com.unity.nuget.newtonsoft-json@2.0.0</Path>
       <Path>Library/PackageCache/com.unity.nuget.newtonsoft-json@2.0.0-preview</Path>
       <Path>Library/PackageCache/com.unity.performance.profile-analyzer@1.0.3</Path>
-      <Path>Library/PackageCache/com.unity.postprocessing@2.3.0</Path>
-      <Path>Library/PackageCache/com.unity.probuilder@4.2.3</Path>
+      <Path>Library/PackageCache/com.unity.postprocessing@3.0.3</Path>
+      <Path>Library/PackageCache/com.unity.probuilder@4.4.0</Path>
       <Path>Library/PackageCache/com.unity.progrids@3.0.3-preview.6</Path>
       <Path>Library/PackageCache/com.unity.purchasing@2.0.6</Path>
       <Path>Library/PackageCache/com.unity.purchasing@2.2.1</Path>
@@ -83,7 +84,7 @@
       <Path>Library/PackageCache/com.unity.scriptablebuildpipeline@1.7.3</Path>
       <Path>Library/PackageCache/com.unity.searcher@4.0.9</Path>
       <Path>Library/PackageCache/com.unity.searcher@4.3.1</Path>
-      <Path>Library/PackageCache/com.unity.settings-manager@1.0.2</Path>
+      <Path>Library/PackageCache/com.unity.settings-manager@1.0.3</Path>
       <Path>Library/PackageCache/com.unity.shadergraph@10.2.2</Path>
       <Path>Library/PackageCache/com.unity.shadergraph@7.4.1</Path>
       <Path>Library/PackageCache/com.unity.shadergraph@8.2.0</Path>
@@ -92,8 +93,8 @@
       <Path>Library/PackageCache/com.unity.test-framework@1.1.14</Path>
       <Path>Library/PackageCache/com.unity.test-framework@1.1.20</Path>
       <Path>Library/PackageCache/com.unity.textmeshpro@2.0.1</Path>
-      <Path>Library/PackageCache/com.unity.textmeshpro@3.0.3</Path>
-      <Path>Library/PackageCache/com.unity.timeline@1.3.7</Path>
+      <Path>Library/PackageCache/com.unity.textmeshpro@3.0.4</Path>
+      <Path>Library/PackageCache/com.unity.timeline@1.4.6</Path>
       <Path>Library/PackageCache/com.unity.visualeffectgraph@10.2.2</Path>
       <Path>Library/PackageCache/com.unity.visualeffectgraph@7.4.1</Path>
       <Path>Library/PackageCache/com.unity.visualeffectgraph@8.2.0</Path>

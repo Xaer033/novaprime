@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 3261012699768621143}
   - component: {fileID: 1150255397927636886}
   - component: {fileID: 5170000108302998514}
-  - component: {fileID: 8405040753183451207}
+  - component: {fileID: -3438681399810462827}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -69,27 +69,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MaxConnections: 16
   Listening: 1
-  Transport: {fileID: 8405040753183451207}
+  Transport: {fileID: -3438681399810462827}
   authenticator: {fileID: 0}
-  Started:
+  _started:
     m_PersistentCalls:
       m_Calls: []
-  Connected:
+  _connected:
     m_PersistentCalls:
       m_Calls: []
-  Authenticated:
+  _authenticated:
     m_PersistentCalls:
       m_Calls: []
-  Disconnected:
+  _disconnected:
     m_PersistentCalls:
       m_Calls: []
-  Stopped:
+  _stopped:
     m_PersistentCalls:
       m_Calls: []
-  OnStartHost:
+  _onStartHost:
     m_PersistentCalls:
       m_Calls: []
-  OnStopHost:
+  _onStopHost:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &3261012699768621143
@@ -104,15 +104,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abe6be14204d94224a3e7cd99dd2ea73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Transport: {fileID: 8405040753183451207}
+  Transport: {fileID: 0}
   authenticator: {fileID: 0}
-  Connected:
+  _connected:
     m_PersistentCalls:
       m_Calls: []
-  Authenticated:
+  _authenticated:
     m_PersistentCalls:
       m_Calls: []
-  Disconnected:
+  _disconnected:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &1150255397927636886
@@ -129,10 +129,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Server: {fileID: 4383971536717400967}
   NetworkSceneManager: {fileID: 0}
-  Spawned:
+  _spawned:
     m_PersistentCalls:
       m_Calls: []
-  UnSpawned:
+  _unSpawned:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &5170000108302998514
@@ -149,14 +149,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Client: {fileID: 3261012699768621143}
   NetworkSceneManager: {fileID: 0}
-  Spawned:
+  _spawned:
     m_PersistentCalls:
       m_Calls: []
-  UnSpawned:
+  _unSpawned:
     m_PersistentCalls:
       m_Calls: []
   spawnPrefabs: []
---- !u!114 &8405040753183451207
+--- !u!114 &-3438681399810462827
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -172,7 +172,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   Port: 11666
-  HashCashBits: 18
+  HashCashBits: 15
   SendWindowSize: 32
   ReceiveWindowSize: 8192
-  delayMode: 2
+  delayMode: 3

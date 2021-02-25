@@ -70,7 +70,6 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         
         _networkManager.onClientSpawnHandler += onClientUnitSpawnHandler;
         _networkManager.onClientUnspawnHandler += onClientUnitUnspawnHandler;
-        _networkManager.onClientLocalDisconnect += onClientLocalDisconnect;
         _networkManager.onClientFrameSnapshot += onClientFrameSnapshot;
         _networkManager.onClientDisconnect += onClientLocalDisconnect;
         
@@ -94,7 +93,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     {
         _networkManager.onClientSpawnHandler -= onClientUnitSpawnHandler;
         _networkManager.onClientUnspawnHandler -= onClientUnitUnspawnHandler;
-        _networkManager.onClientLocalDisconnect -= onClientLocalDisconnect;
+        _networkManager.onClientDisconnect -= onClientLocalDisconnect;
         _networkManager.onClientFrameSnapshot -= onClientFrameSnapshot;
         
         _networkManager.onServerMatchBegin -= onServerMatchBegin;
@@ -431,6 +430,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
                     if(state.nonAckInputBuffer[b].tick == newState.ackTick)
                     {
                         oldStateIndex = b;
+                        Debug.Log("Old state found: " + b);
                         break;
                     }
                 }

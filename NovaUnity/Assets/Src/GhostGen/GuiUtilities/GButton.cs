@@ -20,6 +20,22 @@ public class GButton : UIView
         }
     }
 
+    public bool interactable
+    {
+        set
+        {
+            if(_button != null)
+            {            
+                _button.interactable = value;
+            }
+        }
+
+        get
+        {
+            return _button ? _button.interactable : false;
+        }
+    }
+    
     public Sprite sprite
     {
         set

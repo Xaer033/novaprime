@@ -71,6 +71,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         _networkManager.onClientSpawnHandler += onClientUnitSpawnHandler;
         _networkManager.onClientUnspawnHandler += onClientUnitUnspawnHandler;
         _networkManager.onClientFrameSnapshot += onClientFrameSnapshot;
+        _networkManager.onClientDisconnect += onClientLocalDisconnect;
         
         _networkManager.onServerMatchBegin += onServerMatchBegin;
         _networkManager.onServerSendPlayerInput += onServerSendPlayerInput;

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Permissions;
 using Mirror;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -20,7 +21,9 @@ public class NetworkManager : Mirror.NetworkManager
     private const string kServerIp = "serverIp";
     private const string kServerPort = "serverPort";    
     private const string kServerPlayerCount = "serverPlayers";   
-    private const string kServerPlayerCapacity = "serverCapacity";  
+    private const string kServerPlayerCapacity = "serverCapacity";
+
+    private Action _onSingleplayerCallback;
 
     public string masterServerLocation = "http://novamaster.net";
     public int masterServerPort = 11667;
@@ -62,7 +65,7 @@ public class NetworkManager : Mirror.NetworkManager
     
     public ServerListEntry serverEntry { get; set; }
     
-    public SessionState sessionState { get; private set; }
+    public SessionState sessionState { get; set; }
     
     public static uint frameTick { get; set; }
     
@@ -154,8 +157,38 @@ public class NetworkManager : Mirror.NetworkManager
     public override void Start()
     {
         base.Start();
+        
+        registerNetworkPrefabs();
     }
 
+    public void StartSingleplayer(Action onSingleplayerCreated)
+    {
+        _onSingleplayerCallback = onSingleplayerCreated;
+        
+        onClientCurrentSession += onSingleplayerCurrentSession;
+        // onServerMatchBegin += onSingleplayerMatchBegin;
+        
+	    StartHost();
+	    NetworkServer.dontListen = true;
+    }
+
+    private void onSingleplayerCurrentSession(NetworkConnection conn, CurrentSessionUpdate msg)
+    {   
+        onClientCurrentSession -= onSingleplayerCurrentSession;
+        onServerMatchBegin += onSingleplayerMatchBegin;
+        
+	    // ClientScene.Ready(NetworkClient.connection);
+        NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
+    }
+    
+    private void onSingleplayerMatchBegin()
+    {
+        onServerMatchBegin -= onSingleplayerMatchBegin;
+        
+        _onSingleplayerCallback?.Invoke();
+        _onSingleplayerCallback = null;
+    }
+    
     private void registerNetworkPrefabs()
     {
         UnitMap unitMap = Singleton.instance.gameplayResources.unitMap;
@@ -357,8 +390,6 @@ public class NetworkManager : Mirror.NetworkManager
     {
         Debug.Log("OnStartServer");
         
-        registerNetworkPrefabs();
-        
         _serverNetPlayerMap.Clear();
         
         setupPlayerSlotGenerator();
@@ -382,7 +413,6 @@ public class NetworkManager : Mirror.NetworkManager
     public override void OnStartClient()
     {
         Debug.Log("OnStartClient");
-        registerNetworkPrefabs();
         
         _clientNetPlayerMap.Clear();
         
@@ -613,15 +643,15 @@ public class NetworkManager : Mirror.NetworkManager
 
     public void Disconnect()
     {
-        if(NetworkServer.active)
-        {
-            StopServer();
-        }
-
-        if(NetworkClient.active)
-        {
-            StopClient();
-        }
+        NetworkServer.dontListen = false;
+        
+		Debug.Log("Stopping Client");
+        StopClient();
+    
+		Debug.Log("Stopping Server");
+        StopServer();
+        
+        Shutdown();
         
         _serverNetPlayerMap.Clear();
         _clientNetPlayerMap.Clear();

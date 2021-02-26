@@ -1,5 +1,6 @@
 ﻿using GhostGen;
 using Mirror;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class MainMenuState : IGameState
@@ -11,12 +12,14 @@ public class MainMenuState : IGameState
     private MultiplayerSetupController _multiplayerSetupController;
     private MultiplayerRoomController _multiplayerRoomController;
 
+    private NetworkManager _networkManager;
 
 	public void Init( GameStateMachine stateMachine, object changeStateData )
 	{
 		_stateMachine = stateMachine;
 
-		Singleton.instance.networkManager.Disconnect();
+		_networkManager = Singleton.instance.networkManager;
+		_networkManager.Disconnect();
 		
 		PlayerActions pAction = new PlayerActions();
 		pAction.Menu.Enable();
@@ -115,6 +118,13 @@ public class MainMenuState : IGameState
     }
     
     private void onStartSingleplayer(GeneralEvent e)
+    {
+		_networkManager.Disconnect();
+        _networkManager.StartSingleplayer(onSingleplayerMatchBegin);
+    }
+
+
+    private void onSingleplayerMatchBegin()
     {
 	    _stateMachine.ChangeState(NovaGameState.SINGLEPLAYER_GAMEPLAY);
     }

@@ -1,6 +1,7 @@
 ﻿using DG.Tweening;
 using GhostGen;
 using System.Collections;
+using Mirror;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -47,9 +48,20 @@ public class SingleplayerGameplayState : IGameState
 
     private void onSceneLoaded(AsyncOperation asyncOp)
     {        
+        startGameSystems();
+
+        if(NetworkClient.active)
+        {
+            ClientScene.Ready(NetworkClient.connection);
+            NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
+        }
+    }
+
+    private void startGameSystems()
+    {
         _gameModeController = new SinglePlayerCampaignMode();
-        _gameModeController.AddListener(GameEventType.GAME_OVER, onGameOver);
-        _gameModeController.Start(null);
+        _gameModeController?.AddListener(GameEventType.GAME_OVER, onGameOver);
+        _gameModeController?.Start(null);
     }
     
     public void FixedStep(float fixedDeltaTime)

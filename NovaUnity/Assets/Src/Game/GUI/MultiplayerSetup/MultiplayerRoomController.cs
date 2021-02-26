@@ -62,19 +62,15 @@ public class MultiplayerRoomController : BaseController
             _networkManager.onClientLocalDisconnect -= onClientLocalDisconnect;
         }
 
-        // if(NetworkClient.active || _wasDisconnected)
-        {
-            _networkManager.onClientConfirmReadyUp -= onClientConfirmReadyUp;
-            _networkManager.onClientSyncLobbyPlayers -= onClientSyncLobbyPlayers;
-            _networkManager.onClientStartMatchLoad -= onClientStartMatchLoad;
-        }
-
-        // if(_networkManager.isPureServer || _wasDisconnected)
-        {
-            _networkManager.onServerConnect -= onServerConnect;
-            _networkManager.onServerDisconnect -= onServerDisconnect;
-            _networkManager.onServerConfirmReadyUp -= onServerConfirmReadyUp;
-        }
+        
+        _networkManager.onClientConfirmReadyUp -= onClientConfirmReadyUp;
+        _networkManager.onClientSyncLobbyPlayers -= onClientSyncLobbyPlayers;
+        _networkManager.onClientStartMatchLoad -= onClientStartMatchLoad;
+    
+        _networkManager.onServerConnect -= onServerConnect;
+        _networkManager.onServerDisconnect -= onServerDisconnect;
+        _networkManager.onServerConfirmReadyUp -= onServerConfirmReadyUp;
+        
         base.RemoveView();
     }
 
@@ -170,14 +166,6 @@ public class MultiplayerRoomController : BaseController
     private void onLeftRoom()
     {
         DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);
-    }
-
-    private void onCustomEvent(byte eventCode, object content, int senderId)
-    {
-        if(eventCode == NetworkOpCode.START_GAMEPLAY_LOAD)
-        {
-            DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_GAME);
-        }
     }
 
     private void _setupPlayers(Dictionary<PlayerSlot, NetPlayer> netPlayerMap)

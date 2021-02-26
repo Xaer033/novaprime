@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Permissions;
 using Mirror;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -29,7 +28,7 @@ public class NetworkManager : Mirror.NetworkManager
     public int masterServerPort = 11667;
     
     
-    public event Action<string> onError;
+    // public event Action<string> onError;
     public event Action onServerStarted;
     public event Action onServerStopped;
     public event Action onServerMatchBegin;
@@ -71,7 +70,7 @@ public class NetworkManager : Mirror.NetworkManager
     
     public override void OnDestroy()
     {
-        onError = null;
+        // onError = null;
         onServerStarted = null;
         onServerStopped = null;
         onServerConnect = null;
@@ -168,6 +167,7 @@ public class NetworkManager : Mirror.NetworkManager
         onClientCurrentSession += onSingleplayerCurrentSession;
         // onServerMatchBegin += onSingleplayerMatchBegin;
         
+	    NetworkServer.dontListen = false;
 	    StartHost();
 	    NetworkServer.dontListen = true;
     }
@@ -427,11 +427,11 @@ public class NetworkManager : Mirror.NetworkManager
         onClientStarted?.Invoke();
     }
 
-    public override void OnError(string reason)
-    {
-        base.OnError(reason);
-        onError?.Invoke(reason);
-    }
+    // public override void OnError(string reason)
+    // {
+    //     base.OnError(reason);
+    //     onError?.Invoke(reason);
+    // }
 
     public override void OnServerConnect(NetworkConnection conn)
     {
@@ -493,11 +493,11 @@ public class NetworkManager : Mirror.NetworkManager
         _serverNetPlayerMap.Remove(conn.connectionId);
     }
 
-    public override void OnServerError(NetworkConnection conn, int errorCode)
-    {
-        Debug.LogError("OnServerErrorL " + errorCode);
-        onServerError?.Invoke(conn, errorCode);
-    }
+    // public override void OnServerError(NetworkConnection conn, int errorCode)
+    // {
+    //     Debug.LogError("OnServerErrorL " + errorCode);
+    //     onServerError?.Invoke(conn, errorCode);
+    // }
 
     public override void OnClientConnect(NetworkConnection conn)
     {

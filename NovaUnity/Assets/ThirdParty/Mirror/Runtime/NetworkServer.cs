@@ -450,41 +450,55 @@ namespace Mirror
             return connections.Count == 0 || (connections.Count == 1 && localConnection != null);
         }
 
-        /// <summary>
-        /// Called from NetworkManager in LateUpdate
-        /// <para>The user should never need to pump the update loop manually</para>
-        /// </summary>
-        public static void Update()
+        // NetworkEarlyUpdate called before any Update/FixedUpdate
+        // (we add this to the UnityEngine in NetworkLoop)
+        internal static void NetworkEarlyUpdate()
         {
-            // don't need to update server if not active
-            if (!active) return;
+            // process all incoming messages first before updating the world
+            if (Transport.activeTransport != null)
+                Transport.activeTransport.ServerEarlyUpdate();
+        }
 
-            // Check for dead clients but exclude the host client because it
-            // doesn't ping itself and therefore may appear inactive.
-            CheckForInactiveConnections();
-
-            // update all server objects
-            foreach (KeyValuePair<uint, NetworkIdentity> kvp in NetworkIdentity.spawned)
+        // NetworkLateUpdate called after any Update/FixedUpdate/LateUpdate
+        // (we add this to the UnityEngine in NetworkLoop)
+        internal static void NetworkLateUpdate()
+        {
+            // only process spawned & connections if active
+            if (active)
             {
-                NetworkIdentity identity = kvp.Value;
-                if (identity != null)
+                // Check for dead clients but exclude the host client because it
+                // doesn't ping itself and therefore may appear inactive.
+                CheckForInactiveConnections();
+
+                // update all server objects
+                foreach (KeyValuePair<uint, NetworkIdentity> kvp in NetworkIdentity.spawned)
                 {
-                    identity.ServerUpdate();
-                }
-                else
-                {
+                    NetworkIdentity identity = kvp.Value;
+                    if (identity != null)
+                    {
+                        identity.ServerUpdate();
+                    }
                     // spawned list should have no null entries because we
                     // always call Remove in OnObjectDestroy everywhere.
-                    Debug.LogWarning("Found 'null' entry in spawned list for netId=" + kvp.Key + ". Please call NetworkServer.Destroy to destroy networked objects. Don't use GameObject.Destroy.");
+                    else Debug.LogWarning("Found 'null' entry in spawned list for netId=" + kvp.Key + ". Please call NetworkServer.Destroy to destroy networked objects. Don't use GameObject.Destroy.");
+                }
+
+                // update all connections to send out batched messages in interval
+                foreach (NetworkConnectionToClient conn in connections.Values)
+                {
+                    conn.Update();
                 }
             }
 
-            // update all connections to send out batched messages in interval
-            foreach (NetworkConnectionToClient conn in connections.Values)
-            {
-                conn.Update();
-            }
+            // process all incoming messages after updating the world
+            // (even if not active. still want to process disconnects etc.)
+            if (Transport.activeTransport != null)
+                Transport.activeTransport.ServerLateUpdate();
         }
+
+        // obsolete to not break people's projects. Update was public.
+        [Obsolete("NetworkServer.Update is now called internally from our custom update loop. No need to call Update manually anymore.")]
+        public static void Update() => NetworkLateUpdate();
 
         static void CheckForInactiveConnections()
         {

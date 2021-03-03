@@ -246,16 +246,19 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
 
     private void onServerDisconnect(NetworkConnection conn)
     {
-        IAvatarController controller = _serverConnToPlayerMap[conn.connectionId];
-        NetPlayer netPlayer = _networkManager.GetServerPlayerFromConnId(conn.connectionId);
+        IAvatarController controller = null;// _serverConnToPlayerMap[conn.connectionId];
         
-        _serverConnToPlayerMap?.Remove(conn.connectionId);
-        _serverPlayerInputBuffer?.Remove(netPlayer.playerSlot);
-        _serverPlayerControllerList?.Remove(controller);
+        if(_serverConnToPlayerMap.TryGetValue(conn.connectionId, out controller))
+        {
+            NetPlayer netPlayer = _networkManager.GetServerPlayerFromConnId(conn.connectionId);
+            
+            _serverConnToPlayerMap?.Remove(conn.connectionId);
+            _serverPlayerInputBuffer?.Remove(netPlayer.playerSlot);
+            _serverPlayerControllerList?.Remove(controller);
 
-        NetworkServer.UnSpawn(controller?.view?.gameObject);
-        _avatarSystem.UnSpawn(controller?.view?.gameObject); // Unspawn locally
-        
+            NetworkServer.UnSpawn(controller?.view?.gameObject);
+            _avatarSystem.UnSpawn(controller?.view?.gameObject); // Unspawn locally
+        }
     }
     
     private void onServerSendPlayerInput(NetworkConnection conn, SendPlayerInput msg)
@@ -422,60 +425,60 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
                 
                 c.view.Aim(c.state.aimPosition);
             }
-            else
-            {
-                int oldStateIndex = -1;
-                for(int b = 0; b < state.nonAckInputBuffer.backIndex; ++b)
-                {
-                    if(state.nonAckInputBuffer[b].tick == newState.ackTick)
-                    {
-                        oldStateIndex = b;
-                        Debug.Log("Old state found: " + b);
-                        break;
-                    }
-                }
-                
-                // int oldStateIndex = (int)((newState.ackTick - 1) % PlayerState.MAX_INPUTS);
-                if(oldStateIndex < 0)
-                {
-                    state.previousPosition = state.position;//c.view.viewRoot.position;
-                    state.position = newState.position;
-                    state.aimPosition = newState.aimPosition;
-                }
-                else
-                {
-                    PlayerStateSnapshot oldState = state.nonAckStateBuffer[oldStateIndex];
-                    Vector2 deltaPosition = oldState.position - newState.position;
-                    Vector2 deltaAimPosition = oldState.aimPosition - newState.aimPosition;
-                 
-                    if(deltaPosition.sqrMagnitude > 0.1f)// || deltaAimPosition.sqrMagnitude > 0.01f)
-                    {
-                        //Miss Predictited / catch up 
-                        state.SetFromSnapshot(oldState);
-
-                        state.previousPosition = state.position;//c.view.viewRoot.position;
-                        state.position = newState.position;
-                        state.aimPosition = newState.aimPosition;
-                        
-                        c.view.transform.position = state.position;
-                        c.view.viewRoot.position     = state.previousPosition;
-
-                        int currentStateIndex = (int)((state.nonAckInputBuffer.backIndex + 1) % PlayerState.MAX_INPUTS);
-                        int index = oldStateIndex;
-                        
-                        while(index != currentStateIndex)
-                        {
-                            Debug.LogFormat("Index info: {0}, {1}, {2}", oldStateIndex, currentStateIndex, index);
-                    
-                            PlayerInputTickPair simInput = state.nonAckInputBuffer[index];
-                            c.FixedStep(Time.fixedDeltaTime, simInput.input);
-                            state.nonAckStateBuffer[index] = state.Snapshot();
-                    
-                            index = (int) ((index + 1) % PlayerState.MAX_INPUTS); 
-                        } 
-                    }
-                }
-            }
+            // else
+            // {
+            //     int oldStateIndex = -1;
+            //     for(int b = 0; b < state.nonAckInputBuffer.backIndex; ++b)
+            //     {
+            //         if(state.nonAckInputBuffer[b].tick == newState.ackTick)
+            //         {
+            //             oldStateIndex = b;
+            //             Debug.Log("Old state found: " + b);
+            //             break;
+            //         }
+            //     }
+            //     
+            //     // int oldStateIndex = (int)((newState.ackTick - 1) % PlayerState.MAX_INPUTS);
+            //     if(oldStateIndex < 0)
+            //     {
+            //         state.previousPosition = state.position;//c.view.viewRoot.position;
+            //         state.position = newState.position;
+            //         state.aimPosition = newState.aimPosition;
+            //     }
+            //     else
+            //     {
+            //         PlayerStateSnapshot oldState = state.nonAckStateBuffer[oldStateIndex];
+            //         Vector2 deltaPosition = oldState.position - newState.position;
+            //         Vector2 deltaAimPosition = oldState.aimPosition - newState.aimPosition;
+            //      
+            //         if(deltaPosition.sqrMagnitude > 0.1f)// || deltaAimPosition.sqrMagnitude > 0.01f)
+            //         {
+            //             //Miss Predictited / catch up 
+            //             state.SetFromSnapshot(oldState);
+            //
+            //             state.previousPosition = state.position;//c.view.viewRoot.position;
+            //             state.position = newState.position;
+            //             state.aimPosition = newState.aimPosition;
+            //             
+            //             c.view.transform.position = state.position;
+            //             c.view.viewRoot.position     = state.previousPosition;
+            //
+            //             int currentStateIndex = (int)((state.nonAckInputBuffer.backIndex + 1) % PlayerState.MAX_INPUTS);
+            //             int index = oldStateIndex;
+            //             
+            //             while(index != currentStateIndex)
+            //             {
+            //                 Debug.LogFormat("Index info: {0}, {1}, {2}", oldStateIndex, currentStateIndex, index);
+            //         
+            //                 PlayerInputTickPair simInput = state.nonAckInputBuffer[index];
+            //                 c.FixedStep(Time.fixedDeltaTime, simInput.input);
+            //                 state.nonAckStateBuffer[index] = state.Snapshot();
+            //         
+            //                 index = (int) ((index + 1) % PlayerState.MAX_INPUTS); 
+            //             } 
+            //         }
+            //     }
+            // }
         }
     }
     

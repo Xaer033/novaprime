@@ -25,25 +25,28 @@ public class MultiplayerRoomController : BaseController
             view.AddListener(MenuUIEventType.BACK, onBackButton);
 
             
-            if(!_isServer)
+            if(_networkManager.syncStore != null)
             {
-                _networkManager.onClientLocalDisconnect += onClientLocalDisconnect;
+                _networkManager.syncStore.onPlayerMapChanged += onPlayerMapChanged;                
             }
-
 
             if(NetworkClient.active)
             {
                 _networkManager.onClientConfirmReadyUp += onClientConfirmReadyUp;
                 _networkManager.onClientSyncLobbyPlayers += onClientSyncLobbyPlayers;
                 _networkManager.onClientStartMatchLoad += onClientStartMatchLoad;
+                _networkManager.onClientDisconnect += onClientLocalDisconnect;
             }
 
-            if(_networkManager.isPureServer)
+            if(NetworkServer.active)
             {
                 _networkManager.onServerConnect += onServerConnect;
                 _networkManager.onServerDisconnect += onServerDisconnect;
                 _networkManager.onServerConfirmReadyUp += onServerConfirmReadyUp;
-                
+            }
+            
+            if(_networkManager.isPureServer)
+            {
                 roomView.readyButton.gameObject.SetActive(false);
             }
 
@@ -57,15 +60,15 @@ public class MultiplayerRoomController : BaseController
     
     public override void RemoveView()
     {
-        if(!_isServer)
+        if(_networkManager.syncStore != null)
         {
-            _networkManager.onClientLocalDisconnect -= onClientLocalDisconnect;
+            _networkManager.syncStore.onPlayerMapChanged -= onPlayerMapChanged;            
         }
-
         
         _networkManager.onClientConfirmReadyUp -= onClientConfirmReadyUp;
         _networkManager.onClientSyncLobbyPlayers -= onClientSyncLobbyPlayers;
         _networkManager.onClientStartMatchLoad -= onClientStartMatchLoad;
+        _networkManager.onClientDisconnect -= onClientLocalDisconnect;
     
         _networkManager.onServerConnect -= onServerConnect;
         _networkManager.onServerDisconnect -= onServerDisconnect;
@@ -99,6 +102,12 @@ public class MultiplayerRoomController : BaseController
         
         _setupPlayers(_networkManager.GetServerPlayerMap());
     }
+
+    private void onPlayerMapChanged(SyncDictionary<PlayerSlot, NetPlayer>.Operation op, PlayerSlot slot,
+                                    NetPlayer player)
+    {
+        Debug.LogFormat("On Map Changed: {0}, {1}:{2}", op, slot, player);
+    }
     
     private void onClientConfirmReadyUp(NetworkConnection conn, ConfirmReadyUp msg)
     {
@@ -122,7 +131,9 @@ public class MultiplayerRoomController : BaseController
     
     private void onClientLocalDisconnect(NetworkConnection conn)
     {
-        _networkManager.Disconnect();
+        // view.RemoveListener(MenuUIEventType.BACK, onBackButton);
+        //
+        // _networkManager.Disconnect();
         DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);
     }
     
@@ -130,9 +141,8 @@ public class MultiplayerRoomController : BaseController
     {
         view.RemoveListener(MenuUIEventType.BACK, onBackButton);
         // Maybe throw up a modal dialog to ask if they are sure?
-        // PhotonNetwork.LeaveRoom();
         
-        _networkManager.Disconnect();
+        //
         DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_LOBBY);
     }
 

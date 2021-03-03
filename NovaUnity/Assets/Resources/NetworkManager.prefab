@@ -65,6 +65,8 @@ MonoBehaviour:
   spawnPrefabs: []
   masterServerLocation: http://novamaster.net
   masterServerPort: 11667
+  syncStatePrefab: {fileID: 4762176007934702008, guid: f373649df585fea40b1ca85b07e2cec5,
+    type: 3}
 --- !u!114 &3374875636476469244
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -19,6 +19,8 @@ public class MultiplayerSetupController : BaseController
     
     public override void Start()
     {
+        _networkManager.Disconnect();
+        
         viewFactory.CreateAsync<MultiplayerSetupView>("GUI/MainMenu/MultiplayerSetupView", (v) =>
         {
             view = v;
@@ -148,6 +150,7 @@ public class MultiplayerSetupController : BaseController
     private void onClientConnect(NetworkConnection conn)
     {
         Debug.Log("Client Joined Server");
+        ClientScene.Ready(NetworkClient.connection);
         
         _networkManager.onClientConnect -= onClientConnect;
         _networkManager.onClientCurrentSession += onClientCurrentSession;

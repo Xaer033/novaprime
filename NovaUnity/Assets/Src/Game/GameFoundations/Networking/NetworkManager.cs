@@ -6,6 +6,7 @@ using Mirror;
 using UnityEngine;
 using UnityEngine.Networking;
 
+
 public class NetworkManager : Mirror.NetworkManager
 {
     public const string kGameVersion = "6.6.6";
@@ -13,7 +14,7 @@ public class NetworkManager : Mirror.NetworkManager
     // public const int kMaxPlayers = 4;
     public const string kSingleplayerRoom = "Singleplayer";
 
-    private const string kAppId = "23431909-e58c-40e3-94d2-8d90b4f9e11d";
+    private const string kMasterListSecretId = "23431909-e58c-40e3-94d2-8d90b4f9e11d";
     private const string kAppIdKey = "serverKey";
     private const string kServerUuIdKey = "serverUuid";
     private const string kServerName = "serverName";  
@@ -24,8 +25,11 @@ public class NetworkManager : Mirror.NetworkManager
 
     private Action _onSingleplayerCallback;
 
+
     public string masterServerLocation = "http://novamaster.net";
     public int masterServerPort = 11667;
+
+    public GameObject syncStatePrefab;
     
     
     // public event Action<string> onError;
@@ -60,11 +64,11 @@ public class NetworkManager : Mirror.NetworkManager
         IN_GAME
     }
     
-    
-    
     public ServerListEntry serverEntry { get; set; }
     
-    public SessionState sessionState { get; set; }
+    public SessionState sessionState { get; private set; }
+
+    public SyncStore syncStore { get; private set; }
     
     public static uint frameTick { get; set; }
     
@@ -153,11 +157,10 @@ public class NetworkManager : Mirror.NetworkManager
         return _serverNetPlayerMap[connId];
     }
 
+    
     public override void Start()
     {
         base.Start();
-        
-        registerNetworkPrefabs();
     }
 
     public void StartSingleplayer(Action onSingleplayerCreated)
@@ -167,9 +170,8 @@ public class NetworkManager : Mirror.NetworkManager
         onClientCurrentSession += onSingleplayerCurrentSession;
         // onServerMatchBegin += onSingleplayerMatchBegin;
         
-	    NetworkServer.dontListen = false;
-	    StartHost();
 	    NetworkServer.dontListen = true;
+	    StartHost();
     }
 
     private void onSingleplayerCurrentSession(NetworkConnection conn, CurrentSessionUpdate msg)
@@ -202,6 +204,23 @@ public class NetworkManager : Mirror.NetworkManager
                 OnClientSpawnHandler, 
                 OnClientUnspawnHandler);
         }
+        
+        ClientScene.RegisterPrefab(
+                syncStatePrefab, 
+                onClientSyncStoreCreated, 
+                onClientSyncStoreDestory);
+    }
+
+    private GameObject onClientSyncStoreCreated(SpawnMessage msg)
+    {
+        GameObject syncStoreInstance = GameObject.Instantiate(syncStatePrefab, transform);
+        syncStore = syncStoreInstance.GetComponent<SyncStore>();
+        return syncStoreInstance;
+    }
+    
+    private void onClientSyncStoreDestory(GameObject obj)
+    {
+        GameObject.Destroy(obj);
     }
     
     private string getMasterServerCommand(string command)
@@ -251,7 +270,7 @@ public class NetworkManager : Mirror.NetworkManager
         List<ServerListEntry> serverEntries = new List<ServerListEntry>();
         
         WWWForm form = new WWWForm(); 
-        form.AddField(kAppIdKey, kAppId);
+        form.AddField(kAppIdKey, kMasterListSecretId);
 
         string masterUri = getMasterServerCommand("list"); 
         Debug.Log("Rest Command: " + masterUri);
@@ -297,7 +316,7 @@ public class NetworkManager : Mirror.NetworkManager
     private IEnumerator enumAddServerToMasterList(ServerListEntry entry, Action<long> onComplete)
     {
         WWWForm form = new WWWForm(); 
-        form.AddField(kAppIdKey, kAppId);
+        form.AddField(kAppIdKey, kMasterListSecretId);
         form.AddField(kServerUuIdKey, entry.serverUuid);
         form.AddField(kServerName, entry.name);
         form.AddField(kServerIp, entry.ip);
@@ -340,7 +359,7 @@ public class NetworkManager : Mirror.NetworkManager
     private IEnumerator enumRemoveServerToMasterList(ServerListEntry entry, Action<long> onComplete)
     {
         WWWForm form = new WWWForm();
-        form.AddField(kAppIdKey, kAppId);
+        form.AddField(kAppIdKey, kMasterListSecretId);
         form.AddField(kServerUuIdKey, entry.serverUuid);
         form.AddField(kServerName, entry.name);
         form.AddField(kServerIp, entry.ip);
@@ -391,7 +410,8 @@ public class NetworkManager : Mirror.NetworkManager
         Debug.Log("OnStartServer");
         
         _serverNetPlayerMap.Clear();
-        
+    
+        serverSpawnSyncStore();
         setupPlayerSlotGenerator();
         
         NetworkServer.RegisterHandler<RequestMatchStart>(OnServerRequestMatchStart, false);
@@ -403,7 +423,16 @@ public class NetworkManager : Mirror.NetworkManager
         
         onServerStarted?.Invoke();
     }
-    
+
+    private void serverSpawnSyncStore()
+    {
+        GameObject syncObjectPrefab = syncStatePrefab;
+        GameObject syncInstance = GameObject.Instantiate(syncObjectPrefab, transform);
+        
+        NetworkServer.Spawn(syncInstance);
+        
+        syncStore = syncInstance.GetComponent<SyncStore>();
+    }
     public override void OnStopServer()
     {
         removeServerToMasterList(serverEntry, null);
@@ -413,6 +442,8 @@ public class NetworkManager : Mirror.NetworkManager
     public override void OnStartClient()
     {
         Debug.Log("OnStartClient");
+        
+        registerNetworkPrefabs();
         
         _clientNetPlayerMap.Clear();
         
@@ -442,12 +473,17 @@ public class NetworkManager : Mirror.NetworkManager
 
         if(hasPlayerSlot)
         {
-            _serverNetPlayerMap[conn.connectionId] = new NetPlayer(
+            NetworkServer.SetClientReady(conn);
+            
+            NetPlayer netPlayer = new NetPlayer(
                 conn.connectionId,
                 pSlot,
                 pSlot.ToString(),
                 false);
 
+            _serverNetPlayerMap[conn.connectionId] = netPlayer;
+            syncStore.playerMap[pSlot] = netPlayer;
+            
             // Assign our connected player a number
             AssignPlayerSlot assignMessage = new AssignPlayerSlot(pSlot);
             conn.Send(assignMessage, Channels.DefaultReliable);
@@ -473,11 +509,12 @@ public class NetworkManager : Mirror.NetworkManager
     public override void OnServerDisconnect(NetworkConnection conn)
     {
         Debug.Log("OnServerDisconnect");
-
+        PlayerSlot playerSlot = PlayerSlot.NONE;
+        
         if(conn != null && _serverNetPlayerMap.ContainsKey(conn.connectionId))
         {
             NetPlayer player = _serverNetPlayerMap[conn.connectionId];
-            PlayerSlot playerSlot = player.playerSlot;
+            playerSlot = player.playerSlot;
 
             returnPlayerNumber(playerSlot);
 
@@ -491,6 +528,7 @@ public class NetworkManager : Mirror.NetworkManager
         onServerDisconnect?.Invoke(conn);
         
         _serverNetPlayerMap.Remove(conn.connectionId);
+        syncStore.playerMap.Remove(playerSlot);
     }
 
     // public override void OnServerError(NetworkConnection conn, int errorCode)
@@ -578,6 +616,8 @@ public class NetworkManager : Mirror.NetworkManager
     {
         if(conn.connectionId == NetworkServer.localConnection.connectionId)
         {
+            NetworkServer.SetAllClientsNotReady();
+            
             StartMatchLoad startMatchMessage = new StartMatchLoad();
             NetworkServer.SendToAll(startMatchMessage, Channels.DefaultReliable);
         }
@@ -626,6 +666,7 @@ public class NetworkManager : Mirror.NetworkManager
         {
             player.isReadyUp = msg.isReady;
             _serverNetPlayerMap[conn.connectionId] = player;
+            syncStore.playerMap[player.playerSlot] = player;
 
             NetworkServer.SetClientReady(conn);
             
@@ -645,11 +686,11 @@ public class NetworkManager : Mirror.NetworkManager
     {
         NetworkServer.dontListen = false;
         
-		Debug.Log("Stopping Client");
-        StopClient();
-    
-		Debug.Log("Stopping Server");
-        StopServer();
+		// Debug.Log("Stopping Client");
+  //       StopClient();
+  //   
+		// Debug.Log("Stopping Server");
+  //       StopServer();
         
         Shutdown();
         

@@ -159,6 +159,7 @@
                 <e p="GameSystems.cs" t="Include" />
                 <e p="HealthUISystem.cs" t="Include" />
                 <e p="IGameSystem.cs" t="Include" />
+                <e p="NetSnapshotSystem.cs" t="Include" />
                 <e p="NetworkSystem.cs" t="Include" />
                 <e p="PlatformSystem.cs" t="Include" />
                 <e p="ProjectileSystem.cs" t="Include" />
@@ -246,6 +247,7 @@
               <e p="IStateFactory.cs" t="Include" />
             </e>
             <e p="GeneralUtilities" t="Include">
+              <e p="FloatIntegratorEMA.cs" t="Include" />
               <e p="IPostInit.cs" t="Include" />
               <e p="MathUtil.cs" t="Include" />
               <e p="MultiMap.cs" t="Include" />
@@ -580,6 +582,7 @@
               <e p="NetworkConnectionToServer.cs" t="Include" />
               <e p="NetworkDiagnostics.cs" t="Include" />
               <e p="NetworkIdentity.cs" t="Include" />
+              <e p="NetworkLoop.cs" t="Include" />
               <e p="NetworkManager.cs" t="Include" />
               <e p="NetworkManagerHUD.cs" t="Include" />
               <e p="NetworkMessage.cs" t="Include" />

@@ -38,7 +38,7 @@ public class NetworkManager : Mirror.NetworkManager
     public event Action onServerMatchBegin;
     public event Action<NetworkConnection> onServerConnect;
     public event Action<NetworkConnection> onServerDisconnect;
-    public event Action<NetworkConnection, int> onServerError;
+    // public event Action<NetworkConnection, int> onServerError;
     public event Action<NetworkConnection, ConfirmReadyUp> onServerConfirmReadyUp;
     public event Action<NetworkConnection, SendPlayerInput> onServerSendPlayerInput;
     public event Action<NetworkConnection> onServerMatchLoadComplete;
@@ -47,7 +47,7 @@ public class NetworkManager : Mirror.NetworkManager
     public event Action<NetworkConnection> onClientConnect;
     public event Action<NetworkConnection> onClientDisconnect;
     public event Action<NetworkConnection> onClientLocalDisconnect;
-    public event Action<NetworkConnection, int> onClientError;
+    // public event Action<NetworkConnection, int> onClientError;
     public event Action<NetworkConnection, SyncLobbyPlayers> onClientSyncLobbyPlayers;
     public event Action<NetworkConnection, ConfirmReadyUp> onClientConfirmReadyUp;
     public event Action<NetworkConnection, StartMatchLoad> onClientStartMatchLoad;
@@ -79,7 +79,7 @@ public class NetworkManager : Mirror.NetworkManager
         onServerStopped = null;
         onServerConnect = null;
         onServerDisconnect = null;
-        onServerError = null;
+        // onServerError = null;
         onServerConfirmReadyUp = null;
         onServerMatchBegin = null;
         onServerSendPlayerInput = null;
@@ -90,7 +90,7 @@ public class NetworkManager : Mirror.NetworkManager
         onClientConnect = null;
         onClientDisconnect = null;
         onClientLocalDisconnect = null;
-        onClientError = null;
+        // onClientError = null;
         onClientSyncLobbyPlayers = null;
         onClientConfirmReadyUp = null;
         onClientStartMatchLoad = null;
@@ -278,7 +278,7 @@ public class NetworkManager : Mirror.NetworkManager
         {
             yield return www.SendWebRequest();
 
-            if (www.isNetworkError || www.isHttpError)
+            if (www.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError(www.error);
                 onComplete?.Invoke(false, serverEntries);
@@ -331,7 +331,7 @@ public class NetworkManager : Mirror.NetworkManager
         {
             yield return www.SendWebRequest();
 
-            if (www.isNetworkError || www.isHttpError)
+            if (www.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError(www.error);
                 onComplete?.Invoke(www.responseCode);
@@ -374,7 +374,7 @@ public class NetworkManager : Mirror.NetworkManager
         {
             yield return www.SendWebRequest();
 
-            if(www.isNetworkError || www.isHttpError)
+            if(www.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError(www.error);
                 onComplete?.Invoke(www.responseCode);
@@ -559,11 +559,11 @@ public class NetworkManager : Mirror.NetworkManager
         // _netPlayerMap.Remove(conn.connectionId);
     }
 
-    public override void OnClientError(NetworkConnection conn, int errorCode)
-    {
-        Debug.LogError("OnClientError: " + errorCode);
-        onClientError?.Invoke(conn, errorCode);
-    }
+    // public override void OnClientError(NetworkConnection conn, int errorCode)
+    // {
+    //     Debug.LogError("OnClientError: " + errorCode);
+    //     onClientError?.Invoke(conn, errorCode);
+    // }
 
     private void OnClientSyncLobbyPlayers(NetworkConnection conn, SyncLobbyPlayers msg)
     {

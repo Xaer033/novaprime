@@ -1,16 +1,17 @@
 ﻿using UnityEngine;
 
-public class ProjectileState
+public struct ProjectileState
 {
-    public bool isActive;
+    public bool    isActive;
     public Vector3 position;
     public Vector3 prevPosition;
     public Vector3 velocity;
-    public float speed;
-    public float timeScale;
-    public int damage;
-    public double deathTime;
-    public string ownerUUID;
+    public float   angle;
+    public float   speed;
+    public float   timeScale;
+    public int     damage;
+    public double  deathTime;
+    public string  ownerUUID;
 
     public ProjectileData data;
 }

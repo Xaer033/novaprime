@@ -173,7 +173,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         {
             header = channelHeader,
             frameTick = NetworkManager.frameTick,// + kTicksAhead,
-            sentTime = TimeUtil.timestamp(),
+            sentTime = TimeUtil.Now(),
             inputList = _clientTempInputBuffer
         };
 

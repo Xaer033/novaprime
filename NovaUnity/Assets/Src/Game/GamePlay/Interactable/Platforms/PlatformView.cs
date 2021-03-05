@@ -52,7 +52,7 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
             for (int i = 0; i < localWaypoints.Length; ++i)
             {
                 Gizmos.color = Color.red;
-                Vector2 globalPos = Application.isPlaying && state != null ? state.globalWayPoints[i] : localWaypoints[i] + new Vector2(transform.position.x, transform.position.y);
+                Vector2 globalPos = Application.isPlaying && state.globalWayPoints != null ? state.globalWayPoints[i] : localWaypoints[i] + new Vector2(transform.position.x, transform.position.y);
                 Gizmos.DrawLine(globalPos - Vector2.up * size, globalPos + Vector2.up * size);
                 Gizmos.DrawLine(globalPos - Vector2.left * size, globalPos + Vector2.left * size);
 

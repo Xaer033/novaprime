@@ -37,7 +37,7 @@ public class SpawnPointSystem : NotificationDispatcher, IGameSystem
 
     public void FixedStep(float deltaTime)
     {
-        float now = Time.fixedTime;
+        float now = (float)TimeUtil.Now();
         for (int i = 0; i < _spawnPointViewList.Length; ++i)
         {
             SpawnPointState state = _gameState.spawnPointStateList[i];
@@ -46,8 +46,10 @@ public class SpawnPointSystem : NotificationDispatcher, IGameSystem
             bool shouldSpawn = _shouldSpawn(now, view, state);
             if (shouldSpawn)
             {
-                _spawn(now, view, state);
+                _spawn(now, view, ref state);
             }
+
+            _gameState.spawnPointStateList[i] = state;
         }
     }
 
@@ -72,7 +74,7 @@ public class SpawnPointSystem : NotificationDispatcher, IGameSystem
         return false;
     }
     
-    private void _spawn(float now, SpawnPointView view, SpawnPointState state)
+    private void _spawn(float now, SpawnPointView view, ref SpawnPointState state)
     {
         state.spawnCount++;
         state.nextSpawnTime = now + view.spawnInterval;

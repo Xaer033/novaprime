@@ -83,13 +83,15 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
             switch(view.platformType)
             { 
                 case PlatformType.AUTO_TIME:
-                    _timePlatformController.UpdatePlatform(state, view, adjustedDeltaTime, time);
+                    _timePlatformController.UpdatePlatform(ref state, view, adjustedDeltaTime, time);
                     break;
                 
                 case PlatformType.TRIGGER:
-                    _triggerPlatformController.UpdatePlatform(state, view, adjustedDeltaTime, time);
+                    _triggerPlatformController.UpdatePlatform(ref state, view, adjustedDeltaTime, time);
                     break;
             }
+
+            _gameState.platformStateList[i] = state;
         }
     }
     

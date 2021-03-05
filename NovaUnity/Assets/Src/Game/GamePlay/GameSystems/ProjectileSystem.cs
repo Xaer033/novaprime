@@ -94,7 +94,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         _projectileImpactViewList.Sort(_impactFXSort);
         _bloodImpactViewList.Sort(_impactFXSort);
 
-        double now = TimeUtil.timestamp();
+        double now = TimeUtil.Now();
         
         for (int i = 0; i < _poolSize; ++i)
         {
@@ -175,6 +175,9 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
                     view.Recycle();
                 }
             }
+            
+            // Make sure this happens if state was written to!
+            _gameState.projectileStateList[i] = state;
         }
     }
 
@@ -206,7 +209,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
 
     public ProjectileState Spawn(string ownerUUID, ProjectileData data, Vector3 position, Vector3 direction)
     {
-        double now = TimeUtil.timestamp();
+        double now = TimeUtil.Now();
         
         for (int i = 0; i < _poolSize; ++i)
         {
@@ -225,10 +228,13 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
                 state.position = position;
                 state.prevPosition = position;
                 state.velocity = direction * state.speed;
+                state.angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+                _gameState.projectileStateList[i] = state;
                 
                 view.Reset(position);
-                Vector3 eulerAngles = view.transform.eulerAngles;
-                eulerAngles.z = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+                Vector3 eulerAngles     = view.transform.eulerAngles;
+                eulerAngles.z           = state.angle;
                 view.transform.rotation = Quaternion.Euler(eulerAngles);
                 
                 _gameSystems.DispatchEvent(GamePlayEventType.PROJECTILE_SPAWNED, false, state);
@@ -236,7 +242,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
             }
         }
 
-        return null;
+        return default(ProjectileState);
     }
 
     private int _impactFXSort(ParticleSystem a, ParticleSystem b)

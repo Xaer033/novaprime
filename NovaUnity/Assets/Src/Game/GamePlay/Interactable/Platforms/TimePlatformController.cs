@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class TimePlatformController : BasePlatformController
 {
-    protected override Vector2 calculatePlatformMovement(PlatformState state, PlatformView view, float adjustedDeltaTime, float time)
+    protected override Vector2 calculatePlatformMovement(ref PlatformState state, PlatformView view, float adjustedDeltaTime, float time)
     {
         if (time < state.nextMoveTime)
         {

@@ -31,15 +31,17 @@ public class GameSystems : NotificationDispatcher
     {
         _gameState = gameState;
         
-        IGameSystem projectileSystem     = new ProjectileSystem(gameplayResources, 125);
-        IGameSystem avatarSystem         = new AvatarSystem(gameplayResources);
-        IGameSystem healthUiSystem       = new HealthUISystem(gameplayResources);
-        IGameSystem networkSystem        = new NetworkSystem(gameplayResources.unitMap);
-        IGameSystem spawnPointSystem     = new SpawnPointSystem();
-        IGameSystem platformSystem       = new PlatformSystem();
-        IGameSystem triggerSystem        = new TriggerSystem(); 
- 
+        IGameSystem projectileSystem  = new ProjectileSystem(gameplayResources, 125);
+        IGameSystem avatarSystem      = new AvatarSystem(gameplayResources);
+        IGameSystem healthUiSystem    = new HealthUISystem(gameplayResources);
+        IGameSystem networkSystem     = new NetworkSystem(gameplayResources.unitMap);
+        IGameSystem spawnPointSystem  = new SpawnPointSystem();
+        IGameSystem platformSystem    = new PlatformSystem();
+        IGameSystem triggerSystem     = new TriggerSystem();
+        IGameSystem netSnapshotSystem = new NetSnapshotSystem();
+        
         // Higher priority value goes first
+        _addSystem(600,     netSnapshotSystem);
         _addSystem(500,     triggerSystem);
         _addSystem(400,     avatarSystem);
         _addSystem(300,     spawnPointSystem);
@@ -47,6 +49,7 @@ public class GameSystems : NotificationDispatcher
         _addSystem(100,     projectileSystem);
         _addSystem(100,     healthUiSystem);
         _addSystem( 50,     networkSystem);
+        
         
         _sortedSystemList.Sort(_sortSystems);
     }

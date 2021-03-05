@@ -12,12 +12,12 @@ public class BulletView : MonoBehaviour, ITimeWarpTarget
     
     public void OnTimeWarpEnter(float timeScale)
     {
-        state.timeScale = timeScale;
+        // state.timeScale = timeScale;
     }
 
     public void OnTimeWarpExit()
     {
-        state.timeScale = 1.0f;
+        // state.timeScale = 1.0f;
     }
 
     public void Recycle()

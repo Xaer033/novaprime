@@ -1,26 +1,24 @@
-﻿using System;
-using GhostGen;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class BasePlatformController
 {
-    public void UpdatePlatform(PlatformState state, PlatformView view, float adjustedDeltaTime, float time)
+    public void UpdatePlatform(ref PlatformState state, PlatformView view, float adjustedDeltaTime, float time)
     {
         view._raycastController.UpdateRaycastOrigins();
-        Vector2 newVelocity = calculatePlatformMovement(state, view, adjustedDeltaTime, time);
+        Vector2 newVelocity = calculatePlatformMovement(ref state, view, adjustedDeltaTime, time);
         
-        calculatePassengerMovement(state, view, state.velocity);
+        calculatePassengerMovement(ref state, view, state.velocity);
 
         state.velocity = newVelocity;
         state.prevPosition = state.position;
         
-        movePassengers(state, true);
+        movePassengers(ref state, true);
         state.position += state.velocity;
         view.transform.position = state.position;
-        movePassengers(state, false);
+        movePassengers(ref state, false);
     }
     
-    private void movePassengers(PlatformState state, bool beforeMovePlatform)
+    private void movePassengers(ref PlatformState state, bool beforeMovePlatform)
     {
         for (int i = 0; i < state.passengerMovementList.Count; ++i)
         {
@@ -40,12 +38,12 @@ public class BasePlatformController
         }
     }
     
-    protected virtual Vector2 calculatePlatformMovement(PlatformState state, PlatformView view, float adjustedDeltaTime, float time)
+    protected virtual Vector2 calculatePlatformMovement(ref PlatformState state, PlatformView view, float adjustedDeltaTime, float time)
     {
         return Vector2.zero;
     }
     
-    private void calculatePassengerMovement(PlatformState state, PlatformView view, Vector2 velocity)
+    private void calculatePassengerMovement(ref PlatformState state, PlatformView view, Vector2 velocity)
     {
         state.movedPassengersSet.Clear();
         state.passengerMovementList.Clear();

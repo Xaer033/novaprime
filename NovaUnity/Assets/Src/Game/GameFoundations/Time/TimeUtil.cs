@@ -1,9 +1,15 @@
 ﻿using Mirror;
+using UnityEngine;
 
 public class TimeUtil
 {
-    public static double timestamp()
+    public static double Now()
     {
-        return NetworkTime.time;
+        return Time.unscaledTimeAsDouble;
+    }
+
+    public static int dateNow()
+    {
+        return System.DateTime.Now.Second;
     }
 }

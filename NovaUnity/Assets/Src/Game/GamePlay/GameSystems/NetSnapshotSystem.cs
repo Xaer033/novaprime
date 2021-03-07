@@ -8,8 +8,8 @@ public class NetSnapshotSystem : NotificationDispatcher, IGameSystem
 {
     const int   SNAPSHOT_RATE         = 60;
     const float SNAPSHOT_INTERVAL     = 1.0f / SNAPSHOT_RATE;
-    const int   SNAPSHOT_OFFSET_COUNT = 2;
-    const float INTERPOLATION_OFFSET  = SNAPSHOT_INTERVAL * SNAPSHOT_OFFSET_COUNT;
+    const int   SNAPSHOT_OFFSET_TICK_COUNT = 3;
+    const float INTERPOLATION_OFFSET  = SNAPSHOT_INTERVAL * SNAPSHOT_OFFSET_TICK_COUNT;
 
     const float INTERPOLATION_TIME_ADJUSTMENT_NEGATIVE_THRESHOLD = SNAPSHOT_INTERVAL * -0.5f;
     const float INTERPOLATION_TIME_ADJUSTMENT_POSITIVE_THRESHOLD = SNAPSHOT_INTERVAL * 2;
@@ -182,60 +182,53 @@ public class NetSnapshotSystem : NotificationDispatcher, IGameSystem
             $"diff: {diff:F3}, diffWanted: {diffWanted:F3}, timeScale:{_clientInterpolationTimeScale:F3}, deliveryDeltaAvg:{_clientSnapshotDeliveryDeltaAvg.average}");
     }
 
-    void clientInterpolateSnapshots()
+    private void clientInterpolateSnapshots()
     {
-        if(_clientSnapshotList.Count > 0)
+        if(_clientSnapshotList.Count <= 0)
         {
-            var interpFrom  = default(GameState.Snapshot);
-            var interpTo    = default(GameState.Snapshot);
-            var interpAlpha = default(float);
+            return;
+        }
 
-            for(int i = 0; i < _clientSnapshotList.Count; ++i)
+        var interpFrom  = default(GameState.Snapshot);
+        var interpTo    = default(GameState.Snapshot);
+        var interpAlpha = default(float);
+
+        for(int i = 0; i < _clientSnapshotList.Count; ++i)
+        {
+            if(i + 1 == _clientSnapshotList.Count)
             {
-                if(i + 1 == _clientSnapshotList.Count)
+                if(_clientSnapshotList[0].header.sendTime > _clientInterpolationTime)
                 {
-                    if(_clientSnapshotList[0].header.sendTime > _clientInterpolationTime)
-                    {
-                        interpFrom  = interpTo = _clientSnapshotList[0].snapshot;
-                        interpAlpha = 0;
-                    }
-                    else
-                    {
-                        interpFrom  = interpTo = _clientSnapshotList[i].snapshot;
-                        interpAlpha = 0;
-                    }
+                    interpFrom  = interpTo = _clientSnapshotList[0].snapshot;
+                    interpAlpha = 0;
                 }
                 else
                 {
-                    //                v----- client interp time
-                    // [0][1][2][3][4] [5][6][7][8][9]
-                    //              F
-                    //                 T
-
-                    // F = 101.4 seconds
-                    // INTERP TIME = 101.467
-                    // T = 101.5 seconds
-
-                    var f = i;
-                    var t = i + 1;
-
-                    if(_clientSnapshotList[f].header.sendTime <= _clientInterpolationTime &&
-                       _clientSnapshotList[t].header.sendTime >= _clientInterpolationTime)
-                    {
-                        interpFrom = _clientSnapshotList[f].snapshot;
-                        interpTo   = _clientSnapshotList[t].snapshot;
-
-                        var range   = _clientSnapshotList[t].header.sendTime - _clientSnapshotList[f].header.sendTime;
-                        var current = _clientInterpolationTime - _clientSnapshotList[f].header.sendTime;
-
-                        interpAlpha = Mathf.Clamp01((float)(current / range));
-
-                        break;
-                    }
+                    interpFrom  = interpTo = _clientSnapshotList[i].snapshot;
+                    interpAlpha = 0;
                 }
             }
+            else
+            {
+                int f = i;
+                int t = i + 1;
 
-            onInterpolationUpdate?.Invoke(interpAlpha, interpFrom, interpTo);
+                if(_clientSnapshotList[f].header.sendTime <= _clientInterpolationTime &&
+                   _clientSnapshotList[t].header.sendTime >= _clientInterpolationTime)
+                {
+                    interpFrom = _clientSnapshotList[f].snapshot;
+                    interpTo   = _clientSnapshotList[t].snapshot;
+
+                    var range   = _clientSnapshotList[t].header.sendTime - _clientSnapshotList[f].header.sendTime;
+                    var current = _clientInterpolationTime - _clientSnapshotList[f].header.sendTime;
+
+                    interpAlpha = Mathf.Clamp01((float)(current / range));
+
+                    break;
+                }
+            }
         }
+
+        onInterpolationUpdate?.Invoke(interpAlpha, interpFrom, interpTo);
     }
 }

@@ -475,7 +475,7 @@ namespace kcp2k
                         // -> all unreliable messages are DATA messages anyway.
                         // -> let's skip the magic and call OnData directly if
                         //    the current state allows it.
-                        if (state == KcpState.Authenticated)
+                        if (state == KcpState.Authenticated || state == KcpState.Connected)
                         {
                             // only process messages while not paused for Mirror
                             // scene switching etc.

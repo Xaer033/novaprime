@@ -44,6 +44,7 @@ public class NetworkManager : Mirror.NetworkManager
     public event Action<NetworkConnection> onServerMatchLoadComplete;
     
     public event Action onClientStarted;
+    public event Action onClientStopped;
     public event Action<NetworkConnection> onClientConnect;
     public event Action<NetworkConnection> onClientDisconnect;
     public event Action<NetworkConnection> onClientLocalDisconnect;
@@ -87,6 +88,7 @@ public class NetworkManager : Mirror.NetworkManager
         
         
         onClientStarted = null;
+        onClientStopped = null;
         onClientConnect = null;
         onClientDisconnect = null;
         onClientLocalDisconnect = null;
@@ -201,7 +203,7 @@ public class NetworkManager : Mirror.NetworkManager
             
             ClientScene.RegisterPrefab(
                 unit.view.gameObject, 
-                OnClientSpawnHandler, 
+                OnClientSpawnHandler,
                 OnClientUnspawnHandler);
         }
         
@@ -209,6 +211,22 @@ public class NetworkManager : Mirror.NetworkManager
                 syncStatePrefab, 
                 onClientSyncStoreCreated, 
                 onClientSyncStoreDestory);
+    }
+
+    private void unregisterClientPrefabs()
+    {
+        UnitMap unitMap = Singleton.instance.gameplayResources.unitMap;
+        for(int i = 0; i < unitMap.unitList.Count; ++i)
+        {
+            UnitMap.Unit unit = unitMap.unitList[i];
+            Debug.Log("Unit: " + unit.id);
+            
+            ClientScene.UnregisterPrefab(
+                unit.view.gameObject);
+        }
+        
+        ClientScene.UnregisterPrefab(
+                syncStatePrefab);
     }
 
     private GameObject onClientSyncStoreCreated(SpawnMessage msg)
@@ -456,6 +474,21 @@ public class NetworkManager : Mirror.NetworkManager
         NetworkClient.RegisterHandler<CurrentSessionUpdate>(OnCurrentSessionUpdate, false);
         
         onClientStarted?.Invoke();
+    }
+
+    public override void OnStopClient()
+    {
+        onClientStopped?.Invoke();
+        
+        unregisterClientPrefabs();
+        
+        NetworkClient.UnregisterHandler<SyncLobbyPlayers>();
+        NetworkClient.UnregisterHandler<ConfirmReadyUp>();
+        NetworkClient.UnregisterHandler<AssignPlayerSlot>();
+        NetworkClient.UnregisterHandler<StartMatchLoad>();
+        NetworkClient.UnregisterHandler<MatchBegin>();
+        NetworkClient.UnregisterHandler<NetFrameSnapshot>();
+        NetworkClient.UnregisterHandler<CurrentSessionUpdate>();
     }
 
     // public override void OnError(string reason)

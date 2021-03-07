@@ -1,8 +1,27 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlatformState
 {
+    public uint    netId;
+    public Vector2 position;
+    public Vector2 prevPosition;
+    public Vector2 velocity;
+    
+    public int   fromWaypointIndex;
+    public float percentBetweenWaypoints;
+    public float nextMoveTime;
+    public bool  wasTriggered;
+    public float timeScale;
+    
+    public RaycastHit2D[] raycastHits;
+    public Vector2[]      globalWayPoints;
+    
+    public HashSet<Transform>                        movedPassengersSet;
+    public List<PassengerMovement>                   passengerMovementList;
+    public Dictionary<Transform, IPlatformPassenger> passengerDict;
+    
     public PlatformState(Vector2 startPosition, int raycastArraySize, Vector2[] localWayPoints)
     {
         position                = startPosition;
@@ -28,21 +47,11 @@ public class PlatformState
             globalWayPoints[j] = position + localWayPoints[j];
         }
     }
-    
-    public Vector2 prevPosition;
-    public Vector2 position;
-    public Vector2 velocity;
-    
-    public int   fromWaypointIndex;
-    public float percentBetweenWaypoints;
-    public float nextMoveTime;
-    public bool  wasTriggered;
-    public float timeScale;
-    
-    public RaycastHit2D[] raycastHits;
-    public Vector2[]      globalWayPoints;
-    
-    public HashSet<Transform>                        movedPassengersSet;
-    public List<PassengerMovement>                   passengerMovementList;
-    public Dictionary<Transform, IPlatformPassenger> passengerDict;
+
+    [Serializable]
+    public struct NetSnapshot
+    {
+        public uint    netId;
+        public Vector2 position;
+    }
 }

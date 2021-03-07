@@ -1,14 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using GhostGen;
 using Mirror;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class AvatarSystem : NotificationDispatcher, IGameSystem
 {
-    private GameState _gameState;
-    private GameSystems _gameSystems;
-    private NetworkSystem _networkSystem;
+    private GameState         _gameState;
+    private GameSystems       _gameSystems;
+    private NetworkSystem     _networkSystem;
+    private NetSnapshotSystem _netSnapshotSystem;
     
     private GameplayResources _gameplayResources;
     
@@ -62,19 +63,19 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     public void Start(GameSystems gameSystems, GameState gameState)
     {
         _gameSystems = gameSystems;
-        _gameState = gameState;
+        _gameState   = gameState;
 
-        _networkSystem = _gameSystems.Get<NetworkSystem>();
+        _networkSystem     = _gameSystems.Get<NetworkSystem>();
+        _netSnapshotSystem = _gameSystems.Get<NetSnapshotSystem>();
         
-        _gameSystems.onStep += Step;
+        _netSnapshotSystem.onInterpolationUpdate += onNetInterplationUpdate;
+        
+        _gameSystems.onStep      += Step;
         _gameSystems.onFixedStep += FixedStep;
         _gameSystems.AddListener(GamePlayEventType.SPAWN_POINT_TRIGGERED, onSpawnPointTriggered);
         
         _gameState.playerStateList.Clear();
         _gameState.enemyStateList.Clear();
-
-        
-        // PhotonNetwork.PrefabPool = _prefabPool;
     }
 
     public void FixedStep(float fixedDeltaTime)
@@ -122,16 +123,14 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         // Batch Remove anything that needs to go
         clearRemovedAvatars();
         
-        if (Keyboard.current.f10Key.wasPressedThisFrame)
-        {
-            SaveToFile();
-        }
+        // if (Keyboard.current.f10Key.wasPressedThisFrame)
+        // {
+        //     SaveToFile();
+        // }
     }
 
     public void Step(float deltaTime)
     {
-        // FrameInput defaultInput = default(FrameInput);
-        
         for (int i = 0; i < _avatarControllerList.Count; ++i)
         {
             IAvatarController controller = _avatarControllerList[i];
@@ -153,6 +152,9 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
             } 
             controller.Step(deltaTime);
         }
+        
+        
+        
     }
 
     public void CleanUp()
@@ -232,7 +234,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         return null;
     }
     
-    public T Spawn<T>(string unitId, Vector3 position, SpawnPointData spawnPointData = default) //where T : IAvatarController
+    public T Spawn<T>(string unitId, Vector2 position, SpawnPointData spawnPointData = default) //where T : IAvatarController
     {
         UnitMap.Unit unit = _unitMap.GetUnit(unitId);
         string uuid = _generateUUID(unit);
@@ -256,7 +258,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         _removalList.Add(uuid);
     }
     
-    private IAvatarController _spawnAvatar(string uuid, UnitMap.Unit unit, Vector3 position, SpawnPointData spawnPointData)
+    private IAvatarController _spawnAvatar(string uuid, UnitMap.Unit unit, Vector2 position, SpawnPointData spawnPointData)
     {
         switch (unit.type)
         {
@@ -285,7 +287,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         return controller;
     }
 
-    private IAvatarController _spawnEnemy(string uuid, UnitMap.Unit unit, Vector3 position, SpawnPointData spawnPointData)
+    private IAvatarController _spawnEnemy(string uuid, UnitMap.Unit unit, Vector2 position, SpawnPointData spawnPointData)
     {
         AvatarView view = GameObject.Instantiate<AvatarView>(unit.view as AvatarView, position, Quaternion.identity,  _enemyParent.transform);
         
@@ -342,7 +344,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         }
     }
 
-
+    
     private void clearRemovedAvatars()
     {
         while(_removalList.Count > 0)
@@ -370,55 +372,71 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
             GameObject.Destroy(controller.view.gameObject);
         }
     }
-    private void SaveToFile()
+
+    private void onNetInterplationUpdate(float alpha, GameState.Snapshot from, GameState.Snapshot to)
     {
+        var fromPlayerList = from.playerStateList;
+        fromPlayerList.Sort((a, by) =>  { return a.netId.CompareTo(by.netId);  });
+        
+        var toPlayerList   = to.playerStateList;
+        toPlayerList.Sort((a, by) =>  { return a.netId.CompareTo(by.netId);  });
+
+        int maxCount = Math.Max(toPlayerList.Count, fromPlayerList.Count);
+
+        for(int i = 0; i < maxCount; ++i)
+        {
+            if( i >= toPlayerList.Count     || 
+                i >= fromPlayerList.Count   || 
+                i >= _avatarControllerList.Count)
+            {
+                break;
+            }
+
+            var controller   = _avatarControllerList[i];
+            if(controller.isSimulating)
+            {
+                continue;
+            }
             
-//        StreamWriter writer = new StreamWriter("Assets/Resources/inputList.txt", false, Encoding.UTF8);
-        // BinaryWriter writer = new BinaryWriter(File.Open("Assets/Resources/inputList.dat", FileMode.Create));
-        //
-        // JsonWriter jsonWriter = new BsonWriter(writer);
-        // jsonWriter.Formatting = Formatting.Indented;
-        // jsonWriter.WriteStartArray();
-        // foreach (var input in _frameInputList)
-        // {
-        //     string jsonInput = JsonUtility.ToJson(input);
-        //     jsonWriter.WriteValue(jsonInput);
-        // }
-        // jsonWriter.WriteEndArray();
-        // jsonWriter.Flush();
-        // jsonWriter.Close();
+            var state        = controller.state;
+            
+            int fromIndex    = getStateIndexForList(state.netId, fromPlayerList);
+            int toIndex      = getStateIndexForList(state.netId, toPlayerList);
+            
+            if(fromIndex < 0 || toIndex < 0)
+            {
+                continue;
+            }
+            
+            var fromSnapshot = fromPlayerList[fromIndex];
+            var toSnapshot   = toPlayerList[toIndex];
+
+            state.previousPosition = state.position;
+            state.position         = Vector2.Lerp(fromSnapshot.position, toSnapshot.position, alpha);
+            state.aimPosition      = Vector2.Lerp(fromSnapshot.aimPosition, toSnapshot.aimPosition, alpha);           
+            
+            controller.view.transform.position = state.position;
+            controller.view.viewRoot.position  = state.position;
+            controller.view.Aim(state.aimPosition);
+        }
     }
-//    private static byte[] ToByteArray(PlayerState command)
-//    {
-//        string jsonCommand = JsonUtility.ToJson(command);
-//        return System.Text.Encoding.UTF8.GetBytes(jsonCommand);
-//    }
 
+    private int getStateIndexForList(uint netId, List<PlayerState.NetSnapshot> snapshotList)
+    {
+        int result = -1;
+        
+        for(int i = 0; i < snapshotList.Count; ++i)
+        {
+            if(snapshotList[i].netId == netId)
+            {
+                result = i;
+                break;
+            }
+        }
 
-    // public class AvatarPrefabPool : IPunPrefabPool
-    // {
-    //     private GameplayResources _gameplayResources;
-    //     private UnitMap _unitMap;
-    //     
-    //     public AvatarPrefabPool(GameplayResources gameplayResources)
-    //     {
-    //         _gameplayResources = gameplayResources;
-    //         _unitMap = _gameplayResources.unitMap;
-    //     }
-    //     public GameObject Instantiate(string prefabId, Vector3 position, Quaternion rotation)
-    //     {
-    //         // TODO: Later we can do real pooling, right now, just use the unit map to get the right prefab and boop it to the seen
-    //         UnitMap.Unit unit = _unitMap.GetUnit(prefabId);
-    //         GameObject gObject = GameObject.Instantiate(unit.view.gameObject, position, rotation);
-    //         return gObject;
-    //     }
-    //
-    //     public void Destroy(GameObject gameObject)
-    //     {
-    //         // TODO: Actually Recycle this bitch instead of destroying it
-    //         GameObject.Destroy(gameObject);
-    //     }
-    // }
+        return result;
+    }
+
 }
 
 

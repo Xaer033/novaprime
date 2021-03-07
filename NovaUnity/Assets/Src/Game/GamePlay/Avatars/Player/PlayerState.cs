@@ -1,8 +1,21 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class PlayerState : AvatarState
 {
     public const int MAX_INPUTS = 32;
+    
+    public PlayerSlot          playerSlot;
+    public PlayerActivityType  stateType;
+    public uint                sequence;
+    public uint                ackSequence;
+    public PlayerInputTickPair latestInput;
+    public UnitStats           stats;
+    public MachineGunState     machineGunState;
+    
+    public RingBuffer<PlayerInputTickPair> nonAckInputBuffer = new RingBuffer<PlayerInputTickPair>(MAX_INPUTS);
+    public RingBuffer<PlayerStateSnapshot> nonAckStateBuffer = new RingBuffer<PlayerStateSnapshot>(MAX_INPUTS);
+    
     
     public static PlayerState Create(string uuid,  UnitStats stats, Vector2 position)
     {
@@ -44,18 +57,13 @@ public class PlayerState : AvatarState
         stateType            = snapshot.stateType;
     }
 
-    public PlayerSlot playerSlot;
-    public PlayerActivityType stateType;
-
-    
-    public uint sequence;
-    public uint ackSequence;
-    public PlayerInputTickPair latestInput;
-    public RingBuffer<PlayerInputTickPair> nonAckInputBuffer = new RingBuffer<PlayerInputTickPair>(MAX_INPUTS);
-    public RingBuffer<PlayerStateSnapshot> nonAckStateBuffer = new RingBuffer<PlayerStateSnapshot>(MAX_INPUTS);
-    
-    public UnitStats stats;
-    public MachineGunState machineGunState;
+    [Serializable]
+    public struct NetSnapshot
+    {
+        public uint    netId;
+        public Vector2 position;
+        public Vector2 aimPosition;
+    }
 }
 
 public enum PlayerActivityType

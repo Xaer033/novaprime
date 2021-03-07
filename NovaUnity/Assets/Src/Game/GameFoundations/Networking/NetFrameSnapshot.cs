@@ -6,10 +6,7 @@ using Mirror;
 public struct NetFrameSnapshot : NetworkMessage
 {
     public NetChannelHeader header;
-    public uint ackBitfield;
-    
-    public uint frameTick;
-    public double sendTime;
     
     public List<NetPlayerState> playerStateList;
+    public GameState.Snapshot   snapshot;
 }

@@ -1,11 +1,14 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public struct ProjectileState
 {
+
+    public uint    netId;
     public bool    isActive;
-    public Vector3 position;
-    public Vector3 prevPosition;
-    public Vector3 velocity;
+    public Vector2 position;
+    public Vector2 prevPosition;
+    public Vector2 velocity;
     public float   angle;
     public float   speed;
     public float   timeScale;
@@ -14,6 +17,15 @@ public struct ProjectileState
     public string  ownerUUID;
 
     public ProjectileData data;
+
+    [Serializable]
+    public struct NetSnapshot
+    {
+    
+        public uint    netId;
+        public Vector2 position;
+        public float   angle;
+    }
 }
 
 public enum ProjectileType

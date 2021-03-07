@@ -147,13 +147,15 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     // Update is called once per frame
     public void Step(float deltaTime)
     {
+        if(!isSimulating)
+        {
+            return;
+        }
+        
         float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
         if(view != null && view.viewRoot != null && _state != null)
         {
-            // if(isSimulating)
-            {
-                view.viewRoot.position = Vector2.Lerp(_state.previousPosition, _state.position, alpha);//Vector2.MoveTowards(_state.previousPosition, _state.position, alpha);                
-            }
+            view.viewRoot.position = Vector2.Lerp(_state.previousPosition, _state.position, alpha);//Vector2.MoveTowards(_state.previousPosition, _state.position, alpha);                
         }
     }
 

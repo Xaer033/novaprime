@@ -198,6 +198,9 @@
                   <e p="VolumeTrigger.cs" t="Include" />
                 </e>
               </e>
+              <e p="Networking" t="Include">
+                <e p="NetUtility.cs" t="Include" />
+              </e>
               <e p="PlayFieldController.cs" t="Include" />
               <e p="Weapons" t="Include">
                 <e p="BulletView.cs" t="Include" />

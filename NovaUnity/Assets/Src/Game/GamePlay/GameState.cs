@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 public class GameState
 {
@@ -10,31 +11,48 @@ public class GameState
     public List<PlatformState>   platformStateList   = new List<PlatformState>(100);
 
 
+    [Serializable]
     public struct Snapshot
     {
-        public readonly List<PlayerStateSnapshot> playerStateList;
-        public readonly List<EnemyState>          enemyStateList;
-        public readonly List<ProjectileState>     projectileStateList;
-        public readonly List<SpawnPointState>     spawnPointStateList;
-        public readonly List<PlatformState>       platformStateList;
+        public readonly List<PlayerState.NetSnapshot>     playerStateList;
+        public readonly List<EnemyState.NetSnapshot>      enemyStateList;
+        public readonly List<ProjectileState.NetSnapshot> projectileStateList;
+        public readonly List<SpawnPointState>             spawnPointStateList;
+        public readonly List<PlatformState.NetSnapshot>   platformStateList;
+
 
         public Snapshot(GameState gameState)
         {
-            playerStateList     = new List<PlayerStateSnapshot>(4);
-            enemyStateList      = new List<EnemyState>(200);
-            projectileStateList = new List<ProjectileState>(200);
+            playerStateList     = new List<PlayerState.NetSnapshot>(4);
+            enemyStateList      = new List<EnemyState.NetSnapshot>(200);
+            projectileStateList = new List<ProjectileState.NetSnapshot>(200);
             spawnPointStateList = new List<SpawnPointState>(50);
-            platformStateList   = new List<PlatformState>(100);
+            platformStateList   = new List<PlatformState.NetSnapshot>(100);
 
+            spawnPointStateList.AddRange(gameState.spawnPointStateList);
+            
             foreach(var state in gameState.playerStateList)
             {
-                playerStateList.Add(state.Snapshot());
+                playerStateList.Add(NetUtility.Snapshot(state));
             }
             
-            projectileStateList.AddRange(gameState.projectileStateList); // Nice
-            spawnPointStateList.AddRange(gameState.spawnPointStateList);
-            platformStateList.AddRange(gameState.platformStateList);
+            foreach(var state in gameState.enemyStateList)
+            {
+                enemyStateList.Add(NetUtility.Snapshot(state));
+            }
+            
+            foreach(var state in gameState.projectileStateList)
+            {
+                if(state.isActive)
+                {
+                    projectileStateList.Add(NetUtility.Snapshot(state));                    
+                }
+            }
+            
+            foreach(var state in gameState.platformStateList)
+            {
+                platformStateList.Add(NetUtility.Snapshot(state));
+            }
         }
     }
-
 }

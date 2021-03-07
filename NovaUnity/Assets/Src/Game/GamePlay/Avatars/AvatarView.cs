@@ -57,7 +57,7 @@ public class AvatarView : EventDispatcherBehavior,
         }
     }
     
-    public void Aim(Vector3 cursorPosition)
+    public void Aim(Vector2 cursorPosition)
     {
         if(_cursorTarget != null)
         {
@@ -66,7 +66,7 @@ public class AvatarView : EventDispatcherBehavior,
         
         if (_weaponHook != null)
         {
-            Vector3 delta = (cursorPosition - _weaponHook.position + (Vector3.left * 0.001f)).normalized;
+            Vector2 delta = (cursorPosition - (Vector2)_weaponHook.position + (Vector2.left * 0.001f)).normalized;
             
             _prevWeaponRotation = _weaponRotation;
             _weaponRotation = Quaternion.LookRotation(delta, Vector3.up);

@@ -137,17 +137,12 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         }
 
         NetworkManager.frameTick++;
+        _clientSendSequence++;
+        _serverSendSequence++;
     }
 
     private void clientFixedStep(float fixedDeltaTime)
     {
-        // Apply Snapshots
-        if(!_clientSnapshotBuffer.IsEmpty)
-        {
-            NetFrameSnapshot snapshot = _clientSnapshotBuffer.PopBack();
-            // clientProcessNetSnapshot(snapshot);
-        }
-        
         var pState = _localPlayer.state;
         // var inputBuffer = pState.nonAckInputBuffer;
 
@@ -166,10 +161,10 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         
         NetChannelHeader channelHeader = new NetChannelHeader
         {
-            sequence = _clientSendSequence,
+            sequence    = _clientSendSequence,
             ackSequence = _clientAckSequence,
-            frameTick = NetworkManager.frameTick,// + kTicksAhead,
-            sendTime = TimeUtil.Now(),
+            frameTick   = NetworkManager.frameTick,
+            sendTime    = TimeUtil.Now(),
         };
     
         SendPlayerInput sendInputMessage = new SendPlayerInput
@@ -179,13 +174,36 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         };
 
         NetworkClient.Send(sendInputMessage, Channels.DefaultUnreliable);
-        _clientSendSequence++;
-        
     }
     
     private void serverFixedStep(float fixedDeltaTime)
     {
+        NetChannelHeader netHeader = new NetChannelHeader
+        {
+            sequence    = _serverSendSequence,
+            ackSequence = _clientAckSequence,
+            frameTick   =  NetworkManager.frameTick,
+            sendTime    = TimeUtil.Now()
+        };
         
+        var playerMap = _networkManager.GetServerPlayerMap();
+        foreach(var playerPair in playerMap)
+        {
+            int connId         = playerPair.Value.connectionId;
+            var controller     = _serverConnToPlayerMap[playerPair.Value.connectionId];
+            var state          = controller.state as PlayerState;
+            var playerSnapshot = state.Snapshot();
+            
+            var msg = new PlayerStateUpdate
+            {
+                header   = netHeader,
+                netId    = state.netId,
+                snapshot = playerSnapshot
+            };
+            
+            NetworkConnection conn = NetworkServer.connections[connId];
+            conn.Send(msg, Channels.DefaultUnreliable);
+        }
     }
     
     private void onServerMatchLoadComplete(NetworkConnection conn)

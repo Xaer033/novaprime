@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class ProjectileSystem : NotificationDispatcher, IGameSystem
 {
-    private GameSystems _gameSystems;
-    private GameState _gameState;
+    private GameSystems       _gameSystems;
+    private GameState         _gameState;
     private GameplayResources _gameplayResources;
 
     private GameObject _bulletParent;
     
 //    private ProjectileState[] _projectilePool;
-    private List<BulletView> _projectileViewPool;
+    private List<BulletView>     _projectileViewPool;
     private List<ParticleSystem> _projectileImpactViewList;
     private List<ParticleSystem> _bloodImpactViewList;
     
@@ -23,22 +23,22 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
     
     public ProjectileSystem(GameplayResources gameplayResources, int poolSize)
     {
-        _gameplayResources = gameplayResources;
-        _poolSize = poolSize;
-        _projectileViewPool = new List<BulletView>(poolSize);
+        _gameplayResources        = gameplayResources;
+        _poolSize                 = poolSize;
+        _projectileViewPool       = new List<BulletView>(poolSize);
         _projectileImpactViewList = new List<ParticleSystem>(poolSize);
-        _bloodImpactViewList = new List<ParticleSystem>(40);
+        _bloodImpactViewList      = new List<ParticleSystem>(40);
         
-        _raycastHitList = new RaycastHit2D[3];
+        _raycastHitList           = new RaycastHit2D[3];
     }
     
     public void Start(GameSystems gameSystems, GameState gameState)
     {
         _gameSystems = gameSystems;
-        _gameState = gameState;
+        _gameState   = gameState;
 
-        _gameSystems.onStep += Step;
-        _gameSystems.onFixedStep += FixedStep;
+        _gameSystems.onStep      += onStep;
+        _gameSystems.onFixedStep += onFixedStep;
         
         _bulletParent = new GameObject("BulletParent");
         BulletView projectileTemplate = _gameplayResources.bulletView;
@@ -68,14 +68,14 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         }
     }
 
-    public void Step(float deltaTime)
+    private void onStep(float deltaTime)
     {
         float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
         
         for(int i = 0; i < _poolSize; ++i)
         {
             ProjectileState state = _gameState.projectileStateList[i];
-            BulletView view = _projectileViewPool[i];
+            BulletView      view  = _projectileViewPool[i];
         
             if(state.isActive)
             {
@@ -84,7 +84,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         }
     }
     
-    public void FixedStep(float deltaTime)
+    private void onFixedStep(float deltaTime)
     {
         if (_gameState.projectileStateList == null || _projectileViewPool == null)
         {
@@ -99,15 +99,15 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         for (int i = 0; i < _poolSize; ++i)
         {
             ProjectileState state = _gameState.projectileStateList[i];
-            BulletView view = _projectileViewPool[i];
+            BulletView      view  = _projectileViewPool[i];
             
             if (state.isActive)
             {
-                float scaledDeltaTime = state.timeScale * deltaTime;
+                float   scaledDeltaTime = state.timeScale * deltaTime;
                 
-                float lookAhead = state.velocity.magnitude * scaledDeltaTime;
-                Vector3 bulletDir = state.velocity.normalized;
-                Vector3 rayStart = state.position;
+                float   lookAhead       = state.velocity.magnitude * scaledDeltaTime;
+                Vector3 bulletDir       = state.velocity.normalized;
+                Vector3 rayStart        = state.position;
                 
                 Debug.DrawRay(rayStart, bulletDir * lookAhead, Color.green);
                 
@@ -160,7 +160,6 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
 
                 state.prevPosition = state.position;
                 state.position += (state.velocity * scaledDeltaTime);
-                // view.transform.position = state.position;
                 
 
                 if (state.deathTime < now)
@@ -203,8 +202,8 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         _gameState.projectileStateList.Clear();
         
         
-        _gameSystems.onStep -= Step;
-        _gameSystems.onFixedStep -= FixedStep;
+        _gameSystems.onStep      -= onStep;
+        _gameSystems.onFixedStep -= onFixedStep;
     }
 
     public ProjectileState Spawn(string ownerUUID, ProjectileData data, Vector3 position, Vector3 direction)
@@ -214,21 +213,21 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         for (int i = 0; i < _poolSize; ++i)
         {
             ProjectileState state = _gameState.projectileStateList[i];
-            BulletView view = _projectileViewPool[i];
+            BulletView      view  = _projectileViewPool[i];
             
             if (!state.isActive)
             {
-                state.isActive = true;
-                state.ownerUUID = ownerUUID;
-                state.data = data;
-                state.speed = data.speed;
-                state.damage = data.damage;
-                state.deathTime = now + data.deathTimer;
-                state.timeScale = 1.0f;
-                state.position = position;
+                state.isActive     = true;
+                state.ownerUUID    = ownerUUID;
+                state.data         = data;
+                state.speed        = data.speed;
+                state.damage       = data.damage;
+                state.deathTime    = now + data.deathTimer;
+                state.timeScale    = 1.0f;
+                state.position     = position;
                 state.prevPosition = position;
-                state.velocity = direction * state.speed;
-                state.angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+                state.velocity     = direction * state.speed;
+                state.angle        = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
                 _gameState.projectileStateList[i] = state;
                 
@@ -270,13 +269,13 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         ParticleSystem impactFX = _getAvailableImpact(impactList);
         if(impactFX != null)
         {
-            Vector3 faceDir = Vector3.Reflect(bulletDir, hit.normal);
+            Vector3 faceDir       = Vector3.Reflect(bulletDir, hit.normal);
             Vector3 calculatedRot = Quaternion.LookRotation(faceDir).eulerAngles;
             //Randomize it a bit
             calculatedRot.x += Random.Range(-35, 35);
             
             impactFX.Clear();
-            impactFX.transform.position = hit.point;
+            impactFX.transform.position      = hit.point;
             impactFX.transform.localRotation = Quaternion.Euler(calculatedRot);
             impactFX.Play();
         }

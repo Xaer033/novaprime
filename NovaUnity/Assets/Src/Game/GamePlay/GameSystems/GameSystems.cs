@@ -5,11 +5,11 @@ using UnityEngine;
 
 public class GameSystems : NotificationDispatcher
 {
-    private GameState _gameState;
+    private GameState         _gameState;
     private GameplayResources _gameplayResources;
     
-    private Dictionary<Type, IGameSystem> _gameSystemMap = new Dictionary<Type, IGameSystem>();
-    private List<IGameSystem> _sortedSystemList = new List<IGameSystem>(20);
+    private Dictionary<Type, IGameSystem> _gameSystemMap    = new Dictionary<Type, IGameSystem>();
+    private List<IGameSystem>             _sortedSystemList = new List<IGameSystem>(20);
 
     public event Action<float> onStep;
     public event Action<float> onFixedStep;
@@ -26,10 +26,13 @@ public class GameSystems : NotificationDispatcher
 
         return (T)system;
     }
+
+    public bool isAuthoritive { get; private set; }
     
-    public GameSystems(GameState gameState, GameplayResources gameplayResources)
+    public GameSystems(GameState gameState, GameplayResources gameplayResources, bool isTheAuthority)
     {
-        _gameState = gameState;
+        _gameState    = gameState;
+        isAuthoritive = isTheAuthority;
         
         IGameSystem projectileSystem  = new ProjectileSystem(gameplayResources, 125);
         IGameSystem avatarSystem      = new AvatarSystem(gameplayResources);
@@ -58,21 +61,13 @@ public class GameSystems : NotificationDispatcher
     {
         for(int i = 0; i < _sortedSystemList.Count; ++i)
         {
-            _sortedSystemList[i].Start(this, _gameState);
+            _sortedSystemList[i]?.Start(this, _gameState);
         }
     }
     
     public void FixedStep(float fixedDeltaTime)
     {
-        // Physics2D.SyncTransforms();
-        
         onFixedStep?.Invoke(fixedDeltaTime);
-
-        // Physics2D.Simulate(fixedDeltaTime);
-        // for(int i = 0; i < _sortedSystemList.Count; ++i)
-        // {
-        //     _sortedSystemList[i].FixedStep(fixedDeltaTime);
-        // }
     }
 
     public void Step(float deltaTime)
@@ -89,18 +84,18 @@ public class GameSystems : NotificationDispatcher
     {
         for(int i = 0; i < _sortedSystemList.Count; ++i)
         {
-            _sortedSystemList[i].CleanUp();
+            _sortedSystemList[i]?.CleanUp();
         }
         
-        _sortedSystemList.Clear();
-        _gameSystemMap.Clear();
+        _sortedSystemList?.Clear();
+        _gameSystemMap?.Clear();
     }
 
     private void _addSystem(int priority, IGameSystem gameSystem)
     {
         gameSystem.priority = priority;
-        _gameSystemMap.Add(gameSystem.GetType(), gameSystem);
-        _sortedSystemList.Add(gameSystem);
+        _gameSystemMap?.Add(gameSystem.GetType(), gameSystem);
+        _sortedSystemList?.Add(gameSystem);
     }
 
     private int _sortSystems(IGameSystem a, IGameSystem b)

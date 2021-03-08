@@ -65,7 +65,9 @@
                   <e p="ConfirmReadyUp.cs" t="Include" />
                   <e p="CurrentSessionUpdate.cs" t="Include" />
                   <e p="MatchBegin.cs" t="Include" />
+                  <e p="NetFrameSnapshot.cs" t="Include" />
                   <e p="PlayerMatchLoadComplete.cs" t="Include" />
+                  <e p="PlayerStateUpdate.cs" t="Include" />
                   <e p="RequestMatchStart.cs" t="Include" />
                   <e p="RequestReadyUp.cs" t="Include" />
                   <e p="SendPlayerInput.cs" t="Include" />
@@ -74,7 +76,6 @@
                 </e>
                 <e p="NetChannel.cs" t="Include" />
                 <e p="NetChannelHeader.cs" t="Include" />
-                <e p="NetFrameSnapshot.cs" t="Include" />
                 <e p="NetPlayerState.cs" t="Include" />
                 <e p="NetworkEntity.cs" t="Include" />
                 <e p="NetworkManager.cs" t="Include" />

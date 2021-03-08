@@ -31,7 +31,7 @@ public class PlayFieldController : NotificationDispatcher
         Random.InitState(666);
 
         _gameState = new GameState();
-        _gameSystems = new GameSystems( _gameState, _gameplayResources);
+        _gameSystems = new GameSystems( _gameState, _gameplayResources, NetworkServer.active);
         _gameSystems.Start();
         
 //        AvatarSystem aSystem = _gameSystems.GetSystem<AvatarSystem>();

@@ -185,45 +185,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     
     private void serverFixedStep(float fixedDeltaTime)
     {
-        // int currentPlayerCount = _serverPlayerControllerList.Count;
-        // _serverPlayerStateList.Clear();
-        //
-        // for(int i = 0; i < currentPlayerCount; ++i)
-        // {
-        //     IAvatarController pController = _serverPlayerControllerList[i];
-        //     PlayerState state = pController.state as PlayerState;
-        //
-        //     if(state != null)
-        //     {
-        //         PlayerInputTickPair tickPair = state.latestInput;
-        //         
-        //         NetPlayerState netPlayerState = NetPlayerState.Create(state);
-        //         netPlayerState.netId = pController.view.netIdentity.netId;
-        //         netPlayerState.ackTick = tickPair.tick;
-        //         // netPlayerState.sequence = state.sequence;
-        //         
-        //         _serverPlayerStateList.Add(netPlayerState);
-        //
-        //         state.sequence++;
-        //     }
-        // }
-        //
-        // NetChannelHeader channelHeader = new NetChannelHeader
-        // {
-        //     sequence = _serverSendSequence,
-        //     frameTick = NetworkManager.frameTick,
-        //     sendTime = TimeUtil.Now(),
-        // };
-        //
-        // NetFrameSnapshot snapshot = new NetFrameSnapshot
-        // {
-        //     header = channelHeader,
-        //     playerStateList = _serverPlayerStateList,
-        //     snapshot = NetUtility.Snapshot(_gameState)
-        // };
-        //
-        // NetworkServer.SendToAll(snapshot, Channels.DefaultUnreliable);
-        // _serverSendSequence++;
+        
     }
     
     private void onServerMatchLoadComplete(NetworkConnection conn)
@@ -275,7 +237,6 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     private void onServerMatchBegin()
     {
         NetworkServer.SendToAll(new MatchBegin(), Channels.DefaultReliable);
-        NetworkServer.SpawnObjects();
         
         var netPlayerMap = _networkManager.GetServerPlayerMap();
         foreach(var pair in netPlayerMap)
@@ -313,9 +274,8 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     
     private void setupLocalPlayer(NetPlayer nPlayer, NetworkConnection netConnection, IAvatarController playerController)
     {
-        PlayerView pView = playerController.view as PlayerView;
-        
-        GameplayCamera cam = _getOrCreatePlayerCamera();
+        PlayerView     pView = playerController.view as PlayerView;
+        GameplayCamera cam   = _getOrCreatePlayerCamera();
         cam?.AddTarget(pView.cameraTargetGroup.transform);     
         
 
@@ -323,7 +283,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
                                     _networkManager.localPlayerSlot, 
                                     cam ? cam.gameCamera : null);
          
-        playerController.input = input;
+        playerController.input        = input;
         playerController.isSimulating = true;
         
     

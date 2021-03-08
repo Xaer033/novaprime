@@ -453,6 +453,11 @@ public class NetworkManager : Mirror.NetworkManager
     }
     public override void OnStopServer()
     {
+        if(syncStore != null)
+        {
+            NetworkServer.Destroy(syncStore.gameObject);
+        }
+        
         removeServerToMasterList(serverEntry, null);
         onServerStopped?.Invoke();    
     }
@@ -489,6 +494,11 @@ public class NetworkManager : Mirror.NetworkManager
         NetworkClient.UnregisterHandler<MatchBegin>();
         NetworkClient.UnregisterHandler<NetFrameSnapshot>();
         NetworkClient.UnregisterHandler<CurrentSessionUpdate>();
+
+        // if(syncStore != null)
+        // {
+        //     GameObject.Destroy(syncStore);
+        // }
     }
 
     // public override void OnError(string reason)
@@ -788,6 +798,8 @@ public class NetworkManager : Mirror.NetworkManager
 
     private void setupPlayerSlotGenerator()
     {
+        _serverAvailablePlayerSlots.Clear();
+        
         foreach(PlayerSlot pNum in Enum.GetValues(typeof(PlayerSlot)))
         {
             if(pNum == PlayerSlot.NONE) { continue; }

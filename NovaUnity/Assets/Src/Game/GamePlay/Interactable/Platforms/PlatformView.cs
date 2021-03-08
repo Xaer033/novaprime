@@ -1,7 +1,9 @@
+using System;
+using Mirror;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class PlatformView : MonoBehaviour, ITimeWarpTarget
+public class PlatformView : NetworkBehaviour, ITimeWarpTarget
 {
     public PlatformData data;
     public PlatformType platformType;
@@ -13,19 +15,21 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
     public float speed;
     [HideInInspector]
     public Vector2 startPosition;
-    
+
     public Vector2[] localWaypoints;
     public LayerMask passengerMask;
-    public float distanceBetweenRays = 0.2f;
+    public float     distanceBetweenRays = 0.2f;
 
     public Collider2D collisionCollider;
     [FormerlySerializedAs("_viewRoot")]
     public Transform viewRoot;
 
-    
-    public PlatformState state;
-    
+    public int               index;
+    public NetworkIdentity   netIdentity;
+    public PlatformState     state;
     public RaycastController _raycastController;
+    
+    public event Action<PlatformView> onClientStart;
     
     // Start is called before the first frame update
     void Awake()
@@ -42,6 +46,11 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
     public void OnTimeWarpExit()
     {
         state.timeScale = 1.0f;
+    }
+
+    public override void OnStartClient()
+    {
+        onClientStart?.Invoke(this);
     }
 
     private void OnDrawGizmos()

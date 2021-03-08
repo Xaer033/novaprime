@@ -38,6 +38,11 @@ public class MultiplayerGameplayState : IGameState
 
     private void onSceneLoaded(AsyncOperation asyncOp)
     {
+        if(NetworkServer.active)
+        {
+            NetworkServer.SpawnObjects();            
+        }
+        
         startGameSystems();
 
         if(NetworkClient.active)

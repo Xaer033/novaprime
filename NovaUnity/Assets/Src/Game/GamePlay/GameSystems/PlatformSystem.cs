@@ -24,9 +24,8 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
     
     public PlatformSystem()
     {
-        _triggerPlatforms = new Dictionary<string, List<PlatformState>>();
-        
-        _timePlatformController = new TimePlatformController();
+        _triggerPlatforms          = new Dictionary<string, List<PlatformState>>();
+        _timePlatformController    = new TimePlatformController();
         _triggerPlatformController = new TriggerPlatformController();
     }
 

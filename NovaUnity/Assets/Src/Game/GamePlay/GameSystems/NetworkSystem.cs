@@ -26,12 +26,11 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     private Dictionary<PlayerSlot, ServerPlayerInputBuffer> _serverPlayerInputBuffer;
     
     /* Client */
-    private GameplayCamera _camera;
-    private LocalPlayerState _localPlayer;
-    private uint _clientSendSequence = 0;
-    private uint _clientAckSequence = 0;
-    private List<PlayerInputTickPair> _clientTempInputBuffer;
-    private RingBuffer<NetFrameSnapshot> _clientSnapshotBuffer;
+    private GameplayCamera               _camera;
+    private LocalPlayerState             _localPlayer;
+    private uint                         _clientSendSequence = 0;
+    private uint                         _clientAckSequence  = 0;
+    private List<PlayerInputTickPair>    _clientTempInputBuffer;
     
     
     public int priority { get; set; }
@@ -43,14 +42,14 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         
         _unitMap = unitMap;
         _netPrefabMap = new Dictionary<Guid, UnitMap.Unit>();
-        
-        _serverConnToPlayerMap = new Dictionary<int, IAvatarController>();
+
+        _serverConnToPlayerMap      = new Dictionary<int, IAvatarController>();
         _serverPlayerControllerList = new List<IAvatarController>();
-        _serverPlayerStateList = new List<NetPlayerState>(MAX_PLAYERS);
-        _serverPlayerInputBuffer = new Dictionary<PlayerSlot, ServerPlayerInputBuffer>(MAX_PLAYERS);
+        _serverPlayerStateList      = new List<NetPlayerState>(PlayerState.MAX_PLAYERS);
+        _serverPlayerInputBuffer    = new Dictionary<PlayerSlot, ServerPlayerInputBuffer>(PlayerState.MAX_PLAYERS);
         
         _clientTempInputBuffer = new List<PlayerInputTickPair>(PlayerState.MAX_INPUTS);
-        _clientSnapshotBuffer = new RingBuffer<NetFrameSnapshot>(5);
+        // _clientSnapshotBuffer  = new RingBuffer<NetFrameSnapshot>(5);
 
         for(int i = 0; i < _unitMap.unitList.Count; ++i)
         {
@@ -65,19 +64,21 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     {
         // Application.targetFrameRate = 60; // TODO: Definitely temporary! 
         
-        _gameSystems  = gameSystems;
-        _gameState    = gameState;
-        _avatarSystem = gameSystems.Get<AvatarSystem>();
+        _gameSystems       = gameSystems;
+        _gameState         = gameState;
+        _avatarSystem      = gameSystems.Get<AvatarSystem>();
+        _netSnapshotSystem = gameSystems.Get<NetSnapshotSystem<GameState.Snapshot>>();
+
+        _netSnapshotSystem.onServerSendSnapshot = onServerSendSnapshot;
         
-        _networkManager.onClientSpawnHandler += onClientUnitSpawnHandler;
+        _networkManager.onClientSpawnHandler   += onClientUnitSpawnHandler;
         _networkManager.onClientUnspawnHandler += onClientUnitUnspawnHandler;
-        // _networkManager.onClientFrameSnapshot += onClientFrameSnapshot;
-        _networkManager.onClientDisconnect += onClientLocalDisconnect;
+        _networkManager.onClientDisconnect     += onClientLocalDisconnect;
         
-        _networkManager.onServerMatchBegin += onServerMatchBegin;
-        _networkManager.onServerSendPlayerInput += onServerSendPlayerInput;
-        _networkManager.onServerConnect += onServerConnect;
-        _networkManager.onServerDisconnect += onServerDisconnect;
+        _networkManager.onServerMatchBegin        += onServerMatchBegin;
+        _networkManager.onServerSendPlayerInput   += onServerSendPlayerInput;
+        _networkManager.onServerConnect           += onServerConnect;
+        _networkManager.onServerDisconnect        += onServerDisconnect;
         _networkManager.onServerMatchLoadComplete += onServerMatchLoadComplete;
 
         _gameSystems.onFixedStep += onFixedStep;
@@ -87,7 +88,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
 
         _clientAckSequence = 0;
         _clientSendSequence = 0;
-        // _serverSendSequence = 0;
+        _serverSendSequence = 0;
     }
 
     public void CleanUp()
@@ -353,60 +354,15 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         DispatchEvent(GamePlayEventType.NET_LOCAL_PLAYER_DISCONNECT, false, conn);
     }
 
-    private void onClientFrameSnapshot(NetworkConnection conn, NetFrameSnapshot msg)
+    private void onClientPlayerStateUpdate(PlayerStateUpdate msg)
     {
-        if(_networkManager.isHostClient)
-        {
-            return;
-        }
-
-        if(_clientSnapshotBuffer.IsEmpty)
-        {
-            _clientSnapshotBuffer.PushBack(msg);
-            return;
-        }
-
-        if(msg.header.sequence >= _clientSnapshotBuffer.Back().header.sequence)
-        {
-            _clientSnapshotBuffer.PushBack(msg);
-            _clientSnapshotBuffer.PopFront(); // Remove outdated snapshot
-        }
+        
     }
-
-    private void clientProcessNetSnapshot(NetFrameSnapshot snapshot)
+    
+    private void clientProcessNetSnapshot(FrameSnapshot<GameState.Snapshot> snapshot)
     {
-        for(int i = 0; i < snapshot.playerStateList.Count; ++i)
+        //for(int i = 0; i < snapshot.playerStateList.Count; ++i)
         {
-            NetPlayerState newState = snapshot.playerStateList[i];
-            IAvatarController c = _avatarSystem.GetPlayerByNetId(newState.netId);
-            
-            if(c == null || c.state == null)
-            {
-                continue;    
-            }
-
-            PlayerState state = c.state as PlayerState;
-            
-            // if(state.ackSequence >= newState.ackTick)
-            // {
-            //     continue;
-            // }
-            
-            state.ackSequence = newState.ackTick;
-            
-            if(!c.isSimulating)
-            {
-                c.state.previousPosition    = c.state.position;//c.view.viewRoot.position;
-                c.state.position            = newState.position;
-                c.state.aimPosition         = newState.aimPosition;
-                c.state.velocity            = newState.velocity;
-                
-                c.view.transform.position   = c.state.position;
-                c.view.viewRoot.position    = c.state.previousPosition;
-                
-                c.view.Aim(c.state.aimPosition);
-            }
-            // else
             // {
             //     int oldStateIndex = -1;
             //     for(int b = 0; b < state.nonAckInputBuffer.backIndex; ++b)

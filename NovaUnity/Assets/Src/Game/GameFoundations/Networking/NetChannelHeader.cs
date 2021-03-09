@@ -7,5 +7,4 @@ public struct NetChannelHeader
     public uint   ackSequence;
     public uint   frameTick;
     public double sendTime;
-    public double deliveryTime;
 }

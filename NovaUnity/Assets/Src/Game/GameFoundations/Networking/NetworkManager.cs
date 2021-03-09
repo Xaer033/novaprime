@@ -45,6 +45,7 @@ public class NetworkManager : Mirror.NetworkManager
     
     public event Action onClientStarted;
     public event Action onClientStopped;
+    
     public event Action<NetworkConnection> onClientConnect;
     public event Action<NetworkConnection> onClientDisconnect;
     public event Action<NetworkConnection> onClientLocalDisconnect;
@@ -55,6 +56,7 @@ public class NetworkManager : Mirror.NetworkManager
     public event Action<NetworkConnection, MatchBegin> onClientMatchBegin;
     public event Action<NetworkConnection, NetFrameSnapshot> onClientFrameSnapshot;
     public event Action<NetworkConnection, CurrentSessionUpdate> onClientCurrentSession;
+    public event Action<NetworkConnection, PlayerStateUpdate> onPlayerStateUpdate;
     public event SpawnHandlerDelegate onClientSpawnHandler;
     public event UnSpawnDelegate onClientUnspawnHandler;
 
@@ -75,30 +77,28 @@ public class NetworkManager : Mirror.NetworkManager
     
     public override void OnDestroy()
     {
-        // onError = null;
-        onServerStarted = null;
-        onServerStopped = null;
-        onServerConnect = null;
-        onServerDisconnect = null;
-        // onServerError = null;
-        onServerConfirmReadyUp = null;
-        onServerMatchBegin = null;
-        onServerSendPlayerInput = null;
+        onServerStarted           = null;
+        onServerStopped           = null;
+        onServerConnect           = null;
+        onServerDisconnect        = null;
+        onServerConfirmReadyUp    = null;
+        onServerMatchBegin        = null;
+        onServerSendPlayerInput   = null;
         onServerMatchLoadComplete = null;
         
         
-        onClientStarted = null;
-        onClientStopped = null;
-        onClientConnect = null;
-        onClientDisconnect = null;
-        onClientLocalDisconnect = null;
-        // onClientError = null;
+        onClientStarted          = null;
+        onClientStopped          = null;
+        onClientConnect          = null;
+        onClientDisconnect       = null;
+        onClientLocalDisconnect  = null;
         onClientSyncLobbyPlayers = null;
-        onClientConfirmReadyUp = null;
-        onClientStartMatchLoad = null;
-        onClientMatchBegin = null;
-        onClientFrameSnapshot = null;
-        onClientCurrentSession = null;
+        onClientConfirmReadyUp   = null;
+        onClientStartMatchLoad   = null;
+        onClientMatchBegin       = null;
+        onClientFrameSnapshot    = null;
+        onClientCurrentSession   = null;
+        onPlayerStateUpdate      = null;
 
         base.OnDestroy();
     }
@@ -157,12 +157,6 @@ public class NetworkManager : Mirror.NetworkManager
     public NetPlayer GetServerPlayerFromConnId(int connId)
     {
         return _serverNetPlayerMap[connId];
-    }
-
-    
-    public override void Start()
-    {
-        base.Start();
     }
 
     public void StartSingleplayer(Action onSingleplayerCreated)
@@ -477,6 +471,7 @@ public class NetworkManager : Mirror.NetworkManager
         NetworkClient.RegisterHandler<MatchBegin>(OnClientMatchBegin, false);
         NetworkClient.RegisterHandler<NetFrameSnapshot>(OnClientFrameSnapshot, false);
         NetworkClient.RegisterHandler<CurrentSessionUpdate>(OnCurrentSessionUpdate, false);
+        NetworkClient.RegisterHandler<PlayerStateUpdate>(onPlayerStateUpdate, false);
         
         onClientStarted?.Invoke();
     }
@@ -494,6 +489,7 @@ public class NetworkManager : Mirror.NetworkManager
         NetworkClient.UnregisterHandler<MatchBegin>();
         NetworkClient.UnregisterHandler<NetFrameSnapshot>();
         NetworkClient.UnregisterHandler<CurrentSessionUpdate>();
+        NetworkClient.UnregisterHandler<PlayerStateUpdate>();
 
         // if(syncStore != null)
         // {

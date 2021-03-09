@@ -106,13 +106,19 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
                 controller.FixedStep(fixedDeltaTime, newInputPair.input);
 
                 PlayerState pState = (PlayerState)controller.state;
-                if(pState != null && controller.isSimulating) // Check again to make sure only the client does this part
+                if(pState != null) // Check again to make sure only the client does this part
                 {
-                    // newInputPair.tick = NetworkManager.frameTick;
-                    // pState.latestInput.tick = NetworkManager.frameTick;
-                    
-                    pState.nonAckInputBuffer.PushBack(newInputPair);
-                    pState.nonAckStateBuffer.PushBack(pState.Snapshot());
+                    if (controller.isSimulating)
+                    {
+                        newInputPair.tick = NetworkManager.frameTick;
+                        pState.nonAckInputBuffer.PushBack(newInputPair);
+                        pState.nonAckStateBuffer.PushBack(pState.Snapshot());
+                    }
+
+                    if (NetworkServer.active && newInputPair.tick > pState.ackSequence)
+                    {
+                        pState.ackSequence = newInputPair.tick;
+                    }
                 }
             }
 

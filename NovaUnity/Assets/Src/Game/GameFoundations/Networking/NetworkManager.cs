@@ -20,7 +20,7 @@ public class NetworkManager : Mirror.NetworkManager
     private const string kServerName = "serverName";  
     private const string kServerIp = "serverIp";
     private const string kServerPort = "serverPort";    
-    private const string kServerPlayerCount = "serverPlayers";   
+    private const string kServerPlayerCount = "serverPlayers";
     private const string kServerPlayerCapacity = "serverCapacity";
 
     private Action _onSingleplayerCallback;
@@ -56,7 +56,7 @@ public class NetworkManager : Mirror.NetworkManager
     public event Action<NetworkConnection, MatchBegin> onClientMatchBegin;
     public event Action<NetworkConnection, NetFrameSnapshot> onClientFrameSnapshot;
     public event Action<NetworkConnection, CurrentSessionUpdate> onClientCurrentSession;
-    public event Action<NetworkConnection, PlayerStateUpdate> onPlayerStateUpdate;
+    public event Action<NetworkConnection, PlayerStateUpdate> onClientPlayerStateUpdate;
     public event SpawnHandlerDelegate onClientSpawnHandler;
     public event UnSpawnDelegate onClientUnspawnHandler;
 
@@ -87,18 +87,18 @@ public class NetworkManager : Mirror.NetworkManager
         onServerMatchLoadComplete = null;
         
         
-        onClientStarted          = null;
-        onClientStopped          = null;
-        onClientConnect          = null;
-        onClientDisconnect       = null;
-        onClientLocalDisconnect  = null;
-        onClientSyncLobbyPlayers = null;
-        onClientConfirmReadyUp   = null;
-        onClientStartMatchLoad   = null;
-        onClientMatchBegin       = null;
-        onClientFrameSnapshot    = null;
-        onClientCurrentSession   = null;
-        onPlayerStateUpdate      = null;
+        onClientStarted           = null;
+        onClientStopped           = null;
+        onClientConnect           = null;
+        onClientDisconnect        = null;
+        onClientLocalDisconnect   = null;
+        onClientSyncLobbyPlayers  = null;
+        onClientConfirmReadyUp    = null;
+        onClientStartMatchLoad    = null;
+        onClientMatchBegin        = null;
+        onClientFrameSnapshot     = null;
+        onClientCurrentSession    = null;
+        onClientPlayerStateUpdate = null;
 
         base.OnDestroy();
     }
@@ -471,7 +471,7 @@ public class NetworkManager : Mirror.NetworkManager
         NetworkClient.RegisterHandler<MatchBegin>(OnClientMatchBegin, false);
         NetworkClient.RegisterHandler<NetFrameSnapshot>(OnClientFrameSnapshot, false);
         NetworkClient.RegisterHandler<CurrentSessionUpdate>(OnCurrentSessionUpdate, false);
-        NetworkClient.RegisterHandler<PlayerStateUpdate>(onPlayerStateUpdate, false);
+        NetworkClient.RegisterHandler<PlayerStateUpdate>(OnClientPlayerStateUpdate, false);
         
         onClientStarted?.Invoke();
     }
@@ -632,6 +632,11 @@ public class NetworkManager : Mirror.NetworkManager
         onClientFrameSnapshot?.Invoke(conn, msg);
     }
 
+    private void OnClientPlayerStateUpdate(NetworkConnection conn, PlayerStateUpdate msg)
+    {
+        onClientPlayerStateUpdate?.Invoke(conn, msg);
+    }
+    
     private void OnCurrentSessionUpdate(NetworkConnection conn, CurrentSessionUpdate msg)
     {
         sessionState = msg.sessionState;

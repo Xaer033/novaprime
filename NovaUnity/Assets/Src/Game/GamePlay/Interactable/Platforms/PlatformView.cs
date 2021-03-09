@@ -25,7 +25,7 @@ public class PlatformView : NetworkBehaviour, ITimeWarpTarget
     public Transform viewRoot;
 
     public int               index;
-    public NetworkIdentity   netIdentity;
+    // public NetworkIdentity   netIdentity;
     public PlatformState     state;
     public RaycastController _raycastController;
     

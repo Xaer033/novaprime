@@ -27,8 +27,6 @@ public class NetSnapshotSystem : NotificationDispatcher, IGameSystem
     private float                  _clientMaxServerTimeReceived;
     private float                  _clientInterpolationTime;
     private float                  _clientInterpolationTimeScale;
-    private uint                   _clientSendSequence = 0;
-    private uint                   _clientAckSequence  = 0;
     private List<NetFrameSnapshot> _clientSnapshotList = new List<NetFrameSnapshot>();
 
 
@@ -102,8 +100,7 @@ public class NetSnapshotSystem : NotificationDispatcher, IGameSystem
         {
             sequence     = _serverSendSequence,
             frameTick    = NetworkManager.frameTick,
-            sendTime     = TimeUtil.Now(),
-            deliveryTime = 0
+            sendTime     = TimeUtil.Now()
         };
 
         NetFrameSnapshot snapshot = new NetFrameSnapshot
@@ -132,12 +129,8 @@ public class NetSnapshotSystem : NotificationDispatcher, IGameSystem
         {
             return;
         }
-
-        bool   received = false;
+        
         double now      = TimeUtil.Now();
-
-        msg.header.deliveryTime = now;
-
 
         // this is our first snapshot
         if(_clientSnapshotList.Count == 0)
@@ -154,7 +147,7 @@ public class NetSnapshotSystem : NotificationDispatcher, IGameSystem
         }
 
         // for next time we receive a snapshot
-        _clientLastSnapshotReceived = Time.time;
+        _clientLastSnapshotReceived = (float)now;
 
         // this is the difference between latest time we've received from the server and our local interpolation time 
         var diff = _clientMaxServerTimeReceived - _clientInterpolationTime;
@@ -178,8 +171,7 @@ public class NetSnapshotSystem : NotificationDispatcher, IGameSystem
             _clientInterpolationTimeScale = 1.0f;
         }
 
-        Debug.Log(
-            $"diff: {diff:F3}, diffWanted: {diffWanted:F3}, timeScale:{_clientInterpolationTimeScale:F3}, deliveryDeltaAvg:{_clientSnapshotDeliveryDeltaAvg.average}");
+        // Debug.Log($"diff: {diff:F3}, diffWanted: {diffWanted:F3}, timeScale:{_clientInterpolationTimeScale:F3}, deliveryDeltaAvg:{_clientSnapshotDeliveryDeltaAvg.average}");
     }
 
     private void clientInterpolateSnapshots()

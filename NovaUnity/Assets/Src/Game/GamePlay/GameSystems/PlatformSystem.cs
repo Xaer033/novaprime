@@ -81,7 +81,6 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
     
     public void FixedStep(float deltaTime)
     {
-        
         float time = Time.fixedTime;
         for(int i = 0; i < _platformViewList.Length; ++i)
         {
@@ -95,10 +94,10 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
             }
             
             // Gross, figure out a better way to do this
-            if(Singleton.instance.networkManager.isPureClient)
-            {
-                continue;
-            }
+            // if(Singleton.instance.networkManager.isPureClient)
+            // {
+            //     continue;
+            // }
             
             float adjustedDeltaTime = deltaTime * state.timeScale;
             

@@ -6,7 +6,5 @@ using Mirror;
 public struct NetFrameSnapshot : NetworkMessage
 {
     public NetChannelHeader header;
-    
-    public List<NetPlayerState> playerStateList;
-    public GameState.Snapshot   snapshot;
+    public GameState.Snapshot snapshot;
 }

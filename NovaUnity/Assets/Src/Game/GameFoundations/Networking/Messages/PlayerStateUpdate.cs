@@ -5,5 +5,5 @@ public struct PlayerStateUpdate : NetworkMessage
     public uint netId;
 
     public NetChannelHeader    header;
-    public PlayerStateSnapshot snapshot;
+    public PlayerInputStateSnapshot playerInputStateSnapshot;
 }

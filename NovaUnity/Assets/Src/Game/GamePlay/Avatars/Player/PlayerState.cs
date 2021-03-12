@@ -10,12 +10,14 @@ public class PlayerState : AvatarState
     public PlayerActivityType  stateType;
     public uint                sequence;
     public uint                ackSequence;
+    public uint                frameIndex; 
     public PlayerInputTickPair latestInput;
     public UnitStats           stats;
     public MachineGunState     machineGunState;
     
-    public RingBuffer<PlayerInputTickPair> nonAckInputBuffer = new RingBuffer<PlayerInputTickPair>(MAX_INPUTS);
-    public RingBuffer<PlayerStateSnapshot> nonAckStateBuffer = new RingBuffer<PlayerStateSnapshot>(MAX_INPUTS);
+    public RingBuffer<PlayerInputTickPair> nonAckInputBuffer    = new RingBuffer<PlayerInputTickPair>(MAX_INPUTS);
+    public RingBuffer<PlayerStateSnapshot> nonAckStateBuffer    = new RingBuffer<PlayerStateSnapshot>(MAX_INPUTS);
+    public PlayerInputStateSnapshot[]      nonAckSnapshotBuffer = new PlayerInputStateSnapshot[MAX_INPUTS];
     
     
     public static PlayerState Create(string uuid,  UnitStats stats, Vector2 position)

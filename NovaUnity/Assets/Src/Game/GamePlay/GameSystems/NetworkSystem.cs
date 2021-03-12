@@ -96,24 +96,24 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
 
         NetworkManager.frameTick = 0;
 
-        _clientAckSequence = 0;
+        _clientAckSequence  = 0;
         _clientSendSequence = 0;
         _serverSendSequence = 0;
     }
 
     public void CleanUp()
     {
-        _networkManager.onClientSpawnHandler -= onClientUnitSpawnHandler;
-        _networkManager.onClientUnspawnHandler -= onClientUnitUnspawnHandler;
-        _networkManager.onClientDisconnect -= onClientLocalDisconnect;
+        _networkManager.onClientSpawnHandler      -= onClientUnitSpawnHandler;
+        _networkManager.onClientUnspawnHandler    -= onClientUnitUnspawnHandler;
+        _networkManager.onClientDisconnect        -= onClientLocalDisconnect;
         _networkManager.onClientPlayerStateUpdate -= onClientPlayerStateUpdate;
         
         // _networkManager.onClientFrameSnapshot -= onClientFrameSnapshot;
         
-        _networkManager.onServerMatchBegin -= onServerMatchBegin;
-        _networkManager.onServerSendPlayerInput -= onServerSendPlayerInput;
-        _networkManager.onServerConnect -= onServerConnect;
-        _networkManager.onServerDisconnect -= onServerDisconnect;
+        _networkManager.onServerMatchBegin        -= onServerMatchBegin;
+        _networkManager.onServerSendPlayerInput   -= onServerSendPlayerInput;
+        _networkManager.onServerConnect           -= onServerConnect;
+        _networkManager.onServerDisconnect        -= onServerDisconnect;
         _networkManager.onServerMatchLoadComplete -= onServerMatchLoadComplete;
         
         _gameSystems.onFixedStep -= onFixedStep;
@@ -191,7 +191,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     
         SendPlayerInput sendInputMessage = new SendPlayerInput
         {
-            header = channelHeader,
+            header    = channelHeader,
             inputList = _clientTempInputBuffer
         };
 
@@ -203,20 +203,27 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         var playerMap = _networkManager.GetServerPlayerMap();
         foreach(var playerPair in playerMap)
         {
-            int connId         = playerPair.Value.connectionId;
+            int connId = playerPair.Value.connectionId;
+            
             if (!_serverConnToPlayerMap.TryGetValue(connId, out var controller))
             {
                 continue;
             }
             
-            var state          = controller.state as PlayerState;
-            var playerSnapshot = state.Snapshot();
+            var state = controller.state as PlayerState;
+            
+            var playerSnapshot = new PlayerInputStateSnapshot
+            {
+                input       = state.latestInput.input,
+                frameIndex  = state.latestInput.frameIndex,
+                snapshot    = state.Snapshot()
+            };
             
             NetChannelHeader netHeader = new NetChannelHeader
             {
                 sequence    = _serverSendSequence,
                 ackSequence = state.ackSequence,
-                frameTick   =  NetworkManager.frameTick,
+                frameTick   = NetworkManager.frameTick,
                 sendTime    = TimeUtil.Now()
             };
         
@@ -224,7 +231,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
             {
                 header   = netHeader,
                 netId    = state.netId,
-                snapshot = playerSnapshot
+                playerInputStateSnapshot = playerSnapshot
             };
             
             NetworkConnection conn = NetworkServer.connections[connId];
@@ -320,6 +327,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     {
         PlayerView     pView = playerController.view as PlayerView;
         GameplayCamera cam   = _getOrCreatePlayerCamera();
+        
         cam?.AddTarget(pView.cameraTargetGroup.transform);     
         
 
@@ -333,11 +341,11 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     
         _localPlayer = new LocalPlayerState
         {
-            netPlayer = nPlayer,
-            conn = netConnection,
-            controller = playerController,
-            state = playerController.state as PlayerState,
-            pInput = input
+            netPlayer   = nPlayer,
+            conn        = netConnection,
+            controller  = playerController,
+            state       = playerController.state as PlayerState,
+            pInput      = input
         };
     }
 
@@ -350,9 +358,9 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
             return;
         }
 
-        UnitMap.Unit playerUnit = _unitMap.GetUnit("player");
-        IAvatarController controller = _avatarSystem.Spawn<IAvatarController>(playerUnit.id, point.transform.position);
-        GameObject spawnedGameObject = controller.view.gameObject;
+        UnitMap.Unit      playerUnit        = _unitMap.GetUnit("player");
+        IAvatarController controller        = _avatarSystem.Spawn<IAvatarController>(playerUnit.id, point.transform.position);
+        GameObject        spawnedGameObject = controller.view.gameObject;
 
         _serverPlayerInputBuffer[netPlayer.playerSlot] = new ServerPlayerInputBuffer(PlayerState.MAX_INPUTS);
         NetworkConnection conn = NetworkServer.connections[netPlayer.connectionId];
@@ -407,28 +415,58 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         IAvatarController controller = _localPlayer.controller;
         PlayerState       state      = _localPlayer.state;
         
-        state.SetFromSnapshot(msg.snapshot);
 
         Debug.LogFormat("state ack:{0}, header ack:{1}", state.ackSequence, header.ackSequence);
-        
-        uint tickIter = header.ackSequence;
-        while (tickIter <= NetworkManager.frameTick)
-        {
-            bool hasInput = false;
-            PlayerInputTickPair tickPair = default(PlayerInputTickPair);
-            
-            while (tickPair.tick < tickIter && !state.nonAckInputBuffer.IsEmpty)
-            {
-                tickPair = state.nonAckInputBuffer.PopBack();
-                hasInput = true;
-            }
 
-            if (hasInput)
+        var snapshotTuple = msg.playerInputStateSnapshot;
+
+        uint frameIndex = snapshotTuple.frameIndex;
+        var  newState   = snapshotTuple.snapshot;
+        var  oldState   = state.nonAckSnapshotBuffer[frameIndex];
+        
+        Vector2 positionDelta = oldState.snapshot.position - newState.position;
+        if (positionDelta.sqrMagnitude > 0.01f)
+        {
+            state.SetFromSnapshot(snapshotTuple.snapshot);
+        
+            uint start = frameIndex;
+            uint end   = (NetworkManager.frameTick) % PlayerState.MAX_INPUTS;
+        
+            uint index = start;
+            
+            while (index != end)
             {
-                controller.FixedStep(Time.fixedDeltaTime, tickPair.input);
+                Debug.Log($"Start:{start} End:{end}, Index:{index}");
+                
+                var frame = state.nonAckSnapshotBuffer[index];
+                
+                controller.FixedStep(Time.fixedDeltaTime, frame.input);
+                
+                state.nonAckSnapshotBuffer[index].snapshot = state.Snapshot();
+                index = (index + 1) % PlayerState.MAX_INPUTS;
             }
-            tickIter++;
         }
+        
+        // state.SetFromSnapshot(snapshotTuple.snapshot);
+        //
+        // uint tickIter = header.ackSequence;
+        // while (tickIter <= NetworkManager.frameTick)
+        // {
+        //     bool hasInput = false;
+        //     PlayerInputTickPair tickPair = default(PlayerInputTickPair);
+        //     
+        //     while (tickPair.tick < tickIter && !state.nonAckInputBuffer.IsEmpty)
+        //     {
+        //         tickPair = state.nonAckInputBuffer.PopBack();
+        //         hasInput = true;
+        //     }
+        //
+        //     if (hasInput)
+        //     {
+        //         controller.FixedStep(Time.fixedDeltaTime, tickPair.input);
+        //     }
+        //     tickIter++;
+        // }
 
         state.ackSequence = header.ackSequence;
     }

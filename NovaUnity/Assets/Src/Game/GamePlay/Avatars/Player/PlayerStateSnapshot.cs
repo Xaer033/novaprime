@@ -1,5 +1,12 @@
 ﻿using UnityEngine;
 
+public struct PlayerInputStateSnapshot
+{
+    public PlayerStateSnapshot snapshot;
+    public FrameInput          input;
+    public uint                frameIndex;
+}
+
 public struct PlayerStateSnapshot 
 {
     public readonly Vector2 position;

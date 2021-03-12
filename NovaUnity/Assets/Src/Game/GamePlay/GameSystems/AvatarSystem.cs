@@ -13,23 +13,23 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     
     private GameplayResources _gameplayResources;
     
-    private UnitMap _unitMap;
-    private List<IAvatarController> _avatarControllerList;
-    private Dictionary<string, IAvatarController> _avatarLookUpMap;
-    private Dictionary<string, FrameInput> _lastInputMap;
-    private Dictionary<NetPlayer, FrameInput> _lastPlayerInputMap;
-    private Dictionary<int, GameplayCamera> _cameraMap;
-
+    private UnitMap      _unitMap;
     private List<string> _removalList;
+    
+    private List<IAvatarController>               _avatarControllerList;
+    private Dictionary<string, IAvatarController> _avatarLookUpMap;
+    private Dictionary<string, FrameInput>        _lastInputMap;
+    private Dictionary<NetPlayer, FrameInput>     _lastPlayerInputMap;
+    private Dictionary<int, GameplayCamera>       _cameraMap;
 
     private List<PlayerSpawnPoint> _playerSpawnPointList;
-    private List<FrameInput> _frameInputList;
+    private List<FrameInput>       _frameInputList;
 
     private int _spawnCount;
     
     private GameplayCamera _camera;
-    private GameObject _playerParent;
-    private GameObject _enemyParent;
+    private GameObject     _playerParent;
+    private GameObject     _enemyParent;
 
     // private IPunPrefabPool _oldPool;
     // private IPunPrefabPool _prefabPool;
@@ -40,7 +40,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     public AvatarSystem(GameplayResources gameplayResources)
     {
         _gameplayResources = gameplayResources;
-        _unitMap = _gameplayResources.unitMap;
+        _unitMap           = _gameplayResources.unitMap;
         
         _avatarControllerList           = new List<IAvatarController>(200);
         _avatarLookUpMap                = new Dictionary<string, IAvatarController>();
@@ -103,23 +103,40 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
             {
                 _frameInputList.Add(newInputPair.input);
 
-                controller.FixedStep(fixedDeltaTime, newInputPair.input);
-
-                PlayerState pState = (PlayerState)controller.state;
+                uint bufferIndex = NetworkManager.frameTick % PlayerState.MAX_INPUTS;
+                var  pState      = (PlayerState)controller.state;
+                
                 if(pState != null) // Check again to make sure only the client does this part
                 {
                     if (controller.isSimulating)
                     {
-                        newInputPair.tick = NetworkManager.frameTick;
+                        newInputPair.tick       = NetworkManager.frameTick;
+                        newInputPair.frameIndex = bufferIndex;
+
+
+                        var playerSnapshot = new PlayerInputStateSnapshot
+                        {
+                            snapshot   = pState.Snapshot(),
+                            input      = newInputPair.input,
+                            frameIndex = bufferIndex
+                        };
+
+                        pState.nonAckSnapshotBuffer[bufferIndex] = playerSnapshot;
                         pState.nonAckInputBuffer.PushBack(newInputPair);
-                        pState.nonAckStateBuffer.PushBack(pState.Snapshot());
                     }
 
-                    if (NetworkServer.active && newInputPair.tick > pState.ackSequence)
+                    pState.frameIndex             = bufferIndex;
+                    pState.latestInput.tick       = newInputPair.tick;
+                    pState.latestInput.frameIndex = bufferIndex;
+                    
+                    if (NetworkServer.active)
                     {
                         pState.ackSequence = newInputPair.tick;
+                        pState.frameIndex  = newInputPair.frameIndex;
                     }
                 }
+                
+                controller?.FixedStep(fixedDeltaTime, newInputPair.input);
             }
 
             controller?.input?.Clear();
@@ -151,16 +168,14 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
                 {
                     pState.latestInput = new PlayerInputTickPair
                     {
-                        input = _lastInputMap[controller.uuid],
-                        tick = NetworkManager.frameTick
+                        input       = _lastInputMap[controller.uuid],
+                        tick        = NetworkManager.frameTick,
+                        frameIndex  = NetworkManager.frameTick % PlayerState.MAX_INPUTS
                     };
                 }
             } 
             controller.Step(deltaTime);
         }
-        
-        
-        
     }
 
     public void CleanUp()
@@ -188,7 +203,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         _gameState.playerStateList.Clear();
         _gameState.enemyStateList.Clear();
         
-        _gameSystems.onStep -= Step;
+        _gameSystems.onStep      -= Step;
         _gameSystems.onFixedStep -= FixedStep;
         _gameSystems.RemoveListener(GamePlayEventType.SPAWN_POINT_TRIGGERED, onSpawnPointTriggered);
 

@@ -7,7 +7,7 @@ public class EnemyState : AvatarState
     {
         EnemyState state = new EnemyState();
         state.position         = position;
-        state.previousPosition = position;
+        state.prevPosition = position;
         state.health           = stats.maxHealth;
         state.velocity         = Vector2.zero;
         state.timeScale        = 1.0f;

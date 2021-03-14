@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Mirror;
+using UnityEngine;
 
 public class BasePlatformController
 {
@@ -14,7 +15,7 @@ public class BasePlatformController
         
         movePassengers(ref state, true);
         state.position += state.velocity;
-        view.transform.position = state.position;
+        view.transform.position = state.position; 
         movePassengers(ref state, false);
     }
     

@@ -127,7 +127,7 @@
                   <e p="NetPlayer.cs" t="Include" />
                   <e p="PlayerActions.cs" t="Include" />
                   <e p="PlayerController.cs" t="Include" />
-                  <e p="PlayerInput.cs" t="Include" />
+                  <e p="PlayerInputGenerator.cs" t="Include" />
                   <e p="PlayerNetEntity.cs" t="Include" />
                   <e p="PlayerSpawnPoint.cs" t="Include" />
                   <e p="PlayerState.cs" t="Include" />
@@ -202,6 +202,7 @@
               </e>
               <e p="Networking" t="Include">
                 <e p="NetUtility.cs" t="Include" />
+                <e p="ServerPlayerInputGenerator.cs" t="Include" />
               </e>
               <e p="PlayFieldController.cs" t="Include" />
               <e p="Weapons" t="Include">

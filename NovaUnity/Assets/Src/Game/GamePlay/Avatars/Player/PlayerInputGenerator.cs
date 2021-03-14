@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerInput : IInputGenerator
+public class PlayerInputGenerator : IInputGenerator
 {
     public PlayerSlot playerSlot { get; set; }
 
@@ -17,7 +17,7 @@ public class PlayerInput : IInputGenerator
     private PlayerActions _pAction;
     private bool _useGamePad;
     
-    public PlayerInput(PlayerSlot pSlot, Camera playerCamera)
+    public PlayerInputGenerator(PlayerSlot pSlot, Camera playerCamera)
     {
         playerSlot = pSlot;
         _camera = playerCamera;

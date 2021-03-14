@@ -42,17 +42,17 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         _gameplayResources = gameplayResources;
         _unitMap           = _gameplayResources.unitMap;
         
-        _avatarControllerList           = new List<IAvatarController>(200);
-        _avatarLookUpMap                = new Dictionary<string, IAvatarController>();
-        _frameInputList                 = new List<FrameInput>();
-        _lastInputMap                   = new Dictionary<string, FrameInput>();
-        _lastPlayerInputMap             = new Dictionary<NetPlayer, FrameInput>();
-        _cameraMap                      = new Dictionary<int, GameplayCamera>();
-        _playerSpawnPointList           = new List<PlayerSpawnPoint>(16);
-        _removalList                    = new List<string>();
+        _avatarControllerList = new List<IAvatarController>(200);
+        _avatarLookUpMap      = new Dictionary<string, IAvatarController>();
+        _frameInputList       = new List<FrameInput>();
+        _lastInputMap         = new Dictionary<string, FrameInput>();
+        _lastPlayerInputMap   = new Dictionary<NetPlayer, FrameInput>();
+        _cameraMap            = new Dictionary<int, GameplayCamera>();
+        _playerSpawnPointList = new List<PlayerSpawnPoint>(16);
+        _removalList          = new List<string>();
         
-        _playerParent                   = new GameObject("PlayerParent");
-        _enemyParent                    = new GameObject("EnemyParent");
+        _playerParent = new GameObject("PlayerParent");
+        _enemyParent  = new GameObject("EnemyParent");
 
 
         var spawnList = GameObject.FindObjectsOfType<PlayerSpawnPoint>();
@@ -80,58 +80,58 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
 
     public void FixedStep(float fixedDeltaTime)
     {
+        uint tick = NetworkManager.frameTick;
+        
         for(int i = 0; i < _avatarControllerList.Count; ++i)
         {
             IAvatarController controller = _avatarControllerList[i];
+            IInputGenerator   inputGen   = controller.input;
+            FrameInput        frameInput = default(FrameInput);
             
-            PlayerInputTickPair newInputPair;
-            
-            bool hasInput = _networkSystem.GetInputForTick(
-                ((PlayerState)controller.state).playerSlot, 
-                out newInputPair);
-            
-            if(!hasInput && _lastInputMap.ContainsKey(controller.uuid))
+            if (inputGen != null)
             {
-                 newInputPair.input =  _lastInputMap[controller.uuid];  
-                
-                // TODO: TEMP!
-                PlayerState pState = controller.state as PlayerState;
-                newInputPair = pState != null ? pState.latestInput : newInputPair;
+                frameInput = inputGen.GetInput();
             }
-
+            
             if(NetworkServer.active || controller.isSimulating)
             {
-                _frameInputList.Add(newInputPair.input);
+                _frameInputList.Add(frameInput);
 
-                uint bufferIndex = NetworkManager.frameTick % PlayerState.MAX_INPUTS;
-                var  pState      = (PlayerState)controller.state;
-                
+                var pState = (PlayerState)controller.state;
                 if(pState != null) // Check again to make sure only the client does this part
                 {
+                    
+                    // PlayerInputTickPair inputPair;
+                    // if (_networkSystem.GetInputForTick(pState.playerSlot, out inputPair))
+                    // {
+                    //     frameInput = inputPair.input;
+                    // }
+                    
                     if (controller.isSimulating)
                     {
-                        newInputPair.tick       = NetworkManager.frameTick;
-
-
                         var playerSnapshot = new PlayerInputStateSnapshot
                         {
-                            snapshot   = pState.Snapshot(),
-                            input      = newInputPair.input,
+                            snapshot = pState.Snapshot(),
+                            input    = frameInput,
                         };
 
+                        uint bufferIndex = tick % PlayerState.MAX_INPUTS;
                         pState.nonAckSnapshotBuffer[bufferIndex] = playerSnapshot;
-                        // pState.nonAckInputBuffer.PushBack(newInputPair);
                     }
 
-                    pState.latestInput.tick       = newInputPair.tick;
+                    var serverPlayerInputGen = inputGen as ServerPlayerInputGenerator;
+
+                    pState.latestInput.tick = serverPlayerInputGen != null ? 
+                                                serverPlayerInputGen.lastTickInput.tick : 
+                                                tick;
                     
                     if (NetworkServer.active)
                     {
-                        pState.ackSequence = newInputPair.tick;
+                        pState.ackSequence = pState.latestInput.tick;
                     }
                 }
                 
-                controller?.FixedStep(fixedDeltaTime, newInputPair.input);
+                controller?.FixedStep(fixedDeltaTime, frameInput);
             }
 
             controller?.input?.Clear();
@@ -151,8 +151,8 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     {
         for (int i = 0; i < _avatarControllerList.Count; ++i)
         {
-            IAvatarController controller = _avatarControllerList[i];
-            IInputGenerator inputGenerator = controller.input;
+            IAvatarController controller     = _avatarControllerList[i];
+            IInputGenerator   inputGenerator = controller.input;
 
             if(inputGenerator != null)
             {
@@ -163,8 +163,8 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
                 {
                     pState.latestInput = new PlayerInputTickPair
                     {
-                        input       = _lastInputMap[controller.uuid],
-                        tick        = NetworkManager.frameTick,
+                        input = _lastInputMap[controller.uuid],
+                        tick  = NetworkManager.frameTick,
                     };
                 }
             } 
@@ -243,7 +243,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
             if(controller == null) 
                 continue;
             
-            if(controller?.view?.netIdentity.netId == netId)
+            if(controller.view?.netIdentity.netId == netId)
                 return controller;        
         }
         return null;
@@ -252,7 +252,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     public T Spawn<T>(string unitId, Vector2 position, SpawnPointData spawnPointData = default) //where T : IAvatarController
     {
         UnitMap.Unit unit = _unitMap.GetUnit(unitId);
-        string uuid = _generateUUID(unit);
+        string       uuid = _generateUUID(unit);
         
         IAvatarController controller = _spawnAvatar(uuid, unit, position, spawnPointData);
 
@@ -289,11 +289,9 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         // NetPlayer netPlayer = null;
         
         PlayerSlot pSlot = (PlayerSlot)spawnPointData.customInt;
-        
-        AvatarView view =  GameObject.Instantiate<AvatarView>(unit.view as AvatarView, position, Quaternion.identity, _playerParent.transform);
- 
 
-        PlayerState state = PlayerState.Create(uuid, unit.stats, position);
+        AvatarView       view       = GameObject.Instantiate<AvatarView>(unit.view as AvatarView, position, Quaternion.identity, _playerParent.transform);
+        PlayerState      state      = PlayerState.Create(uuid, unit.stats, position);
         PlayerController controller = new PlayerController(unit, state, view, null);
       
         _gameState.playerStateList.Add(state); 
@@ -304,11 +302,10 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
 
     private IAvatarController _spawnEnemy(string uuid, UnitMap.Unit unit, Vector2 position, SpawnPointData spawnPointData)
     {
-        AvatarView view = GameObject.Instantiate<AvatarView>(unit.view as AvatarView, position, Quaternion.identity,  _enemyParent.transform);
-        
+        AvatarView view  = GameObject.Instantiate<AvatarView>(unit.view as AvatarView, position, Quaternion.identity,  _enemyParent.transform);
         EnemyState state = EnemyState.Create(uuid, unit.stats, position);
 
-        IInputGenerator input = _createEnemyGenerator(unit, state);
+        IInputGenerator   input      = _createEnemyGenerator(unit, state);
         IAvatarController controller = _createAvatarController(unit, state, view, input);
 
         _gameState.enemyStateList.Add(state);
@@ -364,8 +361,9 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     {
         while(_removalList.Count > 0)
         {
-            int removeIndex = _removalList.Count - 1;
-            string uuid = _removalList[removeIndex];
+            int    removeIndex = _removalList.Count - 1;
+            string uuid        = _removalList[removeIndex];
+            
             _removalList.RemoveAt(removeIndex);
             
             IAvatarController controller = _avatarLookUpMap[uuid];
@@ -391,10 +389,10 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
     private void onNetInterplationUpdate(float alpha, GameState.Snapshot from, GameState.Snapshot to)
     {
         var fromPlayerList = from.playerStateList;
-        fromPlayerList.Sort((a, by) =>  { return a.netId.CompareTo(by.netId);  });
+        fromPlayerList.Sort((a, b) =>  { return a.netId.CompareTo(b.netId);  });
         
         var toPlayerList   = to.playerStateList;
-        toPlayerList.Sort((a, by) =>  { return a.netId.CompareTo(by.netId);  });
+        toPlayerList.Sort((a, b) =>  { return a.netId.CompareTo(b.netId);  });
 
         int maxCount = Math.Max(toPlayerList.Count, fromPlayerList.Count);
 
@@ -426,7 +424,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
             var fromSnapshot = fromPlayerList[fromIndex];
             var toSnapshot   = toPlayerList[toIndex];
 
-            state.previousPosition = state.position;
+            state.prevPosition = state.position;
             state.position         = Vector2.Lerp(fromSnapshot.position, toSnapshot.position, alpha);
             state.aimPosition      = Vector2.Lerp(fromSnapshot.aimPosition, toSnapshot.aimPosition, alpha);           
             

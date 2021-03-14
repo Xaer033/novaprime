@@ -155,7 +155,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
         if(view != null && view.viewRoot != null && _state != null)
         {
-            view.viewRoot.position = Vector2.Lerp(_state.previousPosition, _state.position, alpha);//Vector2.MoveTowards(_state.previousPosition, _state.position, alpha);                
+            view.viewRoot.position = Vector2.Lerp(_state.prevPosition, _state.position, alpha);//Vector2.MoveTowards(_state.previousPosition, _state.position, alpha);                
         }
     }
 
@@ -225,11 +225,11 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         {
             Vector2 constrainedMoveDelta = _view.constrainer.Move(moveDelta, isOnPlatform, input);
 
-            _state.previousPosition = _state.position;
+            _state.prevPosition = _state.position;
             _state.position = _state.position + constrainedMoveDelta;
 
             _view.transform.position    = _state.position;
-            _view.viewRoot.position     = _state.previousPosition;
+            _view.viewRoot.position     = _state.prevPosition;
         }
     }
     
@@ -494,7 +494,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
 
     private void handleBeingDead(float deltaTime)
     {
-        _state.previousPosition = _state.position;
+        _state.prevPosition = _state.position;
     }
     
     private void handleBeingAlive(float deltaTime, FrameInput input, ref AnimationInfo animationInfo)
@@ -596,7 +596,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
             {
                 _machineGunController.FixedStep(deltaTime);
 
-                if (input.primaryFire)
+                if (NetworkServer.active && input.primaryFire)
                 {
                     _machineGunController.Fire(aimPosition);
                 }
@@ -662,7 +662,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
         
         
         _state.velocity = velocity;
-        _state.previousPosition = _state.position;//view.viewRoot.position; // Maybe experiment using the current viewRoot position
+        _state.prevPosition = _state.position;//view.viewRoot.position; // Maybe experiment using the current viewRoot position
         _state.position = position + (velocity * lag);
         _state.aimPosition = aimPosition;
         
@@ -678,7 +678,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     {
         if(!pView.netIdentity.isLocalPlayer)
         {
-            _state.previousPosition = _state.position;
+            _state.prevPosition = _state.position;
             _state.position = position;
             _state.velocity = velocity;
             _state.aimPosition = aimPosition;            
@@ -698,7 +698,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
     
     private bool onNetworkSerialize(IAvatarView view, NetworkWriter writer, bool isInitialState)
     {
-        Vector2 prevPos = new Vector2(_state.previousPosition.x, _state.previousPosition.y);
+        Vector2 prevPos = new Vector2(_state.prevPosition.x, _state.prevPosition.y);
         Vector2 pos = new Vector2(_state.position.x, _state.position.y);
         Vector2 aimPos = new Vector2(_state.aimPosition.x, _state.aimPosition.y);
         
@@ -718,11 +718,11 @@ public class PlayerController : NotificationDispatcher, IAvatarController
 
 
         _state.position = pos;
-        _state.previousPosition = view.viewRoot.position; // Maybe experiment using the current viewRoot position
+        _state.prevPosition = view.viewRoot.position; // Maybe experiment using the current viewRoot position
         _state.aimPosition = aimPos;
         
         view.transform.position    = _state.position;
-        view.viewRoot.position     = _state.previousPosition;
+        view.viewRoot.position     = _state.prevPosition;
         Debug.Log("Reading: " + state.uuid);
     }
     

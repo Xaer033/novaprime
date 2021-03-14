@@ -4,7 +4,7 @@ using UnityEngine;
 public class PlayerState : AvatarState
 {
     public const int MAX_PLAYERS = 16;
-    public const int MAX_INPUTS = 666;
+    public const int MAX_INPUTS = 128;
     
     public PlayerSlot          playerSlot;
     public PlayerActivityType  stateType;
@@ -24,7 +24,7 @@ public class PlayerState : AvatarState
         PlayerState state = new PlayerState();
         state.playerSlot = PlayerSlot.NONE;
         state.position = position;
-        state.previousPosition = position;
+        state.prevPosition = position;
         state.health = stats.maxHealth;
         state.velocity = Vector2.zero;
         state.timeScale = 1.0f;
@@ -43,20 +43,20 @@ public class PlayerState : AvatarState
 
     public void SetFromSnapshot(PlayerStateSnapshot snapshot)
     {
-        position             = snapshot.position;
-        previousPosition     = snapshot.previousPosition;
-        velocity             = snapshot.velocity;
-        health               = snapshot.health;
-        timeScale            = snapshot.timeScale;
-        aimPosition          = snapshot.aimPosition;
-        jumpCount            = snapshot.jumpCount;
-        timeToWallUnstick    = snapshot.timeToWallUnstick;
-        wallSlideVelocity    = snapshot.wallSlideVelocity;
-        isWallSliding        = snapshot.isWallSliding;
-        midairJumpTimer      = snapshot.midairJumpTimer;
-        coyoteJumpTimer      = snapshot.coyoteJumpTimer;
-        velocityXSmoothing   = snapshot.velocityXSmoothing;
-        stateType            = snapshot.stateType;
+        position           = snapshot.position;
+        prevPosition       = snapshot.prevPosition;
+        velocity           = snapshot.velocity;
+        health             = snapshot.health;
+        timeScale          = snapshot.timeScale;
+        aimPosition        = snapshot.aimPosition;
+        jumpCount          = snapshot.jumpCount;
+        timeToWallUnstick  = snapshot.timeToWallUnstick;
+        wallSlideVelocity  = snapshot.wallSlideVelocity;
+        isWallSliding      = snapshot.isWallSliding;
+        midairJumpTimer    = snapshot.midairJumpTimer;
+        coyoteJumpTimer    = snapshot.coyoteJumpTimer;
+        velocityXSmoothing = snapshot.velocityXSmoothing;
+        stateType          = snapshot.stateType;
     }
 
     [Serializable]

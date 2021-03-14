@@ -36,8 +36,8 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
         _gameSystems = gameSystems;
         _gameState   = gameState;
 
-        _gameSystems.onFixedStep += FixedStep;
-        _gameSystems.onStep += Step;
+        _gameSystems.onFixedStep += onFixedStep;
+        _gameSystems.onStep += onStep;
 
         _netSnapshotSystem = gameSystems.Get<NetSnapshotSystem>();
         _netSnapshotSystem.onInterpolationUpdate += onSnapshotInterpolationUpdate;
@@ -79,7 +79,7 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
         }
     }
     
-    public void FixedStep(float deltaTime)
+    private void onFixedStep(float deltaTime)
     {
         float time = Time.fixedTime;
         for(int i = 0; i < _platformViewList.Length; ++i)
@@ -94,10 +94,10 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
             }
             
             // Gross, figure out a better way to do this
-            // if(Singleton.instance.networkManager.isPureClient)
-            // {
-            //     continue;
-            // }
+            if(Singleton.instance.networkManager.isPureClient)
+            {
+                continue;
+            }
             
             float adjustedDeltaTime = deltaTime * state.timeScale;
             
@@ -117,7 +117,7 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
         }
     }
     
-    public void Step(float deltaTime)
+    private void onStep(float deltaTime)
     {
         if(_gameState == null)
         {
@@ -149,8 +149,8 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
 
     public void CleanUp()
     {
-        _gameSystems.onFixedStep -= FixedStep;
-        _gameSystems.onStep -= Step;
+        _gameSystems.onFixedStep -= onFixedStep;
+        _gameSystems.onStep -= onStep;
 
         if(_gameState != null)
         {

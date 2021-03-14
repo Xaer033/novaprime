@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using GhostGen;
 using Mirror;
-using Unity.Collections;
 using UnityEngine;
-
 public class NetworkSystem : NotificationDispatcher, IGameSystem
 {
     private const int PLAYER_STATE_BUFFER = 10;
@@ -271,9 +269,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
 
     private void onServerDisconnect(NetworkConnection conn)
     {
-        IAvatarController controller = null;// _serverConnToPlayerMap[conn.connectionId];
-        
-        if(_serverConnToPlayerMap.TryGetValue(conn.connectionId, out controller))
+        if(_serverConnToPlayerMap.TryGetValue(conn.connectionId, out IAvatarController controller))
         {
             NetPlayer netPlayer = _networkManager.GetServerPlayerFromConnId(conn.connectionId);
             
@@ -282,7 +278,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
             _serverPlayerControllerList?.Remove(controller);
 
             NetworkServer.UnSpawn(controller?.view?.gameObject);
-            _avatarSystem.UnSpawn(controller?.view?.gameObject); // Unspawn locally
+            _avatarSystem?.UnSpawn(controller?.view?.gameObject); // Unspawn locally
         }
     }
     
@@ -290,9 +286,13 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     {
         IAvatarController playerController = _serverConnToPlayerMap[conn.connectionId];
         PlayerState pState = (PlayerState)playerController.state;
-
+        
+        
         ServerPlayerInputBuffer playerInputBuffer = _serverPlayerInputBuffer[pState.playerSlot];
         playerInputBuffer?.Push(msg);
+
+        var inputGen = playerController.input as ServerPlayerInputGenerator;
+        inputGen?.AddInput(msg);
     }
     
     private void onServerMatchBegin()
@@ -341,11 +341,11 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         cam?.AddTarget(pView.cameraTargetGroup.transform);     
         
 
-        PlayerInput input = new PlayerInput(
+        PlayerInputGenerator inputGenerator = new PlayerInputGenerator(
                                     _networkManager.localPlayerSlot, 
                                     cam ? cam.gameCamera : null);
          
-        playerController.input        = input;
+        playerController.input        = inputGenerator;
         playerController.isSimulating = true;
         
     
@@ -355,7 +355,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
             conn        = netConnection,
             controller  = playerController,
             state       = playerController.state as PlayerState,
-            pInput      = input
+            pInput      = inputGenerator
         };
     }
 
@@ -385,6 +385,11 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
                        netPlayer.connectionId == _networkManager.localPlayer.connectionId;
                        
         setupPlayer(netPlayer, conn, controller, isOwner);
+
+        if (!isOwner)
+        {
+            controller.input = new ServerPlayerInputGenerator();
+        }
     }
     
     private void onClientUnitUnspawnHandler(GameObject obj)
@@ -420,19 +425,17 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
 
     private void clientPlayerReconsiliation(PlayerStateUpdate msg)
     {
-        NetChannelHeader header = msg.header;
-
+        NetChannelHeader  header     = msg.header;
         IAvatarController controller = _localPlayer.controller;
         PlayerState       state      = _localPlayer.state;
         
 
         Debug.LogFormat("state ack:{0}, header ack:{1}", state.ackSequence, header.ackSequence);
 
-        var snapshotTuple = msg.playerInputStateSnapshot;
-
-        uint frameIndex = msg.header.ackSequence % PlayerState.MAX_INPUTS;
-        var  newState   = snapshotTuple.snapshot;
-        var  oldState   = state.nonAckSnapshotBuffer[frameIndex];
+        var  snapshotTuple = msg.playerInputStateSnapshot;
+        uint frameIndex    = msg.header.ackSequence % PlayerState.MAX_INPUTS;
+        var  newState      = snapshotTuple.snapshot;
+        var  oldState      = state.nonAckSnapshotBuffer[frameIndex];
         
         Vector2 positionDelta = oldState.snapshot.position - newState.position;
         if (positionDelta.magnitude > 0.01f)
@@ -441,7 +444,6 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         
             uint start = frameIndex;
             uint end   = (NetworkManager.frameTick) % PlayerState.MAX_INPUTS;
-        
             uint index = start;
             
             while (index != end)
@@ -453,6 +455,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
                 controller.FixedStep(Time.fixedDeltaTime, frame.input);
                 
                 state.nonAckSnapshotBuffer[index].snapshot = state.Snapshot();
+                
                 index = (index + 1) % PlayerState.MAX_INPUTS;
             }
         }
@@ -479,66 +482,6 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         // }
 
         state.ackSequence = header.ackSequence;
-    }
-    
-    private void clientProcessNetSnapshot(NetFrameSnapshot snapshot)
-    {
-        //for(int i = 0; i < snapshot.playerStateList.Count; ++i)
-        {
-            // {
-            //     int oldStateIndex = -1;
-            //     for(int b = 0; b < state.nonAckInputBuffer.backIndex; ++b)
-            //     {
-            //         if(state.nonAckInputBuffer[b].tick == newState.ackTick)
-            //         {
-            //             oldStateIndex = b;
-            //             Debug.Log("Old state found: " + b);
-            //             break;
-            //         }
-            //     }
-            //     
-            //     // int oldStateIndex = (int)((newState.ackTick - 1) % PlayerState.MAX_INPUTS);
-            //     if(oldStateIndex < 0)
-            //     {
-            //         state.previousPosition = state.position;//c.view.viewRoot.position;
-            //         state.position = newState.position;
-            //         state.aimPosition = newState.aimPosition;
-            //     }
-            //     else
-            //     {
-            //         PlayerStateSnapshot oldState = state.nonAckStateBuffer[oldStateIndex];
-            //         Vector2 deltaPosition = oldState.position - newState.position;
-            //         Vector2 deltaAimPosition = oldState.aimPosition - newState.aimPosition;
-            //      
-            //         if(deltaPosition.sqrMagnitude > 0.1f)// || deltaAimPosition.sqrMagnitude > 0.01f)
-            //         {
-            //             //Miss Predictited / catch up 
-            //             state.SetFromSnapshot(oldState);
-            //
-            //             state.previousPosition = state.position;//c.view.viewRoot.position;
-            //             state.position = newState.position;
-            //             state.aimPosition = newState.aimPosition;
-            //             
-            //             c.view.transform.position = state.position;
-            //             c.view.viewRoot.position     = state.previousPosition;
-            //
-            //             int currentStateIndex = (int)((state.nonAckInputBuffer.backIndex + 1) % PlayerState.MAX_INPUTS);
-            //             int index = oldStateIndex;
-            //             
-            //             while(index != currentStateIndex)
-            //             {
-            //                 Debug.LogFormat("Index info: {0}, {1}, {2}", oldStateIndex, currentStateIndex, index);
-            //         
-            //                 PlayerInputTickPair simInput = state.nonAckInputBuffer[index];
-            //                 c.FixedStep(Time.fixedDeltaTime, simInput.input);
-            //                 state.nonAckStateBuffer[index] = state.Snapshot();
-            //         
-            //                 index = (int) ((index + 1) % PlayerState.MAX_INPUTS); 
-            //             } 
-            //         }
-            //     }
-            // }
-        }
     }
     
      private GameplayCamera _getOrCreatePlayerCamera()

@@ -29,7 +29,7 @@ public class NetUtility
     {
         return  new ProjectileState.NetSnapshot
         {
-            netId       = state.netId,
+            netId    = state.netId,
             position = state.position,
             angle    = state.angle
         };
@@ -37,10 +37,11 @@ public class NetUtility
     
     public static PlatformState.NetSnapshot Snapshot(PlatformState state)
     {
-        return  new PlatformState.NetSnapshot
+        return new PlatformState.NetSnapshot
         {
-            netId       = state.netId,
-            position = state.position
+            netId    = state.netId,
+            position = state.position,
+            velocity = state.velocity
         };
     } 
 }

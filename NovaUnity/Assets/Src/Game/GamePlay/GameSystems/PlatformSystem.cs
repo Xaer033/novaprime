@@ -209,10 +209,13 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
             var fromSnapshot = fromPlatformList[fromIndex];
             var toSnapshot   = toPlatformList[toIndex];
 
-            state.position   = Vector2.Lerp(fromSnapshot.position, toSnapshot.position, alpha);
-
+            state.prevPosition      = state.position;
+            state.position          = Vector2.Lerp(fromSnapshot.position, toSnapshot.position, alpha);
+            state.velocity          = Vector2.Lerp(fromSnapshot.velocity, toSnapshot.velocity, alpha);
             view.transform.position = state.position;
             view.viewRoot.position  = state.position;
+            
+            view._raycastController.UpdateRaycastOrigins();
         }
     }
 

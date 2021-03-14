@@ -4,7 +4,6 @@ public struct PlayerInputStateSnapshot
 {
     public PlayerStateSnapshot snapshot;
     public FrameInput          input;
-    public uint                frameIndex;
 }
 
 public struct PlayerStateSnapshot 

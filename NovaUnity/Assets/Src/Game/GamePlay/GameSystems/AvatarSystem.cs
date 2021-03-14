@@ -111,28 +111,23 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
                     if (controller.isSimulating)
                     {
                         newInputPair.tick       = NetworkManager.frameTick;
-                        newInputPair.frameIndex = bufferIndex;
 
 
                         var playerSnapshot = new PlayerInputStateSnapshot
                         {
                             snapshot   = pState.Snapshot(),
                             input      = newInputPair.input,
-                            frameIndex = bufferIndex
                         };
 
                         pState.nonAckSnapshotBuffer[bufferIndex] = playerSnapshot;
-                        pState.nonAckInputBuffer.PushBack(newInputPair);
+                        // pState.nonAckInputBuffer.PushBack(newInputPair);
                     }
 
-                    pState.frameIndex             = bufferIndex;
                     pState.latestInput.tick       = newInputPair.tick;
-                    pState.latestInput.frameIndex = bufferIndex;
                     
                     if (NetworkServer.active)
                     {
                         pState.ackSequence = newInputPair.tick;
-                        pState.frameIndex  = newInputPair.frameIndex;
                     }
                 }
                 
@@ -170,7 +165,6 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
                     {
                         input       = _lastInputMap[controller.uuid],
                         tick        = NetworkManager.frameTick,
-                        frameIndex  = NetworkManager.frameTick % PlayerState.MAX_INPUTS
                     };
                 }
             } 

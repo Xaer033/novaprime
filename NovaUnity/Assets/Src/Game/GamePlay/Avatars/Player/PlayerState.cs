@@ -4,19 +4,18 @@ using UnityEngine;
 public class PlayerState : AvatarState
 {
     public const int MAX_PLAYERS = 16;
-    public const int MAX_INPUTS = 32;
+    public const int MAX_INPUTS = 666;
     
     public PlayerSlot          playerSlot;
     public PlayerActivityType  stateType;
     public uint                sequence;
     public uint                ackSequence;
-    public uint                frameIndex; 
     public PlayerInputTickPair latestInput;
     public UnitStats           stats;
     public MachineGunState     machineGunState;
     
-    public RingBuffer<PlayerInputTickPair> nonAckInputBuffer    = new RingBuffer<PlayerInputTickPair>(MAX_INPUTS);
-    public RingBuffer<PlayerStateSnapshot> nonAckStateBuffer    = new RingBuffer<PlayerStateSnapshot>(MAX_INPUTS);
+    // public RingBuffer<PlayerInputTickPair> nonAckInputBuffer    = new RingBuffer<PlayerInputTickPair>(MAX_INPUTS);
+    // public RingBuffer<PlayerStateSnapshot> nonAckStateBuffer    = new RingBuffer<PlayerStateSnapshot>(MAX_INPUTS);
     public PlayerInputStateSnapshot[]      nonAckSnapshotBuffer = new PlayerInputStateSnapshot[MAX_INPUTS];
     
     

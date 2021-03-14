@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using GhostGen;
 using Mirror;
+using Unity.Collections;
 using UnityEngine;
 
 public class NetworkSystem : NotificationDispatcher, IGameSystem
@@ -28,9 +29,9 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     private GameplayCamera                _camera;
     private LocalPlayerState              _localPlayer;
     private uint                          _clientSendSequence = 0;
-    private uint                          _clientAckSequence  = 0;
+    // private uint                          _clientAckSequence  = 0;
     private List<PlayerInputTickPair>     _clientTempInputBuffer;
-    private RingBuffer<PlayerStateUpdate> _clientPlayerStateUpdateBuffer;
+    private List<PlayerStateUpdate>       _clientPlayerJitterBuffer;
     
     
     public int priority { get; set; }
@@ -49,8 +50,8 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         _serverPlayerInputBuffer       = new Dictionary<PlayerSlot, ServerPlayerInputBuffer>(PlayerState.MAX_PLAYERS); 
         
         _clientTempInputBuffer         = new List<PlayerInputTickPair>(PlayerState.MAX_INPUTS);
-        _clientPlayerStateUpdateBuffer = new RingBuffer<PlayerStateUpdate>(PLAYER_STATE_BUFFER);
-
+        _clientPlayerJitterBuffer      = new List<PlayerStateUpdate>(32);
+        
         for(int i = 0; i < _unitMap.unitList.Count; ++i)
         {
             UnitMap.Unit unit = _unitMap.unitList[i];
@@ -92,12 +93,11 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         _serverPlayerInputBuffer.Clear();
         
         _clientTempInputBuffer.Clear();
-        _clientPlayerStateUpdateBuffer = new RingBuffer<PlayerStateUpdate>(PLAYER_STATE_BUFFER);
-
+        
         NetworkManager.frameTick = 0;
 
-        _clientAckSequence  = 0;
-        _clientSendSequence = 0;
+        // _clientAckSequence  = 0;
+        // _clientSendSequence = 0;
         _serverSendSequence = 0;
     }
 
@@ -155,10 +155,21 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
 
     private void clientFixedStep(float fixedDeltaTime)
     {
-        if (!_clientPlayerStateUpdateBuffer.IsEmpty)
+        // if (!_clientPlayerStateUpdateBuffer.IsEmpty)
+        // {
+        //     var msg = _clientPlayerStateUpdateBuffer.PopBack();
+        //     clientPlayerReconsiliation(msg);            
+        // }
+        _clientPlayerJitterBuffer.Sort((a, b) =>
         {
-            var msg = _clientPlayerStateUpdateBuffer.PopBack();
-            clientPlayerReconsiliation(msg);            
+            return b.header.ackSequence.CompareTo(a.header.ackSequence);
+        });
+
+        while (_clientPlayerJitterBuffer.Count > 0)
+        {
+            var msg = _clientPlayerJitterBuffer[_clientPlayerJitterBuffer.Count-1];
+            clientPlayerReconsiliation(msg);
+            _clientPlayerJitterBuffer.RemoveAt(_clientPlayerJitterBuffer.Count - 1);
         }
         
         clientSendInput();
@@ -215,7 +226,6 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
             var playerSnapshot = new PlayerInputStateSnapshot
             {
                 input       = state.latestInput.input,
-                frameIndex  = state.latestInput.frameIndex,
                 snapshot    = state.Snapshot()
             };
             
@@ -400,12 +410,12 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         PlayerState state = _localPlayer.state;
 
         //Don't bother, already done
-        if (state.ackSequence > header.ackSequence)
-        {
-            return;
-        }
+        // if (state.ackSequence > header.ackSequence)
+        // {
+        //     return;
+        // }
         
-        _clientPlayerStateUpdateBuffer?.PushFront(msg);
+        _clientPlayerJitterBuffer?.Add(msg);
     }
 
     private void clientPlayerReconsiliation(PlayerStateUpdate msg)
@@ -420,14 +430,14 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
 
         var snapshotTuple = msg.playerInputStateSnapshot;
 
-        uint frameIndex = snapshotTuple.frameIndex;
+        uint frameIndex = msg.header.ackSequence % PlayerState.MAX_INPUTS;
         var  newState   = snapshotTuple.snapshot;
         var  oldState   = state.nonAckSnapshotBuffer[frameIndex];
         
         Vector2 positionDelta = oldState.snapshot.position - newState.position;
-        if (positionDelta.sqrMagnitude > 0.01f)
+        if (positionDelta.magnitude > 0.01f)
         {
-            state.SetFromSnapshot(snapshotTuple.snapshot);
+            state.SetFromSnapshot(newState);
         
             uint start = frameIndex;
             uint end   = (NetworkManager.frameTick) % PlayerState.MAX_INPUTS;
@@ -436,7 +446,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
             
             while (index != end)
             {
-                Debug.Log($"Start:{start} End:{end}, Index:{index}");
+                // Debug.Log($"Start:{start} End:{end}, Index:{index}");
                 
                 var frame = state.nonAckSnapshotBuffer[index];
                 

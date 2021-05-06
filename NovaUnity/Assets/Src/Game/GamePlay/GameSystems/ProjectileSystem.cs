@@ -1,22 +1,26 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using GhostGen;
+using Mirror;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class ProjectileSystem : NotificationDispatcher, IGameSystem
 {
     private GameSystems       _gameSystems;
     private GameState         _gameState;
     private GameplayResources _gameplayResources;
+    private GameObject        _bulletParent;
 
-    private GameObject _bulletParent;
+    private NetworkManager _networkManager;
     
-//    private ProjectileState[] _projectilePool;
-    private List<BulletView>     _projectileViewPool;
-    private List<ParticleSystem> _projectileImpactViewList;
-    private List<ParticleSystem> _bloodImpactViewList;
+    private Dictionary<Guid, BulletView> _netPrefabMap;
+    private List<BulletView>             _projectileViewPool;
+    private List<ParticleSystem>         _projectileImpactViewList;
+    private List<ParticleSystem>         _bloodImpactViewList;
     
-    private int _poolSize;
     private RaycastHit2D[] _raycastHitList;
+    private int _poolSize;
     
     
     public int priority { get; set; }
@@ -28,32 +32,46 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         _projectileViewPool       = new List<BulletView>(poolSize);
         _projectileImpactViewList = new List<ParticleSystem>(poolSize);
         _bloodImpactViewList      = new List<ParticleSystem>(40);
-        
+        _netPrefabMap             = new Dictionary<Guid, BulletView>();
         _raycastHitList           = new RaycastHit2D[3];
+        
+        _networkManager           = Singleton.instance.networkManager;
+     
+        BulletView projectileTemplate = _gameplayResources.bulletView;
+        Guid bulletGuid = projectileTemplate.netIdentity.assetId;
+        _netPrefabMap[bulletGuid] = projectileTemplate;
     }
     
-    public void Start(GameSystems gameSystems, GameState gameState)
+    public void Start(bool hasAuthority, GameSystems gameSystems, GameState gameState)
     {
         _gameSystems = gameSystems;
         _gameState   = gameState;
 
         _gameSystems.onStep      += onStep;
         _gameSystems.onFixedStep += onFixedStep;
+
+        ClientScene.RegisterPrefab( _gameplayResources.bulletView.gameObject, 
+                                    onClientProjectileSpawnHandler, 
+                                    onClientProjectileUnspawnHandler);
         
         _bulletParent = new GameObject("BulletParent");
-        BulletView projectileTemplate = _gameplayResources.bulletView;
+        BulletView     projectileTemplate   = _gameplayResources.bulletView;
         ParticleSystem bulletImpactTemplate = _gameplayResources.bulletImpactFX;
-        ParticleSystem bloodImpactTemplate = _gameplayResources.avatarImpactFX;
+        ParticleSystem bloodImpactTemplate  = _gameplayResources.avatarImpactFX;
         
         for (int i = 0; i < _poolSize; ++i)
         {
             ProjectileState state = new ProjectileState();
             _gameState.projectileStateList.Add(state);
-            
-            BulletView view = GameObject.Instantiate<BulletView>(projectileTemplate, _bulletParent.transform);
-            view.state = state;
-            view.Recycle();
-            _projectileViewPool.Add(view);
+
+            if (hasAuthority)
+            {
+                BulletView view = GameObject.Instantiate<BulletView>(projectileTemplate, _bulletParent.transform);
+                view.Recycle();
+                _projectileViewPool.Add(view);
+                
+                NetworkServer.Spawn(view.gameObject);
+            }
 
 
             ParticleSystem impactFX =
@@ -70,8 +88,14 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
 
     private void onStep(float deltaTime)
     {
-        float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
+        // Gross, figure out a better way to do this
+        if(Singleton.instance.networkManager.isPureClient)
+        {
+            return;
+        }
         
+        
+        float alpha = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
         for(int i = 0; i < _poolSize; ++i)
         {
             ProjectileState state = _gameState.projectileStateList[i];
@@ -79,13 +103,19 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         
             if(state.isActive)
             {
-                view.transform.position = Vector3.Lerp(state.prevPosition, state.position, alpha);
+                view.transform.position = Vector2.Lerp(state.prevPosition, state.position, alpha);
             }
         }
     }
     
     private void onFixedStep(float deltaTime)
     {
+        // Gross, figure out a better way to do this
+        if(Singleton.instance.networkManager.isPureClient)
+        {
+            return;
+        }
+        
         if (_gameState.projectileStateList == null || _projectileViewPool == null)
         {
             return;
@@ -106,8 +136,8 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
                 float   scaledDeltaTime = state.timeScale * deltaTime;
                 
                 float   lookAhead       = state.velocity.magnitude * scaledDeltaTime;
-                Vector3 bulletDir       = state.velocity.normalized;
-                Vector3 rayStart        = state.position;
+                Vector2 bulletDir       = state.velocity.normalized;
+                Vector2 rayStart        = state.position;
                 
                 Debug.DrawRay(rayStart, bulletDir * lookAhead, Color.green);
                 
@@ -136,11 +166,11 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
                         }
 
                         float damageAmount = state.damage * damageModAmount;
-                        
-                        AttackData damageData = new AttackData(state.ownerUUID, 
-                                                               view.gameObject.layer, 
-                                                               state.data.damageType, 
-                                                               damageAmount, 
+
+                        AttackData damageData = new AttackData(state.ownerUUID,
+                                                               view.gameObject.layer,
+                                                               state.data.damageType,
+                                                               damageAmount,
                                                                state.velocity.normalized,
                                                                hit);
                         
@@ -184,7 +214,14 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
     {
         for (int i = 0; i < _projectileViewPool.Count; ++i)
         {
-            GameObject.Destroy(_projectileViewPool[i].gameObject);
+            if (NetworkServer.active)
+            {
+                NetworkServer.Destroy(_projectileViewPool[i].gameObject);                
+            }
+            else
+            {
+                GameObject.Destroy(_projectileViewPool[i].gameObject);
+            }
         }
         
         for (int i = 0; i < _projectileImpactViewList.Count; ++i)
@@ -204,6 +241,8 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         
         _gameSystems.onStep      -= onStep;
         _gameSystems.onFixedStep -= onFixedStep;
+        
+        ClientScene.UnregisterPrefab( _gameplayResources.bulletView.gameObject);
     }
 
     public ProjectileState Spawn(string ownerUUID, ProjectileData data, Vector3 position, Vector3 direction)
@@ -249,7 +288,34 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         return b.isPlaying.CompareTo(a.isPlaying);
     }
     
-
+    private GameObject onClientProjectileSpawnHandler(SpawnMessage msg)
+    {
+        GameObject result = null;
+        
+        if (_netPrefabMap.ContainsKey(msg.assetId))
+        {
+            for (int i = 0; i < _poolSize; ++i)
+            {
+                ProjectileState state = _gameState.projectileStateList[i];
+                BulletView      view  = _projectileViewPool[i];
+                
+                if (state.netId == 0)
+                {
+                    state.netId    = msg.netId;
+                    state.isActive = false;
+                    result         = view.gameObject;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+    
+    private void onClientProjectileUnspawnHandler(GameObject obj)
+    {
+        
+    }
+    
     private ParticleSystem _getAvailableImpact(List<ParticleSystem> impactList)
     {
         for(int i = 0; i < impactList.Count; ++i)

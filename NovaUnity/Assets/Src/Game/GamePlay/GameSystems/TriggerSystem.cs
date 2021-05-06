@@ -19,7 +19,7 @@ public class TriggerSystem : NotificationDispatcher, IGameSystem
         _triggerSet = new HashSet<Trigger>();
     }
     
-    public void Start(GameSystems gameSystems, GameState gameState)
+    public void Start(bool hasAuthority, GameSystems gameSystems, GameState gameState)
     {
         addSceneTriggers();
 

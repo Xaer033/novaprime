@@ -40,7 +40,7 @@ public class NetSnapshotSystem : NotificationDispatcher, IGameSystem
     }
 
     // Start is called before the first frame update
-    public void Start(GameSystems gameSystems, GameState gameState)
+    public void Start(bool hasAuthority, GameSystems gameSystems, GameState gameState)
     {
         _gameSystems = gameSystems;
         _gameState   = gameState;

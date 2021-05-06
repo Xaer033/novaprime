@@ -60,7 +60,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         _playerSpawnPointList.AddRange(spawnList);
     }
     
-    public void Start(GameSystems gameSystems, GameState gameState)
+    public void Start(bool hasAuthority, GameSystems gameSystems, GameState gameState)
     {
         _gameSystems = gameSystems;
         _gameState   = gameState;
@@ -70,15 +70,15 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         
         _netSnapshotSystem.onInterpolationUpdate += onNetInterplationUpdate;
         
-        _gameSystems.onStep      += Step;
-        _gameSystems.onFixedStep += FixedStep;
+        _gameSystems.onStep      += onStep;
+        _gameSystems.onFixedStep += onFixedStep;
         _gameSystems.AddListener(GamePlayEventType.SPAWN_POINT_TRIGGERED, onSpawnPointTriggered);
         
         _gameState.playerStateList.Clear();
         _gameState.enemyStateList.Clear();
     }
 
-    public void FixedStep(float fixedDeltaTime)
+    private void onFixedStep(float fixedDeltaTime)
     {
         uint tick = NetworkManager.frameTick;
         
@@ -100,13 +100,6 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
                 var pState = (PlayerState)controller.state;
                 if(pState != null) // Check again to make sure only the client does this part
                 {
-                    
-                    // PlayerInputTickPair inputPair;
-                    // if (_networkSystem.GetInputForTick(pState.playerSlot, out inputPair))
-                    // {
-                    //     frameInput = inputPair.input;
-                    // }
-                    
                     if (controller.isSimulating)
                     {
                         var playerSnapshot = new PlayerInputStateSnapshot
@@ -147,7 +140,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         // }
     }
 
-    public void Step(float deltaTime)
+    private void onStep(float deltaTime)
     {
         for (int i = 0; i < _avatarControllerList.Count; ++i)
         {
@@ -197,8 +190,8 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         _gameState.playerStateList.Clear();
         _gameState.enemyStateList.Clear();
         
-        _gameSystems.onStep      -= Step;
-        _gameSystems.onFixedStep -= FixedStep;
+        _gameSystems.onStep      -= onStep;
+        _gameSystems.onFixedStep -= onFixedStep;
         _gameSystems.RemoveListener(GamePlayEventType.SPAWN_POINT_TRIGGERED, onSpawnPointTriggered);
 
         // PhotonNetwork.PrefabPool = _oldPool;

@@ -40,15 +40,15 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         _networkManager = Singleton.instance.networkManager;
         
         _unitMap = unitMap;
-        _netPrefabMap = new Dictionary<Guid, UnitMap.Unit>();
 
-        _serverConnToPlayerMap         = new Dictionary<int, IAvatarController>();
-        _serverPlayerControllerList    = new List<IAvatarController>();
-        _serverPlayerStateList         = new List<NetPlayerState>(PlayerState.MAX_PLAYERS);
-        _serverPlayerInputBuffer       = new Dictionary<PlayerSlot, ServerPlayerInputBuffer>(PlayerState.MAX_PLAYERS); 
+        _netPrefabMap               = new Dictionary<Guid, UnitMap.Unit>();
+        _serverConnToPlayerMap      = new Dictionary<int, IAvatarController>();
+        _serverPlayerControllerList = new List<IAvatarController>();
+        _serverPlayerStateList      = new List<NetPlayerState>(PlayerState.MAX_PLAYERS);
+        _serverPlayerInputBuffer    = new Dictionary<PlayerSlot, ServerPlayerInputBuffer>(PlayerState.MAX_PLAYERS); 
         
-        _clientTempInputBuffer         = new List<PlayerInputTickPair>(PlayerState.MAX_INPUTS);
-        _clientPlayerJitterBuffer      = new List<PlayerStateUpdate>(32);
+        _clientTempInputBuffer    = new List<PlayerInputTickPair>(PlayerState.MAX_INPUTS);
+        _clientPlayerJitterBuffer = new List<PlayerStateUpdate>(32);
         
         for(int i = 0; i < _unitMap.unitList.Count; ++i)
         {
@@ -59,7 +59,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         }
     }
 
-    public void Start(GameSystems gameSystems, GameState gameState)
+    public void Start(bool hasAuthority, GameSystems gameSystems, GameState gameState)
     {
         // Application.targetFrameRate = 60; // TODO: Definitely temporary! 
         
@@ -443,7 +443,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
             state.SetFromSnapshot(newState);
         
             uint start = frameIndex;
-            uint end   = (NetworkManager.frameTick) % PlayerState.MAX_INPUTS;
+            uint end   = (NetworkManager.frameTick) % PlayerState.MAX_INPUTS;   
             uint index = start;
             
             while (index != end)

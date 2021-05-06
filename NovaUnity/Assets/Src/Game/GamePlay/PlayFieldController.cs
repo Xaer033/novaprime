@@ -7,22 +7,22 @@ using UnityEngine.InputSystem;
 public class PlayFieldController : NotificationDispatcher
 {
     private GameplayResources _gameplayResources;
-    private GameplayCamera _gameplayCamera;
-    private GameState _gameState;
-    private GameSystems _gameSystems;
-    private PlayerActions _pAction;
+    private GameplayCamera    _gameplayCamera;
+    private GameState         _gameState;
+    private GameSystems       _gameSystems;
+    private PlayerActions     _pAction;
 
-    private IInputGenerator _playerInput;
-    private IInputGenerator _gruntInput;
+    private IInputGenerator  _playerInput;
+    private IInputGenerator  _gruntInput;
     private PlayerController _playerController;
-    private GruntController _gruntController;
+    private GruntController  _gruntController;
 
     private GameplayCamera _cam;
 
     private List<NetPlayer> _playerList;
     private bool _isServer;
     
-    public PlayFieldController( GameplayResources gameplayResources)
+    public PlayFieldController(GameplayResources gameplayResources)
     {
         _gameplayResources = gameplayResources;
     }

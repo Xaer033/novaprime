@@ -30,7 +30,7 @@ public class HealthUISystem : NotificationDispatcher, IGameSystem
         _gameplayResources = gameplayResources;
     }
     
-    public void Start(GameSystems gameSystems, GameState gameState)
+    public void Start(bool hasAuthority, GameSystems gameSystems, GameState gameState)
     {
         _gameSystems = gameSystems;
         _gameSystems.onLateStep += LateStep;

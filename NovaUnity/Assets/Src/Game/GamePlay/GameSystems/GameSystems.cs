@@ -61,7 +61,7 @@ public class GameSystems : NotificationDispatcher
     {
         for(int i = 0; i < _sortedSystemList.Count; ++i)
         {
-            _sortedSystemList[i]?.Start(this, _gameState);
+            _sortedSystemList[i]?.Start(isAuthoritive, this, _gameState);
         }
     }
     

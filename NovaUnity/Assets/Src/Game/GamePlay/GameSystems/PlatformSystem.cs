@@ -8,10 +8,10 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
 {
     private const int BAD_JUJU = 666666666;
     
-    private       TimePlatformController    _timePlatformController;
-    private       TriggerPlatformController _triggerPlatformController;
+    private TimePlatformController    _timePlatformController;
+    private TriggerPlatformController _triggerPlatformController;
     
-    private PlatformView[] _platformViewList;
+    private PlatformView[]  _platformViewList;
 
     private GameSystems       _gameSystems;
     private GameState         _gameState;
@@ -31,13 +31,13 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
 
 
     // Start is called before the first frame update
-    public void Start(GameSystems gameSystems, GameState gameState)
+    public void Start(bool hasAuthority, GameSystems gameSystems, GameState gameState)
     {
         _gameSystems = gameSystems;
         _gameState   = gameState;
 
         _gameSystems.onFixedStep += onFixedStep;
-        _gameSystems.onStep += onStep;
+        _gameSystems.onStep      += onStep;
 
         _netSnapshotSystem = gameSystems.Get<NetSnapshotSystem>();
         _netSnapshotSystem.onInterpolationUpdate += onSnapshotInterpolationUpdate;

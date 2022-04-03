@@ -64,7 +64,6 @@ public class PlayerInputGenerator : IInputGenerator
             _lastAimDirection = direction;
         }
         
-        
         FrameInput input = new FrameInput();
         input.horizontalMovement = horizontalMovement;
         input.verticalMovement = verticalMovement;
@@ -82,6 +81,10 @@ public class PlayerInputGenerator : IInputGenerator
 
         input.useCusorPosition =  !_useGamePad;
         input.cursorDirection = _lastAimDirection;
+        
+                
+        // Debug.Log($"Input: {input}");
+        
         return input;
     }
 

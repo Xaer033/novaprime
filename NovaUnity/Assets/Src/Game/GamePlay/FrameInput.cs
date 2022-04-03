@@ -20,4 +20,20 @@ public struct FrameInput
     
     public Vector2 cursorPosition;
     public Vector2 cursorDirection;
+
+    public override string ToString()
+    {
+        return $"HorizontalMovement:{horizontalMovement}|" +
+               $"VerticalMovement:{verticalMovement}|" +
+               $"downPressed:{downPressed}|" +
+               $"downReleased:{downReleased}|" +
+               $"jumpPressed:{jumpPressed}|" +
+               $"jumpReleased:{jumpReleased}|" +
+               $"interactPressed:{interactPressed}|" +
+               $"primaryFire:{primaryFire}|" +
+               $"secondaryFire:{secondaryFire}|" +
+               $"useCusorPosition:{useCusorPosition}|" +
+               $"cursorPosition:{cursorPosition}|" +
+               $"cursorDirection:{cursorDirection}";
+    }
 }

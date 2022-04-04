@@ -1,10 +1,6 @@
-﻿using DG.Tweening;
-using GhostGen;
-using System.Collections;
-using Mirror;
+﻿using GhostGen;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
 public class SingleplayerGameplayState : IGameState
 {
     private IGameModeController _gameModeController;
@@ -52,8 +48,8 @@ public class SingleplayerGameplayState : IGameState
 
         if(NetworkClient.active)
         {
-            ClientScene.Ready(NetworkClient.connection);
-            NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
+            // ClientScene.Ready(NetworkClient.connection);
+            // NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
         }
     }
 

@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using GhostGen;
-using Mirror;
 using UnityEngine;
-
 public class NetSnapshotSystem : NotificationDispatcher, IGameSystem
 {
     const int   SNAPSHOT_RATE         = 60;
@@ -100,7 +98,7 @@ public class NetSnapshotSystem : NotificationDispatcher, IGameSystem
         {
             sequence     = _serverSendSequence,
             frameTick    = NetworkManager.frameTick,
-            sendTime     = TimeUtil.Now()
+            sendTime     = TimeUtil.TimeSinceGameStart()
         };
 
         NetFrameSnapshot snapshot = new NetFrameSnapshot
@@ -109,7 +107,7 @@ public class NetSnapshotSystem : NotificationDispatcher, IGameSystem
             snapshot = NetUtility.Snapshot(_gameState)
         };
 
-        NetworkServer.SendToAll(snapshot, Channels.DefaultUnreliable);
+        // NetworkServer.SendToAll(snapshot, Channels.DefaultUnreliable);
         _serverSendSequence++;
     }
 
@@ -130,7 +128,7 @@ public class NetSnapshotSystem : NotificationDispatcher, IGameSystem
             return;
         }
         
-        double now      = TimeUtil.Now();
+        double now      = TimeUtil.TimeSinceGameStart();
 
         // this is our first snapshot
         if(_clientSnapshotList.Count == 0)

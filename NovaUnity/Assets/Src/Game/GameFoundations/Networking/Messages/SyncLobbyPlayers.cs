@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using Mirror;
-
-public struct SyncLobbyPlayers : NetworkMessage
+﻿using System.Collections.Generic;
+public struct SyncLobbyPlayers
 {
-    // public Dictionary<int, NetPlayer> playerMap;
-
     public NetPlayer[] playerList;
 
     public Dictionary<PlayerSlot, NetPlayer> GetPlayerMap()

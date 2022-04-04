@@ -1,8 +1,5 @@
 ﻿using GhostGen;
-using Mirror;
-using UnityEngine;
 using UnityEngine.SceneManagement;
-
 public class MainMenuState : IGameState
 {
 	private GameStateMachine _stateMachine;

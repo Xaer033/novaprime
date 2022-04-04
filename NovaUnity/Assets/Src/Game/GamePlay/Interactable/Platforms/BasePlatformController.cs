@@ -1,6 +1,4 @@
-﻿using Mirror;
-using UnityEngine;
-
+﻿using UnityEngine;
 public class BasePlatformController
 {
     public void UpdatePlatform(ref PlatformState state, PlatformView view, float adjustedDeltaTime, float time)

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using GhostGen;
-using Mirror;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -38,7 +37,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         _networkManager           = Singleton.instance.networkManager;
      
         BulletView projectileTemplate = _gameplayResources.bulletView;
-        Guid bulletGuid = projectileTemplate.netIdentity.assetId;
+        Guid bulletGuid = Guid.NewGuid();// projectileTemplate.netIdentity.assetId;
         _netPrefabMap[bulletGuid] = projectileTemplate;
     }
     
@@ -50,9 +49,9 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         _gameSystems.onStep      += onStep;
         _gameSystems.onFixedStep += onFixedStep;
 
-        ClientScene.RegisterPrefab( _gameplayResources.bulletView.gameObject, 
-                                    onClientProjectileSpawnHandler, 
-                                    onClientProjectileUnspawnHandler);
+        // ClientScene.RegisterPrefab( _gameplayResources.bulletView.gameObject, 
+        //                             onClientProjectileSpawnHandler, 
+        //                             onClientProjectileUnspawnHandler);
         
         _bulletParent = new GameObject("BulletParent");
         BulletView     projectileTemplate   = _gameplayResources.bulletView;
@@ -70,7 +69,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
                 view.Recycle();
                 _projectileViewPool.Add(view);
                 
-                NetworkServer.Spawn(view.gameObject);
+                // NetworkServer.Spawn(view.gameObject);
             }
 
 
@@ -124,7 +123,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         _projectileImpactViewList.Sort(_impactFXSort);
         _bloodImpactViewList.Sort(_impactFXSort);
 
-        double now = TimeUtil.Now();
+        double now = TimeUtil.TimeSinceGameStart();
         
         for (int i = 0; i < _poolSize; ++i)
         {
@@ -216,7 +215,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         {
             if (NetworkServer.active)
             {
-                NetworkServer.Destroy(_projectileViewPool[i].gameObject);                
+                // NetworkServer.Destroy(_projectileViewPool[i].gameObject);                
             }
             else
             {
@@ -242,12 +241,12 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         _gameSystems.onStep      -= onStep;
         _gameSystems.onFixedStep -= onFixedStep;
         
-        ClientScene.UnregisterPrefab( _gameplayResources.bulletView.gameObject);
+        // ClientScene.UnregisterPrefab( _gameplayResources.bulletView.gameObject);
     }
 
     public ProjectileState Spawn(string ownerUUID, ProjectileData data, Vector3 position, Vector3 direction)
     {
-        double now = TimeUtil.Now();
+        double now = TimeUtil.TimeSinceGameStart();
         
         for (int i = 0; i < _poolSize; ++i)
         {
@@ -288,28 +287,28 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         return b.isPlaying.CompareTo(a.isPlaying);
     }
     
-    private GameObject onClientProjectileSpawnHandler(SpawnMessage msg)
-    {
-        GameObject result = null;
-        
-        if (_netPrefabMap.ContainsKey(msg.assetId))
-        {
-            for (int i = 0; i < _poolSize; ++i)
-            {
-                ProjectileState state = _gameState.projectileStateList[i];
-                BulletView      view  = _projectileViewPool[i];
-                
-                if (state.netId == 0)
-                {
-                    state.netId    = msg.netId;
-                    state.isActive = false;
-                    result         = view.gameObject;
-                    break;
-                }
-            }
-        }
-        return result;
-    }
+    // private GameObject onClientProjectileSpawnHandler(SpawnMessage msg)
+    // {
+    //     GameObject result = null;
+    //     
+    //     if (_netPrefabMap.ContainsKey(msg.assetId))
+    //     {
+    //         for (int i = 0; i < _poolSize; ++i)
+    //         {
+    //             ProjectileState state = _gameState.projectileStateList[i];
+    //             BulletView      view  = _projectileViewPool[i];
+    //             
+    //             if (state.netId == 0)
+    //             {
+    //                 state.netId    = msg.netId;
+    //                 state.isActive = false;
+    //                 result         = view.gameObject;
+    //                 break;
+    //             }
+    //         }
+    //     }
+    //     return result;
+    // }
     
     private void onClientProjectileUnspawnHandler(GameObject obj)
     {

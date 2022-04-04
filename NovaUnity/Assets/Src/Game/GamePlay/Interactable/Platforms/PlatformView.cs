@@ -1,9 +1,7 @@
 using System;
-using Mirror;
 using UnityEngine;
 using UnityEngine.Serialization;
-
-public class PlatformView : NetworkBehaviour, ITimeWarpTarget
+public class PlatformView : MonoBehaviour, ITimeWarpTarget
 {
     public PlatformData data;
     public PlatformType platformType;
@@ -47,11 +45,11 @@ public class PlatformView : NetworkBehaviour, ITimeWarpTarget
     {
         state.timeScale = 1.0f;
     }
-
-    public override void OnStartClient()
-    {
-        onClientStart?.Invoke(this);
-    }
+    //
+    // public override void OnStartClient()
+    // {
+    //     onClientStart?.Invoke(this);
+    // }
 
     private void OnDrawGizmos()
     {

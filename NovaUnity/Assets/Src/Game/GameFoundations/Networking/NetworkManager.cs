@@ -1,14 +1,19 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Mirror;
 using UnityEngine;
 using UnityEngine.Networking;
 
-
-public class NetworkManager : Mirror.NetworkManager
+public class NetworkManager : MonoBehaviour
 {
+    public enum SessionState
+    {
+        NONE = 0,
+        IN_LOBBY,
+        IN_GAME
+    }
+
+#region Consts
     public const string kGameVersion = "6.6.6";
 
     // public const int kMaxPlayers = 4;
@@ -22,34 +27,37 @@ public class NetworkManager : Mirror.NetworkManager
     private const string kServerPort = "serverPort";    
     private const string kServerPlayerCount = "serverPlayers";
     private const string kServerPlayerCapacity = "serverCapacity";
+#endregion
 
-    private Action _onSingleplayerCallback;
-
-
+#region Editor Properties
     public string masterServerLocation = "http://novamaster.net";
     public int masterServerPort = 11667;
-
     public GameObject syncStatePrefab;
-    
-    
-    // public event Action<string> onError;
+#endregion
+
+#region Private Vars
+    private Dictionary<int, NetPlayer> _serverNetPlayerMap = new Dictionary<int, NetPlayer>();
+    // Can't use ConnectionID's for the keys on the client because the connection id's won't match between server and client
+    private Dictionary<PlayerSlot, NetPlayer> _clientNetPlayerMap = new Dictionary<PlayerSlot, NetPlayer>();
+    private List<PlayerSlot> _serverAvailablePlayerSlots = new List<PlayerSlot>();
+    private Action _onSingleplayerCallback;
+#endregion
+
+#region Public properties
     public event Action onServerStarted;
     public event Action onServerStopped;
     public event Action onServerMatchBegin;
     public event Action<NetworkConnection> onServerConnect;
     public event Action<NetworkConnection> onServerDisconnect;
-    // public event Action<NetworkConnection, int> onServerError;
     public event Action<NetworkConnection, ConfirmReadyUp> onServerConfirmReadyUp;
     public event Action<NetworkConnection, SendPlayerInput> onServerSendPlayerInput;
     public event Action<NetworkConnection> onServerMatchLoadComplete;
     
     public event Action onClientStarted;
     public event Action onClientStopped;
-    
     public event Action<NetworkConnection> onClientConnect;
     public event Action<NetworkConnection> onClientDisconnect;
     public event Action<NetworkConnection> onClientLocalDisconnect;
-    // public event Action<NetworkConnection, int> onClientError;
     public event Action<NetworkConnection, SyncLobbyPlayers> onClientSyncLobbyPlayers;
     public event Action<NetworkConnection, ConfirmReadyUp> onClientConfirmReadyUp;
     public event Action<NetworkConnection, StartMatchLoad> onClientStartMatchLoad;
@@ -57,61 +65,14 @@ public class NetworkManager : Mirror.NetworkManager
     public event Action<NetworkConnection, NetFrameSnapshot> onClientFrameSnapshot;
     public event Action<NetworkConnection, CurrentSessionUpdate> onClientCurrentSession;
     public event Action<NetworkConnection, PlayerStateUpdate> onClientPlayerStateUpdate;
-    public event SpawnHandlerDelegate onClientSpawnHandler;
-    public event UnSpawnDelegate onClientUnspawnHandler;
-
-    public enum SessionState
-    {
-        NONE = 0,
-        IN_LOBBY,
-        IN_GAME
-    }
-    
-    public ServerListEntry serverEntry { get; set; }
-    
+    // public event SpawnHandlerDelegate onClientSpawnHandler;
+    // public event UnSpawnDelegate onClientUnspawnHandler;
+        
     public SessionState sessionState { get; private set; }
-
     public SyncStore syncStore { get; private set; }
-    
-    public static uint frameTick { get; set; }
-    
-    public override void OnDestroy()
-    {
-        onServerStarted           = null;
-        onServerStopped           = null;
-        onServerConnect           = null;
-        onServerDisconnect        = null;
-        onServerConfirmReadyUp    = null;
-        onServerMatchBegin        = null;
-        onServerSendPlayerInput   = null;
-        onServerMatchLoadComplete = null;
-        
-        
-        onClientStarted           = null;
-        onClientStopped           = null;
-        onClientConnect           = null;
-        onClientDisconnect        = null;
-        onClientLocalDisconnect   = null;
-        onClientSyncLobbyPlayers  = null;
-        onClientConfirmReadyUp    = null;
-        onClientStartMatchLoad    = null;
-        onClientMatchBegin        = null;
-        onClientFrameSnapshot     = null;
-        onClientCurrentSession    = null;
-        onClientPlayerStateUpdate = null;
-
-        base.OnDestroy();
-    }
-
-    private Dictionary<int, NetPlayer> _serverNetPlayerMap = new Dictionary<int, NetPlayer>();
-    
-    // Can't use ConnectionID's for the keys on the client because the connection id's won't match between server and client
-    private Dictionary<PlayerSlot, NetPlayer> _clientNetPlayerMap = new Dictionary<PlayerSlot, NetPlayer>();
-
-    private List<PlayerSlot> _serverAvailablePlayerSlots = new List<PlayerSlot>();
-
-
     public PlayerSlot localPlayerSlot { get; private set; }
+    public ServerListEntry serverEntry { get; set; }
+    public static uint frameTick { get; set; }
 
     public bool isPureServer
     {
@@ -136,7 +97,19 @@ public class NetworkManager : Mirror.NetworkManager
             return NetworkServer.active && NetworkClient.active;
         }
     }
+    
+    public bool isConnected
+    {
+        get { return NetworkClient.active || NetworkServer.active; }
+    }
+    
+    // public NetworkConnection localPlayer
+    // {
+    //     get { return NetworkClient.connection != null ? NetworkClient.connection : null; }
+    // }
+#endregion
 
+#region Public API
     public Dictionary<PlayerSlot, NetPlayer> GetClientPlayerMap()
     {
         return _clientNetPlayerMap;
@@ -163,83 +136,541 @@ public class NetworkManager : Mirror.NetworkManager
     {
         _onSingleplayerCallback = onSingleplayerCreated;
         
-        onClientCurrentSession += onSingleplayerCurrentSession;
-        // onServerMatchBegin += onSingleplayerMatchBegin;
-        
-	    NetworkServer.dontListen = true;
-	    StartHost();
+     //    onClientCurrentSession += onSingleplayerCurrentSession;
+     //    
+	    // NetworkServer.dontListen = true;
+	    // StartHost();
     }
 
-    private void onSingleplayerCurrentSession(NetworkConnection conn, CurrentSessionUpdate msg)
-    {   
-        onClientCurrentSession -= onSingleplayerCurrentSession;
-        onServerMatchBegin += onSingleplayerMatchBegin;
+    public void StartServer(int port)
+    {
         
-	    // ClientScene.Ready(NetworkClient.connection);
-        NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
+    }
+
+    public void StartHost(int port)
+    {
+        
     }
     
-    private void onSingleplayerMatchBegin()
+    public void StartClient(Uri uri)
     {
-        onServerMatchBegin -= onSingleplayerMatchBegin;
         
-        _onSingleplayerCallback?.Invoke();
-        _onSingleplayerCallback = null;
+    }
+
+        // public void ServerBeginMatch()
+    // {
+    //     // StartMatchLoad startMatchMessage = new StartMatchLoad();
+    //     // NetworkServer.SendToAll(startMatchMessage, Channels.DefaultReliable); 
+    // }
+    
+    public void FetchMasterServerList(Action<bool, List<ServerListEntry>> onComplete)
+    {
+        StartCoroutine(enumFetchMasterServerList(onComplete));
     }
     
-    private void registerNetworkPrefabs()
+    public void Disconnect()
     {
-        UnitMap unitMap = Singleton.instance.gameplayResources.unitMap;
-        for(int i = 0; i < unitMap.unitList.Count; ++i)
+        _serverNetPlayerMap.Clear();
+        _clientNetPlayerMap.Clear();
+    }
+    
+    public void AddServerToMasterList(ServerListEntry entry, Action<long> onComplete)
+    {
+        if(entry != null)
         {
-            UnitMap.Unit unit = unitMap.unitList[i];
-            Debug.Log("Unit: " + unit.id);
-            
-            ClientScene.RegisterPrefab(
-                unit.view.gameObject, 
-                OnClientSpawnHandler,
-                OnClientUnspawnHandler);
+            StartCoroutine(enumAddServerToMasterList(entry, onComplete));            
+        }
+        else
+        {
+            onComplete?.Invoke(0);
+        }
+    }
+    
+        
+    public void RemoveServerToMasterList(ServerListEntry entry, Action<long> onComplete)
+    {
+        if(entry != null)
+        {
+            StartCoroutine(enumRemoveServerToMasterList(entry, onComplete));
+        }
+        else
+        {
+            onComplete?.Invoke(0);
+        }
+    }
+#endregion
+
+#region Unity Callbacks
+    public virtual void OnDestroy()
+    {
+        onServerStarted           = null;
+        onServerStopped           = null;
+        onServerConnect           = null;
+        onServerDisconnect        = null;
+        onServerConfirmReadyUp    = null;
+        onServerMatchBegin        = null;
+        onServerSendPlayerInput   = null;
+        onServerMatchLoadComplete = null;
+        
+        
+        onClientStarted           = null;
+        onClientStopped           = null;
+        onClientConnect           = null;
+        onClientDisconnect        = null;
+        onClientLocalDisconnect   = null;
+        onClientSyncLobbyPlayers  = null;
+        onClientConfirmReadyUp    = null;
+        onClientStartMatchLoad    = null;
+        onClientMatchBegin        = null;
+        onClientFrameSnapshot     = null;
+        onClientCurrentSession    = null;
+        onClientPlayerStateUpdate = null;
+    }
+#endregion
+
+#region Callbacks
+// private void onSingleplayerCurrentSession(NetworkConnection conn, CurrentSessionUpdate msg)
+    // {   
+    //     onClientCurrentSession -= onSingleplayerCurrentSession;
+    //     onServerMatchBegin += onSingleplayerMatchBegin;
+    //     
+    //     NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
+    // }
+    
+    // private void onSingleplayerMatchBegin()
+    // {
+    //     onServerMatchBegin -= onSingleplayerMatchBegin;
+    //     
+    //     _onSingleplayerCallback?.Invoke();
+    //     _onSingleplayerCallback = null;
+    // }
+    
+        
+    public void OnStopServer()
+    {
+        if(syncStore != null)
+        {
+            // NetworkServer.Destroy(syncStore.gameObject);
         }
         
-        ClientScene.RegisterPrefab(
-                syncStatePrefab, 
-                onClientSyncStoreCreated, 
-                onClientSyncStoreDestory);
-    }
-
-    private void unregisterClientPrefabs()
-    {
-        UnitMap unitMap = Singleton.instance.gameplayResources.unitMap;
-        for(int i = 0; i < unitMap.unitList.Count; ++i)
-        {
-            UnitMap.Unit unit = unitMap.unitList[i];
-            Debug.Log("Unit: " + unit.id);
-            
-            ClientScene.UnregisterPrefab(
-                unit.view.gameObject);
-        }
-        
-        ClientScene.UnregisterPrefab(
-                syncStatePrefab);
-    }
-
-    private GameObject onClientSyncStoreCreated(SpawnMessage msg)
-    {
-        GameObject syncStoreInstance = GameObject.Instantiate(syncStatePrefab, transform);
-        syncStore = syncStoreInstance.GetComponent<SyncStore>();
-        return syncStoreInstance;
+        RemoveServerToMasterList(serverEntry, null);
+        // onServerStopped?.Invoke();    
     }
     
-    private void onClientSyncStoreDestory(GameObject obj)
+    public void OnStartClient()
     {
-        GameObject.Destroy(obj);
+        // Debug.Log("OnStartClient");
+        //
+        // registerNetworkPrefabs();
+        //
+        // _clientNetPlayerMap.Clear();
+        //
+        // NetworkClient.RegisterHandler<SyncLobbyPlayers>(OnClientSyncLobbyPlayers, false);
+        // NetworkClient.RegisterHandler<ConfirmReadyUp>(OnClientConfirmReadyUp, false);
+        // NetworkClient.RegisterHandler<AssignPlayerSlot>(OnClientAssignPlayerSlot, false);
+        // NetworkClient.RegisterHandler<StartMatchLoad>(OnClientStartMatchLoad, false);
+        // NetworkClient.RegisterHandler<MatchBegin>(OnClientMatchBegin, false);
+        // NetworkClient.RegisterHandler<NetFrameSnapshot>(OnClientFrameSnapshot, false);
+        // NetworkClient.RegisterHandler<CurrentSessionUpdate>(OnCurrentSessionUpdate, false);
+        // NetworkClient.RegisterHandler<PlayerStateUpdate>(OnClientPlayerStateUpdate, false);
+        //
+        // onClientStarted?.Invoke();
+    }
+
+    public void OnStopClient()
+    {
+        // onClientStopped?.Invoke();
+        //
+        // unregisterClientPrefabs();
+        //
+        // NetworkClient.UnregisterHandler<SyncLobbyPlayers>();
+        // NetworkClient.UnregisterHandler<ConfirmReadyUp>();
+        // NetworkClient.UnregisterHandler<AssignPlayerSlot>();
+        // NetworkClient.UnregisterHandler<StartMatchLoad>();
+        // NetworkClient.UnregisterHandler<MatchBegin>();
+        // NetworkClient.UnregisterHandler<NetFrameSnapshot>();
+        // NetworkClient.UnregisterHandler<CurrentSessionUpdate>();
+        // NetworkClient.UnregisterHandler<PlayerStateUpdate>();
+    }
+
+    // public override void OnServerConnect(NetworkConnection conn)
+    // {
+    //     Debug.Log("OnServerConnect");
+    //
+    //     PlayerSlot pSlot = PlayerSlot.NONE;
+    //     bool hasPlayerSlot = retrieveAvailablePlayerSlot(ref pSlot);
+    //
+    //     if(hasPlayerSlot)
+    //     {
+    //         NetworkServer.SetClientReady(conn);
+    //         
+    //         NetPlayer netPlayer = new NetPlayer(
+    //             conn.connectionId,
+    //             pSlot,
+    //             pSlot.ToString(),
+    //             false);
+    //
+    //         _serverNetPlayerMap[conn.connectionId] = netPlayer;
+    //         syncStore.playerMap[pSlot] = netPlayer;
+    //         
+    //         // Assign our connected player a number
+    //         AssignPlayerSlot assignMessage = new AssignPlayerSlot(pSlot);
+    //         conn.Send(assignMessage, Channels.DefaultReliable);
+    //
+    //         CurrentSessionUpdate sessionMessage = new CurrentSessionUpdate(sessionState);
+    //         conn.Send(sessionMessage, Channels.DefaultReliable);
+    //         
+    //         // Sync player states with all clients
+    //         SyncLobbyPlayers syncPlayersMessage = new SyncLobbyPlayers();
+    //         syncPlayersMessage.playerList = _serverNetPlayerMap.Values.ToArray();
+    //         NetworkServer.SendToAll(syncPlayersMessage, Channels.DefaultReliable);
+    //         
+    //         onServerConnect?.Invoke(conn);
+    //     }
+    //     else
+    //     {
+    //         NetworkServer.dontListen = true;
+    //         // No more free player slots! Sorry bud :(
+    //         conn.Disconnect();
+    //     }
+    // }
+
+    // public override void OnServerDisconnect(NetworkConnection conn)
+    // {
+    //     Debug.Log("OnServerDisconnect");
+    //     PlayerSlot playerSlot = PlayerSlot.NONE;
+    //     
+    //     if(conn != null && _serverNetPlayerMap.ContainsKey(conn.connectionId))
+    //     {
+    //         NetPlayer player = _serverNetPlayerMap[conn.connectionId];
+    //         playerSlot = player.playerSlot;
+    //
+    //         returnPlayerNumber(playerSlot);
+    //
+    //         SyncLobbyPlayers syncPlayersMessage = new SyncLobbyPlayers();
+    //         syncPlayersMessage.playerList = _serverNetPlayerMap.Values.ToArray();
+    //         NetworkServer.SendToAll(syncPlayersMessage, Channels.DefaultReliable);
+    //         
+    //         NetworkServer.dontListen = false;
+    //     }
+    //
+    //     onServerDisconnect?.Invoke(conn);
+    //     
+    //     _serverNetPlayerMap.Remove(conn.connectionId);
+    //     syncStore.playerMap.Remove(playerSlot);
+    // }
+
+    // public override void OnServerError(NetworkConnection conn, int errorCode)
+    // {
+    //     Debug.LogError("OnServerErrorL " + errorCode);
+    //     onServerError?.Invoke(conn, errorCode);
+    // }
+
+    // public override void OnClientConnect(NetworkConnection conn)
+    // {
+    //     Debug.Log("OnClientConnect");
+    //     // _netPlayerMap[conn.connectionId] = new NetPlayer(conn, conn.connectionId, "P" + conn.connectionId);
+    //     onClientConnect?.Invoke(conn);
+    // }
+    //
+    // public override void OnClientDisconnect(NetworkConnection conn)
+    // {
+    //     Debug.Log("OnClientDisconnect");
+    //
+    //     onClientDisconnect?.Invoke(conn);
+    //
+    //     NetworkConnection localConnection = NetworkClient.connection;
+    //     if(localConnection != null && localConnection.connectionId == conn.connectionId)
+    //     {
+    //         onClientLocalDisconnect?.Invoke(conn);
+    //     }
+    // }
+    //
+    // private void OnClientSyncLobbyPlayers(NetworkConnection conn, SyncLobbyPlayers msg)
+    // {
+    //     _clientNetPlayerMap = msg.GetPlayerMap();
+    //     
+    //     onClientSyncLobbyPlayers?.Invoke(conn, msg);
+    // }
+    //
+    // private void OnClientMatchBegin(NetworkConnection conn, MatchBegin msg)
+    // {
+    //     Debug.Log("Client Begin Match");
+    //     onClientMatchBegin?.Invoke(conn, msg);
+    // }
+    //
+    // private void OnClientStartMatchLoad(NetworkConnection conn, StartMatchLoad msg)
+    // {
+    //     onClientStartMatchLoad?.Invoke(conn, msg);
+    // }
+    //
+    // private void OnClientAssignPlayerSlot(NetworkConnection conn, AssignPlayerSlot msg)
+    // {
+    //     localPlayerSlot = msg.playerSlot;
+    // }
+    //
+    // private void OnClientFrameSnapshot(NetworkConnection conn, NetFrameSnapshot msg)
+    // {
+    //     onClientFrameSnapshot?.Invoke(conn, msg);
+    // }
+    //
+    // private void OnClientPlayerStateUpdate(NetworkConnection conn, PlayerStateUpdate msg)
+    // {
+    //     onClientPlayerStateUpdate?.Invoke(conn, msg);
+    // }
+    //
+    // private void OnCurrentSessionUpdate(NetworkConnection conn, CurrentSessionUpdate msg)
+    // {
+    //     sessionState = msg.sessionState;
+    //     onClientCurrentSession?.Invoke(conn, msg);
+    // }
+    //
+    // private void OnClientConfirmReadyUp(NetworkConnection conn, ConfirmReadyUp msg)
+    // {
+    //     Debug.LogFormat("OnClientConfirmReadyUp for Player:{0} : {1}", msg.playerSlot, msg.isReady);
+    //
+    //     PlayerSlot playerSlot = msg.playerSlot;
+    //     
+    //     NetPlayer player = _clientNetPlayerMap[playerSlot];
+    //     player.isReadyUp = msg.isReady;
+    //     _clientNetPlayerMap[playerSlot] = player;
+    //     
+    //     onClientConfirmReadyUp?.Invoke(conn, msg);
+    // }
+    //
+    // private void OnServerRequestMatchStart(NetworkConnection conn, RequestMatchStart msg)
+    // {
+    //     if(conn.connectionId == NetworkServer.localConnection.connectionId)
+    //     {
+    //         NetworkServer.SetAllClientsNotReady();
+    //         
+    //         StartMatchLoad startMatchMessage = new StartMatchLoad();
+    //         NetworkServer.SendToAll(startMatchMessage, Channels.DefaultReliable);
+    //     }
+    // }
+    //
+    // private void OnServerSendPlayerInput(NetworkConnection conn, SendPlayerInput msg)
+    // {
+    //     onServerSendPlayerInput?.Invoke(conn, msg);
+    // }
+    //
+    // private void OnServerPlayerMatchLoadComplete(NetworkConnection conn, PlayerMatchLoadComplete msg)
+    // {
+    //     NetPlayer player = _serverNetPlayerMap[conn.connectionId];
+    //     player.isMatchReady = true;
+    //     _serverNetPlayerMap[conn.connectionId] = player;
+    //     
+    //     Debug.Log("OnServerPlayerMatchLoadComplete: " + player.playerSlot.ToString());
+    //
+    //     onServerMatchLoadComplete?.Invoke(conn);
+    //     
+    //     if(sessionState == SessionState.IN_GAME)
+    //     {
+    //         // sessionState == SessionState.IN_GAME;
+    //         // conn.Send
+    //     }
+    //     else
+    //     {
+    //         bool allPlayersLoaded = hasAllPlayersLoaded();
+    //         if(allPlayersLoaded)
+    //         {
+    //             Debug.Log("Server Match Start");
+    //             
+    //             sessionState = SessionState.IN_GAME;
+    //             onServerMatchBegin?.Invoke();
+    //         }
+    //     }
+    // }
+    //
+    // private void OnServerRequestReadyUp(NetworkConnection conn, RequestReadyUp msg)
+    // {
+    //     NetPlayer player = _serverNetPlayerMap[conn.connectionId];
+    //     
+    //     Debug.LogFormat("OnServerRequestReadyUp for Player:{0} : {1}", player.playerSlot, msg.isReady);
+    //
+    //     if(player.isReadyUp != msg.isReady)
+    //     {
+    //         player.isReadyUp = msg.isReady;
+    //         _serverNetPlayerMap[conn.connectionId] = player;
+    //         syncStore.playerMap[player.playerSlot] = player;
+    //
+    //         NetworkServer.SetClientReady(conn);
+    //         
+    //         bool allPlayersReady = canStartGame();
+    //         ConfirmReadyUp readyMessage = new ConfirmReadyUp(
+    //                                             player.playerSlot, 
+    //                                             player.isReadyUp, 
+    //                                             allPlayersReady);
+    //                                             
+    //         NetworkServer.SendToAll(readyMessage, Channels.DefaultReliable);
+    //
+    //         onServerConfirmReadyUp?.Invoke(conn, readyMessage);
+    //     }
+    // }
+
+// private GameObject OnClientSpawnHandler(SpawnMessage msg)
+    // {
+    //     return onClientSpawnHandler?.Invoke(msg);  
+    // }
+    //
+    // private void OnClientUnspawnHandler(GameObject obj)
+    // {
+    //     onClientUnspawnHandler?.Invoke(obj);
+    // }
+
+
+    public void OnStartServer()
+    {
+        Debug.Log("OnStartServer");
+        
+        _serverNetPlayerMap.Clear();
+    
+        serverSpawnSyncStore();
+        setupPlayerSlotGenerator();
+        
+        // NetworkServer.RegisterHandler<RequestMatchStart>(OnServerRequestMatchStart, false);
+        // NetworkServer.RegisterHandler<RequestReadyUp>(OnServerRequestReadyUp, false);
+        // NetworkServer.RegisterHandler<PlayerMatchLoadComplete>(OnServerPlayerMatchLoadComplete, false);
+        // NetworkServer.RegisterHandler<SendPlayerInput>(OnServerSendPlayerInput, false);
+
+        sessionState = SessionState.IN_LOBBY;
+        
+        // onServerStarted?.Invoke();
+    }
+#endregion
+
+#region Private methods
+// private void registerNetworkPrefabs()
+    // {
+    //     UnitMap unitMap = Singleton.instance.gameplayResources.unitMap;
+    //     for(int i = 0; i < unitMap.unitList.Count; ++i)
+    //     {
+    //         UnitMap.Unit unit = unitMap.unitList[i];
+    //         Debug.Log("Unit: " + unit.id);
+    //         
+    //         ClientScene.RegisterPrefab(
+    //             unit.view.gameObject, 
+    //             OnClientSpawnHandler,
+    //             OnClientUnspawnHandler);
+    //     }
+    //     
+    //     ClientScene.RegisterPrefab(
+    //             syncStatePrefab, 
+    //             onClientSyncStoreCreated, 
+    //             onClientSyncStoreDestory);
+    // }
+
+    // private void unregisterClientPrefabs()
+    // {
+    //     UnitMap unitMap = Singleton.instance.gameplayResources.unitMap;
+    //     for(int i = 0; i < unitMap.unitList.Count; ++i)
+    //     {
+    //         UnitMap.Unit unit = unitMap.unitList[i];
+    //         Debug.Log("Unit: " + unit.id);
+    //         
+    //         ClientScene.UnregisterPrefab(
+    //             unit.view.gameObject);
+    //     }
+    //     
+    //     ClientScene.UnregisterPrefab(
+    //             syncStatePrefab);
+    // }
+    
+ // private GameObject onClientSyncStoreCreated(SpawnMessage msg)
+    // {
+    //     GameObject syncStoreInstance = GameObject.Instantiate(syncStatePrefab, transform);
+    //     syncStore = syncStoreInstance.GetComponent<SyncStore>();
+    //     return syncStoreInstance;
+    // }
+    
+    private void onClientSyncStoreDestroy(GameObject obj)
+    {
+        Destroy(obj);
+    }
+    
+    private void serverSpawnSyncStore()
+    {
+        GameObject syncObjectPrefab = syncStatePrefab;
+        GameObject syncInstance = Instantiate(syncObjectPrefab, transform);
+        
+        // NetworkServer.Spawn(syncInstance);
+        
+        syncStore = syncInstance.GetComponent<SyncStore>();
+    }
+    
+    //
+    // private bool retrieveAvailablePlayerSlot(ref PlayerSlot num)
+    // {
+    //     int availablePlayerCount = _serverAvailablePlayerSlots.Count;
+    //     if(availablePlayerCount <= 0)
+    //     {
+    //         return false;
+    //     }
+    //
+    //     int index = availablePlayerCount - 1;
+    //     num = _serverAvailablePlayerSlots[index];
+    //     _serverAvailablePlayerSlots.RemoveAt(index);
+    //
+    //     return true;
+    // }
+    //
+    // private bool canStartGame()
+    // {
+    //     foreach(var player in _serverNetPlayerMap)
+    //     {
+    //         if(!player.Value.isReadyUp)
+    //         {
+    //             return false;
+    //         }
+    //     }
+    //
+    //     return true;
+    // }
+    //
+    // private bool hasAllPlayersLoaded()
+    // {
+    //     foreach(var player in _serverNetPlayerMap)
+    //     {
+    //         if(!player.Value.isMatchReady)
+    //         {
+    //             return false;
+    //         }
+    //     }
+    //
+    //     return true;
+    // }
+    //
+    // private void returnPlayerNumber(PlayerSlot num)
+    // {
+    //     _serverAvailablePlayerSlots.Add(num);
+    //     _serverAvailablePlayerSlots.Sort((a, b) =>
+    //     {
+    //         return b.CompareTo(a);
+    //     });
+    // }
+    //
+    private void setupPlayerSlotGenerator()
+    {
+        _serverAvailablePlayerSlots.Clear();
+        
+        foreach(PlayerSlot pNum in Enum.GetValues(typeof(PlayerSlot)))
+        {
+            if(pNum == PlayerSlot.NONE) { continue; }
+            if(pNum == PlayerSlot.MAX_PLAYERS) { continue; }
+    
+            _serverAvailablePlayerSlots.Add(pNum);
+        }
+    
+        _serverAvailablePlayerSlots.Sort((a, b) =>
+        {
+            return b.CompareTo(a);
+        });
     }
     
     private string getMasterServerCommand(string command)
     {
         return string.Format("{0}:{1}/{2}", masterServerLocation, masterServerPort, command); 
     }
-
 
     public void fetchExternalIpAddress(Action<bool, string> onComplete)
     {
@@ -272,11 +703,6 @@ public class NetworkManager : Mirror.NetworkManager
         onComplete?.Invoke(didSucceed, result);
     }
     
-    public void fetchMasterServerList(Action<bool, List<ServerListEntry>> onComplete)
-    {
-        StartCoroutine(enumFetchMasterServerList(onComplete));
-    }
-
     private IEnumerator enumFetchMasterServerList(Action<bool, List<ServerListEntry>> onComplete)
     {
         List<ServerListEntry> serverEntries = new List<ServerListEntry>();
@@ -313,18 +739,6 @@ public class NetworkManager : Mirror.NetworkManager
         } 
     }
     
-    public void addServerToMasterList(ServerListEntry entry, Action<long> onComplete)
-    {
-        if(entry != null)
-        {
-            StartCoroutine(enumAddServerToMasterList(entry, onComplete));            
-        }
-        else
-        {
-            onComplete?.Invoke(0);
-        }
-    }
-    
     private IEnumerator enumAddServerToMasterList(ServerListEntry entry, Action<long> onComplete)
     {
         WWWForm form = new WWWForm(); 
@@ -355,19 +769,7 @@ public class NetworkManager : Mirror.NetworkManager
             }
         } 
     }
-    
-    public void removeServerToMasterList(ServerListEntry entry, Action<long> onComplete)
-    {
-        if(entry != null)
-        {
-            StartCoroutine(enumRemoveServerToMasterList(entry, onComplete));
-        }
-        else
-        {
-            onComplete?.Invoke(0);
-        }
-    }
-    
+
     private IEnumerator enumRemoveServerToMasterList(ServerListEntry entry, Action<long> onComplete)
     {
         WWWForm form = new WWWForm();
@@ -398,433 +800,20 @@ public class NetworkManager : Mirror.NetworkManager
             }
         }
     }
+#endregion
+}
 
-    private GameObject OnClientSpawnHandler(SpawnMessage msg)
-    {
-        return onClientSpawnHandler?.Invoke(msg);
-        
-    }
-    
-    private void OnClientUnspawnHandler(GameObject obj)
-    {
-        onClientUnspawnHandler?.Invoke(obj);
-    }
+public class NetworkClient
+{
+    public static bool active { get; }
+}
 
-    // public void ServerBeginMatch()
-    // {
-    //     // StartMatchLoad startMatchMessage = new StartMatchLoad();
-    //     // NetworkServer.SendToAll(startMatchMessage, Channels.DefaultReliable);
-    //
-    //     
-    // }
-    public override void OnStartServer()
-    {
-        Debug.Log("OnStartServer");
-        
-        _serverNetPlayerMap.Clear();
-    
-        serverSpawnSyncStore();
-        setupPlayerSlotGenerator();
-        
-        NetworkServer.RegisterHandler<RequestMatchStart>(OnServerRequestMatchStart, false);
-        NetworkServer.RegisterHandler<RequestReadyUp>(OnServerRequestReadyUp, false);
-        NetworkServer.RegisterHandler<PlayerMatchLoadComplete>(OnServerPlayerMatchLoadComplete, false);
-        NetworkServer.RegisterHandler<SendPlayerInput>(OnServerSendPlayerInput, false);
+public class NetworkServer
+{
+    public static bool active { get; }
+}
 
-        sessionState = SessionState.IN_LOBBY;
-        
-        onServerStarted?.Invoke();
-    }
-
-    private void serverSpawnSyncStore()
-    {
-        GameObject syncObjectPrefab = syncStatePrefab;
-        GameObject syncInstance = GameObject.Instantiate(syncObjectPrefab, transform);
-        
-        NetworkServer.Spawn(syncInstance);
-        
-        syncStore = syncInstance.GetComponent<SyncStore>();
-    }
-    public override void OnStopServer()
-    {
-        if(syncStore != null)
-        {
-            NetworkServer.Destroy(syncStore.gameObject);
-        }
-        
-        removeServerToMasterList(serverEntry, null);
-        onServerStopped?.Invoke();    
-    }
-    
-    public override void OnStartClient()
-    {
-        Debug.Log("OnStartClient");
-        
-        registerNetworkPrefabs();
-        
-        _clientNetPlayerMap.Clear();
-        
-        NetworkClient.RegisterHandler<SyncLobbyPlayers>(OnClientSyncLobbyPlayers, false);
-        NetworkClient.RegisterHandler<ConfirmReadyUp>(OnClientConfirmReadyUp, false);
-        NetworkClient.RegisterHandler<AssignPlayerSlot>(OnClientAssignPlayerSlot, false);
-        NetworkClient.RegisterHandler<StartMatchLoad>(OnClientStartMatchLoad, false);
-        NetworkClient.RegisterHandler<MatchBegin>(OnClientMatchBegin, false);
-        NetworkClient.RegisterHandler<NetFrameSnapshot>(OnClientFrameSnapshot, false);
-        NetworkClient.RegisterHandler<CurrentSessionUpdate>(OnCurrentSessionUpdate, false);
-        NetworkClient.RegisterHandler<PlayerStateUpdate>(OnClientPlayerStateUpdate, false);
-        
-        onClientStarted?.Invoke();
-    }
-
-    public override void OnStopClient()
-    {
-        onClientStopped?.Invoke();
-        
-        unregisterClientPrefabs();
-        
-        NetworkClient.UnregisterHandler<SyncLobbyPlayers>();
-        NetworkClient.UnregisterHandler<ConfirmReadyUp>();
-        NetworkClient.UnregisterHandler<AssignPlayerSlot>();
-        NetworkClient.UnregisterHandler<StartMatchLoad>();
-        NetworkClient.UnregisterHandler<MatchBegin>();
-        NetworkClient.UnregisterHandler<NetFrameSnapshot>();
-        NetworkClient.UnregisterHandler<CurrentSessionUpdate>();
-        NetworkClient.UnregisterHandler<PlayerStateUpdate>();
-
-        // if(syncStore != null)
-        // {
-        //     GameObject.Destroy(syncStore);
-        // }
-    }
-
-    // public override void OnError(string reason)
-    // {
-    //     base.OnError(reason);
-    //     onError?.Invoke(reason);
-    // }
-
-    public override void OnServerConnect(NetworkConnection conn)
-    {
-        Debug.Log("OnServerConnect");
-
-        PlayerSlot pSlot = PlayerSlot.NONE;
-        bool hasPlayerSlot = retrieveAvailablePlayerSlot(ref pSlot);
-
-        if(hasPlayerSlot)
-        {
-            NetworkServer.SetClientReady(conn);
-            
-            NetPlayer netPlayer = new NetPlayer(
-                conn.connectionId,
-                pSlot,
-                pSlot.ToString(),
-                false);
-
-            _serverNetPlayerMap[conn.connectionId] = netPlayer;
-            syncStore.playerMap[pSlot] = netPlayer;
-            
-            // Assign our connected player a number
-            AssignPlayerSlot assignMessage = new AssignPlayerSlot(pSlot);
-            conn.Send(assignMessage, Channels.DefaultReliable);
-
-            CurrentSessionUpdate sessionMessage = new CurrentSessionUpdate(sessionState);
-            conn.Send(sessionMessage, Channels.DefaultReliable);
-            
-            // Sync player states with all clients
-            SyncLobbyPlayers syncPlayersMessage = new SyncLobbyPlayers();
-            syncPlayersMessage.playerList = _serverNetPlayerMap.Values.ToArray();
-            NetworkServer.SendToAll(syncPlayersMessage, Channels.DefaultReliable);
-            
-            onServerConnect?.Invoke(conn);
-        }
-        else
-        {
-            NetworkServer.dontListen = true;
-            // No more free player slots! Sorry bud :(
-            conn.Disconnect();
-        }
-    }
-
-    public override void OnServerDisconnect(NetworkConnection conn)
-    {
-        Debug.Log("OnServerDisconnect");
-        PlayerSlot playerSlot = PlayerSlot.NONE;
-        
-        if(conn != null && _serverNetPlayerMap.ContainsKey(conn.connectionId))
-        {
-            NetPlayer player = _serverNetPlayerMap[conn.connectionId];
-            playerSlot = player.playerSlot;
-
-            returnPlayerNumber(playerSlot);
-
-            SyncLobbyPlayers syncPlayersMessage = new SyncLobbyPlayers();
-            syncPlayersMessage.playerList = _serverNetPlayerMap.Values.ToArray();
-            NetworkServer.SendToAll(syncPlayersMessage, Channels.DefaultReliable);
-            
-            NetworkServer.dontListen = false;
-        }
-
-        onServerDisconnect?.Invoke(conn);
-        
-        _serverNetPlayerMap.Remove(conn.connectionId);
-        syncStore.playerMap.Remove(playerSlot);
-    }
-
-    // public override void OnServerError(NetworkConnection conn, int errorCode)
-    // {
-    //     Debug.LogError("OnServerErrorL " + errorCode);
-    //     onServerError?.Invoke(conn, errorCode);
-    // }
-
-    public override void OnClientConnect(NetworkConnection conn)
-    {
-        Debug.Log("OnClientConnect");
-        // _netPlayerMap[conn.connectionId] = new NetPlayer(conn, conn.connectionId, "P" + conn.connectionId);
-        onClientConnect?.Invoke(conn);
-    }
-
-    public override void OnClientDisconnect(NetworkConnection conn)
-    {
-        Debug.Log("OnClientDisconnect");
-
-        onClientDisconnect?.Invoke(conn);
-
-        NetworkConnection localConnection = NetworkClient.connection;
-        if(localConnection != null && localConnection.connectionId == conn.connectionId)
-        {
-            onClientLocalDisconnect?.Invoke(conn);
-        }
-
-        // _netPlayerMap.Remove(conn.connectionId);
-    }
-
-    // public override void OnClientError(NetworkConnection conn, int errorCode)
-    // {
-    //     Debug.LogError("OnClientError: " + errorCode);
-    //     onClientError?.Invoke(conn, errorCode);
-    // }
-
-    private void OnClientSyncLobbyPlayers(NetworkConnection conn, SyncLobbyPlayers msg)
-    {
-        _clientNetPlayerMap = msg.GetPlayerMap();
-        
-        onClientSyncLobbyPlayers?.Invoke(conn, msg);
-    }
-
-    private void OnClientMatchBegin(NetworkConnection conn, MatchBegin msg)
-    {
-        Debug.Log("Client Begin Match");
-        onClientMatchBegin?.Invoke(conn, msg);
-    }
-
-    private void OnClientStartMatchLoad(NetworkConnection conn, StartMatchLoad msg)
-    {
-        onClientStartMatchLoad?.Invoke(conn, msg);
-    }
-    
-    private void OnClientAssignPlayerSlot(NetworkConnection conn, AssignPlayerSlot msg)
-    {
-        localPlayerSlot = msg.playerSlot;
-    }
-
-    private void OnClientFrameSnapshot(NetworkConnection conn, NetFrameSnapshot msg)
-    {
-        onClientFrameSnapshot?.Invoke(conn, msg);
-    }
-
-    private void OnClientPlayerStateUpdate(NetworkConnection conn, PlayerStateUpdate msg)
-    {
-        onClientPlayerStateUpdate?.Invoke(conn, msg);
-    }
-    
-    private void OnCurrentSessionUpdate(NetworkConnection conn, CurrentSessionUpdate msg)
-    {
-        sessionState = msg.sessionState;
-        onClientCurrentSession?.Invoke(conn, msg);
-    }
-    
-    private void OnClientConfirmReadyUp(NetworkConnection conn, ConfirmReadyUp msg)
-    {
-        Debug.LogFormat("OnClientConfirmReadyUp for Player:{0} : {1}", msg.playerSlot, msg.isReady);
-
-        PlayerSlot playerSlot = msg.playerSlot;
-        
-        NetPlayer player = _clientNetPlayerMap[playerSlot];
-        player.isReadyUp = msg.isReady;
-        _clientNetPlayerMap[playerSlot] = player;
-        
-        onClientConfirmReadyUp?.Invoke(conn, msg);
-    }
-
-    private void OnServerRequestMatchStart(NetworkConnection conn, RequestMatchStart msg)
-    {
-        if(conn.connectionId == NetworkServer.localConnection.connectionId)
-        {
-            NetworkServer.SetAllClientsNotReady();
-            
-            StartMatchLoad startMatchMessage = new StartMatchLoad();
-            NetworkServer.SendToAll(startMatchMessage, Channels.DefaultReliable);
-        }
-    }
-
-    private void OnServerSendPlayerInput(NetworkConnection conn, SendPlayerInput msg)
-    {
-        onServerSendPlayerInput?.Invoke(conn, msg);
-    }
-    
-    private void OnServerPlayerMatchLoadComplete(NetworkConnection conn, PlayerMatchLoadComplete msg)
-    {
-        NetPlayer player = _serverNetPlayerMap[conn.connectionId];
-        player.isMatchReady = true;
-        _serverNetPlayerMap[conn.connectionId] = player;
-        
-        Debug.Log("OnServerPlayerMatchLoadComplete: " + player.playerSlot.ToString());
-
-        onServerMatchLoadComplete?.Invoke(conn);
-        
-        if(sessionState == SessionState.IN_GAME)
-        {
-            // sessionState == SessionState.IN_GAME;
-            // conn.Send
-        }
-        else
-        {
-            bool allPlayersLoaded = hasAllPlayersLoaded();
-            if(allPlayersLoaded)
-            {
-                Debug.Log("Server Match Start");
-                
-                sessionState = SessionState.IN_GAME;
-                onServerMatchBegin?.Invoke();
-            }
-        }
-    }
-    
-    private void OnServerRequestReadyUp(NetworkConnection conn, RequestReadyUp msg)
-    {
-        NetPlayer player = _serverNetPlayerMap[conn.connectionId];
-        
-        Debug.LogFormat("OnServerRequestReadyUp for Player:{0} : {1}", player.playerSlot, msg.isReady);
-
-        if(player.isReadyUp != msg.isReady)
-        {
-            player.isReadyUp = msg.isReady;
-            _serverNetPlayerMap[conn.connectionId] = player;
-            syncStore.playerMap[player.playerSlot] = player;
-
-            NetworkServer.SetClientReady(conn);
-            
-            bool allPlayersReady = canStartGame();
-            ConfirmReadyUp readyMessage = new ConfirmReadyUp(
-                                                player.playerSlot, 
-                                                player.isReadyUp, 
-                                                allPlayersReady);
-                                                
-            NetworkServer.SendToAll(readyMessage, Channels.DefaultReliable);
-
-            onServerConfirmReadyUp?.Invoke(conn, readyMessage);
-        }
-    }
-
-    public void Disconnect()
-    {
-        NetworkServer.dontListen = false;
-        
-		// Debug.Log("Stopping Client");
-  //       StopClient();
-  //   
-		// Debug.Log("Stopping Server");
-  //       StopServer();
-        
-        Shutdown();
-        
-        _serverNetPlayerMap.Clear();
-        _clientNetPlayerMap.Clear();
-    }
-
-    public bool isConnected
-    {
-        get { return NetworkClient.active || NetworkServer.active; }
-    }
-
-    private bool retrieveAvailablePlayerSlot(ref PlayerSlot num)
-    {
-        int availablePlayerCount = _serverAvailablePlayerSlots.Count;
-        if(availablePlayerCount <= 0)
-        {
-            return false;
-        }
-
-        int index = availablePlayerCount - 1;
-        num = _serverAvailablePlayerSlots[index];
-        _serverAvailablePlayerSlots.RemoveAt(index);
-
-        return true;
-    }
-
-    private bool canStartGame()
-    {
-        foreach(var player in _serverNetPlayerMap)
-        {
-            if(!player.Value.isReadyUp)
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-    
-    private bool hasAllPlayersLoaded()
-    {
-        foreach(var player in _serverNetPlayerMap)
-        {
-            if(!player.Value.isMatchReady)
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-    
-    private void returnPlayerNumber(PlayerSlot num)
-    {
-        _serverAvailablePlayerSlots.Add(num);
-        _serverAvailablePlayerSlots.Sort((a, b) =>
-        {
-            return b.CompareTo(a);
-        });
-    }
-
-    private void setupPlayerSlotGenerator()
-    {
-        _serverAvailablePlayerSlots.Clear();
-        
-        foreach(PlayerSlot pNum in Enum.GetValues(typeof(PlayerSlot)))
-        {
-            if(pNum == PlayerSlot.NONE) { continue; }
-            if(pNum == PlayerSlot.MAX_PLAYERS) { continue; }
-
-            _serverAvailablePlayerSlots.Add(pNum);
-        }
-
-        _serverAvailablePlayerSlots.Sort((a, b) =>
-        {
-            return b.CompareTo(a);
-        });
-    }
-    
-    public NetworkConnection localPlayer
-    {
-        get { return NetworkClient.connection != null ? NetworkClient.connection : null; }
-    }
-
-    private void safeCall(Action callback)
-    {
-        if(callback != null)
-        {
-            callback();
-        }
-    }
+public class NetworkConnection
+{
+    public int connectionId;
 }

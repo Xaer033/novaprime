@@ -1,15 +1,14 @@
-﻿using Mirror;
+﻿using System;
 using UnityEngine;
-
 public class TimeUtil
 {
-    public static double Now()
+    public static double TimeSinceGameStart()
     {
         return Time.unscaledTimeAsDouble;
     }
 
-    public static int dateNow()
+    public static DateTime Now()
     {
-        return System.DateTime.Now.Second;
+        return DateTime.UtcNow;
     }
 }

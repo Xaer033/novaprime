@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using GhostGen;
-using Mirror;
 using UnityEngine;
 using UnityEngine.InputSystem;
-
 public class PlayFieldController : NotificationDispatcher
 {
     private GameplayResources _gameplayResources;
@@ -59,7 +57,7 @@ public class PlayFieldController : NotificationDispatcher
             CleanUp();
             Start();
             
-            NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
+            // NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
         },  ()=>
         {
             _pAction.Gameplay.Enable();

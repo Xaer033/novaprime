@@ -1,6 +1,5 @@
-﻿using Mirror;
-
-public struct CurrentSessionUpdate : NetworkMessage
+﻿
+public struct CurrentSessionUpdate
 {
     public NetworkManager.SessionState sessionState;
     

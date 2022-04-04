@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using GhostGen;
-using Mirror;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
 public class MultiplayerGameplayState : IGameState
 {
     const string kIsLoadedKey = "isGameplayLoaded";
@@ -24,8 +22,8 @@ public class MultiplayerGameplayState : IGameState
 
         if(NetworkServer.active)
         {
-            StartMatchLoad startMatchMessage = new StartMatchLoad();
-            NetworkServer.SendToAll(startMatchMessage, Channels.DefaultReliable);
+            // StartMatchLoad startMatchMessage = new StartMatchLoad();
+            // NetworkServer.SendToAll(startMatchMessage, Channels.DefaultReliable);
         }
         
         _networkManager = Singleton.instance.networkManager;
@@ -40,7 +38,7 @@ public class MultiplayerGameplayState : IGameState
     {
         if(NetworkServer.active)
         {
-            NetworkServer.SpawnObjects();            
+            // NetworkServer.SpawnObjects();            
         }
         
         startGameSystems();
@@ -49,22 +47,19 @@ public class MultiplayerGameplayState : IGameState
         {
             Debug.Log("SceneLoader: " + _networkManager.localPlayerSlot);
             
-            ClientScene.Ready(NetworkClient.connection);
-            NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
+            // ClientScene.Ready(NetworkClient.connection);
+            // NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
         }
     }
     
     public void FixedStep(float fixedDeltaTime)
     {
-        
 	    _gameModeController?.FixedStep(fixedDeltaTime);
     }
     
     public void Step( float deltaTime )
 	{
-        
         _gameModeController?.Step(deltaTime);
-    
     }
 
     public void LateStep(float deltaTime)

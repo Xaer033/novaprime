@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using GhostGen;
-using Mirror;
 using UnityEngine;
-
 public class MultiplayerSetupController : BaseController 
 {
     private NetworkManager _networkManager;
@@ -34,7 +32,7 @@ public class MultiplayerSetupController : BaseController
 
             setupView.SetSelectedItemCallback(onRoomClicked);
 
-            _networkManager.fetchMasterServerList(onFetchComplete);
+            _networkManager.FetchMasterServerList(onFetchComplete);
 
         });
     }
@@ -68,7 +66,7 @@ public class MultiplayerSetupController : BaseController
         _serverName = e.data as string;
         
         _networkManager.onServerStarted += onServerStarted;
-        _networkManager.StartServer();
+        _networkManager.StartServer(10666);
     }
 
     private void onCreateServerAsHost(GeneralEvent e)
@@ -76,7 +74,7 @@ public class MultiplayerSetupController : BaseController
         _serverName = e.data as string;
         
         _networkManager.onServerStarted += onServerStarted;
-        _networkManager.StartHost();
+        _networkManager.StartHost(10666);
     }
     
     private void onServerStarted()
@@ -98,7 +96,7 @@ public class MultiplayerSetupController : BaseController
 
             _networkManager.serverEntry = entry;
             
-            _networkManager.addServerToMasterList(entry, null);
+            _networkManager.AddServerToMasterList(entry, null);
             DispatchEvent(MenuUIEventType.GOTO_NETWORK_ROOM);
         });
     }
@@ -107,13 +105,13 @@ public class MultiplayerSetupController : BaseController
     {
         setupView.StartLoadingTween();
         
-        _networkManager.fetchMasterServerList(onFetchComplete);   
+        _networkManager.FetchMasterServerList(onFetchComplete);   
     }
 
     private void onJoinListedServer(GeneralEvent e)
     {
         ServerListEntry entry = (ServerListEntry)_uiServerData[_selectedRoomIndex];
-        Uri uri = new Uri(string.Format("http://{0}:{1}", entry.ip, entry.port));
+        Uri uri = new Uri($"http://{entry.ip}:{entry.port}");
         
         Debug.Log("Joining Server: " + uri.AbsoluteUri);
         
@@ -123,7 +121,7 @@ public class MultiplayerSetupController : BaseController
     private void onJoinServer(GeneralEvent e)
     {
         string serverIpAddress = e.data as string;
-        _networkManager.networkAddress = serverIpAddress;
+        // _networkManager.networkAddress = serverIpAddress;
 
         Uri uri = new Uri(serverIpAddress + ":11666");
         joinServer(uri);
@@ -150,7 +148,7 @@ public class MultiplayerSetupController : BaseController
     private void onClientConnect(NetworkConnection conn)
     {
         Debug.Log("Client Joined Server");
-        ClientScene.Ready(NetworkClient.connection);
+        // ClientScene.Ready(NetworkClient.connection);
         
         _networkManager.onClientConnect -= onClientConnect;
         _networkManager.onClientCurrentSession += onClientCurrentSession;

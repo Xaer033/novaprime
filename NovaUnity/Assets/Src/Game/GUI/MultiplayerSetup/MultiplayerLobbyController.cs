@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using GhostGen;
-using Mirror;
 using UnityEngine;
 
 public class MultiplayerLobbyController : BaseController

@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using Mirror;
 
 [Serializable]
-public struct NetFrameSnapshot : NetworkMessage
+public struct NetFrameSnapshot
 {
     public NetChannelHeader header;
     public GameState.Snapshot snapshot;

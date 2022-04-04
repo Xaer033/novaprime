@@ -1,4 +1,4 @@
-﻿using Mirror;
+﻿
 
 public class LocalPlayerState
 {

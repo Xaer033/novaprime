@@ -1,6 +1,5 @@
-﻿using Mirror;
-
-public struct PlayerStateUpdate : NetworkMessage
+﻿
+public struct PlayerStateUpdate 
 {
     public uint netId;
 

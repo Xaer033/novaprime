@@ -1,5 +1,4 @@
 ﻿using GhostGen;
-using Mirror;
 using UnityEngine;
 
 public interface IAvatarView : IEventDispatcher
@@ -14,5 +13,5 @@ public interface IAvatarView : IEventDispatcher
     IAvatarController controller { get; }
 
     NetworkEntity netEntity { get; }
-    NetworkIdentity netIdentity { get; }
+    // NetworkIdentity netIdentity { get; }
 }

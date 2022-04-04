@@ -1,11 +1,10 @@
-﻿using Mirror;
-using UnityEngine;
+﻿using UnityEngine;
 public class BulletView : MonoBehaviour, ITimeWarpTarget
 {
 
     public LayerMask       collisionMask;
     public TrailRenderer   _trailRenderer;
-    public NetworkIdentity netIdentity;
+    // public NetworkIdentity netIdentity;
     
     public ProjectileState state { get; set; }
     

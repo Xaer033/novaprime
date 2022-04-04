@@ -1,6 +1,5 @@
-﻿using Mirror;
-
-public struct MatchBegin : NetworkMessage
+﻿
+public struct MatchBegin 
 {
 
 }

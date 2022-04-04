@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using GhostGen;
-using Mirror;
 using UnityEngine;
 
 public class AvatarSystem : NotificationDispatcher, IGameSystem
@@ -236,8 +235,8 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
             if (controller == null)
                 continue;
 
-            if (controller.view?.netIdentity.netId == netId)
-                return controller;
+            // if (controller.view?.netIdentity.netId == netId)
+            //     return controller;
         }
         return null;
     }

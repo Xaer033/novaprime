@@ -1,15 +1,13 @@
 using System;
 using Cinemachine;
 using GhostGen;
-using Mirror;
 using UnityEngine;
 using UnityEngine.Animations;
-
 public class AvatarView : EventDispatcherBehavior, 
-                            IAvatarView, 
-                            IPlatformPassenger, 
-                            ITimeWarpTarget, 
-                            IAttackTarget
+                          IAvatarView, 
+                          IPlatformPassenger, 
+                          ITimeWarpTarget, 
+                          IAttackTarget
 {
     
     // [BoxGroup("Hooks")]
@@ -86,10 +84,10 @@ public class AvatarView : EventDispatcherBehavior,
         get { return cameraTargetGroup.transform; }
     }
     
-    public NetworkIdentity netIdentity
-    {
-        get => _netEntity.netIdentity;
-    }
+    // public NetworkIdentity netIdentity
+    // {
+    //     get => _netEntity.netIdentity;
+    // }
 
     public NetworkEntity netEntity
     {

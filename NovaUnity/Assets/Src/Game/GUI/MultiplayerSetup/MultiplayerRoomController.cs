@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using GhostGen;
-using Mirror;
 using UnityEngine;
 
 public class MultiplayerRoomController : BaseController 
@@ -27,7 +26,7 @@ public class MultiplayerRoomController : BaseController
             
             if(_networkManager.syncStore != null)
             {
-                _networkManager.syncStore.onPlayerMapChanged += onPlayerMapChanged;                
+                // _networkManager.syncStore.onPlayerMapChanged += onPlayerMapChanged;                
             }
 
             if(NetworkClient.active)
@@ -62,7 +61,7 @@ public class MultiplayerRoomController : BaseController
     {
         if(_networkManager.syncStore != null)
         {
-            _networkManager.syncStore.onPlayerMapChanged -= onPlayerMapChanged;            
+            // _networkManager.syncStore.onPlayerMapChanged -= onPlayerMapChanged;            
         }
         
         _networkManager.onClientConfirmReadyUp -= onClientConfirmReadyUp;
@@ -103,11 +102,11 @@ public class MultiplayerRoomController : BaseController
         _setupPlayers(_networkManager.GetServerPlayerMap());
     }
 
-    private void onPlayerMapChanged(SyncDictionary<PlayerSlot, NetPlayer>.Operation op, PlayerSlot slot,
-                                    NetPlayer player)
-    {
-        Debug.LogFormat("On Map Changed: {0}, {1}:{2}", op, slot, player);
-    }
+    // private void onPlayerMapChanged(SyncDictionary<PlayerSlot, NetPlayer>.Operation op, PlayerSlot slot,
+    //                                 NetPlayer player)
+    // {
+    //     Debug.LogFormat("On Map Changed: {0}, {1}:{2}", op, slot, player);
+    // }
     
     private void onClientConfirmReadyUp(NetworkConnection conn, ConfirmReadyUp msg)
     {
@@ -169,7 +168,7 @@ public class MultiplayerRoomController : BaseController
             Debug.Log("Ready Button State: " + requestedReadyState);
             RequestReadyUp readyRequest = new RequestReadyUp(requestedReadyState);
 
-            NetworkClient.Send(readyRequest, Channels.DefaultReliable);
+            // NetworkClient.Send(readyRequest, Channels.DefaultReliable);
         }
     }
 

@@ -37,7 +37,7 @@ public class SpawnPointSystem : NotificationDispatcher, IGameSystem
 
     public void FixedStep(float deltaTime)
     {
-        float now = (float)TimeUtil.Now();
+        float now = (float)TimeUtil.TimeSinceGameStart();
         for (int i = 0; i < _spawnPointViewList.Length; ++i)
         {
             SpawnPointState state = _gameState.spawnPointStateList[i];

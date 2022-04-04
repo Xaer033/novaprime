@@ -64,9 +64,9 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
                 PlatformView  view  = _platformViewList[i];
                 PlatformState state = new PlatformState(view.startPosition, 10, view.localWaypoints);
 
-                state.netId = view.netId;
-                view.state  = state;
-                view.index  = i;
+                state.netId        =  0;//view.netId;
+                view.state         =  state;
+                view.index         =  i;
                 view.onClientStart += onClientStart;
                 
                 _gameState.platformStateList.Add(state);
@@ -87,9 +87,9 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
             PlatformView view = _platformViewList[i];
             PlatformState state = _gameState.platformStateList[i];
 
-            if(state.netId == BAD_JUJU && view.netIdentity.netId != 0)
+            if(state.netId == BAD_JUJU)// && view.netIdentity.netId != 0)
             {
-                state.netId = view.netIdentity.netId;
+               // state.netId = view.netIdentity.netId;
                 _gameState.platformStateList[i] = state;
             }
             
@@ -238,7 +238,7 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
     private void onClientStart(PlatformView view)
     {
         var state = _gameState.platformStateList[view.index];
-        state.netId = view.netId;
+        state.netId = BAD_JUJU;// view.netId;
         _gameState.platformStateList[view.index] = state;
     }
     

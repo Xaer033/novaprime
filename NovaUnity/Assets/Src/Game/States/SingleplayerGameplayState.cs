@@ -1,4 +1,5 @@
-﻿using GhostGen;
+﻿using Fusion;
+using GhostGen;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 public class SingleplayerGameplayState : IGameState
@@ -8,49 +9,25 @@ public class SingleplayerGameplayState : IGameState
 
     private GameStateMachine    _stateMachine;
 
-    public void Init( GameStateMachine stateMachine, object changeStateData )
+    private NetworkManager _networkManager;
+
+    public void Init(GameStateMachine stateMachine, object changeStateData)
 	{       
 		_stateMachine = stateMachine;
 
         // *TEMP*
         Singleton.instance.gui.screenFader.alpha = 0.0f;
 
-        string name = SceneManager.GetActiveScene().name;
-        if (Application.isEditor || name != "GameplayScene")
-        {
-            onSceneUnloaded(null);
-        }
-        else
-        {
-            AsyncOperation async = SceneManager.UnloadSceneAsync("GameplayScene");
-            async.completed += onSceneUnloaded;
-        }
+        _networkManager = Singleton.instance.networkManager;
+        _networkManager.onSceneLoadDone += onSceneLoaded;
+        
+        // Scene scene = SceneManager.GetSceneByBuildIndex(0)
+        _networkManager.runner.SetActiveScene(2);
     }
 
-    private void onSceneUnloaded(AsyncOperation asyncOp)
-    {
-        string name = SceneManager.GetActiveScene().name;
-        if (Application.isEditor && name == "GameplayScene")
-        {
-            onSceneLoaded(null);
-        }
-        else
-        {
-            AsyncOperation async = SceneManager.LoadSceneAsync("GameplayScene", LoadSceneMode.Single);
-            async.completed += onSceneLoaded;
-        }
-
-    }
-
-    private void onSceneLoaded(AsyncOperation asyncOp)
+    private void onSceneLoaded(NetworkRunner runner)
     {        
         startGameSystems();
-
-        if(NetworkClient.active)
-        {
-            // ClientScene.Ready(NetworkClient.connection);
-            // NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
-        }
     }
 
     private void startGameSystems()
@@ -62,32 +39,23 @@ public class SingleplayerGameplayState : IGameState
     
     public void FixedStep(float fixedDeltaTime)
     {
-        if (_gameModeController != null)
-        {
-	        _gameModeController.FixedStep(fixedDeltaTime);
-        }
+	    _gameModeController?.FixedStep(fixedDeltaTime);
     }
     
     public void Step( float p_deltaTime )
 	{
-        if (_gameModeController != null)
-        {
-            _gameModeController.Step(p_deltaTime);
-        }
+        _gameModeController?.Step(p_deltaTime);
     }
 
     public void LateStep(float deltaTime)
     {
-        if (_gameModeController != null)
-        {
-            _gameModeController.LateStep(deltaTime);
-        }
+        _gameModeController?.LateStep(deltaTime);
     }
     
     public void Exit()
 	{
-        _gameModeController.RemoveListener(GameEventType.GAME_OVER, onGameOver);
-        _gameModeController.CleanUp();   
+        _gameModeController?.RemoveListener(GameEventType.GAME_OVER, onGameOver);
+        _gameModeController?.CleanUp();   
     }
 
     
@@ -95,5 +63,4 @@ public class SingleplayerGameplayState : IGameState
     {
         _stateMachine.ChangeState(NovaGameState.MAIN_MENU); ;
     }
-
 }

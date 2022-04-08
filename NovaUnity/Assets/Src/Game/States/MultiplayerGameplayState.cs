@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Fusion;
 using GhostGen;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -28,13 +29,13 @@ public class MultiplayerGameplayState : IGameState
         
         _networkManager = Singleton.instance.networkManager;
         _networkManager.onClientMatchBegin += onClientMatchBegin;
+        _networkManager.onSceneLoadDone += onSceneLoaded;
         
-        // PhotonNetwork.IsMessageQueueRunning = false;
-        AsyncOperation async = SceneManager.LoadSceneAsync("GameplayScene", LoadSceneMode.Single);
-        async.completed += onSceneLoaded;
+        Scene scene = SceneManager.GetSceneByName("GameplayScene");
+        _networkManager.runner.SetActiveScene(scene.buildIndex);
     }
 
-    private void onSceneLoaded(AsyncOperation asyncOp)
+    private void onSceneLoaded(NetworkRunner runner)
     {
         if(NetworkServer.active)
         {
@@ -43,13 +44,10 @@ public class MultiplayerGameplayState : IGameState
         
         startGameSystems();
 
-        if(NetworkClient.active)
-        {
             Debug.Log("SceneLoader: " + _networkManager.localPlayerSlot);
             
             // ClientScene.Ready(NetworkClient.connection);
             // NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
-        }
     }
     
     public void FixedStep(float fixedDeltaTime)

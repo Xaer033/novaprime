@@ -8,9 +8,11 @@ public interface IAvatarController : ITimeWarpTarget, IAttackTarget
 
     string uuid { get; }
 
-    IAvatarView view { get; }
-    AvatarState state { get; }
-    UnitMap.Unit unit { get; }
+    float        health { get; }
+    
+    IAvatarView  view   { get; }
+    AvatarState  state  { get; }
+    UnitMap.Unit unit   { get; }
     
     bool isSimulating { get; set; }
     

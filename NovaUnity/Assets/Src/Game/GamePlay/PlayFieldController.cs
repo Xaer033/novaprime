@@ -18,8 +18,8 @@ public class PlayFieldController : NotificationDispatcher
     private GameplayCamera _cam;
 
     private List<NetPlayer> _playerList;
-    private bool _isServer;
-    
+    private bool            _isServer;
+
     public PlayFieldController(GameplayResources gameplayResources)
     {
         _gameplayResources = gameplayResources;
@@ -28,10 +28,10 @@ public class PlayFieldController : NotificationDispatcher
     {
         Random.InitState(666);
 
-        _gameState = new GameState();
-        _gameSystems = new GameSystems( _gameState, _gameplayResources, NetworkServer.active);
+        _gameState   = new GameState();
+        _gameSystems = new GameSystems(_gameState, _gameplayResources, NetworkServer.active);
         _gameSystems.Start();
-        
+
 //        AvatarSystem aSystem = _gameSystems.GetSystem<AvatarSystem>();
 //        _playerController = aSystem.Spawn<PlayerController>( "player", Vector3.up * 2.0f);
 //        _playerInput = _playerController.GetInput();
@@ -39,12 +39,12 @@ public class PlayFieldController : NotificationDispatcher
 //        aSystem.Spawn<GruntController>( "grunt", Vector3.right * 2 + Vector3.up * 2.0f);
 //        _gruntController = aSystem.Spawn<GruntController>( "grunt", Vector3.left * 4.0f + Vector3.up * 2.0f);
 //        _gruntInput = _gruntController.GetInput();
-        
+
         _pAction = new PlayerActions();
         _pAction.Gameplay.Enable();
 
         _cam = GameObject.FindObjectOfType<GameplayCamera>();
-        
+
         _addCallbacks();
     }
 
@@ -56,21 +56,21 @@ public class PlayFieldController : NotificationDispatcher
         {
             CleanUp();
             Start();
-            
+
             // NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
-        },  ()=>
+        }, () =>
         {
             _pAction.Gameplay.Enable();
         });
     }
-    
+
     public void Step(float deltaTime)
     {
         if (_gameSystems != null)
         {
             _gameSystems.Step(deltaTime);
         }
-        
+
         if (_pAction.Gameplay.reset.triggered)
         {
             Restart();
@@ -92,27 +92,27 @@ public class PlayFieldController : NotificationDispatcher
             _gameSystems.LateStep(deltaTime);
         }
 
-        
-                
+
+
         //Debug STUFF
         if (Keyboard.current.f2Key.wasPressedThisFrame)
         {
             _cam.ClearTargets();
-            
+
             IInputGenerator currentInput = _gruntController.input;
             if (currentInput == _gruntInput)
             {
                 _playerController.input = _gruntInput;
-                _gruntController.input = _playerInput;
+                _gruntController.input  = _playerInput;
                 _cam.AddTarget(_gruntController.view.cameraTarget);
             }
             else
             {
                 _playerController.input = _playerInput;
-                _gruntController.input = _gruntInput;
+                _gruntController.input  = _gruntInput;
                 _cam.AddTarget(_playerController.view.cameraTarget);
             }
-            
+
         }
 
         if (_pAction.Gameplay.exit.triggered)
@@ -120,7 +120,7 @@ public class PlayFieldController : NotificationDispatcher
             Singleton.instance.gameStateMachine.ChangeState(NovaGameState.MAIN_MENU);
         }
     }
-    
+
     public void CleanUp()
     {
         if (_gameSystems != null)
@@ -129,16 +129,16 @@ public class PlayFieldController : NotificationDispatcher
         }
 
         _gruntController = null;
-        _gruntInput = null;
+        _gruntInput      = null;
 
         _playerController = null;
-        _playerInput = null;
+        _playerInput      = null;
 
         _removeCallbacks();
 
         RemoveAllListeners();
     }
-    
+
     private void onGameOver(bool gameOverPopup = true)
     {
         if (!gameOverPopup)
@@ -157,8 +157,8 @@ public class PlayFieldController : NotificationDispatcher
             //});
         }
     }
-    
-    private void   _addCallbacks()
+
+    private void _addCallbacks()
     {
         _gameSystems.AddListener(GamePlayEventType.AVATAR_SPAWNED, onAvatarSpawned);
     }
@@ -171,17 +171,17 @@ public class PlayFieldController : NotificationDispatcher
     private void onAvatarSpawned(GeneralEvent e)
     {
         IAvatarController controller = (IAvatarController)e.data;
-        string id = controller.unit.id;
-        
+        string            id         = controller.unit.id;
+
         if (id == "player")
         {
             _playerController = controller as PlayerController;
-            _playerInput = _playerController.input;
+            _playerInput      = _playerController.input;
         }
         else if (id == "grunt" && _gruntInput == null)
         {
             _gruntController = controller as GruntController;
-            _gruntInput = _gruntController.input;
+            _gruntInput      = _gruntController.input;
         }
     }
 }

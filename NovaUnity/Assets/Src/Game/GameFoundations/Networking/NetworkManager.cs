@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Fusion;
+using Fusion.Sockets;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class NetworkManager : MonoBehaviour
+public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 {
     public enum SessionState
     {
@@ -30,9 +32,10 @@ public class NetworkManager : MonoBehaviour
 #endregion
 
 #region Editor Properties
-    public string masterServerLocation = "http://novamaster.net";
-    public int masterServerPort = 11667;
-    public GameObject syncStatePrefab;
+    public string                  masterServerLocation = "http://novamaster.net";
+    public int                     masterServerPort     = 11667;
+    public GameObject              syncStatePrefab;
+    public NetworkSceneManagerBase sceneObjectProvider;
 #endregion
 
 #region Private Vars
@@ -40,7 +43,7 @@ public class NetworkManager : MonoBehaviour
     // Can't use ConnectionID's for the keys on the client because the connection id's won't match between server and client
     private Dictionary<PlayerSlot, NetPlayer> _clientNetPlayerMap = new Dictionary<PlayerSlot, NetPlayer>();
     private List<PlayerSlot> _serverAvailablePlayerSlots = new List<PlayerSlot>();
-    private Action _onSingleplayerCallback;
+    private NetObjectPoolRoot _pool; 
 #endregion
 
 #region Public properties
@@ -65,14 +68,18 @@ public class NetworkManager : MonoBehaviour
     public event Action<NetworkConnection, NetFrameSnapshot> onClientFrameSnapshot;
     public event Action<NetworkConnection, CurrentSessionUpdate> onClientCurrentSession;
     public event Action<NetworkConnection, PlayerStateUpdate> onClientPlayerStateUpdate;
+    public event Action<NetworkRunner> onSceneLoadDone;
+    public event Action<NetworkRunner> onSceneLoadStart;
+    
     // public event SpawnHandlerDelegate onClientSpawnHandler;
     // public event UnSpawnDelegate onClientUnspawnHandler;
         
-    public SessionState sessionState { get; private set; }
-    public SyncStore syncStore { get; private set; }
-    public PlayerSlot localPlayerSlot { get; private set; }
-    public ServerListEntry serverEntry { get; set; }
-    public static uint frameTick { get; set; }
+    public        NetworkRunner   runner          { get; private set; }
+    public        SessionState    sessionState    { get; private set; }
+    public        SyncStore       syncStore       { get; private set; }
+    public        PlayerSlot      localPlayerSlot { get; private set; }
+    public        ServerListEntry serverEntry     { get; set; }
+    public static uint            frameTick       { get; set; }
 
     public bool isPureServer
     {
@@ -132,16 +139,26 @@ public class NetworkManager : MonoBehaviour
         return _serverNetPlayerMap[connId];
     }
 
-    public void StartSingleplayer(Action onSingleplayerCreated)
+    public async void StartSingleplayer(Action onSingleplayerCreated)
     {
-        _onSingleplayerCallback = onSingleplayerCreated;
-        
      //    onClientCurrentSession += onSingleplayerCurrentSession;
      //    
 	    // NetworkServer.dontListen = true;
 	    // StartHost();
-    }
 
+        StartGameArgs args = new StartGameArgs
+        {
+            Address             = NetAddress.LocalhostIPv4(0),
+            SceneObjectProvider = sceneObjectProvider,
+            ObjectPool          = _pool,
+            Config = NetworkProjectConfig.Global,
+            GameMode = GameMode.Server,
+        };
+        await runner.StartGame(args);
+        
+        onSingleplayerCreated.Invoke();
+    }
+    
     public void StartServer(int port)
     {
         
@@ -201,6 +218,16 @@ public class NetworkManager : MonoBehaviour
 #endregion
 
 #region Unity Callbacks
+
+    protected void Awake()
+    {
+        _pool  = new NetObjectPoolRoot(transform);
+        
+		runner = gameObject.GetComponent<NetworkRunner>();
+		runner.AddCallbacks(this);
+		
+    }
+
     public virtual void OnDestroy()
     {
         onServerStarted           = null;
@@ -536,6 +563,71 @@ public class NetworkManager : MonoBehaviour
         sessionState = SessionState.IN_LOBBY;
         
         // onServerStarted?.Invoke();
+    }
+    
+    public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
+    {
+        throw new NotImplementedException();
+    }
+    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
+    {
+        throw new NotImplementedException();
+    }
+    public void OnInput(NetworkRunner runner, NetworkInput input)
+    {
+        throw new NotImplementedException();
+    }
+    public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)
+    {
+        throw new NotImplementedException();
+    }
+    public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
+    {
+        throw new NotImplementedException();
+    }
+    public void OnConnectedToServer(NetworkRunner runner)
+    {
+        throw new NotImplementedException();
+    }
+    public void OnDisconnectedFromServer(NetworkRunner runner)
+    {
+        throw new NotImplementedException();
+    }
+    public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token)
+    {
+        throw new NotImplementedException();
+    }
+    public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
+    {
+        throw new NotImplementedException();
+    }
+    public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message)
+    {
+        throw new NotImplementedException();
+    }
+    public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
+    {
+        throw new NotImplementedException();
+    }
+    public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data)
+    {
+        throw new NotImplementedException();
+    }
+    public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken)
+    {
+        throw new NotImplementedException();
+    }
+    public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ArraySegment<byte> data)
+    {
+        throw new NotImplementedException();
+    }
+    public void OnSceneLoadDone(NetworkRunner runner)
+    {
+        onSceneLoadDone?.Invoke(runner);
+    }
+    public void OnSceneLoadStart(NetworkRunner runner)
+    {
+        onSceneLoadStart?.Invoke(runner);
     }
 #endregion
 

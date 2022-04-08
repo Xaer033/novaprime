@@ -43,15 +43,15 @@ public class GameSystems : NotificationDispatcher
         IGameSystem triggerSystem     = new TriggerSystem();
         IGameSystem netSnapshotSystem = new NetSnapshotSystem();
         
-        // Higher priority value goes first
-        _addSystem(600,     netSnapshotSystem);
+        /// Higher priority value goes first
+        // _addSystem(600,     netSnapshotSystem);
         _addSystem(500,     triggerSystem);
         _addSystem(400,     avatarSystem);
         _addSystem(300,     spawnPointSystem);
-        _addSystem(200,     platformSystem);
-        _addSystem(100,     projectileSystem);
+        // _addSystem(200,     platformSystem);
+        // _addSystem(100,     projectileSystem);
         _addSystem(100,     healthUiSystem);
-        _addSystem( 50,     networkSystem);
+        // _addSystem( 50,     networkSystem);
         
         
         _sortedSystemList.Sort(_sortSystems);

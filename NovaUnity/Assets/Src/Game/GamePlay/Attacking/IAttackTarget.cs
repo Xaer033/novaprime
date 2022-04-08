@@ -2,5 +2,5 @@
 {
     AttackResult TakeDamage(AttackData attackData);
 
-    float     health { get; }
+    // float     health { get; }
 }

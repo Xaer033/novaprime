@@ -2,12 +2,7 @@
 using GhostGen;
 
 public class SinglePlayerCampaignMode : NotificationDispatcher, IGameModeController
-{   
-    //private PassAndPlayFieldController  _playFieldController        = new PassAndPlayFieldController();
-    //private GameOverPopupController     _gameOverPopupController    = new GameOverPopupController();
-//    private TuckMatchCore _tuckMatchCore;
-//    private PlayFieldController _playFieldController = new PlayFieldController();
-//    private List<PlayerState> _playerList = new List<PlayerState>(PlayerGroup.kMaxPlayerCount);
+{
     private PlayFieldController _playFieldController;
     
     public void Start(object context)

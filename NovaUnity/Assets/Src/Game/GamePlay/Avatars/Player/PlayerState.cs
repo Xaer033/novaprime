@@ -1,6 +1,12 @@
 ﻿using System;
+using Fusion;
 using UnityEngine;
 
+
+public struct Pstate : INetworkStruct
+{
+    
+}
 public class PlayerState : AvatarState
 {
     public const int MAX_PLAYERS = 16;

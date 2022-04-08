@@ -66,8 +66,8 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
 
         _networkSystem     = _gameSystems.Get<NetworkSystem>();
         _netSnapshotSystem = _gameSystems.Get<NetSnapshotSystem>();
-
-        _netSnapshotSystem.onInterpolationUpdate += onNetInterplationUpdate;
+        //
+        // _netSnapshotSystem.onInterpolationUpdate += onNetInterplationUpdate;
 
         _gameSystems.onStep      += onStep;
         _gameSystems.onFixedStep += onFixedStep;

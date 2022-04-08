@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
 
-public enum GameMode
-{
-    SINGLE_PLAYER_CAMPAIGN,
-    MULTI_PLAYER_VS,
-    MULTI_PLAYER_COOP
-}
 
 public class GameContext
 {
+    public enum GameMode
+    {
+        SINGLE_PLAYER_CAMPAIGN,
+        MULTI_PLAYER_VS,
+        MULTI_PLAYER_COOP
+    }
+
     public GameMode         gameMode        { get; private set; }
     //public PlayerState[]    playerList      { get; private set; }
 

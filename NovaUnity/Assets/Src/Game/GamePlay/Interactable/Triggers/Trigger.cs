@@ -21,9 +21,6 @@ public class Trigger : MonoBehaviour, ITrigger
     
     protected void InvokeTrigger(TriggerEventType triggertype, object customData)
     {
-        if(onTriggerEvent != null)
-        {
-            onTriggerEvent(triggertype, customData);
-        }
+        onTriggerEvent?.Invoke(triggertype, customData);
     }
 }

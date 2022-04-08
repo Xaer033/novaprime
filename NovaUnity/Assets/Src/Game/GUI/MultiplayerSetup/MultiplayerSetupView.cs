@@ -72,7 +72,6 @@ public class MultiplayerSetupView : UIView
     public void SetLobbyDataProvider(List<object> dataProvider)
     {
         _serverListRect.dataProvider = dataProvider;
-        
     }
     
     public void SetSelectedItemCallback(Action<int, bool> callback)

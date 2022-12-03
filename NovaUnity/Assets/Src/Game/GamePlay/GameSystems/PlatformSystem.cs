@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Fusion;
 using GhostGen;
 using UnityEngine;
 
@@ -36,11 +37,11 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
         _gameSystems = gameSystems;
         _gameState   = gameState;
 
-        _gameSystems.onFixedStep += onFixedStep;
-        _gameSystems.onStep      += onStep;
+        _gameSystems.onFixedNetworkStep += onFixedStep;
+        // _gameSystems.onStep      += onStep;
 
         _netSnapshotSystem = gameSystems.Get<NetSnapshotSystem>();
-        _netSnapshotSystem.onInterpolationUpdate += onSnapshotInterpolationUpdate;
+        // _netSnapshotSystem.onInterpolationUpdate += onSnapshotInterpolationUpdate;
         
         _triggerSystem = gameSystems.Get<TriggerSystem>();
         _triggerSystem.AddListener(TriggerEventType.ENTER.ToString(), onTrigger);
@@ -79,7 +80,7 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
         }
     }
     
-    private void onFixedStep(float deltaTime)
+    private void onFixedStep(NetworkRunner runner, NetSimulator netSim)
     {
         float time = Time.fixedTime;
         for(int i = 0; i < _platformViewList.Length; ++i)
@@ -94,12 +95,7 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
             }
             
             // Gross, figure out a better way to do this
-            if(Singleton.instance.networkManager.isPureClient)
-            {
-                continue;
-            }
-            
-            float adjustedDeltaTime = deltaTime * state.timeScale;
+            float adjustedDeltaTime = runner.DeltaTime * state.timeScale;
             
             // can use different controllers for different platforms
             switch(view.platformType)
@@ -114,6 +110,14 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
             }
 
             _gameState.platformStateList[i] = state;
+
+            view.netState = new PlatformState.NetState
+            {
+                position = state.position,
+                netId    = view.Object.Id.Raw,
+                velocity = state.velocity
+            };
+            view._networkTransform.transform.position = state.position;
         }
     }
     
@@ -149,7 +153,7 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
 
     public void CleanUp()
     {
-        _gameSystems.onFixedStep -= onFixedStep;
+        _gameSystems.onFixedNetworkStep -= onFixedStep;
         _gameSystems.onStep -= onStep;
 
         if(_gameState != null)
@@ -170,70 +174,70 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
             _triggerSystem.RemoveListener(TriggerEventType.ATTACKED.ToString(), onTrigger);
         }
 
-        if(_netSnapshotSystem != null)
-        {
-            _netSnapshotSystem.onInterpolationUpdate -= onSnapshotInterpolationUpdate;
-        }
+        // if(_netSnapshotSystem != null)
+        // {
+        //     _netSnapshotSystem.onInterpolationUpdate -= onSnapshotInterpolationUpdate;
+        // }
     }
 
-    private void onSnapshotInterpolationUpdate(float alpha, GameState.Snapshot from, GameState.Snapshot to)
-    {
-        var fromPlatformList = from.platformStateList;
-        fromPlatformList.Sort((a, by) =>  { return a.netId.CompareTo(by.netId);  });
-        
-        var toPlatformList   = to.platformStateList;
-        toPlatformList.Sort((a, by) =>  { return a.netId.CompareTo(by.netId);  });
+    // private void onSnapshotInterpolationUpdate(float alpha, GameState.Snapshot from, GameState.Snapshot to)
+    // {
+    //     var fromPlatformList = from.platformStateList;
+    //     fromPlatformList.Sort((a, by) =>  { return a.netId.CompareTo(by.netId);  });
+    //     
+    //     var toPlatformList   = to.platformStateList;
+    //     toPlatformList.Sort((a, by) =>  { return a.netId.CompareTo(by.netId);  });
+    //
+    //     int maxCount = Math.Max(toPlatformList.Count, fromPlatformList.Count);
+    //
+    //     for(int i = 0; i < maxCount; ++i)
+    //     {
+    //         if( i >= toPlatformList.Count     || 
+    //             i >= fromPlatformList.Count   || 
+    //             i >= _gameState.platformStateList.Count)
+    //         {
+    //             break;
+    //         }
+    //
+    //         var state = _gameState.platformStateList[i];
+    //         var view  = _platformViewList[i];
+    //
+    //         int fromIndex = getStateIndexForList(state.netId, fromPlatformList);
+    //         int toIndex   = getStateIndexForList(state.netId, toPlatformList);
+    //         
+    //         if(fromIndex < 0 || toIndex < 0)
+    //         {
+    //             continue;
+    //         }
+    //         
+    //         var fromSnapshot = fromPlatformList[fromIndex];
+    //         var toSnapshot   = toPlatformList[toIndex];
+    //
+    //         state.prevPosition      = state.position;
+    //         state.position          = Vector2.Lerp(fromSnapshot.position, toSnapshot.position, alpha);
+    //         state.velocity          = Vector2.Lerp(fromSnapshot.velocity, toSnapshot.velocity, alpha);
+    //         view.transform.position = state.position;
+    //         view.viewRoot.position  = state.position;
+    //         
+    //         view._raycastController.UpdateRaycastOrigins();
+    //     }
+    // }
 
-        int maxCount = Math.Max(toPlatformList.Count, fromPlatformList.Count);
-
-        for(int i = 0; i < maxCount; ++i)
-        {
-            if( i >= toPlatformList.Count     || 
-                i >= fromPlatformList.Count   || 
-                i >= _gameState.platformStateList.Count)
-            {
-                break;
-            }
-
-            var state = _gameState.platformStateList[i];
-            var view  = _platformViewList[i];
-
-            int fromIndex = getStateIndexForList(state.netId, fromPlatformList);
-            int toIndex   = getStateIndexForList(state.netId, toPlatformList);
-            
-            if(fromIndex < 0 || toIndex < 0)
-            {
-                continue;
-            }
-            
-            var fromSnapshot = fromPlatformList[fromIndex];
-            var toSnapshot   = toPlatformList[toIndex];
-
-            state.prevPosition      = state.position;
-            state.position          = Vector2.Lerp(fromSnapshot.position, toSnapshot.position, alpha);
-            state.velocity          = Vector2.Lerp(fromSnapshot.velocity, toSnapshot.velocity, alpha);
-            view.transform.position = state.position;
-            view.viewRoot.position  = state.position;
-            
-            view._raycastController.UpdateRaycastOrigins();
-        }
-    }
-
-    private int getStateIndexForList(uint netId, List<PlatformState.NetSnapshot> snapshotList)
-    {
-        int result = -1;
-        
-        for(int i = 0; i < snapshotList.Count; ++i)
-        {
-            if(snapshotList[i].netId == netId)
-            {
-                result = i;
-                break;
-            }
-        }
-
-        return result;
-    }
+    // private int getStateIndexForList(uint netId, List<PlatformState.NetSnapshot> snapshotList)
+    // {
+    //     int result = -1;
+    //     
+    //     for(int i = 0; i < snapshotList.Count; ++i)
+    //     {
+    //         if(snapshotList[i].netId == netId)
+    //         {
+    //             result = i;
+    //             break;
+    //         }
+    //     }
+    //
+    //     return result;
+    // }
 
     private void onClientStart(PlatformView view)
     {
@@ -252,8 +256,11 @@ public class PlatformSystem : NotificationDispatcher, IGameSystem
         {
             for(int i = 0; i < triggerPlatList.Count; ++i)
             {
-                triggerPlatList[i].wasTriggered = true;
+                PlatformState newState = triggerPlatList[i];
+                newState.wasTriggered = true;
+                triggerPlatList[i]    = newState;
             }
+            // _triggerPlatforms[triggerTag] = triggerPlatList;
         }
     }
 

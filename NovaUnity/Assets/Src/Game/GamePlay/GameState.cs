@@ -17,7 +17,7 @@ public class GameState
         public readonly List<EnemyState.NetSnapshot>      enemyStateList;
         public readonly List<ProjectileState.NetSnapshot> projectileStateList;
         public readonly List<SpawnPointState>             spawnPointStateList;
-        public readonly List<PlatformState.NetSnapshot>   platformStateList;
+        public readonly List<PlatformState.NetState>   platformStateList;
 
 
         public Snapshot(GameState gameState)
@@ -26,7 +26,7 @@ public class GameState
             enemyStateList      = new List<EnemyState.NetSnapshot>(200);
             projectileStateList = new List<ProjectileState.NetSnapshot>(200);
             spawnPointStateList = new List<SpawnPointState>(50);
-            platformStateList   = new List<PlatformState.NetSnapshot>(100);
+            platformStateList   = new List<PlatformState.NetState>(100);
 
             spawnPointStateList.AddRange(gameState.spawnPointStateList);
             

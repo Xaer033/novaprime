@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using Fusion;
+using UnityEngine;
 
-public struct FrameInput 
+public struct FrameInput : INetworkInput
 {
     // Range of -1 to 1
     public float horizontalMovement;

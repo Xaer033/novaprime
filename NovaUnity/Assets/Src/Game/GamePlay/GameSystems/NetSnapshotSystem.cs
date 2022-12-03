@@ -98,7 +98,7 @@ public class NetSnapshotSystem : NotificationDispatcher, IGameSystem
         {
             sequence     = _serverSendSequence,
             frameTick    = NetworkManager.frameTick,
-            sendTime     = TimeUtil.TimeSinceGameStart()
+            sendTime     = TimeUtil.FixedTimeSinceGameStart()
         };
 
         NetFrameSnapshot snapshot = new NetFrameSnapshot
@@ -128,7 +128,7 @@ public class NetSnapshotSystem : NotificationDispatcher, IGameSystem
             return;
         }
         
-        double now      = TimeUtil.TimeSinceGameStart();
+        double now = TimeUtil.FixedTimeSinceGameStart();
 
         // this is our first snapshot
         if(_clientSnapshotList.Count == 0)

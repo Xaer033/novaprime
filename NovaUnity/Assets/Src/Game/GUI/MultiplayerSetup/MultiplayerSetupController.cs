@@ -81,7 +81,7 @@ public class MultiplayerSetupController : BaseController
     {
         _networkManager.onServerStarted -= onServerStarted;
 
-        _networkManager.fetchExternalIpAddress((wasSuccessfull, ipAddress) =>
+        _networkManager.FetchExternalIpAddress((wasSuccessfull, ipAddress) =>
         {
             // Inform the master server
             ServerListEntry entry = new ServerListEntry

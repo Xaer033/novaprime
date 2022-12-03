@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Fusion;
 using GhostGen;
 using UnityEngine;
 
@@ -70,14 +71,14 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         // _netSnapshotSystem.onInterpolationUpdate += onNetInterplationUpdate;
 
         _gameSystems.onStep      += onStep;
-        _gameSystems.onFixedStep += onFixedStep;
+        _gameSystems.onFixedNetworkStep += onFixedStep;
         _gameSystems.AddListener(GamePlayEventType.SPAWN_POINT_TRIGGERED, onSpawnPointTriggered);
 
         _gameState.playerStateList.Clear();
         _gameState.enemyStateList.Clear();
     }
 
-    private void onFixedStep(float fixedDeltaTime)
+    private void onFixedStep(NetworkRunner runner, NetSimulator netSim)
     {
         uint tick = NetworkManager.frameTick;
 
@@ -87,43 +88,11 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
             IInputGenerator   inputGen   = controller.input;
             FrameInput        frameInput = default(FrameInput);
 
-            // if (inputGen != null)
-            // {
-            //     frameInput = inputGen.GetInput();
-            // }
             frameInput = _lastInputMap[controller.uuid];
             if (NetworkServer.active || controller.isSimulating)
             {
                 _frameInputList.Add(frameInput);
-
-                var pState = (PlayerState)controller.state;
-                if (pState != null) // Check again to make sure only the client does this part
-                {
-                    if (controller.isSimulating)
-                    {
-                        var playerSnapshot = new PlayerInputStateSnapshot
-                        {
-                            snapshot = pState.Snapshot(),
-                            input    = frameInput,
-                        };
-
-                        uint bufferIndex = tick % PlayerState.MAX_INPUTS;
-                        pState.nonAckSnapshotBuffer[bufferIndex] = playerSnapshot;
-                    }
-
-                    var serverPlayerInputGen = inputGen as ServerPlayerInputGenerator;
-
-                    pState.latestInput.tick = serverPlayerInputGen != null ?
-                        serverPlayerInputGen.lastTickInput.tick :
-                        tick;
-
-                    if (NetworkServer.active)
-                    {
-                        pState.ackSequence = pState.latestInput.tick;
-                    }
-                }
-
-                controller?.FixedStep(fixedDeltaTime, frameInput);
+                controller?.FixedStep(runner.DeltaTime, frameInput);
             }
 
             controller?.input?.Clear();
@@ -190,7 +159,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         _gameState.enemyStateList.Clear();
 
         _gameSystems.onStep      -= onStep;
-        _gameSystems.onFixedStep -= onFixedStep;
+        _gameSystems.onFixedNetworkStep -= onFixedStep;
         _gameSystems.RemoveListener(GamePlayEventType.SPAWN_POINT_TRIGGERED, onSpawnPointTriggered);
 
         // PhotonNetwork.PrefabPool = _oldPool;
@@ -276,12 +245,13 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         return null;
     }
 
-    private PlayerController _spawnPlayer(string uuid, UnitMap.Unit unit, Vector3 position, SpawnPointData spawnPointData)
+    private void _spawnPlayer(string uuid, UnitMap.Unit unit, Vector3 position, SpawnPointData spawnPointData, Action<PlayerController> onSpawnComplete)
     {
-        // NetPlayer netPlayer = null;
-
         PlayerSlot pSlot = (PlayerSlot)spawnPointData.customInt;
 
+
+        // _networkManager.runner.Spawn(unit.view,)
+        
         AvatarView       view       = GameObject.Instantiate<AvatarView>(unit.view as AvatarView, position, Quaternion.identity, _playerParent.transform);
         PlayerState      state      = PlayerState.Create(uuid, unit.stats, position);
         PlayerController controller = new PlayerController(unit, state, view, null);
@@ -289,7 +259,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         _gameState.playerStateList.Add(state);
 
         controller.Start(_gameSystems);
-        return controller;
+        // return controller;
     }
 
     private IAvatarController _spawnEnemy(string uuid, UnitMap.Unit unit, Vector2 position, SpawnPointData spawnPointData)
@@ -375,6 +345,7 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
             }
 
             GameObject.Destroy(controller.view.gameObject);
+            
         }
     }
 

@@ -1,4 +1,5 @@
-﻿using GhostGen;
+﻿using Fusion;
+using GhostGen;
 using UnityEngine;
 
 public class SpawnPointSystem : NotificationDispatcher, IGameSystem
@@ -7,14 +8,14 @@ public class SpawnPointSystem : NotificationDispatcher, IGameSystem
     private GameState _gameState;
 
     private SpawnPointView[] _spawnPointViewList;
-    
+    private NetworkManager   _networkManager;
     
     public int priority { get; set; }
     
     //Ensures that dependencies are initialized first
     public SpawnPointSystem()
     {
-        
+        _networkManager = Singleton.instance.networkManager;
     }
     
     public void Start(bool hasAuthority, GameSystems gameSystems, GameState gameState)
@@ -22,22 +23,21 @@ public class SpawnPointSystem : NotificationDispatcher, IGameSystem
         _gameSystems = gameSystems;
         _gameState = gameState;
 
-        _gameSystems.onFixedStep += FixedStep;
+        _gameSystems.onFixedNetworkStep += FixedStep;
         
         _gameState.spawnPointStateList.Clear();
         _spawnPointViewList = GameObject.FindObjectsOfType<SpawnPointView>();
         for (int i = 0; i < _spawnPointViewList.Length; ++i)
         {
-            
             SpawnPointView view = _spawnPointViewList[i];
-            SpawnPointState state = new SpawnPointState(Time.fixedTime + view.spawnInterval);
+            SpawnPointState state = new SpawnPointState(TimeUtil.FixedTimeSinceGameStart() + view.spawnInterval);
             _gameState.spawnPointStateList.Add(state);
         }
     }
 
-    public void FixedStep(float deltaTime)
+    public void FixedStep(NetworkRunner runner, NetSimulator netSim)
     {
-        float now = (float)TimeUtil.TimeSinceGameStart();
+        float now = TimeUtil.FixedTimeSinceGameStart();
         for (int i = 0; i < _spawnPointViewList.Length; ++i)
         {
             SpawnPointState state = _gameState.spawnPointStateList[i];
@@ -55,7 +55,7 @@ public class SpawnPointSystem : NotificationDispatcher, IGameSystem
 
     public void CleanUp()
     {
-        _gameSystems.onFixedStep -= FixedStep;
+        _gameSystems.onFixedNetworkStep -= FixedStep;
         _gameState.spawnPointStateList.Clear();
     }
 

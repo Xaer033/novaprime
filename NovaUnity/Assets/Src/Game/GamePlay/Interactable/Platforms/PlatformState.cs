@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using Fusion;
 using UnityEngine;
 
-public class PlatformState
+public struct PlatformState
 {
     public uint    netId;
     public Vector2 position;
@@ -32,6 +33,7 @@ public class PlatformState
         fromWaypointIndex       = 0;
         percentBetweenWaypoints = 0;
         wasTriggered            = false;
+        netId                   = 0;
         
         int raycastSize       = raycastArraySize > 0 ? raycastArraySize : 1;
         raycastHits           = new RaycastHit2D[raycastSize];
@@ -49,7 +51,7 @@ public class PlatformState
     }
 
     [Serializable]
-    public struct NetSnapshot
+    public struct NetState : INetworkStruct
     {
         public uint    netId;
         public Vector2 position;

@@ -123,7 +123,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         _projectileImpactViewList.Sort(_impactFXSort);
         _bloodImpactViewList.Sort(_impactFXSort);
 
-        double now = TimeUtil.TimeSinceGameStart();
+        double now = TimeUtil.FixedTimeSinceGameStart();
         
         for (int i = 0; i < _poolSize; ++i)
         {
@@ -246,37 +246,39 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
 
     public ProjectileState Spawn(string ownerUUID, ProjectileData data, Vector3 position, Vector3 direction)
     {
-        double now = TimeUtil.TimeSinceGameStart();
+        double now = TimeUtil.FixedTimeSinceGameStart();
         
         for (int i = 0; i < _poolSize; ++i)
         {
             ProjectileState state = _gameState.projectileStateList[i];
-            BulletView      view  = _projectileViewPool[i];
             
-            if (!state.isActive)
+            if (state.isActive)
             {
-                state.isActive     = true;
-                state.ownerUUID    = ownerUUID;
-                state.data         = data;
-                state.speed        = data.speed;
-                state.damage       = data.damage;
-                state.deathTime    = now + data.deathTimer;
-                state.timeScale    = 1.0f;
-                state.position     = position;
-                state.prevPosition = position;
-                state.velocity     = direction * state.speed;
-                state.angle        = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-
-                _gameState.projectileStateList[i] = state;
-                
-                view.Reset(position);
-                Vector3 eulerAngles     = view.transform.eulerAngles;
-                eulerAngles.z           = state.angle;
-                view.transform.rotation = Quaternion.Euler(eulerAngles);
-                
-                _gameSystems.DispatchEvent(GamePlayEventType.PROJECTILE_SPAWNED, false, state);
-                return state;
+                continue;
             }
+            
+            BulletView      view  = _projectileViewPool[i];
+            state.isActive     = true;
+            state.ownerUUID    = ownerUUID;
+            state.data         = data;
+            state.speed        = data.speed;
+            state.damage       = data.damage;
+            state.deathTime    = now + data.deathTimer;
+            state.timeScale    = 1.0f;
+            state.position     = position;
+            state.prevPosition = position;
+            state.velocity     = direction * state.speed;
+            state.angle        = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+            _gameState.projectileStateList[i] = state;
+            
+            view.Reset(position);
+            Vector3 eulerAngles     = view.transform.eulerAngles;
+            eulerAngles.z           = state.angle;
+            view.transform.rotation = Quaternion.Euler(eulerAngles);
+            
+            _gameSystems.DispatchEvent(GamePlayEventType.PROJECTILE_SPAWNED, false, state);
+            return state;
         }
 
         return default(ProjectileState);

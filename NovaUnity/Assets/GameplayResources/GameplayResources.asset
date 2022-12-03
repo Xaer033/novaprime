@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34568cf48c03f3b439027da6533f80a7, type: 3}
   m_Name: GameplayResources
   m_EditorClassIdentifier: 
+  netSimulator: {fileID: 2175832434944306759, guid: c1e315d3c189104499cbcec3aad7c6d1,
+    type: 3}
   gameplayCamera: {fileID: 750901081596856283, guid: 57845569f40ecc84f89fd329f71426f5,
     type: 3}
   bulletView: {fileID: -1901877338219026376, guid: a67d08bde992529428ee0d38b34637eb,

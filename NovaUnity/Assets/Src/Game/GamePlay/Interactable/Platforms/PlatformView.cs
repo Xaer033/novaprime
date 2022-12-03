@@ -1,8 +1,11 @@
 using System;
+using Fusion;
 using UnityEngine;
 using UnityEngine.Serialization;
-public class PlatformView : MonoBehaviour, ITimeWarpTarget
+
+public class PlatformView : SimulationBehaviour, ITimeWarpTarget
 {
+    [Header("Platform Settings")]
     public PlatformData data;
     public PlatformType platformType;
     public string triggerTag;
@@ -18,16 +21,23 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
     public LayerMask passengerMask;
     public float     distanceBetweenRays = 0.2f;
 
+    [Header("Asset References")]
     public Collider2D collisionCollider;
     [FormerlySerializedAs("_viewRoot")]
     public Transform viewRoot;
+    public NetworkTransform _networkTransform;
 
     public int               index;
-    // public NetworkIdentity   netIdentity;
+    
     public PlatformState     state;
     public RaycastController _raycastController;
+
+
+    [Networked]
+    public PlatformState.NetState netState { get; set; }
     
-    public event Action<PlatformView> onClientStart;
+    
+    public event Action< PlatformView> onClientStart;
     
     // Start is called before the first frame update
     void Awake()
@@ -53,7 +63,7 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
 
     private void OnDrawGizmos()
     {
-        if (localWaypoints != null && collisionCollider != null && state != null)
+        if (localWaypoints != null && collisionCollider != null)
         {
             float size = 0.3f;
             for (int i = 0; i < localWaypoints.Length; ++i)
@@ -64,7 +74,7 @@ public class PlatformView : MonoBehaviour, ITimeWarpTarget
                 Gizmos.DrawLine(globalPos - Vector2.left * size, globalPos + Vector2.left * size);
 
                 
-                Gizmos.color = i == 0 ? new Color(0.42f, 0.75f, 0.4f, 0.8f) : new Color(0.2f, 0.2f, 1.0f, 0.8f);
+                Gizmos.color = i == 0 ? new Color(0.42f, 0.75f, 0.4f, 0.4f) : new Color(0.2f, 0.2f, 1.0f, 0.4f);
                 Vector3 platformSize = collisionCollider.bounds.size;
                 Gizmos.DrawCube(globalPos, platformSize);
             }

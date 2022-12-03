@@ -29,6 +29,11 @@ public class NetObjectPoolRoot : INetworkObjectPool
 	public NetworkObject AcquireInstance(NetworkRunner runner, NetworkPrefabInfo info)
 	{
 		NetworkObject prefab;
+		foreach (var pair in NetworkProjectConfig.Global.PrefabTable.GetEntries())
+		{
+			Debug.Log($"{pair.Item1}|{pair.Item2}");
+		}
+		
 		if (NetworkProjectConfig.Global.PrefabTable.TryGetPrefab(info.Prefab, out prefab))
 		{
 			NetObjectPool pool = GetPool(prefab);

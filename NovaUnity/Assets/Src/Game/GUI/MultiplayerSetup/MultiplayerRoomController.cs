@@ -196,7 +196,7 @@ public class MultiplayerRoomController : BaseController
             }
             else
             {
-                roomView.SetPlayer(i, new NetPlayer(-1));
+                roomView.SetPlayer(i, new NetPlayer { connectionId = -1 });
             }
         }
     }

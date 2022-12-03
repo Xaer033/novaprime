@@ -117,12 +117,14 @@ public class MainMenuState : IGameState
     private void onStartSingleplayer(GeneralEvent e)
     {
 		_networkManager.Disconnect();
-        _networkManager.StartSingleplayer(onSingleplayerMatchBegin);
+		_networkManager.onServerStarted += onSingleplayerMatchBegin;
+        _networkManager.StartSingleplayer();
     }
 
 
     private void onSingleplayerMatchBegin()
     {
+		_networkManager.onServerStarted -= onSingleplayerMatchBegin;
 	    _stateMachine.ChangeState(NovaGameState.SINGLEPLAYER_GAMEPLAY);
     }
     

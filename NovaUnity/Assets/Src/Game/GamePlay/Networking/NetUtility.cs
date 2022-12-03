@@ -35,9 +35,9 @@ public class NetUtility
         };
     } 
     
-    public static PlatformState.NetSnapshot Snapshot(PlatformState state)
+    public static PlatformState.NetState Snapshot(PlatformState state)
     {
-        return new PlatformState.NetSnapshot
+        return new PlatformState.NetState
         {
             netId    = state.netId,
             position = state.position,

@@ -66,10 +66,7 @@ public class PlayFieldController : NotificationDispatcher
 
     public void Step(float deltaTime)
     {
-        if (_gameSystems != null)
-        {
-            _gameSystems.Step(deltaTime);
-        }
+        _gameSystems?.Step(deltaTime);
 
         if (_pAction.Gameplay.reset.triggered)
         {
@@ -79,19 +76,12 @@ public class PlayFieldController : NotificationDispatcher
 
     public void FixedStep(float fixedDeltaTime)
     {
-        if (_gameSystems != null)
-        {
-            _gameSystems.FixedStep(fixedDeltaTime);
-        }
+        _gameSystems?.FixedStep(fixedDeltaTime);
     }
 
     public void LateStep(float deltaTime)
     {
-        if (_gameSystems != null)
-        {
-            _gameSystems.LateStep(deltaTime);
-        }
-
+        _gameSystems?.LateStep(deltaTime);
 
 
         //Debug STUFF
@@ -123,10 +113,7 @@ public class PlayFieldController : NotificationDispatcher
 
     public void CleanUp()
     {
-        if (_gameSystems != null)
-        {
-            _gameSystems.CleanUp();
-        }
+        _gameSystems?.CleanUp();
 
         _gruntController = null;
         _gruntInput      = null;

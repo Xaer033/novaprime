@@ -6,8 +6,9 @@ using Object = UnityEngine.Object;
 [CreateAssetMenu(menuName ="Nova/Gameplay Resources")]
 public class GameplayResources : ScriptableObject
 {
+    public NetSimulator   netSimulator;
     public GameplayCamera gameplayCamera;
-    public BulletView bulletView;
+    public BulletView     bulletView;
     public ParticleSystem bulletImpactFX;
     public ParticleSystem avatarImpactFX;
     public ParticleSystem jumpLandFX;

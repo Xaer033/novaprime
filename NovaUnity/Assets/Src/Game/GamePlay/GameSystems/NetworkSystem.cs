@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Fusion;
 using GhostGen;
 using UnityEngine;
 public class NetworkSystem : NotificationDispatcher, IGameSystem
@@ -188,7 +189,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
             sequence    = lastInput.tick,//_clientSendSequence,
             ackSequence = pState.ackSequence,
             frameTick   = NetworkManager.frameTick,
-            sendTime    = TimeUtil.TimeSinceGameStart(),
+            sendTime    = TimeUtil.FixedTimeSinceGameStart(),
         };
     
         SendPlayerInput sendInputMessage = new SendPlayerInput
@@ -225,7 +226,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
                 sequence    = _serverSendSequence,
                 ackSequence = state.ackSequence,
                 frameTick   = NetworkManager.frameTick,
-                sendTime    = TimeUtil.TimeSinceGameStart()
+                sendTime    = TimeUtil.FixedTimeSinceGameStart()
             };
         
             var msg = new PlayerStateUpdate
@@ -240,12 +241,11 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         }
     }
     
-    private void onServerMatchLoadComplete(NetworkConnection conn)
+    private void onServerMatchLoadComplete(NetworkRunner runner, PlayerRef playerRef)
     {
         if(_networkManager.sessionState == NetworkManager.SessionState.IN_GAME)
         {
-            var netPlayerMap = _networkManager.GetServerPlayerMap();
-            NetPlayer netPlayer = _networkManager.GetServerPlayerFromConnId(conn.connectionId);
+            NetPlayer netPlayer = _networkManager.GetServerPlayerFromRef(playerRef);
             serverSpawnPlayer(netPlayer);
         }
     }
@@ -264,7 +264,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     {
         if(_serverConnToPlayerMap.TryGetValue(conn.connectionId, out IAvatarController controller))
         {
-            NetPlayer netPlayer = _networkManager.GetServerPlayerFromConnId(conn.connectionId);
+            NetPlayer netPlayer = _networkManager.GetServerPlayerFromRef(conn.connectionId);
             
             _serverConnToPlayerMap?.Remove(conn.connectionId);
             _serverPlayerInputBuffer?.Remove(netPlayer.playerSlot);
@@ -314,7 +314,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     //     return controller.view.gameObject;
     // }
 
-    private void setupPlayer(NetPlayer nPlayer, NetworkConnection netConnection, IAvatarController playerController, bool isOwner)
+    private void setupPlayer(NetPlayer nPlayer, PlayerRef playerRef, IAvatarController playerController, bool isOwner)
     {
         PlayerState pState = (PlayerState)playerController.state;
         pState.playerSlot = nPlayer.playerSlot;
@@ -322,11 +322,11 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
 
         if(isOwner)
         {
-            setupLocalPlayer(nPlayer, netConnection, playerController);
+            setupLocalPlayer(nPlayer, playerRef, playerController);
         }
     }
     
-    private void setupLocalPlayer(NetPlayer nPlayer, NetworkConnection netConnection, IAvatarController playerController)
+    private void setupLocalPlayer(NetPlayer nPlayer, PlayerRef playerRef, IAvatarController playerController)
     {
         PlayerView     pView = playerController.view as PlayerView;
         GameplayCamera cam   = _getOrCreatePlayerCamera();
@@ -345,7 +345,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         _localPlayer = new LocalPlayerState
         {
             netPlayer   = nPlayer,
-            conn        = netConnection,
+            playerRef   = playerRef,
             controller  = playerController,
             state       = playerController.state as PlayerState,
             pInput      = inputGenerator
@@ -354,35 +354,35 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
 
     private void serverSpawnPlayer(NetPlayer netPlayer)
     {
-        // PlayerSpawnPoint point = _avatarSystem.GetSpawnPointForSlot(netPlayer.playerSlot);
-        // if(point == null)
-        // {
-        //     Debug.LogErrorFormat("No spawn point for slot {0}, player {1} cant spawn!", netPlayer.playerSlot.ToString(), netPlayer.nickName );
-        //     return;
-        // }
-        //
-        // UnitMap.Unit      playerUnit        = _unitMap.GetUnit("player");
-        // IAvatarController controller        = _avatarSystem.Spawn<IAvatarController>(playerUnit.id, point.transform.position);
-        // GameObject        spawnedGameObject = controller.view.gameObject;
-        //
+        PlayerSpawnPoint point = _avatarSystem.GetSpawnPointForSlot(netPlayer.playerSlot);
+        if(point == null)
+        {
+            Debug.LogErrorFormat("No spawn point for slot {0}, player {1} cant spawn!", netPlayer.playerSlot.ToString(), netPlayer.nickName );
+            return;
+        }
+        
+        UnitMap.Unit      playerUnit        = _unitMap.GetUnit("player");
+        IAvatarController controller        = _avatarSystem.Spawn<IAvatarController>(playerUnit.id, point.transform.position);
+        GameObject        spawnedGameObject = controller.view.gameObject;
+        
         // _serverPlayerInputBuffer[netPlayer.playerSlot] = new ServerPlayerInputBuffer(PlayerState.MAX_INPUTS);
         // NetworkConnection conn = NetworkServer.connections[netPlayer.connectionId];
         //
         // NetworkServer.Spawn(spawnedGameObject, conn);
         // NetworkServer.AddPlayerForConnection(conn, spawnedGameObject);
-        //
+        
         // _serverConnToPlayerMap[conn.connectionId] = controller;
-        // _serverPlayerControllerList.Add(controller);
-        //
-        // bool isOwner = _networkManager.localPlayer != null &&
-        //                netPlayer.connectionId == _networkManager.localPlayer.connectionId;
-        //                
-        // setupPlayer(netPlayer, conn, controller, isOwner);
-        //
-        // if (!isOwner)
-        // {
-        //     controller.input = new ServerPlayerInputGenerator();
-        // }
+        _serverPlayerControllerList.Add(controller);
+
+        bool isOwner = true;// //_networkManager.runner.LocalPlayer != null &&
+                       //netPlayer.connectionId == _networkManager.localPlayer.connectionId;
+                       
+        setupPlayer(netPlayer, conn, controller, isOwner);
+        
+        if (!isOwner)
+        {
+            controller.input = new ServerPlayerInputGenerator();
+        }
     }
     
     private void onClientUnitUnspawnHandler(GameObject obj)

@@ -653,7 +653,7 @@ public class PlayerController : NotificationDispatcher, IAvatarController
 
     private void onClientUpdate(IAvatarView pView, double sendTimestamp, Vector2 velocity, Vector2 position, Vector2 aimPosition)
     {
-        if(playerNetEntity.hasAuthority)
+        if(playerNetEntity.isOwned)
         {
             return;
         }

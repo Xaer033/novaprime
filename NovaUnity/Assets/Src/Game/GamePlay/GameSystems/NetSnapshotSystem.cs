@@ -109,7 +109,7 @@ public class NetSnapshotSystem : NotificationDispatcher, IGameSystem
             snapshot = NetUtility.Snapshot(_gameState)
         };
 
-        NetworkServer.SendToAll(snapshot, Channels.DefaultUnreliable);
+        NetworkServer.SendToAll(snapshot, Channels.Unreliable);
         _serverSendSequence++;
     }
 
@@ -123,7 +123,7 @@ public class NetSnapshotSystem : NotificationDispatcher, IGameSystem
         _clientInterpolationTime += _clientSnapshotList.Count > 0 ? deltaTime : 0;
     }
 
-    private void onClientFrameSnapshotReceived(NetworkConnection conn, NetFrameSnapshot msg)
+    private void onClientFrameSnapshotReceived(NetFrameSnapshot msg)
     {
         if(_networkManager.isHostClient)
         {

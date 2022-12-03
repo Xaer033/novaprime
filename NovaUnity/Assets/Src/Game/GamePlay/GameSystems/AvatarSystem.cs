@@ -92,7 +92,8 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
             // {
             //     frameInput = inputGen.GetInput();
             // }
-            frameInput = _lastInputMap[controller.uuid];
+            _lastInputMap.TryGetValue(controller.uuid, out frameInput);
+            
             if (NetworkServer.active || controller.isSimulating)
             {
                 _frameInputList.Add(frameInput);
@@ -193,8 +194,8 @@ public class AvatarSystem : NotificationDispatcher, IGameSystem
         _gameSystems.onStep      -= onStep;
         _gameSystems.onFixedStep -= onFixedStep;
         _gameSystems.RemoveListener(GamePlayEventType.SPAWN_POINT_TRIGGERED, onSpawnPointTriggered);
-
-        // PhotonNetwork.PrefabPool = _oldPool;
+        
+        _netSnapshotSystem.onInterpolationUpdate -= onNetInterplationUpdate;
     }
 
     public PlayerSpawnPoint GetSpawnPointForSlot(PlayerSlot slot)

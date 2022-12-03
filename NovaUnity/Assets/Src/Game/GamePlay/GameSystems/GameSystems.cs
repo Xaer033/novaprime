@@ -34,24 +34,15 @@ public class GameSystems : NotificationDispatcher
         _gameState    = gameState;
         isAuthoritive = isTheAuthority;
         
-        IGameSystem projectileSystem  = new ProjectileSystem(gameplayResources, 125);
-        IGameSystem avatarSystem      = new AvatarSystem(gameplayResources);
-        IGameSystem healthUiSystem    = new HealthUISystem(gameplayResources);
-        IGameSystem networkSystem     = new NetworkSystem(gameplayResources.unitMap);
-        IGameSystem spawnPointSystem  = new SpawnPointSystem();
-        IGameSystem platformSystem    = new PlatformSystem();
-        IGameSystem triggerSystem     = new TriggerSystem();
-        IGameSystem netSnapshotSystem = new NetSnapshotSystem();
-        
         // Higher priority value goes first
-        _addSystem(600,     netSnapshotSystem);
-        _addSystem(500,     triggerSystem);
-        _addSystem(400,     avatarSystem);
-        _addSystem(300,     spawnPointSystem);
-        _addSystem(200,     platformSystem);
-        _addSystem(100,     projectileSystem);
-        _addSystem(100,     healthUiSystem);
-        _addSystem( 50,     networkSystem);
+        _addSystem(600,     new NetSnapshotSystem());
+        _addSystem(500,     new TriggerSystem());
+        _addSystem(400,     new AvatarSystem(gameplayResources));
+        _addSystem(300,     new SpawnPointSystem());
+        _addSystem(200,     new PlatformSystem());
+        _addSystem(100,     new ProjectileSystem(gameplayResources, 125));
+        _addSystem(100,     new HealthUISystem(gameplayResources));
+        _addSystem( 50,     new NetworkSystem(gameplayResources.unitMap));
         
         
         _sortedSystemList.Sort(_sortSystems);

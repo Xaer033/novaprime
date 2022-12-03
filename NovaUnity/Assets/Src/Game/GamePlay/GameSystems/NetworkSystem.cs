@@ -14,7 +14,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     private NetworkManager _networkManager;
     private UnitMap        _unitMap;
     
-    private Dictionary<Guid, UnitMap.Unit> _netPrefabMap;
+    private Dictionary<uint, UnitMap.Unit> _netPrefabMap;
     
     /* Server */
     private uint                                            _serverSendSequence = 0;
@@ -41,7 +41,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         
         _unitMap = unitMap;
 
-        _netPrefabMap               = new Dictionary<Guid, UnitMap.Unit>();
+        _netPrefabMap               = new Dictionary<uint, UnitMap.Unit>();
         _serverConnToPlayerMap      = new Dictionary<int, IAvatarController>();
         _serverPlayerControllerList = new List<IAvatarController>();
         _serverPlayerStateList      = new List<NetPlayerState>(PlayerState.MAX_PLAYERS);
@@ -54,7 +54,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         {
             UnitMap.Unit unit = _unitMap.unitList[i];
             Debug.Log("Unit: " + unit.id);
-            Guid guid = unit.view.netIdentity.assetId;
+            uint guid = unit.view.netIdentity.assetId; //1406090550
             _netPrefabMap[guid] = unit;
         }
     }
@@ -204,7 +204,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
             inputList = _clientTempInputBuffer
         };
 
-        NetworkClient.Send(sendInputMessage, Channels.DefaultUnreliable);
+        NetworkClient.Send(sendInputMessage, Channels.Unreliable);
     }
     
     private void serverFixedStep(float fixedDeltaTime)
@@ -243,7 +243,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
             };
             
             NetworkConnection conn = NetworkServer.connections[connId];
-            conn.Send(msg, Channels.DefaultUnreliable);
+            conn.Send(msg, Channels.Unreliable);
         }
     }
     
@@ -263,7 +263,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         
         if(_networkManager.sessionState == NetworkManager.SessionState.IN_GAME)
         {
-            conn.Send(new StartMatchLoad(), Channels.DefaultReliable);
+            conn.Send(new StartMatchLoad(), Channels.Reliable);
         }
     }
 
@@ -297,7 +297,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     
     private void onServerMatchBegin()
     {
-        NetworkServer.SendToAll(new MatchBegin(), Channels.DefaultReliable);
+        NetworkServer.SendToAll(new MatchBegin(), Channels.Reliable);
         
         var netPlayerMap = _networkManager.GetServerPlayerMap();
         foreach(var pair in netPlayerMap)
@@ -373,7 +373,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         GameObject        spawnedGameObject = controller.view.gameObject;
 
         _serverPlayerInputBuffer[netPlayer.playerSlot] = new ServerPlayerInputBuffer(PlayerState.MAX_INPUTS);
-        NetworkConnection conn = NetworkServer.connections[netPlayer.connectionId];
+        NetworkConnectionToClient conn = NetworkServer.connections[netPlayer.connectionId];
         
         NetworkServer.Spawn(spawnedGameObject, conn);
         NetworkServer.AddPlayerForConnection(conn, spawnedGameObject);
@@ -397,21 +397,20 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         _avatarSystem.UnSpawn(obj);
     }
 
-    private void onClientLocalDisconnect(NetworkConnection conn)
+    private void onClientLocalDisconnect()
     {
-        DispatchEvent(GamePlayEventType.NET_LOCAL_PLAYER_DISCONNECT, false, conn);
+        DispatchEvent(GamePlayEventType.NET_LOCAL_PLAYER_DISCONNECT);
     }
 
-    private void onClientPlayerStateUpdate(NetworkConnection conn, PlayerStateUpdate msg)
+    private void onClientPlayerStateUpdate(PlayerStateUpdate msg)
     {
-        NetChannelHeader header = msg.header;
-
         // Not ready yet
         if (_localPlayer == null)
         {
             return;
         }
         
+        NetChannelHeader header = msg.header;
         PlayerState state = _localPlayer.state;
 
         //Don't bother, already done

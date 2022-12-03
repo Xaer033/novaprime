@@ -109,7 +109,7 @@ public class MultiplayerRoomController : BaseController
         Debug.LogFormat("On Map Changed: {0}, {1}:{2}", op, slot, player);
     }
     
-    private void onClientConfirmReadyUp(NetworkConnection conn, ConfirmReadyUp msg)
+    private void onClientConfirmReadyUp(ConfirmReadyUp msg)
     {
         if(NetworkServer.active)
         {
@@ -119,17 +119,17 @@ public class MultiplayerRoomController : BaseController
         _setupPlayers(_networkManager.GetClientPlayerMap());
     }
 
-    private void onClientSyncLobbyPlayers(NetworkConnection conn, SyncLobbyPlayers msg)
+    private void onClientSyncLobbyPlayers(SyncLobbyPlayers msg)
     {
         _setupPlayers(_networkManager.GetClientPlayerMap());
     }
 
-    private void onClientStartMatchLoad(NetworkConnection conn, StartMatchLoad msg)
+    private void onClientStartMatchLoad(StartMatchLoad msg)
     {
         DispatchEvent(MenuUIEventType.GOTO_MULTIPLAYER_GAME);
     }
     
-    private void onClientLocalDisconnect(NetworkConnection conn)
+    private void onClientLocalDisconnect()
     {
         // view.RemoveListener(MenuUIEventType.BACK, onBackButton);
         //
@@ -169,7 +169,7 @@ public class MultiplayerRoomController : BaseController
             Debug.Log("Ready Button State: " + requestedReadyState);
             RequestReadyUp readyRequest = new RequestReadyUp(requestedReadyState);
 
-            NetworkClient.Send(readyRequest, Channels.DefaultReliable);
+            NetworkClient.Send(readyRequest, Channels.Reliable);
         }
     }
 

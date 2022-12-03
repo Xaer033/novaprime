@@ -25,6 +25,7 @@ ScriptedImporter:
     streamingMipmaps: 1
     streamingMipmapsPriority: 0
     vTOnly: 0
+    ignoreMasterTextureLimit: 0
     nPOTScale: 1
     sRGBTexture: 1
     spriteMode: 2
@@ -46,6 +47,7 @@ ScriptedImporter:
     flipbookRows: 0
     flipbookColumns: 0
     ignorePngGamma: 0
+    cookieMode: 0
     filterMode: 1
     aniso: 1
     mipBias: 0
@@ -79,7 +81,6 @@ ScriptedImporter:
       width: 512
       height: 512
     spriteID: 
-    internalID: 0
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -89,6 +90,7 @@ ScriptedImporter:
     tessellationDetail: 0
     parentGroupIndex: -1
     uvTransform: {x: 0, y: 0}
+    spritePosition: {x: 0, y: 0}
   mosaicSpriteImportData: []
   rigSpriteImportData:
   - name: lArm
@@ -103,7 +105,6 @@ ScriptedImporter:
       width: 62
       height: 11
     spriteID: cd5ffa75dcc75b4448b03688eaffb671
-    internalID: 0
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -113,6 +114,7 @@ ScriptedImporter:
     tessellationDetail: 0
     parentGroupIndex: -1
     uvTransform: {x: -147, y: 403}
+    spritePosition: {x: 0, y: 0}
   - name: RArm #1
     originalName: 
     pivot: {x: 0.5, y: 0.5}
@@ -125,7 +127,6 @@ ScriptedImporter:
       width: 112
       height: 25
     spriteID: bb05dc32d9e4e6d45bbe84edff580976
-    internalID: 0
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -135,6 +136,7 @@ ScriptedImporter:
     tessellationDetail: 0
     parentGroupIndex: -1
     uvTransform: {x: 25, y: 391}
+    spritePosition: {x: 0, y: 0}
   - name: head #1
     originalName: 
     pivot: {x: 0.5, y: 0.5}
@@ -147,7 +149,6 @@ ScriptedImporter:
       width: 41
       height: 11
     spriteID: 336e37ea0b345fc44bd6f185124654f2
-    internalID: 0
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -157,6 +158,7 @@ ScriptedImporter:
     tessellationDetail: 0
     parentGroupIndex: -1
     uvTransform: {x: 20, y: 326}
+    spritePosition: {x: 0, y: 0}
   - name: torso #1
     originalName: 
     pivot: {x: 0.5, y: 0.5}
@@ -169,7 +171,6 @@ ScriptedImporter:
       width: 86
       height: 43
     spriteID: 4c0418049ffa3254c8c645506d4cadcd
-    internalID: 0
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -179,6 +180,7 @@ ScriptedImporter:
     tessellationDetail: 0
     parentGroupIndex: -1
     uvTransform: {x: -208, y: 434}
+    spritePosition: {x: 0, y: 0}
   - name: RShoe #1
     originalName: 
     pivot: {x: 0.5, y: 0.5}
@@ -191,7 +193,6 @@ ScriptedImporter:
       width: 1
       height: 4
     spriteID: 3de439b7218671941ba9c387e5bf2b39
-    internalID: 0
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -201,6 +202,7 @@ ScriptedImporter:
     tessellationDetail: 0
     parentGroupIndex: -1
     uvTransform: {x: -143, y: 532}
+    spritePosition: {x: 0, y: 0}
   - name: LShoe #1
     originalName: 
     pivot: {x: 0.5, y: 0.5}
@@ -213,7 +215,6 @@ ScriptedImporter:
       width: 0
       height: 0
     spriteID: ea3dba961c556b540b49f67fd9e84c2f
-    internalID: 0
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -223,6 +224,7 @@ ScriptedImporter:
     tessellationDetail: 0
     parentGroupIndex: -1
     uvTransform: {x: -405, y: 45}
+    spritePosition: {x: 0, y: 0}
   - name: mask #1
     originalName: 
     pivot: {x: 0.5, y: 0.5}
@@ -235,7 +237,6 @@ ScriptedImporter:
       width: 512
       height: 512
     spriteID: d1538b7432dca0e4c827812e818d8211
-    internalID: 0
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -245,23 +246,35 @@ ScriptedImporter:
     tessellationDetail: 0
     parentGroupIndex: -1
     uvTransform: {x: 4, y: 4}
+    spritePosition: {x: 0, y: 0}
+  characterData:
+    bones: []
+    parts: []
+    dimension: {x: 0, y: 0}
+    characterGroups: []
+    boneReadOnly: 0
+  sharedRigSpriteImportData: []
+  sharedRigCharacterData:
+    bones: []
+    parts: []
+    dimension: {x: 0, y: 0}
+    characterGroups: []
+    boneReadOnly: 0
   platformSettings: []
   mosaicLayers: 1
+  characterMode: 1
   documentPivot: {x: 0, y: 0}
   documentAlignment: 7
   importHiddenLayers: 0
-  importedTextureWidth: 1024
-  importedTextureHeight: 1024
-  documentSize: {x: 512, y: 512}
+  layerMappingOption: 2
+  generatePhysicsShape: 0
   paperDollMode: 0
   keepDupilcateSpriteName: 0
+  skeletonAssetReferenceID: 
   spriteCategoryList:
     categories: []
-  textureActualWidth: 512
-  textureActualHeight: 512
   spritePackingTag: 
   resliceFromLayer: 0
-  characterMode: 1
   mosaicPSDLayers: []
   rigPSDLayers:
   - name: mask
@@ -271,6 +284,9 @@ ScriptedImporter:
     spriteID: 
     layerID: -1516409786
     mosaicPosition: {x: 0, y: 0}
+    flatten: 0
+    isImported: 0
+    isVisible: 0
   - name: lArm
     spriteName: lArm
     isGroup: 0
@@ -278,6 +294,9 @@ ScriptedImporter:
     spriteID: cd5ffa75dcc75b4448b03688eaffb671
     layerID: 749096744
     mosaicPosition: {x: 218, y: 524}
+    flatten: 0
+    isImported: 0
+    isVisible: 0
   - name: RArm #1
     spriteName: RArm #1
     isGroup: 0
@@ -285,6 +304,9 @@ ScriptedImporter:
     spriteID: bb05dc32d9e4e6d45bbe84edff580976
     layerID: -457619674
     mosaicPosition: {x: 98, y: 524}
+    flatten: 0
+    isImported: 0
+    isVisible: 0
   - name: head #1
     spriteName: head #1
     isGroup: 0
@@ -292,6 +314,9 @@ ScriptedImporter:
     spriteID: 336e37ea0b345fc44bd6f185124654f2
     layerID: -1516003360
     mosaicPosition: {x: 288, y: 524}
+    flatten: 0
+    isImported: 0
+    isVisible: 0
   - name: torso #1
     spriteName: torso #1
     isGroup: 0
@@ -299,6 +324,9 @@ ScriptedImporter:
     spriteID: 4c0418049ffa3254c8c645506d4cadcd
     layerID: -202601033
     mosaicPosition: {x: 4, y: 524}
+    flatten: 0
+    isImported: 0
+    isVisible: 0
   - name: RShoe #1
     spriteName: RShoe #1
     isGroup: 0
@@ -306,6 +334,9 @@ ScriptedImporter:
     spriteID: 3de439b7218671941ba9c387e5bf2b39
     layerID: -275086079
     mosaicPosition: {x: 98, y: 557}
+    flatten: 0
+    isImported: 0
+    isVisible: 0
   - name: LShoe #1
     spriteName: LShoe #1
     isGroup: 0
@@ -313,6 +344,9 @@ ScriptedImporter:
     spriteID: ea3dba961c556b540b49f67fd9e84c2f
     layerID: -275466961
     mosaicPosition: {x: 107, y: 557}
+    flatten: 0
+    isImported: 0
+    isVisible: 0
   - name: mask #1
     spriteName: mask #1
     isGroup: 0
@@ -320,13 +354,14 @@ ScriptedImporter:
     spriteID: d1538b7432dca0e4c827812e818d8211
     layerID: 1564182278
     mosaicPosition: {x: 4, y: 4}
-  characterData:
-    bones: []
-    parts: []
-    dimension: {x: 0, y: 0}
-    characterGroups: []
+    flatten: 0
+    isImported: 0
+    isVisible: 0
+  sharedRigPSDLayers: []
+  pSDLayerImportSetting: []
   generateGOHierarchy: 0
   textureAssetName: aweperator_atlas_mask Texture
   prefabAssetName: aweperator_atlas_mask Prefab
   spriteLibAssetName: aweperator_atlas_mask Sprite Lib
+  skeletonAssetName: 
   secondarySpriteTextures: []

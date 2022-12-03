@@ -25,7 +25,7 @@ public class MultiplayerGameplayState : IGameState
         if(NetworkServer.active)
         {
             StartMatchLoad startMatchMessage = new StartMatchLoad();
-            NetworkServer.SendToAll(startMatchMessage, Channels.DefaultReliable);
+            NetworkServer.SendToAll(startMatchMessage, Channels.Reliable);
         }
         
         _networkManager = Singleton.instance.networkManager;
@@ -49,8 +49,8 @@ public class MultiplayerGameplayState : IGameState
         {
             Debug.Log("SceneLoader: " + _networkManager.localPlayerSlot);
             
-            ClientScene.Ready(NetworkClient.connection);
-            NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
+            NetworkClient.Ready();
+            NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.Reliable);
         }
     }
     
@@ -79,7 +79,7 @@ public class MultiplayerGameplayState : IGameState
     }
 
 
-    private void onClientMatchBegin(NetworkConnection conn, MatchBegin msg)
+    private void onClientMatchBegin(MatchBegin msg)
     {
         _networkManager.onClientMatchBegin -= onClientMatchBegin;
         // handleAllPlayersLoaded();

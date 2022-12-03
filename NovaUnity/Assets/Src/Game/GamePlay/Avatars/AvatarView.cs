@@ -32,6 +32,7 @@ public class AvatarView : EventDispatcherBehavior,
     
     public AvatarConstrainer constrainer;
     public NetworkEntity _netEntity;    
+    public NetworkIdentity _networkIdentity;
     public Animator _animator;
 
 
@@ -88,7 +89,7 @@ public class AvatarView : EventDispatcherBehavior,
     
     public NetworkIdentity netIdentity
     {
-        get => _netEntity.netIdentity;
+        get => _networkIdentity;
     }
 
     public NetworkEntity netEntity

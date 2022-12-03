@@ -14,7 +14,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
 
     private NetworkManager _networkManager;
     
-    private Dictionary<Guid, BulletView> _netPrefabMap;
+    private Dictionary<uint, BulletView> _netPrefabMap;
     private List<BulletView>             _projectileViewPool;
     private List<ParticleSystem>         _projectileImpactViewList;
     private List<ParticleSystem>         _bloodImpactViewList;
@@ -32,13 +32,13 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         _projectileViewPool       = new List<BulletView>(poolSize);
         _projectileImpactViewList = new List<ParticleSystem>(poolSize);
         _bloodImpactViewList      = new List<ParticleSystem>(40);
-        _netPrefabMap             = new Dictionary<Guid, BulletView>();
+        _netPrefabMap             = new Dictionary<uint, BulletView>();
         _raycastHitList           = new RaycastHit2D[3];
         
         _networkManager           = Singleton.instance.networkManager;
      
         BulletView projectileTemplate = _gameplayResources.bulletView;
-        Guid bulletGuid = projectileTemplate.netIdentity.assetId;
+        uint bulletGuid = projectileTemplate.netIdentity.assetId;
         _netPrefabMap[bulletGuid] = projectileTemplate;
     }
     
@@ -50,7 +50,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         _gameSystems.onStep      += onStep;
         _gameSystems.onFixedStep += onFixedStep;
 
-        ClientScene.RegisterPrefab( _gameplayResources.bulletView.gameObject, 
+        NetworkClient.RegisterPrefab( _gameplayResources.bulletView.gameObject, 
                                     onClientProjectileSpawnHandler, 
                                     onClientProjectileUnspawnHandler);
         
@@ -242,7 +242,7 @@ public class ProjectileSystem : NotificationDispatcher, IGameSystem
         _gameSystems.onStep      -= onStep;
         _gameSystems.onFixedStep -= onFixedStep;
         
-        ClientScene.UnregisterPrefab( _gameplayResources.bulletView.gameObject);
+        NetworkClient.UnregisterPrefab( _gameplayResources.bulletView.gameObject);
     }
 
     public ProjectileState Spawn(string ownerUUID, ProjectileData data, Vector3 position, Vector3 direction)

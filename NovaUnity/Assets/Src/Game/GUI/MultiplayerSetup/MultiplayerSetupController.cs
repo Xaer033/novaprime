@@ -147,16 +147,16 @@ public class MultiplayerSetupController : BaseController
     }
 
 
-    private void onClientConnect(NetworkConnection conn)
+    private void onClientConnect()
     {
         Debug.Log("Client Joined Server");
-        ClientScene.Ready(NetworkClient.connection);
+        NetworkClient.Ready();
         
         _networkManager.onClientConnect -= onClientConnect;
         _networkManager.onClientCurrentSession += onClientCurrentSession;
     }
 
-    private void onClientCurrentSession(NetworkConnection conn, CurrentSessionUpdate msg)
+    private void onClientCurrentSession(CurrentSessionUpdate msg)
     {
         _networkManager.onClientCurrentSession -= onClientCurrentSession;
 
@@ -205,7 +205,7 @@ public class MultiplayerSetupController : BaseController
     
     private void onRoomClicked(int index, bool isSelected)
     {
-        setupView.joinRoomButton._button.interactable =  setupView._serverListRect.selectedIndex >= 0;
+        setupView.joinRoomButton.interactable =  setupView._serverListRect.selectedIndex >= 0;
         if(isSelected)
         {
             if(index >= 0 && index < _uiServerData.Count)

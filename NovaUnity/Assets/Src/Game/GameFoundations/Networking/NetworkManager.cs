@@ -46,17 +46,17 @@ public class NetworkManager : Mirror.NetworkManager
     public event Action onClientStarted;
     public event Action onClientStopped;
     
-    public event Action<NetworkConnection> onClientConnect;
-    public event Action<NetworkConnection> onClientDisconnect;
-    public event Action<NetworkConnection> onClientLocalDisconnect;
+    public event Action onClientConnect;
+    public event Action onClientDisconnect;
+    public event Action onClientLocalDisconnect;
     // public event Action<NetworkConnection, int> onClientError;
-    public event Action<NetworkConnection, SyncLobbyPlayers> onClientSyncLobbyPlayers;
-    public event Action<NetworkConnection, ConfirmReadyUp> onClientConfirmReadyUp;
-    public event Action<NetworkConnection, StartMatchLoad> onClientStartMatchLoad;
-    public event Action<NetworkConnection, MatchBegin> onClientMatchBegin;
-    public event Action<NetworkConnection, NetFrameSnapshot> onClientFrameSnapshot;
-    public event Action<NetworkConnection, CurrentSessionUpdate> onClientCurrentSession;
-    public event Action<NetworkConnection, PlayerStateUpdate> onClientPlayerStateUpdate;
+    public event Action<SyncLobbyPlayers> onClientSyncLobbyPlayers;
+    public event Action<ConfirmReadyUp> onClientConfirmReadyUp;
+    public event Action<StartMatchLoad> onClientStartMatchLoad;
+    public event Action<MatchBegin> onClientMatchBegin;
+    public event Action<NetFrameSnapshot> onClientFrameSnapshot;
+    public event Action<CurrentSessionUpdate> onClientCurrentSession;
+    public event Action<PlayerStateUpdate> onClientPlayerStateUpdate;
     public event SpawnHandlerDelegate onClientSpawnHandler;
     public event UnSpawnDelegate onClientUnspawnHandler;
 
@@ -170,13 +170,13 @@ public class NetworkManager : Mirror.NetworkManager
 	    StartHost();
     }
 
-    private void onSingleplayerCurrentSession(NetworkConnection conn, CurrentSessionUpdate msg)
+    private void onSingleplayerCurrentSession(CurrentSessionUpdate msg)
     {   
         onClientCurrentSession -= onSingleplayerCurrentSession;
         onServerMatchBegin += onSingleplayerMatchBegin;
         
 	    // ClientScene.Ready(NetworkClient.connection);
-        NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
+        NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.Reliable);
     }
     
     private void onSingleplayerMatchBegin()
@@ -195,13 +195,13 @@ public class NetworkManager : Mirror.NetworkManager
             UnitMap.Unit unit = unitMap.unitList[i];
             Debug.Log("Unit: " + unit.id);
             
-            ClientScene.RegisterPrefab(
+            NetworkClient.RegisterPrefab(
                 unit.view.gameObject, 
                 OnClientSpawnHandler,
                 OnClientUnspawnHandler);
         }
         
-        ClientScene.RegisterPrefab(
+        NetworkClient.RegisterPrefab(
                 syncStatePrefab, 
                 onClientSyncStoreCreated, 
                 onClientSyncStoreDestory);
@@ -215,11 +215,11 @@ public class NetworkManager : Mirror.NetworkManager
             UnitMap.Unit unit = unitMap.unitList[i];
             Debug.Log("Unit: " + unit.id);
             
-            ClientScene.UnregisterPrefab(
+            NetworkClient.UnregisterPrefab(
                 unit.view.gameObject);
         }
         
-        ClientScene.UnregisterPrefab(
+        NetworkClient.UnregisterPrefab(
                 syncStatePrefab);
     }
 
@@ -430,8 +430,11 @@ public class NetworkManager : Mirror.NetworkManager
         NetworkServer.RegisterHandler<RequestReadyUp>(OnServerRequestReadyUp, false);
         NetworkServer.RegisterHandler<PlayerMatchLoadComplete>(OnServerPlayerMatchLoadComplete, false);
         NetworkServer.RegisterHandler<SendPlayerInput>(OnServerSendPlayerInput, false);
-
-        sessionState = SessionState.IN_LOBBY;
+        
+        NetworkServer.OnConnectedEvent    += OnServerConnect;
+        NetworkServer.OnDisconnectedEvent += OnServerDisconnect;
+        
+        sessionState =  SessionState.IN_LOBBY;
         
         onServerStarted?.Invoke();
     }
@@ -473,6 +476,9 @@ public class NetworkManager : Mirror.NetworkManager
         NetworkClient.RegisterHandler<CurrentSessionUpdate>(OnCurrentSessionUpdate, false);
         NetworkClient.RegisterHandler<PlayerStateUpdate>(OnClientPlayerStateUpdate, false);
         
+        NetworkClient.OnConnectedEvent    += OnClientConnected;
+        NetworkClient.OnDisconnectedEvent += OnClientDisconnected;
+        
         onClientStarted?.Invoke();
     }
 
@@ -503,7 +509,7 @@ public class NetworkManager : Mirror.NetworkManager
     //     onError?.Invoke(reason);
     // }
 
-    public override void OnServerConnect(NetworkConnection conn)
+    public override void OnServerConnect(NetworkConnectionToClient conn)
     {
         Debug.Log("OnServerConnect");
 
@@ -525,15 +531,15 @@ public class NetworkManager : Mirror.NetworkManager
             
             // Assign our connected player a number
             AssignPlayerSlot assignMessage = new AssignPlayerSlot(pSlot);
-            conn.Send(assignMessage, Channels.DefaultReliable);
+            conn.Send(assignMessage, Channels.Reliable);
 
             CurrentSessionUpdate sessionMessage = new CurrentSessionUpdate(sessionState);
-            conn.Send(sessionMessage, Channels.DefaultReliable);
+            conn.Send(sessionMessage, Channels.Reliable);
             
             // Sync player states with all clients
             SyncLobbyPlayers syncPlayersMessage = new SyncLobbyPlayers();
             syncPlayersMessage.playerList = _serverNetPlayerMap.Values.ToArray();
-            NetworkServer.SendToAll(syncPlayersMessage, Channels.DefaultReliable);
+            NetworkServer.SendToAll(syncPlayersMessage, Channels.Reliable);
             
             onServerConnect?.Invoke(conn);
         }
@@ -545,7 +551,7 @@ public class NetworkManager : Mirror.NetworkManager
         }
     }
 
-    public override void OnServerDisconnect(NetworkConnection conn)
+    public override void OnServerDisconnect(NetworkConnectionToClient conn)
     {
         Debug.Log("OnServerDisconnect");
         PlayerSlot playerSlot = PlayerSlot.NONE;
@@ -559,7 +565,7 @@ public class NetworkManager : Mirror.NetworkManager
 
             SyncLobbyPlayers syncPlayersMessage = new SyncLobbyPlayers();
             syncPlayersMessage.playerList = _serverNetPlayerMap.Values.ToArray();
-            NetworkServer.SendToAll(syncPlayersMessage, Channels.DefaultReliable);
+            NetworkServer.SendToAll(syncPlayersMessage, Channels.Reliable);
             
             NetworkServer.dontListen = false;
         }
@@ -576,23 +582,22 @@ public class NetworkManager : Mirror.NetworkManager
     //     onServerError?.Invoke(conn, errorCode);
     // }
 
-    public override void OnClientConnect(NetworkConnection conn)
+    public void OnClientConnected()
     {
         Debug.Log("OnClientConnect");
         // _netPlayerMap[conn.connectionId] = new NetPlayer(conn, conn.connectionId, "P" + conn.connectionId);
-        onClientConnect?.Invoke(conn);
+        onClientConnect?.Invoke();
     }
 
-    public override void OnClientDisconnect(NetworkConnection conn)
+    public void OnClientDisconnected()
     {
         Debug.Log("OnClientDisconnect");
 
-        onClientDisconnect?.Invoke(conn);
+        onClientDisconnect?.Invoke();
 
-        NetworkConnection localConnection = NetworkClient.connection;
-        if(localConnection != null && localConnection.connectionId == conn.connectionId)
+        if(!NetworkClient.active)
         {
-            onClientLocalDisconnect?.Invoke(conn);
+            onClientLocalDisconnect?.Invoke();
         }
 
         // _netPlayerMap.Remove(conn.connectionId);
@@ -604,46 +609,46 @@ public class NetworkManager : Mirror.NetworkManager
     //     onClientError?.Invoke(conn, errorCode);
     // }
 
-    private void OnClientSyncLobbyPlayers(NetworkConnection conn, SyncLobbyPlayers msg)
+    private void OnClientSyncLobbyPlayers(SyncLobbyPlayers msg)
     {
         _clientNetPlayerMap = msg.GetPlayerMap();
         
-        onClientSyncLobbyPlayers?.Invoke(conn, msg);
+        onClientSyncLobbyPlayers?.Invoke(msg);
     }
 
-    private void OnClientMatchBegin(NetworkConnection conn, MatchBegin msg)
+    private void OnClientMatchBegin(MatchBegin msg)
     {
         Debug.Log("Client Begin Match");
-        onClientMatchBegin?.Invoke(conn, msg);
+        onClientMatchBegin?.Invoke(msg);
     }
 
-    private void OnClientStartMatchLoad(NetworkConnection conn, StartMatchLoad msg)
+    private void OnClientStartMatchLoad(StartMatchLoad msg)
     {
-        onClientStartMatchLoad?.Invoke(conn, msg);
+        onClientStartMatchLoad?.Invoke(msg);
     }
     
-    private void OnClientAssignPlayerSlot(NetworkConnection conn, AssignPlayerSlot msg)
+    private void OnClientAssignPlayerSlot(AssignPlayerSlot msg)
     {
         localPlayerSlot = msg.playerSlot;
     }
 
-    private void OnClientFrameSnapshot(NetworkConnection conn, NetFrameSnapshot msg)
+    private void OnClientFrameSnapshot(NetFrameSnapshot msg)
     {
-        onClientFrameSnapshot?.Invoke(conn, msg);
+        onClientFrameSnapshot?.Invoke( msg);
     }
 
-    private void OnClientPlayerStateUpdate(NetworkConnection conn, PlayerStateUpdate msg)
+    private void OnClientPlayerStateUpdate(PlayerStateUpdate msg)
     {
-        onClientPlayerStateUpdate?.Invoke(conn, msg);
+        onClientPlayerStateUpdate?.Invoke(msg);
     }
     
-    private void OnCurrentSessionUpdate(NetworkConnection conn, CurrentSessionUpdate msg)
+    private void OnCurrentSessionUpdate(CurrentSessionUpdate msg)
     {
         sessionState = msg.sessionState;
-        onClientCurrentSession?.Invoke(conn, msg);
+        onClientCurrentSession?.Invoke(msg);
     }
     
-    private void OnClientConfirmReadyUp(NetworkConnection conn, ConfirmReadyUp msg)
+    private void OnClientConfirmReadyUp(ConfirmReadyUp msg)
     {
         Debug.LogFormat("OnClientConfirmReadyUp for Player:{0} : {1}", msg.playerSlot, msg.isReady);
 
@@ -653,26 +658,26 @@ public class NetworkManager : Mirror.NetworkManager
         player.isReadyUp = msg.isReady;
         _clientNetPlayerMap[playerSlot] = player;
         
-        onClientConfirmReadyUp?.Invoke(conn, msg);
+        onClientConfirmReadyUp?.Invoke(msg);
     }
 
-    private void OnServerRequestMatchStart(NetworkConnection conn, RequestMatchStart msg)
+    private void OnServerRequestMatchStart(NetworkConnectionToClient conn, RequestMatchStart msg)
     {
         if(conn.connectionId == NetworkServer.localConnection.connectionId)
         {
             NetworkServer.SetAllClientsNotReady();
             
             StartMatchLoad startMatchMessage = new StartMatchLoad();
-            NetworkServer.SendToAll(startMatchMessage, Channels.DefaultReliable);
+            NetworkServer.SendToAll(startMatchMessage, Channels.Reliable);
         }
     }
 
-    private void OnServerSendPlayerInput(NetworkConnection conn, SendPlayerInput msg)
+    private void OnServerSendPlayerInput(NetworkConnectionToClient conn, SendPlayerInput msg)
     {
         onServerSendPlayerInput?.Invoke(conn, msg);
     }
     
-    private void OnServerPlayerMatchLoadComplete(NetworkConnection conn, PlayerMatchLoadComplete msg)
+    private void OnServerPlayerMatchLoadComplete(NetworkConnectionToClient conn, PlayerMatchLoadComplete msg)
     {
         NetPlayer player = _serverNetPlayerMap[conn.connectionId];
         player.isMatchReady = true;
@@ -700,7 +705,7 @@ public class NetworkManager : Mirror.NetworkManager
         }
     }
     
-    private void OnServerRequestReadyUp(NetworkConnection conn, RequestReadyUp msg)
+    private void OnServerRequestReadyUp(NetworkConnectionToClient conn, RequestReadyUp msg)
     {
         NetPlayer player = _serverNetPlayerMap[conn.connectionId];
         
@@ -720,7 +725,7 @@ public class NetworkManager : Mirror.NetworkManager
                                                 player.isReadyUp, 
                                                 allPlayersReady);
                                                 
-            NetworkServer.SendToAll(readyMessage, Channels.DefaultReliable);
+            NetworkServer.SendToAll(readyMessage, Channels.Reliable);
 
             onServerConfirmReadyUp?.Invoke(conn, readyMessage);
         }
@@ -730,13 +735,18 @@ public class NetworkManager : Mirror.NetworkManager
     {
         NetworkServer.dontListen = false;
         
-		// Debug.Log("Stopping Client");
-  //       StopClient();
-  //   
-		// Debug.Log("Stopping Server");
-  //       StopServer();
-        
-        Shutdown();
+        if (NetworkClient.isHostClient)
+        {
+            StopHost();
+        }
+        else if (NetworkClient.active)
+        {
+            StopClient();
+        }
+        else if (NetworkServer.active)
+        {
+            StopServer();
+        }
         
         _serverNetPlayerMap.Clear();
         _clientNetPlayerMap.Clear();

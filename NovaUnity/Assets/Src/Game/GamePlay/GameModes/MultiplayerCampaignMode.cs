@@ -20,33 +20,21 @@ public class MultiplayerCampaignMode : NotificationDispatcher, IGameModeControll
 
     public void FixedStep(float fixedDeltaTime)
     {
-        if (_playFieldController != null)
-        {
-            _playFieldController.FixedStep(fixedDeltaTime);
-        }
+        _playFieldController?.FixedStep(fixedDeltaTime);   
     }
     
     public void Step(float deltaTime)
     {
-        if (_playFieldController != null)
-        {
-            _playFieldController.Step(deltaTime);
-        }
+        _playFieldController?.Step(deltaTime);
     }
 
     public void LateStep(float deltaTime)
     {
-        if (_playFieldController != null)
-        {
-            _playFieldController.LateStep(deltaTime);
-        } 
+        _playFieldController?.LateStep(deltaTime);
     }
     
     public void CleanUp()
     {
-        if (_playFieldController != null)
-        {
-            _playFieldController.CleanUp();
-        }
+        _playFieldController?.CleanUp();
     }
 }

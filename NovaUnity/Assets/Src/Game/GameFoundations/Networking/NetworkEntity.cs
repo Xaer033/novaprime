@@ -20,18 +20,13 @@ public class NetworkEntity : NetworkBehaviour
         _view = GetComponent<IAvatarView>();
     }
     
-    public override bool OnSerialize(NetworkWriter writer, bool initialState)
+    public override void OnSerialize(NetworkWriter writer, bool initialState)
     {
-        bool wasBaseChanged =  base.OnSerialize(writer, initialState);
-        bool overrideChanged = false;
-        if(onSerialize != null)
-        {
+        base.OnSerialize(writer, initialState);
+       
         // TODO: This is kind of weird, and would be problematic if we have multiple onSerialize events registered, 
         // I believe it returns the last one called...but that isn't ideal...
-            overrideChanged = onSerialize(_view, writer, initialState); 
-        }
-        
-        return wasBaseChanged || overrideChanged;
+        onSerialize?.Invoke(_view, writer, initialState); 
     }
     
     public override void OnDeserialize(NetworkReader reader, bool initialState)

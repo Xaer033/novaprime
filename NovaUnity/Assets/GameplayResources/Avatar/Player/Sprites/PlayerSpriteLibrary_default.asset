@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Labels:
   - m_Name: player
-    m_Hash: -1743160731
+    m_Hash: 404322917
     m_CategoryList:
     - m_Name: head
-      m_Hash: -1477183844
+      m_Hash: 670299804
       m_Sprite: {fileID: 6140229241472856684, guid: edd0d2f31988e26498db58311a12edb0,
         type: 3}
     - m_Name: lArm
@@ -25,11 +25,11 @@ MonoBehaviour:
       m_Sprite: {fileID: -4540860136120143160, guid: edd0d2f31988e26498db58311a12edb0,
         type: 3}
     - m_Name: rArm
-      m_Hash: -1088399763
+      m_Hash: 1059083885
       m_Sprite: {fileID: 5636583008245310845, guid: edd0d2f31988e26498db58311a12edb0,
         type: 3}
     - m_Name: lFoot
-      m_Hash: -770104096
+      m_Hash: 303637728
       m_Sprite: {fileID: 2135727680522120406, guid: edd0d2f31988e26498db58311a12edb0,
         type: 3}
     - m_Name: rFoot
@@ -40,3 +40,4 @@ MonoBehaviour:
       m_Hash: 660585605
       m_Sprite: {fileID: 750801830707369506, guid: edd0d2f31988e26498db58311a12edb0,
         type: 3}
+  m_ModificationHash: 0

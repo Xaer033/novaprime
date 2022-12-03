@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Mirror;
+using UnityEngine;
 
 public class PlayerView : AvatarView
 {
@@ -8,10 +9,10 @@ public class PlayerView : AvatarView
     // [BoxGroup("Hooks")]
     public Transform _leftFootHook;
     // [BoxGroup("Hooks")]
-    public Transform _rightFootHook;
+    public  Transform       _rightFootHook;
     
-    private ParticleSystem _leftFootPuffFx;
-    private ParticleSystem _rightFootPuffFx;
+    private ParticleSystem  _leftFootPuffFx;
+    private ParticleSystem  _rightFootPuffFx;
     
     // public PhotonView netView;
     

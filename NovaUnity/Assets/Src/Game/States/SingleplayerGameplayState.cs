@@ -52,8 +52,8 @@ public class SingleplayerGameplayState : IGameState
 
         if(NetworkClient.active)
         {
-            ClientScene.Ready(NetworkClient.connection);
-            NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
+            NetworkClient.Ready();
+            NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.Reliable);
         }
     }
 

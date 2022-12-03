@@ -59,7 +59,7 @@ public class PlayFieldController : NotificationDispatcher
             CleanUp();
             Start();
             
-            NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.DefaultReliable);
+            NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.Reliable);
         },  ()=>
         {
             _pAction.Gameplay.Enable();

@@ -28,6 +28,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -47,23 +48,20 @@ MonoBehaviour:
   dontDestroyOnLoad: 0
   runInBackground: 1
   autoStartServerBuild: 0
-  showDebugMessages: 0
-  serverTickRate: 60
-  serverBatching: 0
-  serverBatchInterval: 0
+  autoConnectClientBuild: 0
+  sendRate: 60
   offlineScene: 
   onlineScene: 
   transport: {fileID: 3374875636476469244}
   networkAddress: localhost
   maxConnections: 128
-  disconnectInactiveConnections: 0
-  disconnectInactiveTimeout: 60
   authenticator: {fileID: 0}
   playerPrefab: {fileID: 0}
   autoCreatePlayer: 0
   playerSpawnMethod: 0
   spawnPrefabs: []
-  masterServerLocation: http://novamaster.net
+  timeInterpolationGui: 0
+  masterServerLocation: http://xaer0-vpn.duckdns.org
   masterServerPort: 11667
   syncStatePrefab: {fileID: 4762176007934702008, guid: f373649df585fea40b1ca85b07e2cec5,
     type: 3}
@@ -80,12 +78,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Port: 11666
+  DualMode: 1
   NoDelay: 1
   Interval: 10
+  Timeout: 10000
   FastResend: 2
   CongestionWindow: 0
   SendWindowSize: 4096
   ReceiveWindowSize: 4096
+  MaxRetransmit: 40
+  NonAlloc: 1
+  MaximizeSendReceiveBuffersToOSLimit: 1
+  ReliableMaxMessageSize: 298449
+  UnreliableMaxMessageSize: 1199
   debugLog: 1
   statisticsGUI: 1
   statisticsLog: 0

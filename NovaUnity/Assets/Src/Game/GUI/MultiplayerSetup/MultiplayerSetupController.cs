@@ -34,7 +34,7 @@ public class MultiplayerSetupController : BaseController
 
             setupView.SetSelectedItemCallback(onRoomClicked);
 
-            _networkManager.fetchMasterServerList(onFetchComplete);
+            _networkManager.FetchMasterServerList(onFetchComplete);
 
         });
     }
@@ -83,12 +83,11 @@ public class MultiplayerSetupController : BaseController
     {
         _networkManager.onServerStarted -= onServerStarted;
 
-        _networkManager.fetchExternalIpAddress((wasSuccessfull, ipAddress) =>
+        _networkManager.FetchExternalIpAddress((wasSuccessfull, ipAddress) =>
         {
             // Inform the master server
             ServerListEntry entry = new ServerListEntry
             {
-                serverUuid = Guid.NewGuid().ToString(),
                 name = _serverName,
                 ip = ipAddress,
                 port = 11666, // for now
@@ -98,7 +97,7 @@ public class MultiplayerSetupController : BaseController
 
             _networkManager.serverEntry = entry;
             
-            _networkManager.addServerToMasterList(entry, null);
+            _networkManager.AddServerToMasterList(entry, null);
             DispatchEvent(MenuUIEventType.GOTO_NETWORK_ROOM);
         });
     }
@@ -107,7 +106,7 @@ public class MultiplayerSetupController : BaseController
     {
         setupView.StartLoadingTween();
         
-        _networkManager.fetchMasterServerList(onFetchComplete);   
+        _networkManager.FetchMasterServerList(onFetchComplete);   
     }
 
     private void onJoinListedServer(GeneralEvent e)

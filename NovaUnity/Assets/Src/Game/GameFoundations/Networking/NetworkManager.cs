@@ -14,7 +14,7 @@ public class NetworkManager : Mirror.NetworkManager
     // public const int kMaxPlayers = 4;
     public const string kSingleplayerRoom = "Singleplayer";
 
-    private const string kMasterListSecretId = "23431909-e58c-40e3-94d2-8d90b4f9e11d";
+    private const string kMasterListSecretId = "NodeListServerDefaultKey";//"23431909-e58c-40e3-94d2-8d90b4f9e11d";
     private const string kAppIdKey = "serverKey";
     private const string kServerUuIdKey = "serverUuid";
     private const string kServerName = "serverName";  
@@ -26,8 +26,8 @@ public class NetworkManager : Mirror.NetworkManager
     private Action _onSingleplayerCallback;
 
 
-    public string masterServerLocation = "http://novamaster.net";
-    public int masterServerPort = 11667;
+    public string masterServerLocation = "http://xaer0-vpn.duckdns.org"; //"http://novamaster.net";
+    public int    masterServerPort     = 11667;
 
     public GameObject syncStatePrefab;
     
@@ -241,7 +241,7 @@ public class NetworkManager : Mirror.NetworkManager
     }
 
 
-    public void fetchExternalIpAddress(Action<bool, string> onComplete)
+    public void FetchExternalIpAddress(Action<bool, string> onComplete)
     {
         StartCoroutine(enumGetExternalIPAddress(onComplete));
     }
@@ -272,7 +272,7 @@ public class NetworkManager : Mirror.NetworkManager
         onComplete?.Invoke(didSucceed, result);
     }
     
-    public void fetchMasterServerList(Action<bool, List<ServerListEntry>> onComplete)
+    public void FetchMasterServerList(Action<bool, List<ServerListEntry>> onComplete)
     {
         StartCoroutine(enumFetchMasterServerList(onComplete));
     }
@@ -313,7 +313,7 @@ public class NetworkManager : Mirror.NetworkManager
         } 
     }
     
-    public void addServerToMasterList(ServerListEntry entry, Action<long> onComplete)
+    public void AddServerToMasterList(ServerListEntry entry, Action<long> onComplete)
     {
         if(entry != null)
         {
@@ -329,12 +329,16 @@ public class NetworkManager : Mirror.NetworkManager
     {
         WWWForm form = new WWWForm(); 
         form.AddField(kAppIdKey, kMasterListSecretId);
-        form.AddField(kServerUuIdKey, entry.serverUuid);
         form.AddField(kServerName, entry.name);
         form.AddField(kServerIp, entry.ip);
         form.AddField(kServerPort, entry.port);
         form.AddField(kServerPlayerCapacity, entry.capacity);
         form.AddField(kServerPlayerCount, entry.players);
+        
+        if (!string.IsNullOrEmpty(entry.serverUuid))
+        {
+            form.AddField(kServerUuIdKey, entry.serverUuid);
+        }
 
         string masterUri = getMasterServerCommand("add"); 
         Debug.Log("Rest Command: " + masterUri);
@@ -351,6 +355,7 @@ public class NetworkManager : Mirror.NetworkManager
             else
             {
                 Debug.Log(www.responseCode);
+                entry.serverUuid = www.downloadHandler.text.Trim();
                 onComplete?.Invoke(www.responseCode);
             }
         } 
@@ -373,11 +378,6 @@ public class NetworkManager : Mirror.NetworkManager
         WWWForm form = new WWWForm();
         form.AddField(kAppIdKey, kMasterListSecretId);
         form.AddField(kServerUuIdKey, entry.serverUuid);
-        form.AddField(kServerName, entry.name);
-        form.AddField(kServerIp, entry.ip);
-        form.AddField(kServerPort, entry.port);
-        form.AddField(kServerPlayerCapacity, entry.capacity);
-        form.AddField(kServerPlayerCount, entry.players);
 
         string masterUri = getMasterServerCommand("remove");
         Debug.Log("Rest Command: " + masterUri);

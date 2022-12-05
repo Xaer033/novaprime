@@ -62,7 +62,7 @@ public class RoomItemView : UIView, IListItemView
         if(IsInvalid(InvalidationFlag.DYNAMIC_DATA) && _data != null)
         {
             roomName.text = _data.name;
-            serverIp.text = _data.ip;
+            serverIp.text = _data.serverIp;
             playerCount.text = string.Format("{0}/{1}", _data.players, _data.capacity);
             
             // RREEEEEEEEEEEEEH

@@ -90,8 +90,9 @@ public class MultiplayerSetupController : BaseController
             {
                 name = _serverName,
                 ip = ipAddress,
+                serverIp = ipAddress,
                 port = 11666, // for now
-                players = 0,
+                players = 1,
                 capacity = 10 // FOr now
             };
 
@@ -112,7 +113,7 @@ public class MultiplayerSetupController : BaseController
     private void onJoinListedServer(GeneralEvent e)
     {
         ServerListEntry entry = (ServerListEntry)_uiServerData[_selectedRoomIndex];
-        Uri uri = new Uri(string.Format("http://{0}:{1}", entry.ip, entry.port));
+        Uri uri = new Uri(string.Format("http://{0}:{1}", entry.serverIp, entry.port));
         
         Debug.Log("Joining Server: " + uri.AbsoluteUri);
         

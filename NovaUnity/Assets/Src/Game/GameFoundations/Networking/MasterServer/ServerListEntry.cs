@@ -4,6 +4,7 @@
 public class ServerListEntry 
 {
     public string ip;
+    public string serverIp;
     public string name;
     public int port;
     public int players;

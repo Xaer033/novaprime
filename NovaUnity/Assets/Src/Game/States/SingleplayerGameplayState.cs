@@ -43,16 +43,19 @@ public class SingleplayerGameplayState : IGameState
             AsyncOperation async = SceneManager.LoadSceneAsync("GameplayScene", LoadSceneMode.Single);
             async.completed += onSceneLoaded;
         }
-
     }
 
     private void onSceneLoaded(AsyncOperation asyncOp)
     {        
+        if(NetworkServer.active)
+        {
+            NetworkServer.SpawnObjects();            
+        }
+        
         startGameSystems();
 
         if(NetworkClient.active)
         {
-            NetworkClient.Ready();
             NetworkClient.Send(new PlayerMatchLoadComplete(), Channels.Reliable);
         }
     }
@@ -66,38 +69,27 @@ public class SingleplayerGameplayState : IGameState
     
     public void FixedStep(float fixedDeltaTime)
     {
-        if (_gameModeController != null)
-        {
-	        _gameModeController.FixedStep(fixedDeltaTime);
-        }
+	    _gameModeController?.FixedStep(fixedDeltaTime);
     }
     
     public void Step( float p_deltaTime )
 	{
-        if (_gameModeController != null)
-        {
-            _gameModeController.Step(p_deltaTime);
-        }
+        _gameModeController?.Step(p_deltaTime);   
     }
 
     public void LateStep(float deltaTime)
     {
-        if (_gameModeController != null)
-        {
-            _gameModeController.LateStep(deltaTime);
-        }
+            _gameModeController?.LateStep(deltaTime);
     }
     
     public void Exit()
 	{
-        _gameModeController.RemoveListener(GameEventType.GAME_OVER, onGameOver);
-        _gameModeController.CleanUp();   
+        _gameModeController?.RemoveListener(GameEventType.GAME_OVER, onGameOver);
+        _gameModeController?.CleanUp();   
     }
-
     
     private void onGameOver(GeneralEvent e)
     {
         _stateMachine.ChangeState(NovaGameState.MAIN_MENU); ;
     }
-
 }

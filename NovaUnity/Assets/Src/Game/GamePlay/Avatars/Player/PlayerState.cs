@@ -4,7 +4,7 @@ using UnityEngine;
 public class PlayerState : AvatarState
 {
     public const int MAX_PLAYERS = 16;
-    public const int MAX_INPUTS = 128;
+    public const int MAX_INPUTS = 16;
     
     public PlayerSlot          playerSlot;
     public PlayerActivityType  stateType;

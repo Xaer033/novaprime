@@ -17,4 +17,4 @@ MonoBehaviour:
     m_Bits: 5632
   view: {fileID: -2973457739781033346, guid: 76b7b00ebdb9a7f4397284dc79fbe64c, type: 3}
   projectileData: {fileID: 11400000, guid: f85596d5b7b0430459790eb8fb481afc, type: 2}
-  fireCooldownSeconds: 0.15
+  fireCooldownSeconds: 0.2

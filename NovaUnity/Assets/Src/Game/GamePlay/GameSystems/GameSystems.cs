@@ -40,7 +40,7 @@ public class GameSystems : NotificationDispatcher
         _addSystem(400,     new AvatarSystem(gameplayResources));
         _addSystem(300,     new SpawnPointSystem());
         _addSystem(200,     new PlatformSystem());
-        _addSystem(100,     new ProjectileSystem(gameplayResources, 125));
+        _addSystem(100,     new ProjectileSystem(gameplayResources, 256));
         _addSystem(100,     new HealthUISystem(gameplayResources));
         _addSystem( 50,     new NetworkSystem(gameplayResources.unitMap));
         

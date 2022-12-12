@@ -35,7 +35,7 @@ public class PlatformView : NetworkBehaviour, ITimeWarpTarget
     void Awake()
     {
         startPosition = transform.position;
-        _raycastController = new RaycastController(distanceBetweenRays, collisionCollider, passengerMask);
+        _raycastController = new RaycastController(distanceBetweenRays, collisionCollider, passengerMask, collisionSkinHeight:0.1f);
     }
     
     public void OnTimeWarpEnter(float timeScale)
@@ -55,6 +55,8 @@ public class PlatformView : NetworkBehaviour, ITimeWarpTarget
 
     private void OnDrawGizmos()
     {
+        const float alphaColor = 0.5f;
+        
         if (localWaypoints != null && collisionCollider != null)
         {
             float size = 0.3f;
@@ -66,7 +68,7 @@ public class PlatformView : NetworkBehaviour, ITimeWarpTarget
                 Gizmos.DrawLine(globalPos - Vector2.left * size, globalPos + Vector2.left * size);
 
                 
-                Gizmos.color = i == 0 ? new Color(0.42f, 0.75f, 0.4f, 0.8f) : new Color(0.2f, 0.2f, 1.0f, 0.8f);
+                Gizmos.color = i == 0 ? new Color(0.42f, 0.75f, 0.4f, alphaColor) : new Color(0.2f, 0.2f, 1.0f, alphaColor);
                 Vector3 platformSize = collisionCollider.bounds.size;
                 Gizmos.DrawCube(globalPos, platformSize);
             }

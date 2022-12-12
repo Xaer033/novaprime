@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using GhostGen;
 using Mirror;
@@ -83,8 +84,13 @@ public class MultiplayerSetupController : BaseController
     {
         _networkManager.onServerStarted -= onServerStarted;
 
-        _networkManager.FetchExternalIpAddress((wasSuccessfull, ipAddress) =>
+        _networkManager.FetchExternalIpAddress((wasSuccessful, ipAddress) =>
         {
+            if (!wasSuccessful)
+            {
+                return;
+            }
+            
             // Inform the master server
             ServerListEntry entry = new ServerListEntry
             {
@@ -113,7 +119,7 @@ public class MultiplayerSetupController : BaseController
     private void onJoinListedServer(GeneralEvent e)
     {
         ServerListEntry entry = (ServerListEntry)_uiServerData[_selectedRoomIndex];
-        Uri uri = new Uri(string.Format("http://{0}:{1}", entry.serverIp, entry.port));
+        Uri uri = new Uri($"kcp://{entry.serverIp}:{entry.port}");
         
         Debug.Log("Joining Server: " + uri.AbsoluteUri);
         
@@ -123,15 +129,16 @@ public class MultiplayerSetupController : BaseController
     private void onJoinServer(GeneralEvent e)
     {
         string serverIpAddress = e.data as string;
-        _networkManager.networkAddress = serverIpAddress;
+        _networkManager.networkAddress = serverIpAddress.TrimStart(':');
 
-        Uri uri = new Uri(serverIpAddress + ":11666");
+        Uri uri = new Uri(serverIpAddress);
         joinServer(uri);
     }
 
     private void joinServer(Uri uri)
     {
-        _networkManager.onClientConnect += onClientConnect;
+        // _networkManager.onClientConnect += onClientConnect;
+        _networkManager.onClientCurrentSession += onClientCurrentSession;
         
         Debug.Log("Joining Server: " + uri.AbsoluteUri);
         _networkManager.StartClient(uri);
@@ -146,15 +153,6 @@ public class MultiplayerSetupController : BaseController
         DispatchEvent(MenuUIEventType.GOTO_MAIN_MENU);
     }
 
-
-    private void onClientConnect()
-    {
-        Debug.Log("Client Joined Server");
-        NetworkClient.Ready();
-        
-        _networkManager.onClientConnect -= onClientConnect;
-        _networkManager.onClientCurrentSession += onClientCurrentSession;
-    }
 
     private void onClientCurrentSession(CurrentSessionUpdate msg)
     {

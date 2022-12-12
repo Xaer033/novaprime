@@ -24,12 +24,14 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
     private Dictionary<PlayerSlot, ServerPlayerInputBuffer> _serverPlayerInputBuffer;
     
     /* Client */
-    private GameplayCamera                _camera;
-    private LocalPlayerState              _localPlayer;
-    private uint                          _clientSendSequence = 0;
-    // private uint                          _clientAckSequence  = 0;
-    private List<PlayerInputTickPair>     _clientTempInputBuffer;
-    private List<PlayerStateUpdate>       _clientPlayerJitterBuffer;
+    private GameplayCamera            _camera;
+    private LocalPlayerState          _localPlayer;
+    private uint                      _clientSendSequence = 0;
+    private uint                      _clientAckSequence  = 0;
+    private List<PlayerInputTickPair> _clientTempInputBuffer;
+    private List<PlayerStateUpdate>   _clientPlayerJitterBuffer;
+    
+    private SortedList<uint, PlayerStateUpdate>             _clientJitterBuffer;
     
     
     public int priority { get; set; }
@@ -48,6 +50,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         _serverPlayerInputBuffer    = new Dictionary<PlayerSlot, ServerPlayerInputBuffer>(PlayerState.MAX_PLAYERS); 
         
         _clientTempInputBuffer    = new List<PlayerInputTickPair>(PlayerState.MAX_INPUTS);
+        _clientJitterBuffer       = new SortedList<uint, PlayerStateUpdate>(32);
         _clientPlayerJitterBuffer = new List<PlayerStateUpdate>(32);
         
         for(int i = 0; i < _unitMap.unitList.Count; ++i)
@@ -91,11 +94,12 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         _serverPlayerInputBuffer.Clear();
         
         _clientTempInputBuffer.Clear();
+        _clientJitterBuffer.Clear();
         
         NetworkManager.frameTick = 0;
 
-        // _clientAckSequence  = 0;
-        // _clientSendSequence = 0;
+        _clientAckSequence  = 0;
+        _clientSendSequence = 0;
         _serverSendSequence = 0;
     }
 
@@ -149,6 +153,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
 
         NetworkManager.frameTick++;
         _serverSendSequence++;
+        _clientSendSequence++;
     }
 
     private void clientFixedStep(float fixedDeltaTime)
@@ -160,15 +165,15 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         // }
         _clientPlayerJitterBuffer.Sort((a, b) =>
         {
-            return b.header.ackSequence.CompareTo(a.header.ackSequence);
+            return a.header.ackSequence.CompareTo(b.header.ackSequence);
         });
 
-        while (_clientPlayerJitterBuffer.Count > 0)
+        if (_clientPlayerJitterBuffer.Count > 0)
         {
-            var msg = _clientPlayerJitterBuffer[_clientPlayerJitterBuffer.Count-1];
+            var msg = _clientPlayerJitterBuffer[0];
             clientPlayerReconsiliation(msg);
-            _clientPlayerJitterBuffer.RemoveAt(_clientPlayerJitterBuffer.Count - 1);
         }
+        _clientPlayerJitterBuffer.Clear();
         
         clientSendInput();
     }
@@ -178,7 +183,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
          var pState = _localPlayer.state;
         // var inputBuffer = pState.nonAckInputBuffer;
 
-        pState.sequence = _clientSendSequence++;
+        pState.sequence = _clientSendSequence;
 
         PlayerInputTickPair lastInput = pState.latestInput;
 
@@ -193,7 +198,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         NetChannelHeader channelHeader = new NetChannelHeader
         {
             sequence    = lastInput.tick,//_clientSendSequence,
-            ackSequence = pState.ackSequence,
+            ackSequence = _clientAckSequence,
             frameTick   = NetworkManager.frameTick,
             sendTime    = TimeUtil.Now(),
         };
@@ -230,7 +235,7 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
             NetChannelHeader netHeader = new NetChannelHeader
             {
                 sequence    = _serverSendSequence,
-                ackSequence = state.ackSequence,
+                ackSequence = _serverSendSequence,//state.ackSequence,
                 frameTick   = NetworkManager.frameTick,
                 sendTime    = TimeUtil.Now()
             };
@@ -414,10 +419,10 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         PlayerState state = _localPlayer.state;
 
         //Don't bother, already done
-        // if (state.ackSequence > header.ackSequence)
-        // {
-        //     return;
-        // }
+        if (_clientAckSequence >= header.ackSequence)
+        {
+            return;
+        }
         
         _clientPlayerJitterBuffer?.Add(msg);
     }
@@ -480,7 +485,8 @@ public class NetworkSystem : NotificationDispatcher, IGameSystem
         //     tickIter++;
         // }
 
-        state.ackSequence = header.ackSequence;
+        state.ackSequence  = header.ackSequence;
+        _clientAckSequence = header.ackSequence;
     }
     
      private GameplayCamera _getOrCreatePlayerCamera()

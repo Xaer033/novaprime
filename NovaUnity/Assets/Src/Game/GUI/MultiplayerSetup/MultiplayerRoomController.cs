@@ -35,7 +35,7 @@ public class MultiplayerRoomController : BaseController
                 _networkManager.onClientConfirmReadyUp += onClientConfirmReadyUp;
                 _networkManager.onClientSyncLobbyPlayers += onClientSyncLobbyPlayers;
                 _networkManager.onClientStartMatchLoad += onClientStartMatchLoad;
-                _networkManager.onClientDisconnect += onClientLocalDisconnect;
+                _networkManager.onClientLocalDisconnect += onClientLocalDisconnect;
             }
 
             if(NetworkServer.active)
@@ -64,15 +64,21 @@ public class MultiplayerRoomController : BaseController
         {
             _networkManager.syncStore.onPlayerMapChanged -= onPlayerMapChanged;            
         }
-        
-        _networkManager.onClientConfirmReadyUp -= onClientConfirmReadyUp;
-        _networkManager.onClientSyncLobbyPlayers -= onClientSyncLobbyPlayers;
-        _networkManager.onClientStartMatchLoad -= onClientStartMatchLoad;
-        _networkManager.onClientDisconnect -= onClientLocalDisconnect;
-    
-        _networkManager.onServerConnect -= onServerConnect;
-        _networkManager.onServerDisconnect -= onServerDisconnect;
-        _networkManager.onServerConfirmReadyUp -= onServerConfirmReadyUp;
+
+        if (NetworkClient.active)
+        {
+            _networkManager.onClientConfirmReadyUp   -= onClientConfirmReadyUp;
+            _networkManager.onClientSyncLobbyPlayers -= onClientSyncLobbyPlayers;
+            _networkManager.onClientStartMatchLoad   -= onClientStartMatchLoad;
+            _networkManager.onClientLocalDisconnect  -= onClientLocalDisconnect;
+        }
+
+        if (NetworkServer.active)
+        {
+            _networkManager.onServerConnect -= onServerConnect;
+            _networkManager.onServerDisconnect -= onServerDisconnect;
+            _networkManager.onServerConfirmReadyUp -= onServerConfirmReadyUp;
+        }
         
         base.RemoveView();
     }

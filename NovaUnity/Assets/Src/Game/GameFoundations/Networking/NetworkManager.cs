@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using kcp2k;
 using Mirror;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -74,6 +75,14 @@ public class NetworkManager : Mirror.NetworkManager
     public SyncStore syncStore { get; private set; }
     
     public static uint frameTick { get; set; }
+
+    public override void Start()
+    {
+        base.Start();
+
+        // NetworkDiagnostics.OutMessageEvent += OnOutMessageEvent;
+        // NetworkDiagnostics.InMessageEvent  += OnInMessageEvent;
+    }
     
     public override void OnDestroy()
     {
@@ -433,6 +442,7 @@ public class NetworkManager : Mirror.NetworkManager
         
         NetworkServer.OnConnectedEvent    += OnServerConnect;
         NetworkServer.OnDisconnectedEvent += OnServerDisconnect;
+        
         
         sessionState =  SessionState.IN_LOBBY;
         

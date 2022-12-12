@@ -497,7 +497,7 @@ namespace kcp2k
                         // -> all unreliable messages are DATA messages anyway.
                         // -> let's skip the magic and call OnData directly if
                         //    the current state allows it.
-                        if (state == KcpState.Authenticated)
+                        if (state == KcpState.Authenticated || state == KcpState.Connected)
                         {
                             ArraySegment<byte> message = new ArraySegment<byte>(buffer, 1, msgLength - 1);
                             OnData?.Invoke(message, KcpChannel.Unreliable);
